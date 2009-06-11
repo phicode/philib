@@ -25,7 +25,7 @@ public class LockGroupTest {
 	private Lockable[] lockables;
 	private LockGroup[] lockgroups;
 
-	@Test
+	@Test(timeout = 5000)
 	public void concurrentTest() throws InterruptedException {
 		initThread();
 		initLockables();
@@ -106,7 +106,7 @@ public class LockGroupTest {
 		}
 	}
 
-	@Test
+	@Test(timeout = 2000)
 	public void testWithProphets() throws InterruptedException {
 		Thread[] ts = new Thread[5];
 		Lockable[] las = new Lockable[5];
