@@ -13,6 +13,8 @@ import ch.bind.philib.concurrency.Lockable;
 
 public class LockGroupTest {
 
+	// TODO: beautify
+
 	private static final int NUM_LOCKABLES = 1000;
 	private static final int NUM_LOCKGROUPS = 25;
 	private static final int NUM_LOCKABLE_PER_GROUP = 20;
@@ -102,5 +104,51 @@ public class LockGroupTest {
 				lg.unlock();
 			}
 		}
+	}
+
+	@Test
+	public void testWithProphets() throws InterruptedException {
+		Thread[] ts = new Thread[5];
+		Lockable[] las = new Lockable[5];
+		LockGroup[] lgs = new LockGroup[5];
+
+		for (int i = 0; i < 5; i++) {
+			las[i] = new LockableStub();
+		}
+
+		for (int i = 0; i < 5; i++) {
+			Lockable[] lgslocks = new Lockable[2];
+			lgslocks[0] = las[i];
+			lgslocks[1] = las[(i + 1) % 5];
+			lgs[i] = new LockGroup(lgslocks);
+		}
+
+		for (int i = 0; i < 5; i++) {
+			ts[i] = new Thread(new Locker(lgs[i]));
+		}
+
+		for (Thread t : ts)
+			t.start();
+		for (Thread t : ts)
+			t.join();
+	}
+
+	private class Locker implements Runnable {
+
+		private LockGroup lg;
+
+		private Locker(LockGroup lg) {
+			this.lg = lg;
+		}
+
+		@Override
+		public void run() {
+			for (int i = 0; i < NUM_ITERATIONS_PER_THREAD; i++) {
+				lg.lock();
+				Thread.yield();
+				lg.unlock();
+			}
+		}
+
 	}
 }
