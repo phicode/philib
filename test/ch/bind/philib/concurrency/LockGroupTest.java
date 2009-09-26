@@ -1,4 +1,4 @@
-package ch.bind.phillib.concurrency;
+package ch.bind.philib.concurrency;
 
 import java.util.Random;
 import java.util.concurrent.locks.Lock;

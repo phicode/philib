@@ -1,4 +1,4 @@
-package ch.bind.phillib.math;
+package ch.bind.philib.math;
 
 import static org.junit.Assert.assertEquals;
 
