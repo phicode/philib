@@ -1,6 +1,9 @@
 package ch.bind.philib.math;
 
-public class PhiMath {
+public final class PhiMath {
+
+	private PhiMath() {
+	}
 
 	/**
 	 * Calculate the sum of all values from 1 to <code>end</code>, including.
