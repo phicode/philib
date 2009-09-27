@@ -11,10 +11,12 @@ public final class LockGroup {
 
 	public LockGroup(Lockable[] objects) {
 		if (objects == null || objects.length == 0)
-			throw new IllegalArgumentException("TODO"); //TODO
+			throw new IllegalArgumentException("TODO"); // TODO
 		final int n = objects.length;
 		this.objects = new Lockable[n];
 		System.arraycopy(objects, 0, this.objects, 0, n);
+		// FIXME: the array could contain the same lock twice! remove it? handle
+		// it in lock/unlock?
 		Arrays.sort(this.objects, lockableComparator);
 	}
 

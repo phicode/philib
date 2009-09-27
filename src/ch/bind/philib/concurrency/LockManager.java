@@ -2,7 +2,10 @@ package ch.bind.philib.concurrency;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class LockManager {
+public final class LockManager {
+
+	private LockManager() {
+	}
 
 	private static final AtomicLong LOCK_ID_SEQUENCES = new AtomicLong(0);
 
