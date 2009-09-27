@@ -14,4 +14,15 @@ public final class Fibonacci {
 		curFib = cur;
 		return cur;
 	}
+
+	public static long calcFib(final int num) {
+		long last = 1;
+		long cur = 1;
+		for (int i = 1; i < num; i++) {
+			long newCur = last + cur;
+			last = cur;
+			cur = newCur;
+		}
+		return cur;
+	}
 }
