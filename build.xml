@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<!--
+	Copyright (c) 2006-2009 Philipp Meinen <philipp@bind.ch>
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"),
+	to deal in the Software without restriction, including without limitation
+	the rights to use, copy, modify, merge, publish, distribute, sublicense,
+	and/or sell copies of the Software, and to permit persons to whom the Software
+	is furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included
+	in all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+	IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+	TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
+	THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<project name="philib" default="build">
+	<description>
+            A class library for commonly used stuff. 
+    </description>
+
+	<property file="build.properties" />
+
+	<property name="DIST_JAR" value="philib.jar" />
+	<property name="src.dir" value="src" />
+	<property name="test.dir" value="test" />
+	<property name="build.dir" value="build" />
+	<property name="build.test.dir" value="build/test" />
+	<property name="javadoc.dir" value="${build.dir}/doc" />
+	<property name="junit.xml.dir" value="${build.test.dir}/report_xml" />
+	<property name="junit.html.dir" value="${build.test.dir}/report_html" />
+
+	<fileset id="TEST_CLASSPATH" dir=".">
+		<patternset>
+			<include name="lib/test/*.jar" />
+			<include name="${DIST_JAR}" />
+		</patternset>
+	</fileset>
+
+	<macrodef name="compile">
+		<attribute name="src" />
+		<attribute name="dst" />
+		<element name="classpath-fileset" optional="true" />
+		<sequential>
+			<mkdir dir="@{dst}" />
+			<javac srcdir="@{src}" destdir="@{dst}" source="${javac.source}" target="${javac.target}" encoding="utf-8" nowarn="false" failonerror="true" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="${javac.deprecation}">
+				<classpath>
+					<classpath-fileset />
+				</classpath>
+			</javac>
+		</sequential>
+	</macrodef>
+
+	<target name="build" description="build the library source-code">
+		<compile src="${src.dir}" dst="${build.dir}/classes" />
+		<jar destfile="${DIST_JAR}" basedir="${build.dir}/classes" compress="${jar.compress}" index="${jar.index}" update="false" />
+	</target>
+
+	<target name="buildtests" depends="build" description="build the library test-classes">
+		<compile src="${test.dir}" dst="${build.test.dir}/classes">
+			<classpath-fileset>
+				<fileset refid="TEST_CLASSPATH" />
+			</classpath-fileset>
+		</compile>
+	</target>
+
+	<target name="test" depends="buildtests" description="build and run the junit tests">
+		<mkdir dir="${junit.xml.dir}" />
+		<mkdir dir="${junit.html.dir}" />
+
+		<!-- run the junit test and put the xml-reports in a separate folder -->
+		<junit printsummary="yes" haltonfailure="yes" dir="${junit.xml.dir}">
+			<classpath>
+				<pathelement path="${build.test.dir}/classes" />
+				<fileset refid="TEST_CLASSPATH" />
+			</classpath>
+
+			<batchtest fork="yes" todir="${junit.xml.dir}" filtertrace="false">
+				<fileset dir="${build.test.dir}/classes">
+					<include name="**/*Test.class" />
+				</fileset>
+				<formatter type="xml" />
+			</batchtest>
+		</junit>
+
+		<!-- collect the xml-reports and generate the html-report in yet another folder -->
+		<junitreport todir="${junit.xml.dir}">
+			<fileset dir="${junit.xml.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${junit.html.dir}" />
+		</junitreport>
+	</target>
+
+	<target name="clean" description="clean up">
+		<delete dir="${build.dir}" />
+		<delete file="${DIST_JAR}" />
+	</target>
+
+	<target name="doc" description="build the public api">
+		<mkdir dir="${javadoc.dir}" />
+		<javadoc access="protected" author="true" classpath="" destdir="${javadoc.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.5" sourcepath="src/" packagenames="ch.bind.*" splitindex="true" use="true" version="true" serialwarn="true" verbose="true">
+			<link href="${javadoc.apiurl}" />
+		</javadoc>
+	</target>
+
+</project>
