@@ -15,12 +15,48 @@ public final class ValidationResults {
 		return errors.size();
 	}
 
-	public void addError(String message) {
+	public void addError(final String message) {
 		errors.add(message);
 	}
 
-	private static final String LINE_SEPARATOR = System
-			.getProperty("line.separator");
+	public void addError(final String format, Object... args) {
+		errors.add(String.format(format, args));
+	}
+
+	public boolean validateNotNull(final Object testNull, final String name) {
+		if (testNull == null) {
+			addError("%s is null", name);
+			return false;
+		}
+		return true;
+	}
+
+	public boolean validateMaxLength(final String testStr, final String name,
+			final int maxLength) {
+		if (testStr.length() > maxLength) {
+			addError("%s is too long (%d), the maximum is %d", name, testStr
+					.length(), maxLength);
+			return false;
+		}
+		return true;
+	}
+
+	public boolean validateMinLength(final String testStr, final String name,
+			final int minLength) {
+		if (testStr.length() > minLength) {
+			addError("%s is too short (%d), the miniumum is %d", name, testStr
+					.length(), minLength);
+			return false;
+		}
+		return true;
+	}
+
+	public void checkValidations() throws ValidationException {
+		if (errors.size() > 0)
+			throw new ValidationException(this);
+	}
+
+	static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	@Override
 	public String toString() {
