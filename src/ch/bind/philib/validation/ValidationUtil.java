@@ -2,9 +2,9 @@ package ch.bind.philib.validation;
 
 import java.util.Collection;
 
-public final class ValidateUtil {
+public final class ValidationUtil {
 
-	private ValidateUtil() {
+	private ValidationUtil() {
 	}
 
 	public static final ValidationResults validate(final Validatable validatable) {
