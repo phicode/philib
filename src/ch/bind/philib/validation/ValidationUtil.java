@@ -13,8 +13,8 @@ public final class ValidationUtil {
 		return results;
 	}
 
-	public static final ValidationResults validate(
-			final Collection<Validatable> validatables) {
+	public static final <T extends Validatable> ValidationResults validate(
+			final Collection<T> validatables) {
 		final ValidationResults results = new ValidationResults();
 		for (Validatable validatable : validatables) {
 			validatable.validate(results); // NPE is intended!
@@ -22,8 +22,8 @@ public final class ValidationUtil {
 		return results;
 	}
 
-	public static final ValidationResults validate(
-			final Validatable[] validatables) {
+	public static final <T extends Validatable> ValidationResults validate(
+			final T[] validatables) {
 		final ValidationResults results = new ValidationResults();
 		for (Validatable validatable : validatables) {
 			validatable.validate(results); // NPE is intended!

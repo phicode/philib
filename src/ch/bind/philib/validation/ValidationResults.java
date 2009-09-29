@@ -43,7 +43,7 @@ public final class ValidationResults {
 
 	public boolean validateMinLength(final String testStr, final String name,
 			final int minLength) {
-		if (testStr.length() > minLength) {
+		if (testStr.length() < minLength) {
 			addError("%s is too short (%d), the miniumum is %d", name, testStr
 					.length(), minLength);
 			return false;

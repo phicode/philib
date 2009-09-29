@@ -2,6 +2,8 @@ package ch.bind.philib.validation;
 
 public class ValidationException extends Exception {
 
+	private static final long serialVersionUID = -4093437375262230866L;
+	
 	private final ValidationResults results;
 
 	public ValidationException(ValidationResults results) {
