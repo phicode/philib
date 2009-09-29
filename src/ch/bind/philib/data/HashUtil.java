@@ -35,10 +35,16 @@ public final class HashUtil {
 		return hash * HASH_PRIME + ((obj == null) ? 0 : obj.hashCode());
 	}
 
+	public static final int nextHash(int hash, final boolean value) {
+		if (hash == 0)
+			hash = 1;
+		return hash * HASH_PRIME + (value == false ? 0 : 1);
+	}
+
 	public static final int nextHash(int hash, final byte value) {
 		if (hash == 0)
 			hash = 1;
-		return hash * HASH_PRIME + (int)value;
+		return hash * HASH_PRIME + (int) value;
 	}
 
 	public static final int nextHash(int hash, final char value) {
@@ -57,6 +63,12 @@ public final class HashUtil {
 		if (hash == 0)
 			hash = 1;
 		return hash * HASH_PRIME + value;
+	}
+
+	public static final int nextHash(int hash, final long value) {
+		if (hash == 0)
+			hash = 1;
+		return hash * HASH_PRIME + (int) (value ^ (value >>> 32));
 	}
 
 	public static final int nextHash(int hash, final float value) {

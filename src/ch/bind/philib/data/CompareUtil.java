@@ -38,4 +38,20 @@ public final class CompareUtil {
 			}
 		}
 	}
+
+	public static final <T> int compare(final Comparable<T> o1, final T o2) {
+		if (o1 == null) {
+			if (o2 == null) {
+				return 0; // equal
+			} else {
+				return -1; // o1 < o2
+			}
+		} else {
+			if (o2 == null) {
+				return 1; // o1 > o2
+			} else {
+				return o1.compareTo(o2);
+			}
+		}
+	}
 }
