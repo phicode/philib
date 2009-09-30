@@ -33,6 +33,9 @@ import java.util.Random;
  */
 public final class PhiArrays {
 
+	private PhiArrays() {
+	}
+
 	private static final Random rand = new Random(); // TODO: thread-safe?
 
 	/**
