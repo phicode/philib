@@ -94,12 +94,12 @@
 
 	<target name="clean" description="clean up">
 		<delete dir="${build.dir}" />
-		<delete file="${jar.dist.path}" />
+		<delete file="${jar.name}" />
 	</target>
 
 	<target name="build" description="build the library source-code">
 		<compile src="${src.dir}" dst="${build.dir}/classes" classpathrefid="classpath.src.compile" />
-		<jar destfile="${jar.dist.path}" basedir="${build.dir}/classes" compress="${jar.compress}" index="${jar.index}" update="false" />
+		<jar destfile="${jar.name}" basedir="${build.dir}/classes" compress="${jar.compress}" index="${jar.index}" update="false" />
 	</target>
 
 	<target name="buildtests" depends="build" description="build the library test-classes">
