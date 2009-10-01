@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!--
 	Copyright (c) 2006-2009 Philipp Meinen <philipp@bind.ch>
 
@@ -26,64 +26,98 @@
             A class library for commonly used stuff. 
     </description>
 
+	<!-- load configurable properties -->
 	<property file="build.properties" />
 
-	<property name="DIST_JAR" value="philib.jar" />
+	<!-- "internal" properties -->
 	<property name="src.dir" value="src" />
 	<property name="test.dir" value="test" />
+	<property name="lib.dir" value="lib" />
 	<property name="build.dir" value="build" />
 	<property name="build.test.dir" value="build/test" />
 	<property name="javadoc.dir" value="${build.dir}/doc" />
-	<property name="junit.xml.dir" value="${build.test.dir}/report_xml" />
+	<property name="junit.test.dir" value="${build.test.dir}/test" />
 	<property name="junit.html.dir" value="${build.test.dir}/report_html" />
 
-	<fileset id="TEST_CLASSPATH" dir=".">
-		<patternset>
-			<include name="lib/test/*.jar" />
-			<include name="${DIST_JAR}" />
-		</patternset>
-	</fileset>
+	<!-- ### Path definitions ### -->
+
+	<path id="classpath.src.compile">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<path id="classpath.test.compile">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${lib.dir}/test">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement path="${build.dir}/classes" />
+	</path>
+
+	<path id="classpath.test.run">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${lib.dir}/test">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement path="${build.dir}/classes" />
+		<pathelement path="${build.test.dir}/classes" />
+	</path>
+
+	<!-- ### Macros ### -->
 
 	<macrodef name="compile">
 		<attribute name="src" />
 		<attribute name="dst" />
-		<element name="classpath-fileset" optional="true" />
+		<attribute name="classpathRefId" />
 		<sequential>
 			<mkdir dir="@{dst}" />
+
 			<javac srcdir="@{src}" destdir="@{dst}" source="${javac.source}" target="${javac.target}" encoding="utf-8" nowarn="false" failonerror="true" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="${javac.deprecation}">
-				<classpath>
-					<classpath-fileset />
-				</classpath>
+				<classpath refid="@{classpathRefId}" />
 			</javac>
+
+			<!-- copy resources -->
+			<copy todir="@{dst}" flatten="false" includeemptydirs="false">
+				<fileset dir="@{src}">
+					<exclude name="**/*.java" />
+				</fileset>
+			</copy>
 		</sequential>
 	</macrodef>
 
+	<!-- ### Targets ### -->
+
+	<target name="clean" description="clean up">
+		<delete dir="${build.dir}" />
+		<delete file="${jar.dist.path}" />
+	</target>
+
 	<target name="build" description="build the library source-code">
-		<compile src="${src.dir}" dst="${build.dir}/classes" />
-		<jar destfile="${DIST_JAR}" basedir="${build.dir}/classes" compress="${jar.compress}" index="${jar.index}" update="false" />
+		<compile src="${src.dir}" dst="${build.dir}/classes" classpathrefid="classpath.src.compile" />
+		<jar destfile="${jar.dist.path}" basedir="${build.dir}/classes" compress="${jar.compress}" index="${jar.index}" update="false" />
 	</target>
 
 	<target name="buildtests" depends="build" description="build the library test-classes">
-		<compile src="${test.dir}" dst="${build.test.dir}/classes">
-			<classpath-fileset>
-				<fileset refid="TEST_CLASSPATH" />
-			</classpath-fileset>
-		</compile>
+		<compile src="${test.dir}" dst="${build.test.dir}/classes" classpathrefid="classpath.test.compile" />
 	</target>
 
 	<target name="test" depends="buildtests" description="build and run the junit tests">
-		<mkdir dir="${junit.xml.dir}" />
+		<mkdir dir="${junit.test.dir}" />
 		<mkdir dir="${junit.html.dir}" />
 
 		<!-- run the junit test and put the xml-reports in a separate folder -->
-		<junit printsummary="yes" haltonfailure="yes" dir="${junit.xml.dir}">
-			<classpath>
-				<pathelement path="${build.test.dir}/classes" />
-				<fileset refid="TEST_CLASSPATH" />
-			</classpath>
+		<junit printsummary="yes" haltonfailure="yes" fork="true" dir="${junit.test.dir}">
+			<classpath refid="classpath.test.run" />
 
-			<batchtest fork="yes" todir="${junit.xml.dir}" filtertrace="false">
+			<batchtest fork="true" todir="${junit.test.dir}" filtertrace="false">
 				<fileset dir="${build.test.dir}/classes">
+					<exclude name="**/*$*.class" />
+					<exclude name="**/Abstract*.class" />
 					<include name="**/*Test.class" />
 				</fileset>
 				<formatter type="xml" />
@@ -91,22 +125,21 @@
 		</junit>
 
 		<!-- collect the xml-reports and generate the html-report in yet another folder -->
-		<junitreport todir="${junit.xml.dir}">
-			<fileset dir="${junit.xml.dir}">
+		<junitreport todir="${junit.test.dir}">
+			<fileset dir="${junit.test.dir}">
 				<include name="TEST-*.xml" />
 			</fileset>
 			<report format="frames" todir="${junit.html.dir}" />
 		</junitreport>
-	</target>
 
-	<target name="clean" description="clean up">
-		<delete dir="${build.dir}" />
-		<delete file="${DIST_JAR}" />
+		<echo>You will find the JUnit-testreport in the directory:
+			${junit.html.dir}</echo>
 	</target>
 
 	<target name="doc" description="build the public api">
 		<mkdir dir="${javadoc.dir}" />
-		<javadoc access="protected" author="true" classpath="" destdir="${javadoc.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.5" sourcepath="src/" packagenames="ch.bind.*" splitindex="true" use="true" version="true" serialwarn="true" verbose="true">
+		<javadoc access="protected" author="true" classpath="" destdir="${javadoc.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.5" sourcepath="${src.dir}" packagenames="${javadoc.packagenames}" splitindex="true" use="true" version="true" serialwarn="true" verbose="true">
+			<classpath refid="classpath.src.compile" />
 			<link href="${javadoc.apiurl}" />
 		</javadoc>
 	</target>
