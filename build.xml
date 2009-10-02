@@ -21,10 +21,12 @@
 	THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-<project name="philib" default="build">
+<project name="philib" default="all">
 	<description>
             A class library for commonly used stuff. 
     </description>
+
+	<!-- ### Properties ### -->
 
 	<!-- load configurable properties -->
 	<property file="build.properties" />
@@ -68,6 +70,13 @@
 		<pathelement path="${build.test.dir}/classes" />
 	</path>
 
+	<!-- ### Taskdefs ### -->
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement path="lib/ant/ant-contrib-1.0b3.jar" />
+		</classpath>
+	</taskdef>
+
 	<!-- ### Macros ### -->
 
 	<macrodef name="compile">
@@ -90,7 +99,22 @@
 		</sequential>
 	</macrodef>
 
+	<macrodef name="ifNotEmpty">
+		<attribute name="value" />
+		<element name="useElement" optional="false" />
+		<sequential>
+			<if>
+				<equals arg1="@{value}" arg2="" />
+				<else>
+					<useElement />
+				</else>
+			</if>
+		</sequential>
+	</macrodef>
+
 	<!-- ### Targets ### -->
+
+	<target name="all" description="build all" depends="clean,build,test,package" />
 
 	<target name="clean" description="clean up">
 		<delete dir="${build.dir}" />
@@ -99,11 +123,48 @@
 
 	<target name="build" description="build the library source-code">
 		<compile src="${src.dir}" dst="${build.dir}/classes" classpathrefid="classpath.src.compile" />
-		<jar destfile="${jar.name}" basedir="${build.dir}/classes" compress="${jar.compress}" index="${jar.index}" update="false" />
 	</target>
 
 	<target name="buildtests" depends="build" description="build the library test-classes">
 		<compile src="${test.dir}" dst="${build.test.dir}/classes" classpathrefid="classpath.test.compile" />
+	</target>
+
+	<target name="package" depends="build" description="build a distributable package">
+		<mkdir dir="${build.dir}/classes/META-INF" />
+		<property name="manifest.generated" value="${build.dir}/classes/META-INF/MANIFEST.MF" />
+
+		<!-- manifest-version 1.2 is required for url-Class-Path entries -->
+		<manifest file="${manifest.generated}" mode="update">
+			<attribute name="Manifest-Version" value="1.2" />
+		</manifest>
+
+		<!-- maybe add a main-class attribute to the manifest-->
+		<ifNotEmpty value="${manifest.mainclass}">
+			<useElement>
+				<echo>Using MANIFEST Main-Class: ${manifest.mainclass}</echo>
+				<manifest file="${manifest.generated}" mode="update">
+					<attribute name="Main-Class" value="${manifest.mainclass}" />
+				</manifest>
+			</useElement>
+		</ifNotEmpty>
+
+		<!-- maybe add a class-path attribute to the manifest-->
+		<manifestclasspath property="manifest.classpath" jarfile="${jar.name}">
+			<classpath refid="classpath.src.compile" />
+		</manifestclasspath>
+		<ifNotEmpty value="${manifest.classpath}">
+			<useElement>
+				<echo>Using MANIFEST Class-Path: ${manifest.classpath}</echo>
+				<manifest file="${manifest.generated}" mode="update">
+					<attribute name="Class-Path" value="${manifest.classpath}" />
+				</manifest>
+			</useElement>
+		</ifNotEmpty>
+
+		<!-- generate the jar with the generated manifest -->
+		<!-- XXX: if we enable "index" generation we must also implement the <indexjars> element,
+		otherwise the Class-Path entry of the manifest is overruled -->
+		<jar destfile="${jar.name}" basedir="${build.dir}/classes" compress="${jar.compress}" index="false" update="false" manifest="${manifest.generated}" />
 	</target>
 
 	<target name="test" depends="buildtests" description="build and run the junit tests">
