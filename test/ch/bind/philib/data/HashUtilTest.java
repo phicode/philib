@@ -9,7 +9,7 @@ public class HashUtilTest {
 	public void testByteHashes() {
 		int hash = 0;
 		byte value = 0;
-		int expected = 31;
+		int expected = 17*31;
 
 		hash = HashUtil.nextHash(hash, value);
 		assertEquals(expected, hash);
