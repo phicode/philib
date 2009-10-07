@@ -12,17 +12,17 @@ import org.junit.Test;
 public class ValidationResultsTest {
 
 	private ValidationResults results;
-	
+
 	@Before
 	public void setup() {
 		results = new ValidationResults();
 	}
-	
+
 	@After
 	public void cleanup() {
-		results=null;
+		results = null;
 	}
-	
+
 	@Test
 	public void noError() throws Exception {
 		ValidatableDummy dummy = new ValidatableDummy();
