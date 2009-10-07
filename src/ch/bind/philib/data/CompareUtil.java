@@ -28,8 +28,11 @@ public final class CompareUtil {
 	}
 
 	public static final boolean equality(final Object o1, final Object o2) {
+		if (o1 == o2)
+			return true;
 		if (o1 == null) {
-			return (o2 == null);
+			// o2 is not null -> not equal
+			return false;
 		} else {
 			if (o2 == null) {
 				return false;
@@ -40,12 +43,11 @@ public final class CompareUtil {
 	}
 
 	public static final <T> int compare(final Comparable<T> o1, final T o2) {
+		if (o1 == o2)
+			return 0;
 		if (o1 == null) {
-			if (o2 == null) {
-				return 0; // equal
-			} else {
-				return -1; // o1 < o2
-			}
+			// o2 is not null
+			return -1; // o1 < o2
 		} else {
 			if (o2 == null) {
 				return 1; // o1 > o2
