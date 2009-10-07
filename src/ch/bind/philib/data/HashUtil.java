@@ -27,7 +27,7 @@ public final class HashUtil {
 	private HashUtil() {
 	}
 
-    private static final int HASH_PRIME_START = 17;
+	private static final int HASH_PRIME_START = 17;
 	private static final int HASH_PRIME_STEP = 31;
 
 	public static final int nextHash(int hash, final Object obj) {
@@ -73,14 +73,10 @@ public final class HashUtil {
 	}
 
 	public static final int nextHash(int hash, final float value) {
-		if (hash == 0)
-			hash = HASH_PRIME_START;
-		return hash * HASH_PRIME_STEP + Float.valueOf(value).hashCode();
+		return nextHash(hash, Float.floatToIntBits(value));
 	}
 
 	public static final int nextHash(int hash, final double value) {
-		if (hash == 0)
-			hash = HASH_PRIME_START;
-		return hash * HASH_PRIME_STEP + Double.valueOf(value).hashCode();
+		return nextHash(hash, Double.doubleToLongBits(value));
 	}
 }
