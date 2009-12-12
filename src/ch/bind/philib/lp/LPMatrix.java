@@ -30,12 +30,6 @@ import ch.bind.philib.ToStringUtil;
  */
 public class LPMatrix {
 
-	// variablen
-	// private BigDecimal[] x;
-
-	// koeffizienten der nebenbedingungen
-	// private BigDecimal[][] a;
-
 	// Koeffizienten der Matrix, addressiert nach [x][y], bzw [spalte][zeile].
 	// Die Anzahl Spalten entspricht der Anzahl Variablen (x) plus eins.
 	// Die Anzahl Zeilen entspricht der Anzahl Nebenbedingunen plus eins.
@@ -43,15 +37,6 @@ public class LPMatrix {
 
 	private final Variable[] headVars;
 	private final Variable[] sideVars;
-
-	// obergrenze der nebenbedingungen
-	// private BigDecimal[] c;
-
-	// koeffizienten der zielfunktion
-	// private BigDecimal[] b;
-
-	// "gewinn"
-	// private BigDecimal d;
 
 	private final int N;
 	private final int M;
@@ -71,45 +56,78 @@ public class LPMatrix {
 		}
 	}
 
-	public void setSideCondition(final int num, double[] coeffs,
-			SideConditionType type, double target) {
-		if (num < 0 || num >= M)
-			throw new IllegalArgumentException("num is out of range");
-		if (coeffs == null || coeffs.length != N)
-			throw new IllegalArgumentException("coeffs invalid");
+	/**
+	 * 
+	 * @param pos
+	 *            The position where the side-condition should be added.
+	 * @param coeffs
+	 * @param type
+	 * @return The next position where a side-condition can be added.
+	 */
+	public int setSideCondition(final int pos, double[] coeffs,
+			SideConditionType type) {
+		if (pos < 0 || pos >= M)
+			throw new IllegalArgumentException("position is out of range");
+		if (coeffs == null || coeffs.length != (N + 1))
+			throw new IllegalArgumentException("coeffs count invalid");
 		if (type == null)
 			throw new IllegalArgumentException("no type defined");
 
-		double[] transformed = transformSideCondition(coeffs, type, target);
-		for (int i = 0; i < (N + 1); i++) {
-			a[i][num] = transformed[i];
+		if (type != SideConditionType.EQUAL) {
+			boolean negateCoeff = type == SideConditionType.SMALLER_EQUAL;
+			setSideCondition(pos, coeffs, negateCoeff);
+			return pos + 1;
+		} else {
+			// we need one extra space because we are going to add two rows for
+			// an equation
+			if (pos >= (M - 1))
+				throw new IllegalArgumentException("position is out of range");
+			setSideCondition(pos, coeffs, true);
+			setSideCondition(pos + 1, coeffs, false);
+			return pos + 2;
 		}
 	}
 
-	public void setTargetFunction(double[] coeffs) {
-		if (coeffs == null || coeffs.length != N)
-			throw new IllegalArgumentException("coeffs invalid");
-
-		for (int i = 0; i < N; i++) {
-			a[i][M] = coeffs[i];
+	private void setSideCondition(final int pos, double[] coeffs,
+			boolean negateCoeff) {
+		double[] transformed = transformSideCondition(coeffs, negateCoeff);
+		for (int i = 0; i <= N; i++) {
+			a[i][pos] = transformed[i];
 		}
-		a[N][M] = 0.0;
 	}
 
 	// schlupfvariablen bilden:
 	// c1 + c2 + ... + cn <= target
 	// c1 + c2 + ... + cn + y = target
 	// y = - c1 - c2 - ... - cn + target
-	// TODO: only handles <= so far, the other two cases (= and >=) must be
-	// added.
-	private double[] transformSideCondition(double[] coeffs,
-			SideConditionType type, double target) {
+	// TODO: only handles <= and => so far, the other case (=) must be added.
+	// for <= : negateCoeff = true
+	// a + b <= c
+	// a + b + y = c
+	// y = -a + -b + c
+	// for >= : negateCoeff = false
+	// a + b >= c
+	// a + b - y = c
+	// y = a + b - c
+	private double[] transformSideCondition(double[] coeffs, boolean negateCoeff) {
+		double multCoeff = negateCoeff ? -1 : 1;
+		double multResult = negateCoeff ? 1 : -1;
+
 		double[] transformed = new double[N + 1];
 		for (int i = 0; i < N; i++) {
-			transformed[i] = -coeffs[i];
+			transformed[i] = multCoeff * coeffs[i];
 		}
-		transformed[N] = target;
+		transformed[N] = multResult * coeffs[N];
 		return transformed;
+	}
+
+	public void setTargetFunction(double[] coeffs) {
+		if (coeffs == null || coeffs.length != (N + 1))
+			throw new IllegalArgumentException("coeffs invalid");
+
+		for (int i = 0; i <= N; i++) {
+			a[i][M] = coeffs[i];
+		}
 	}
 
 	public MatrixPoint findPivot() {
@@ -139,11 +157,11 @@ public class LPMatrix {
 		double smallest = Double.MIN_VALUE;
 		int row = -1;
 		for (int y = 0; y < N; y++) {
-			final double c = a[N][y];
+			final double Ci = a[N][y];
 			final double Aiq = a[x][y];
 			if (Aiq < 0) {
-				final double q = c / Aiq;
-				if (row == -1 || q > smallest) {
+				final double q = Math.abs(Ci / Aiq);
+				if (row == -1 || q < smallest) {
 					smallest = q;
 					row = y;
 				}
@@ -181,7 +199,7 @@ public class LPMatrix {
 	 *  z  -7 + 22 = 30
 	 * </pre>
 	 */
-	public void transform(final MatrixPoint pivot) {
+	public double transform(final MatrixPoint pivot) {
 		final int x = pivot.getX();
 		final int y = pivot.getY();
 		if (x < 0 || x >= N)
@@ -197,6 +215,8 @@ public class LPMatrix {
 				tranformRow(row, pivot);
 			}
 		}
+
+		return a[N][M];
 	}
 
 	/**
@@ -275,6 +295,14 @@ public class LPMatrix {
 		public String toString() {
 			return (xVariable) ? "x" + nr : "y" + nr;
 		}
+
+		public boolean isXVariable() {
+			return xVariable;
+		}
+
+		public int getNr() {
+			return nr;
+		}
 	}
 
 	public static final class MatrixPoint {
@@ -298,6 +326,32 @@ public class LPMatrix {
 		public String toString() {
 			return "(" + x + " / " + y + ")";
 		}
+	}
+
+	public String getSolution() {
+		final String fmt = "x%d = %.9f\n";
+		StringBuilder sb = new StringBuilder();
+		for (int x = 0; x < N; x++) {
+			int searchX = x + 1;
+
+			for (int i = 0; i < N; i++) {
+				Variable var = headVars[i];
+				if (var.isXVariable() && var.getNr() == searchX) {
+					double val = a[i][M];
+					sb.append(String.format(fmt, searchX, val));
+				}
+			}
+			for (int i = 0; i < M; i++) {
+				Variable var = sideVars[i];
+				if (var.isXVariable() && var.getNr() == searchX) {
+					double val = a[N][i];
+					sb.append(String.format(fmt, searchX, val));
+				}
+			}
+		}
+		sb.append("Result: ");
+		sb.append(a[N][M]);
+		return sb.toString();
 	}
 
 	@Override
