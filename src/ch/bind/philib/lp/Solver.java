@@ -53,15 +53,31 @@ public final class Solver {
 				result = matrix.transform(pivot);
 			} while (lastResult != result);
 		}
+		checkNonNegativity(matrix);
+
+		// System.out.println(matrix);
 		return matrix.getSolution();
+	}
+
+	private void checkNonNegativity(final LPMatrix matrix) {
+		boolean[] nonNegativity = linearProgram.getNonNegativity();
+		for (int x = 0; x < linearProgram.getNumVars(); x++) {
+			if (matrix.getX(x) < 0 && nonNegativity[x] == true) {
+				throw new IllegalStateException("x" + (x + 1)
+						+ " became negative but is not allowed to do so");
+			}
+		}
 	}
 
 	private LPMatrix buildMatrix() {
 		final LinearProgram lp = linearProgram;
 		final int N = lp.getNumVars();
+//		final int NActual = getActualNumVars(lp);
 		final int M = lp.getNumSideConditions();
 		final int MActual = getActualNumSideConditions(lp);
 		LPMatrix m = new LPMatrix(N, MActual);
+
+//		boolean[] nonNeg = lp.getNonNegativity();
 
 		double[][] scs = lp.getSideConditions();
 		SideConditionType[] sct = lp.getSideConditionTypes();
@@ -80,6 +96,26 @@ public final class Solver {
 
 		return m;
 	}
+
+	// /**
+	// * Variables which are allowed to become non-negative are transformed into
+	// * two variables which are not allowed to become negative.<br/>
+	// * a + b <= 10<br>
+	// * a >= 0<br/>
+	// * b <= 0<br/>
+	// * transform b to <code>(z1 - z2)</code> so that:<br/>
+	// * a + z1 - z2 <= 10
+	// *
+	// * @param lp
+	// * @return
+	// */
+	// private int getActualNumVars(LinearProgram lp) {
+	// int num = 0;
+	// for (boolean nonNeg : lp.getNonNegativity()) {
+	// num += (nonNeg ? 1 : 2);
+	// }
+	// return num;
+	// }
 
 	/**
 	 * The actual number of side-conditions can be higher then the number which

@@ -49,10 +49,10 @@ public class LPMatrix {
 		this.headVars = new Variable[N];
 		this.sideVars = new Variable[M];
 		for (int k = 0; k < N; k++) {
-			headVars[k] = new Variable(true, k + 1);
+			headVars[k] = new Variable(true, k);
 		}
 		for (int i = 0; i < M; i++) {
-			sideVars[i] = new Variable(false, i + 1);
+			sideVars[i] = new Variable(false, i);
 		}
 	}
 
@@ -156,7 +156,7 @@ public class LPMatrix {
 	private int findSmallestQuotient(final int x) {
 		double smallest = Double.MIN_VALUE;
 		int row = -1;
-		for (int y = 0; y < N; y++) {
+		for (int y = 0; y < M; y++) {
 			final double Ci = a[N][y];
 			final double Aiq = a[x][y];
 			if (Aiq < 0) {
@@ -281,6 +281,42 @@ public class LPMatrix {
 		}
 	}
 
+	private boolean isInfinite() {
+		boolean allBnegative = true;
+		for (int x = 0; x < N; x++) {
+			if (a[x][M] >= 0)
+				allBnegative = false;
+		}
+		if (allBnegative)
+			return false;
+
+		for (int x = 0; x < N; x++) {
+			for (int y = 0; y < M; y++) {
+				if (a[x][y] < 0)
+					return false;
+			}
+		}
+		return true;
+	}
+
+	public double getX(int searchX) {
+		if (searchX < 0 || searchX >= N)
+			throw new IllegalArgumentException("searchX is out of range");
+		for (int i = 0; i < N; i++) {
+			Variable var = headVars[i];
+			if (var.isXVariable() && var.getNr() == searchX) {
+				return a[i][M];
+			}
+		}
+		for (int i = 0; i < M; i++) {
+			Variable var = sideVars[i];
+			if (var.isXVariable() && var.getNr() == searchX) {
+				return a[N][i];
+			}
+		}
+		throw new IllegalStateException("should never happen");
+	}
+
 	private static final class Variable {
 
 		final boolean xVariable;
@@ -329,25 +365,15 @@ public class LPMatrix {
 	}
 
 	public String getSolution() {
+		if (isInfinite()) {
+			return "Infinite problem";
+		}
+
 		final String fmt = "x%d = %.9f\n";
 		StringBuilder sb = new StringBuilder();
 		for (int x = 0; x < N; x++) {
-			int searchX = x + 1;
-
-			for (int i = 0; i < N; i++) {
-				Variable var = headVars[i];
-				if (var.isXVariable() && var.getNr() == searchX) {
-					double val = a[i][M];
-					sb.append(String.format(fmt, searchX, val));
-				}
-			}
-			for (int i = 0; i < M; i++) {
-				Variable var = sideVars[i];
-				if (var.isXVariable() && var.getNr() == searchX) {
-					double val = a[N][i];
-					sb.append(String.format(fmt, searchX, val));
-				}
-			}
+			double value = getX(x);
+			sb.append(String.format(fmt, x + 1, value));
 		}
 		sb.append("Result: ");
 		sb.append(a[N][M]);
