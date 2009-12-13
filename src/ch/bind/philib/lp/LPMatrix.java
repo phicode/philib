@@ -25,10 +25,12 @@ package ch.bind.philib.lp;
 import ch.bind.philib.ToStringUtil;
 
 /**
+ * This class models a matrix for solving linear program's. It is not intended
+ * to be used directly but from the Solver class.
  * 
  * @author Philipp Meinen
  */
-public class LPMatrix {
+final class LPMatrix {
 
 	// Koeffizienten der Matrix, addressiert nach [x][y], bzw [spalte][zeile].
 	// Die Anzahl Spalten entspricht der Anzahl Variablen (x) plus eins.
@@ -38,7 +40,14 @@ public class LPMatrix {
 	private final Variable[] headVars;
 	private final Variable[] sideVars;
 
+	/**
+	 * The number of variables represented by the linear program in this matrix.
+	 */
 	private final int N;
+	/**
+	 * The number of side-conditions represented by the linear program in this
+	 * matrix.
+	 */
 	private final int M;
 
 	public LPMatrix(int numVars, int numSideConds) {
@@ -61,7 +70,10 @@ public class LPMatrix {
 	 * @param pos
 	 *            The position where the side-condition should be added.
 	 * @param coeffs
+	 *            the coefficients of the side-condition.
 	 * @param type
+	 *            The type of the side-condition equation, either
+	 *            greater-equals, smaller-equals or equals.
 	 * @return The next position where a side-condition can be added.
 	 */
 	public int setSideCondition(final int pos, double[] coeffs,
@@ -100,15 +112,23 @@ public class LPMatrix {
 	// c1 + c2 + ... + cn <= target
 	// c1 + c2 + ... + cn + y = target
 	// y = - c1 - c2 - ... - cn + target
-	// TODO: only handles <= and => so far, the other case (=) must be added.
-	// for <= : negateCoeff = true
-	// a + b <= c
-	// a + b + y = c
-	// y = -a + -b + c
-	// for >= : negateCoeff = false
-	// a + b >= c
-	// a + b - y = c
-	// y = a + b - c
+	/**
+	 * Transforms the coefficients of a side-condition to be used in the matrix.
+	 * 
+	 * @param coeffs
+	 *            The coefficients of the side-condition.
+	 * @param negateCoeff
+	 * <br/>
+	 *            for '<=' : negateCoeff = true<br/>
+	 *            a + b <= c<br/>
+	 *            a + b + y = c<br/>
+	 *            y = -a + -b + c<br/>
+	 *            for '>=' : negateCoeff = false<br/>
+	 *            a + b >= c<br/>
+	 *            a + b - y = c<br/>
+	 *            y = a + b - c<br/>
+	 * @return the transformed side condition
+	 */
 	private double[] transformSideCondition(double[] coeffs, boolean negateCoeff) {
 		double multCoeff = negateCoeff ? -1 : 1;
 		double multResult = negateCoeff ? 1 : -1;
@@ -129,7 +149,13 @@ public class LPMatrix {
 			a[i][M] = coeffs[i];
 		}
 	}
-
+	
+	/**
+	 * Searches the next viable pivot element.
+	 * 
+	 * @return either <code>null</code> if no pivot element could be found, or
+	 *         an instance of the <code>MatrixPoint</code> class.
+	 */
 	public MatrixPoint findPivot() {
 		// check for positive bq first
 		for (int x = 0; x < N; x++) {
@@ -153,6 +179,15 @@ public class LPMatrix {
 		return null;
 	}
 
+	/**
+	 * Finds the smallest quotient in a certain column of the matrix.
+	 * 
+	 * @param x
+	 *            The column of the matrix where the smallest quotient must be
+	 *            found.
+	 * @return -1 if there is no viable row for a pivot element, otherwise the
+	 *         index-number (>= 0) of the row which can be used as a pivot-row.
+	 */
 	private int findSmallestQuotient(final int x) {
 		double smallest = Double.MIN_VALUE;
 		int row = -1;
@@ -171,6 +206,8 @@ public class LPMatrix {
 	}
 
 	/**
+	 * Performs the transformation of the matrix by a certain pivot element.
+	 * 
 	 * <pre>
 	 *     x1   x2
 	 * y1  -2 + -2 = 3
@@ -198,6 +235,11 @@ public class LPMatrix {
 	 * y2  -4 + 13 =  8
 	 *  z  -7 + 22 = 30
 	 * </pre>
+	 * 
+	 * @param pivot
+	 *            the point of the matrix which must be used as a pivot element.
+	 * @return The value (the result) of the target function after the
+	 *         transformation step.
 	 */
 	public double transform(final MatrixPoint pivot) {
 		final int x = pivot.getX();
@@ -223,7 +265,9 @@ public class LPMatrix {
 	 * Transforms one of the non-pivot rows.
 	 * 
 	 * @param row
+	 *            The index of the row which has to be transformed.
 	 * @param pivot
+	 *            The pivot which is in use for the current transformation.
 	 */
 	private void tranformRow(final int row, final MatrixPoint pivot) {
 		// pivotRow: x1 = -y1 + 2x2 + 3
@@ -247,10 +291,14 @@ public class LPMatrix {
 	}
 
 	/**
-	 * Swap the variable names
+	 * Swap two variables from the lists of head-, and side-variables.
 	 * 
-	 * @param x
-	 * @param y
+	 * @param headIdx
+	 *            The index of the head-variable which must be swapped with a
+	 *            side-variable.
+	 * @param sideIdx
+	 *            The index of the side-variable which must be swapped with a
+	 *            head-variable.
 	 */
 	private void swapVariableDefinitions(int x, int y) {
 		final Variable swapHead = headVars[x];
@@ -271,7 +319,9 @@ public class LPMatrix {
 	 * 
 	 * 
 	 * @param x
+	 *            The x-index of the pivot-element in the matrix.
 	 * @param y
+	 *            The y-index of the pivot-element in the matrix.
 	 */
 	private void transformPivotRow(final int x, final int y) {
 		final double absPivot = Math.abs(a[x][y]);
@@ -280,7 +330,13 @@ public class LPMatrix {
 			a[curx][y] /= absPivot;
 		}
 	}
-
+	
+	/**
+	 * Checks whether or not the linear-program is running into oblivion.
+	 * 
+	 * @return <code>true</code> if the linear-program is running into oblivion,
+	 *         <code>false</code> otherwise.
+	 */
 	private boolean isInfinite() {
 		boolean allBnegative = true;
 		for (int x = 0; x < N; x++) {
@@ -299,6 +355,13 @@ public class LPMatrix {
 		return true;
 	}
 
+	/**
+	 * Gets the value of certain variable.
+	 * 
+	 * @param searchX
+	 *            The index of the variable, starting by 0.
+	 * @return The value of the variable in the current state of the matrix.
+	 */
 	public double getX(int searchX) {
 		if (searchX < 0 || searchX >= N)
 			throw new IllegalArgumentException("searchX is out of range");
@@ -317,6 +380,11 @@ public class LPMatrix {
 		throw new IllegalStateException("should never happen");
 	}
 
+	/**
+	 * Represents a head-, or side variable and its ordinal number.
+	 * 
+	 * @author Philipp Meinen
+	 */
 	private static final class Variable {
 
 		final boolean xVariable;
@@ -341,6 +409,11 @@ public class LPMatrix {
 		}
 	}
 
+	/**
+	 * Represents a point in the Matrix.
+	 * 
+	 * @author Philipp Meinen
+	 */
 	public static final class MatrixPoint {
 		final int x;
 		final int y;

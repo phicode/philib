@@ -24,6 +24,9 @@ package ch.bind.philib.lp;
 
 /**
  * 
+ * Models the three different comparison operators which are allowed for linear
+ * programs.
+ * 
  * @author Philipp Meinen
  */
 public enum SideConditionType {

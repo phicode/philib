@@ -24,7 +24,7 @@ package ch.bind.philib.lp;
 
 import java.io.File;
 
-public class ParserTests {
+public final class ParserTests {
 
 	public static void main(String[] args) {
 		String folder = "/home/lance/fh/efalg/Uebungen/LP_problems";

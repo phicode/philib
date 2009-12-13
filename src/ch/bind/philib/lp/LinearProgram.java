@@ -23,6 +23,7 @@
 package ch.bind.philib.lp;
 
 /**
+ * Describes a linear program.
  * 
  * @author Philipp Meinen
  */

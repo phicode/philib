@@ -25,6 +25,7 @@ package ch.bind.philib.lp;
 import ch.bind.philib.lp.LPMatrix.MatrixPoint;
 
 /**
+ * Solves a linear program.
  * 
  * @author Philipp Meinen
  */
@@ -69,15 +70,20 @@ public final class Solver {
 		}
 	}
 
+	/**
+	 * Transforms a linear-program into a linear-program matrix.
+	 * 
+	 * @return The resulting linear-program matrix.
+	 */
 	private LPMatrix buildMatrix() {
 		final LinearProgram lp = linearProgram;
 		final int N = lp.getNumVars();
-//		final int NActual = getActualNumVars(lp);
+		// final int NActual = getActualNumVars(lp);
 		final int M = lp.getNumSideConditions();
 		final int MActual = getActualNumSideConditions(lp);
 		LPMatrix m = new LPMatrix(N, MActual);
 
-//		boolean[] nonNeg = lp.getNonNegativity();
+		// boolean[] nonNeg = lp.getNonNegativity();
 
 		double[][] scs = lp.getSideConditions();
 		SideConditionType[] sct = lp.getSideConditionTypes();
