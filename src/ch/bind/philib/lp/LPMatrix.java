@@ -149,7 +149,7 @@ final class LPMatrix {
 			a[i][M] = coeffs[i];
 		}
 	}
-	
+
 	/**
 	 * Searches the next viable pivot element.
 	 * 
@@ -330,7 +330,7 @@ final class LPMatrix {
 			a[curx][y] /= absPivot;
 		}
 	}
-	
+
 	/**
 	 * Checks whether or not the linear-program is running into oblivion.
 	 * 
