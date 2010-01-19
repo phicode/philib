@@ -14,7 +14,7 @@ public class HashUtilTest {
 		hash = HashUtil.nextHash(hash, value);
 		assertEquals(expected, hash);
 
-		value = (int) 4294967295L;// 2^32-1
+		value = (int) 4294967295L; // 2^32-1
 		hash = HashUtil.nextHash(hash, value);
 		expected = expected * 31 - 1;
 		assertEquals(expected, hash);
@@ -170,7 +170,7 @@ public class HashUtilTest {
 		hash = HashUtil.nextHash(hash, value);
 		assertEquals(expected, hash);
 
-		value = (int) 4294967295L;// 2^32-1
+		value = (int) 4294967295L; // 2^32-1
 		hash = HashUtil.nextHash(hash, value);
 		expected = expected * 31 - 1;
 		assertEquals(expected, hash);
