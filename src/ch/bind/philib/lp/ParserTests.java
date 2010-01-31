@@ -27,7 +27,12 @@ import java.io.File;
 public final class ParserTests {
 
 	public static void main(String[] args) {
-		String folder = "/home/lance/fh/efalg/Uebungen/LP_problems";
+		if (args.length != 1) {
+			System.out.println("Usage: " + ParserTests.class.getName()
+					+ " <test-folder>");
+			System.exit(1);
+		}
+		String folder = args[0];
 		File dir = new File(folder);
 		File[] files = dir.listFiles();
 		String[] fileNames = new String[files.length];
