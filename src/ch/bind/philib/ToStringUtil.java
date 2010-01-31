@@ -39,16 +39,22 @@ public final class ToStringUtil {
 	 * @return The result of the matrix pretty-printing.
 	 */
 	public static String matrixOutput(String[][] matrix) {
+		checkMatrix(matrix);
 		StringBuilder sb = new StringBuilder();
 		final int N = matrix.length;
+		if (N == 0)
+			return "";
 		final int M = matrix[0].length;
 
 		int max = 0;
 		for (int x = 0; x < N; x++) {
 			for (int y = 0; y < M; y++) {
-				int len = matrix[x][y].length();
-				if (len > max) {
-					max = len;
+				final String str = matrix[x][y];
+				if (str != null) {
+					int len = matrix[x][y].length();
+					if (len > max) {
+						max = len;
+					}
 				}
 			}
 		}
@@ -64,6 +70,8 @@ public final class ToStringUtil {
 				if (x != 0)
 					sb.append(' ');
 				String val = matrix[x][y];
+				if (val == null)
+					val = "";
 				int len = val.length();
 				int pad = max - len;
 				for (int p = 0; p < pad; p++)
@@ -78,5 +86,27 @@ public final class ToStringUtil {
 		}
 
 		return sb.toString();
+	}
+
+	private static void checkMatrix(String[][] matrix) {
+		if (matrix == null) {
+			throw new IllegalArgumentException("matrix == null");
+		}
+		final int N = matrix.length;
+		if (N > 0) {
+			final String[] first = matrix[0];
+			if (first == null)
+				throw new IllegalArgumentException("matrix[0] == null");
+			final int M = first.length;
+			for (int i = 1; i < N; i++) {
+				final String[] cur = matrix[i];
+				if (cur == null)
+					throw new IllegalArgumentException("matrix[" + i
+							+ "] == null");
+				if (cur.length != M)
+					throw new IllegalArgumentException("matrix[" + i
+							+ "].length != matrix[0].length");
+			}
+		}
 	}
 }
