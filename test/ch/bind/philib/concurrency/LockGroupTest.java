@@ -7,9 +7,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.junit.Test;
 
 import ch.bind.philib.PhiArrays;
-import ch.bind.philib.concurrency.LockGroup;
-import ch.bind.philib.concurrency.LockManager;
-import ch.bind.philib.concurrency.Lockable;
 
 public class LockGroupTest {
 
