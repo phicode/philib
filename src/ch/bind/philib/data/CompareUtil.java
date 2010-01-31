@@ -27,7 +27,7 @@ public final class CompareUtil {
 	private CompareUtil() {
 	}
 
-	public static final boolean equality(final Object o1, final Object o2) {
+	public static final boolean equals(final Object o1, final Object o2) {
 		if (o1 == o2)
 			return true;
 		if (o1 == null) {
