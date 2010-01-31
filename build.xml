@@ -177,6 +177,7 @@
 
 			<batchtest fork="true" todir="${junit.test.dir}" filtertrace="false">
 				<fileset dir="${build.test.dir}/classes">
+					<!-- ignore inner/anonym classes -->
 					<exclude name="**/*$*.class" />
 					<exclude name="**/Abstract*.class" />
 					<include name="**/*Test.class" />
