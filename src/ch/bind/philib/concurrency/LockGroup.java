@@ -31,7 +31,7 @@ public final class LockGroup {
 
 	private final Lockable[] objects;
 
-	public LockGroup(Lockable[] objects) {
+	public LockGroup(final Lockable[] objects) {
 		if (objects == null || objects.length == 0)
 			throw new IllegalArgumentException("TODO"); // TODO
 		final int n = objects.length;
