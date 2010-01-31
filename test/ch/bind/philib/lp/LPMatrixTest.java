@@ -83,8 +83,4 @@ public class LPMatrixTest {
 		assertEquals(24.0, matrix.getX(0), 0.0);
 		assertEquals(12.0, matrix.getX(1), 0.0);
 	}
-
-	public static void main(String[] args) {
-		new LPMatrixTest().matrix();
-	}
 }
