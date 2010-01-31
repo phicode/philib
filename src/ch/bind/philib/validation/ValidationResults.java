@@ -22,12 +22,14 @@
 
 package ch.bind.philib.validation;
 
+import java.io.Serializable;
 import java.util.LinkedList;
-import java.util.List;
 
-public final class ValidationResults {
+public final class ValidationResults implements Serializable {
 
-	private final List<String> errors;
+	private static final long serialVersionUID = 8465822377127857280L;
+
+	private final LinkedList<String> errors;
 
 	public ValidationResults() {
 		errors = new LinkedList<String>();
