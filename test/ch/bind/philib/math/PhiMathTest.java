@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import ch.bind.philib.math.PhiMath;
-
 public class PhiMathTest {
 
 	@Test
