@@ -130,7 +130,7 @@ public class LockGroupTest {
 			t.join();
 	}
 
-	private class Locker implements Runnable {
+	private static class Locker implements Runnable {
 
 		private LockGroup lg;
 
