@@ -40,7 +40,7 @@
 	<property name="javadoc.dir" value="${build.dir}/doc" />
 	<property name="junit.test.dir" value="${build.test.dir}/test" />
 	<property name="junit.html.dir" value="${build.test.dir}/report_html" />
-	<property name="jar.name.output" value="${jar.name}-${software.version}" />
+	<property name="jar.name" value="${software.name}-${software.version}.jar" />
 
 	<!-- ### Path definitions ### -->
 
@@ -119,8 +119,8 @@
 
 	<target name="clean" description="clean up">
 		<delete dir="${build.dir}" />
-		<delete dir="${basedir}">
-			<containsregexp expression="philib-[0-9]+\.[0-9]+\.jar" />
+		<delete verbose="true">
+			<fileset dir="${basedir}" includes="*.jar" />
 		</delete>
 	</target>
 
@@ -152,7 +152,7 @@
 		</ifNotEmpty>
 
 		<!-- maybe add a class-path attribute to the manifest-->
-		<manifestclasspath property="manifest.classpath" jarfile="${jar.name.output}">
+		<manifestclasspath property="manifest.classpath" jarfile="${jar.name}">
 			<classpath refid="classpath.src.compile" />
 		</manifestclasspath>
 		<ifNotEmpty value="${manifest.classpath}">
@@ -167,7 +167,7 @@
 		<!-- generate the jar with the generated manifest -->
 		<!-- XXX: if we enable "index" generation we must also implement the <indexjars> element,
 		otherwise the Class-Path entry of the manifest is overruled -->
-		<jar destfile="${jar.name.output}" basedir="${build.dir}/classes" compress="${jar.compress}" index="false" update="false" manifest="${manifest.generated}" />
+		<jar destfile="${jar.name}" basedir="${build.dir}/classes" compress="${jar.compress}" index="false" update="false" manifest="${manifest.generated}" />
 	</target>
 
 	<target name="test" depends="buildtests" description="build and run the junit tests">
