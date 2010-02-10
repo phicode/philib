@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Philipp Meinen <philipp@bind.ch>
+ * Copyright (c) 2009-2010 Philipp Meinen <philipp@bind.ch>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
@@ -27,6 +27,8 @@ public final class Intervals {
 	private Intervals() {
 	}
 
+	private static final double[] COEFFS = { 1.0, 2.5, 5.0 };
+
 	public static int chooseInterval(int maxValue, int maxSegments) {
 		// try to bring maxSegments or less lines on to the chart
 		int interval = 1;
@@ -45,16 +47,14 @@ public final class Intervals {
 			// 1 for 10, 25, 50
 			// 2 for 100, 250, 500
 			int power = (intervalNum / 3);
-
 			double multiply = Math.pow(10, power);
 			int num = intervalNum % 3;
-			if (num == 0) { // 1, 10, 100, 100, ...
-				interval = (int) (1.0 * multiply);
-			} else if (num == 1) { // 2, 25, 250, 2500, ...
-				interval = (int) (2.5 * multiply);
-			} else { // 5, 50, 500, 5000, ...
-				interval = (int) (5.0 * multiply);
-			}
+			double coeff = COEFFS[num];
+
+			// for num=0: 1, 10, 100, 100, ...
+			// for num=1: 2, 25, 250, 2500, ...
+			// for num=2: 5, 50, 500, 5000, ...
+			interval = (int) (coeff * multiply);
 
 			segments = maxValue / interval;
 			if (segments * interval < maxValue)
