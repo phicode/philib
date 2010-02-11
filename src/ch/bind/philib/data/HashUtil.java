@@ -22,6 +22,28 @@
 
 package ch.bind.philib.data;
 
+/**
+ * Provides helper methods for hash-code generation.<br/>
+ * Hash methods for handling all primitive types as well as <code>Object</code>s
+ * are provided.<br/>
+ * 
+ * <b>Usage:</b>
+ * 
+ * <pre>
+ * &#64;Override
+ * public int hashCode() {
+ *     int hash = HashUtil.start(field1);
+ *     hash = HashUtil.next(field2);
+ *     ...
+ *     hash = HashUtil.next(fieldN);
+ *     return hash;
+ * }
+ * </pre>
+ * 
+ * Note: fields may be null.
+ * 
+ * @author Philipp Meinen
+ */
 public final class HashUtil {
 
 	private HashUtil() {

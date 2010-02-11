@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2009 Philipp Meinen <philipp@bind.ch>
+ * Copyright (c) 2010 Philipp Meinen <philipp@bind.ch>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
@@ -20,45 +20,8 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.data;
-
 /**
- * Provides helper methods for object comparison.
- * 
+ * Provides classes with helper-methods for data related tasks.
  * @author Philipp Meinen
  */
-public final class CompareUtil {
-
-	private CompareUtil() {
-	}
-
-	public static final boolean equals(final Object o1, final Object o2) {
-		if (o1 == o2)
-			return true;
-		if (o1 == null) {
-			// o2 is not null -> not equal
-			return false;
-		} else {
-			if (o2 == null) {
-				return false;
-			} else {
-				return o1.equals(o2);
-			}
-		}
-	}
-
-	public static final <T> int compare(final Comparable<T> o1, final T o2) {
-		if (o1 == o2)
-			return 0;
-		if (o1 == null) {
-			// o2 is not null
-			return -1; // o1 < o2
-		} else {
-			if (o2 == null) {
-				return 1; // o1 > o2
-			} else {
-				return o1.compareTo(o2);
-			}
-		}
-	}
-}
+package ch.bind.philib.data;
