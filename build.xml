@@ -40,7 +40,9 @@
 	<property name="javadoc.dir" value="${build.dir}/doc" />
 	<property name="junit.test.dir" value="${build.test.dir}/test" />
 	<property name="junit.html.dir" value="${build.test.dir}/report_html" />
-	<property name="jar.name" value="${software.name}-${software.version}.jar" />
+	<property name="jar.file.name" value="${software.name}-${software.version}.jar" />
+	<property name="doc.file.name" value="${software.name}-${software.version}-doc.zip" />
+	<property name="src.file.name" value="${software.name}-${software.version}-src.zip" />
 
 	<!-- ### Path definitions ### -->
 
@@ -116,11 +118,15 @@
 	<!-- ### Targets ### -->
 
 	<target name="all" description="build all" depends="clean,build,test,package" />
+	
+	<target name="dist" description="build a distributable release" depends="all,doc">
+	</target>
 
 	<target name="clean" description="clean up">
 		<delete dir="${build.dir}" />
 		<delete verbose="true">
 			<fileset dir="${basedir}" includes="*.jar" />
+			<fileset dir="${basedir}" includes="*.zip" />
 		</delete>
 	</target>
 
@@ -152,7 +158,7 @@
 		</ifNotEmpty>
 
 		<!-- maybe add a class-path attribute to the manifest-->
-		<manifestclasspath property="manifest.classpath" jarfile="${jar.name}">
+		<manifestclasspath property="manifest.classpath" jarfile="${jar.file.name}">
 			<classpath refid="classpath.src.compile" />
 		</manifestclasspath>
 		<ifNotEmpty value="${manifest.classpath}">
@@ -167,7 +173,7 @@
 		<!-- generate the jar with the generated manifest -->
 		<!-- XXX: if we enable "index" generation we must also implement the <indexjars> element,
 		otherwise the Class-Path entry of the manifest is overruled -->
-		<jar destfile="${jar.name}" basedir="${build.dir}/classes" compress="${jar.compress}" index="false" update="false" manifest="${manifest.generated}" />
+		<jar destfile="${jar.file.name}" basedir="${build.dir}/classes" compress="${jar.compress}" index="false" update="false" manifest="${manifest.generated}" />
 	</target>
 
 	<target name="test" depends="buildtests" description="build and run the junit tests">
@@ -207,6 +213,10 @@
 			<classpath refid="classpath.src.compile" />
 			<link href="${javadoc.apiurl}" />
 		</javadoc>
+		<jar destfile="${doc.file.name}" basedir="${javadoc.dir}" compress="${doc.compress}" index="false" update="false" />
+		<jar destfile="${src.file.name}" basedir="${src.dir}" compress="${src.compress}" index="false" update="false">
+			<include name="**/*.java" />
+		</jar>
 	</target>
 
 </project>
