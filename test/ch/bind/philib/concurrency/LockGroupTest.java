@@ -10,8 +10,6 @@ import ch.bind.philib.PhiArrays;
 
 public class LockGroupTest {
 
-	// TODO: beautify
-
 	private static final int NUM_LOCKABLES = 1000;
 	private static final int NUM_LOCKGROUPS = 25;
 	private static final int NUM_LOCKABLE_PER_GROUP = 20;

@@ -33,7 +33,7 @@ public final class LockGroup {
 
 	public LockGroup(final Lockable[] objects) {
 		if (objects == null || objects.length == 0)
-			throw new IllegalArgumentException("TODO"); // TODO
+			throw new IllegalArgumentException("No lockables supplied");
 		final int n = objects.length;
 		this.objects = new Lockable[n];
 		System.arraycopy(objects, 0, this.objects, 0, n);
