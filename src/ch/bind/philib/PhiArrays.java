@@ -36,7 +36,8 @@ public final class PhiArrays {
 	private PhiArrays() {
 	}
 
-	private static final Random rand = new Random(); // TODO: thread-safe?
+	// java.util.Random is updated atomically => this is thread-safe
+	private static final Random rand = new Random();
 
 	/**
 	 * Fills the <code>destination</code> array with randomly picked values from
