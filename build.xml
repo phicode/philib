@@ -32,14 +32,15 @@
 	<property file="build.properties" />
 
 	<!-- "internal" properties -->
-	<property name="src.dir" value="src" />
-	<property name="test.dir" value="test" />
+	<property name="src.dir" value="src/main/java" />
+	<property name="test.dir" value="src/test/java" />
 	<property name="lib.dir" value="lib" />
-	<property name="build.dir" value="build" />
-	<property name="build.test.dir" value="build/test" />
-	<property name="javadoc.dir" value="${build.dir}/doc" />
-	<property name="junit.test.dir" value="${build.test.dir}/test" />
-	<property name="junit.html.dir" value="${build.test.dir}/report_html" />
+	<property name="build.basedir" value="build" />
+	<property name="build.main.dir" value="${build.basedir}/main/java" />
+	<property name="build.test.dir" value="${build.basedir}/test/java" />
+	<property name="javadoc.dir" value="${build.basedir}/javadoc" />
+	<property name="junit.test.dir" value="${build.basedir}/test/junit" />
+	<property name="junit.html.dir" value="${build.basedir}/test/report" />
 	<property name="jar.file.name" value="${software.name}-${software.version}.jar" />
 	<property name="doc.file.name" value="${software.name}-${software.version}-doc.zip" />
 	<property name="src.file.name" value="${software.name}-${software.version}-src.zip" />
@@ -59,7 +60,7 @@
 		<fileset dir="${lib.dir}/test">
 			<include name="*.jar" />
 		</fileset>
-		<pathelement path="${build.dir}/classes" />
+		<pathelement path="${build.main.dir}/classes" />
 	</path>
 
 	<path id="classpath.test.run">
@@ -69,7 +70,7 @@
 		<fileset dir="${lib.dir}/test">
 			<include name="*.jar" />
 		</fileset>
-		<pathelement path="${build.dir}/classes" />
+		<pathelement path="${build.main.dir}/classes" />
 		<pathelement path="${build.test.dir}/classes" />
 	</path>
 
@@ -118,12 +119,12 @@
 	<!-- ### Targets ### -->
 
 	<target name="all" description="build all" depends="clean,build,test,package" />
-	
+
 	<target name="dist" description="build a distributable release" depends="all,doc">
 	</target>
 
 	<target name="clean" description="clean up">
-		<delete dir="${build.dir}" />
+		<delete dir="${build.basedir}" />
 		<delete verbose="true">
 			<fileset dir="${basedir}" includes="*.jar" />
 			<fileset dir="${basedir}" includes="*.zip" />
@@ -131,7 +132,7 @@
 	</target>
 
 	<target name="build" description="build the library source-code">
-		<compile src="${src.dir}" dst="${build.dir}/classes" classpathrefid="classpath.src.compile" />
+		<compile src="${src.dir}" dst="${build.main.dir}/classes" classpathrefid="classpath.src.compile" />
 	</target>
 
 	<target name="buildtests" depends="build" description="build the library test-classes">
@@ -139,8 +140,8 @@
 	</target>
 
 	<target name="package" depends="build" description="build a distributable package">
-		<mkdir dir="${build.dir}/classes/META-INF" />
-		<property name="manifest.generated" value="${build.dir}/classes/META-INF/MANIFEST.MF" />
+		<mkdir dir="${build.main.dir}/classes/META-INF" />
+		<property name="manifest.generated" value="${build.main.dir}/classes/META-INF/MANIFEST.MF" />
 
 		<!-- manifest-version 1.2 is required for url-Class-Path entries -->
 		<manifest file="${manifest.generated}" mode="update">
@@ -173,7 +174,7 @@
 		<!-- generate the jar with the generated manifest -->
 		<!-- XXX: if we enable "index" generation we must also implement the <indexjars> element,
 		otherwise the Class-Path entry of the manifest is overruled -->
-		<jar destfile="${jar.file.name}" basedir="${build.dir}/classes" compress="${jar.compress}" index="false" update="false" manifest="${manifest.generated}" />
+		<jar destfile="${jar.file.name}" basedir="${build.main.dir}/classes" compress="${jar.compress}" index="false" update="false" manifest="${manifest.generated}" />
 	</target>
 
 	<target name="test" depends="buildtests" description="build and run the junit tests">
@@ -209,7 +210,7 @@
 
 	<target name="doc" description="build the public api">
 		<mkdir dir="${javadoc.dir}" />
-		<javadoc access="protected" author="true" classpath="" destdir="${javadoc.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.5" sourcepath="${src.dir}" packagenames="${javadoc.packagenames}" splitindex="true" use="true" version="true" serialwarn="true" verbose="true">
+		<javadoc access="protected" author="true" destdir="${javadoc.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.5" sourcepath="${src.dir}" packagenames="${javadoc.packagenames}" splitindex="true" use="true" version="true" serialwarn="true" verbose="true">
 			<classpath refid="classpath.src.compile" />
 			<link href="${javadoc.apiurl}" />
 		</javadoc>
