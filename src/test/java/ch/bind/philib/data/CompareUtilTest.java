@@ -8,91 +8,91 @@ import org.junit.Test;
 
 public class CompareUtilTest {
 
-	@Test
-	public void equalityObjObj() {
-		Object a = "a";
-		Object b = "b";
+    @Test
+    public void equalityObjObj() {
+        Object a = "a";
+        Object b = "b";
 
-		boolean eq = CompareUtil.equals(a, b);
-		assertFalse(eq);
+        boolean eq = CompareUtil.equals(a, b);
+        assertFalse(eq);
 
-		a = "b";
-		eq = CompareUtil.equals(a, b);
-		assertTrue(eq);
+        a = "b";
+        eq = CompareUtil.equals(a, b);
+        assertTrue(eq);
 
-		b = "a";
-		eq = CompareUtil.equals(a, b);
-		assertFalse(eq);
-	}
+        b = "a";
+        eq = CompareUtil.equals(a, b);
+        assertFalse(eq);
+    }
 
-	@Test
-	public void equalityNullNull() {
-		Object a = null;
-		Object b = null;
+    @Test
+    public void equalityNullNull() {
+        Object a = null;
+        Object b = null;
 
-		boolean eq = CompareUtil.equals(a, b);
-		assertTrue(eq);
-	}
+        boolean eq = CompareUtil.equals(a, b);
+        assertTrue(eq);
+    }
 
-	@Test
-	public void equalityObjNull() {
-		Object a = "a";
-		Object b = null;
+    @Test
+    public void equalityObjNull() {
+        Object a = "a";
+        Object b = null;
 
-		boolean eq = CompareUtil.equals(a, b);
-		assertFalse(eq);
-	}
+        boolean eq = CompareUtil.equals(a, b);
+        assertFalse(eq);
+    }
 
-	@Test
-	public void equalityNullObj() {
-		Object a = null;
-		Object b = "b";
+    @Test
+    public void equalityNullObj() {
+        Object a = null;
+        Object b = "b";
 
-		boolean eq = CompareUtil.equals(a, b);
-		assertFalse(eq);
-	}
+        boolean eq = CompareUtil.equals(a, b);
+        assertFalse(eq);
+    }
 
-	@Test
-	public void compareStringString() {
-		String a = "a";
-		String b = "b";
+    @Test
+    public void compareStringString() {
+        String a = "a";
+        String b = "b";
 
-		int cmp = CompareUtil.compare(a, b);
-		assertEquals(-1, cmp);
+        int cmp = CompareUtil.compare(a, b);
+        assertEquals(-1, cmp);
 
-		a = "b";
-		cmp = CompareUtil.compare(a, b);
-		assertEquals(0, cmp);
+        a = "b";
+        cmp = CompareUtil.compare(a, b);
+        assertEquals(0, cmp);
 
-		b = "a";
-		cmp = CompareUtil.compare(a, b);
-		assertEquals(1, cmp);
-	}
+        b = "a";
+        cmp = CompareUtil.compare(a, b);
+        assertEquals(1, cmp);
+    }
 
-	@Test
-	public void compareStringNull() {
-		String a = "a";
-		String b = null;
+    @Test
+    public void compareStringNull() {
+        String a = "a";
+        String b = null;
 
-		int cmp = CompareUtil.compare(a, b);
-		assertEquals(1, cmp); // a > b
-	}
+        int cmp = CompareUtil.compare(a, b);
+        assertEquals(1, cmp); // a > b
+    }
 
-	@Test
-	public void compareNullString() {
-		String a = null;
-		String b = "b";
+    @Test
+    public void compareNullString() {
+        String a = null;
+        String b = "b";
 
-		int cmp = CompareUtil.compare(a, b);
-		assertEquals(-1, cmp); // a < b
-	}
+        int cmp = CompareUtil.compare(a, b);
+        assertEquals(-1, cmp); // a < b
+    }
 
-	@Test
-	public void compareNullNull() {
-		String a = null;
-		String b = null;
+    @Test
+    public void compareNullNull() {
+        String a = null;
+        String b = null;
 
-		int cmp = CompareUtil.compare(a, b);
-		assertEquals(0, cmp); // a == b
-	}
+        int cmp = CompareUtil.compare(a, b);
+        assertEquals(0, cmp); // a == b
+    }
 }

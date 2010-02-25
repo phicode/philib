@@ -30,5 +30,5 @@ package ch.bind.philib.lp;
  * @author Philipp Meinen
  */
 public enum SideConditionType {
-	SMALLER_EQUAL, EQUAL, GREATER_EQUAL;
+    SMALLER_EQUAL, EQUAL, GREATER_EQUAL;
 }

@@ -27,71 +27,67 @@ import java.util.LinkedList;
 
 public final class ValidationResults implements Serializable {
 
-	private static final long serialVersionUID = 8465822377127857280L;
+    private static final long serialVersionUID = 8465822377127857280L;
 
-	private final LinkedList<String> errors;
+    private final LinkedList<String> errors;
 
-	public ValidationResults() {
-		errors = new LinkedList<String>();
-	}
+    public ValidationResults() {
+        errors = new LinkedList<String>();
+    }
 
-	public int getNumErrors() {
-		return errors.size();
-	}
+    public int getNumErrors() {
+        return errors.size();
+    }
 
-	public void addError(final String message) {
-		errors.add(message);
-	}
+    public void addError(final String message) {
+        errors.add(message);
+    }
 
-	public void addError(final String format, Object... args) {
-		errors.add(String.format(format, args));
-	}
+    public void addError(final String format, Object... args) {
+        errors.add(String.format(format, args));
+    }
 
-	public boolean validateNotNull(final Object testNull, final String name) {
-		if (testNull == null) {
-			addError("%s is null", name);
-			return false;
-		}
-		return true;
-	}
+    public boolean validateNotNull(final Object testNull, final String name) {
+        if (testNull == null) {
+            addError("%s is null", name);
+            return false;
+        }
+        return true;
+    }
 
-	public boolean validateMaxLength(final String testStr, final String name,
-			final int maxLength) {
-		if (testStr.length() > maxLength) {
-			addError("%s is too long (%d), the maximum is %d", name, testStr
-					.length(), maxLength);
-			return false;
-		}
-		return true;
-	}
+    public boolean validateMaxLength(final String testStr, final String name, final int maxLength) {
+        if (testStr.length() > maxLength) {
+            addError("%s is too long (%d), the maximum is %d", name, testStr.length(), maxLength);
+            return false;
+        }
+        return true;
+    }
 
-	public boolean validateMinLength(final String testStr, final String name,
-			final int minLength) {
-		if (testStr.length() < minLength) {
-			addError("%s is too short (%d), the minimum is %d", name, testStr
-					.length(), minLength);
-			return false;
-		}
-		return true;
-	}
+    public boolean validateMinLength(final String testStr, final String name, final int minLength) {
+        if (testStr.length() < minLength) {
+            addError("%s is too short (%d), the minimum is %d", name, testStr.length(), minLength);
+            return false;
+        }
+        return true;
+    }
 
-	public void checkValidations() throws ValidationException {
-		if (errors.size() > 0)
-			throw new ValidationException(this);
-	}
+    public void checkValidations() throws ValidationException {
+        if (errors.size() > 0)
+            throw new ValidationException(this);
+    }
 
-	static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		int num = 1;
-		for (String msg : errors) {
-			if (num > 1)
-				sb.append(LINE_SEPARATOR);
-			sb.append(msg);
-			num++;
-		}
-		return sb.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        int num = 1;
+        for (String msg : errors) {
+            if (num > 1)
+                sb.append(LINE_SEPARATOR);
+            sb.append(msg);
+            num++;
+        }
+        return sb.toString();
+    }
 }

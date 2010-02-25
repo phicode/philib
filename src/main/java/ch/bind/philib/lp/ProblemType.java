@@ -27,5 +27,5 @@ package ch.bind.philib.lp;
  * @author Philipp Meinen
  */
 public enum ProblemType {
-	MAXIMIZE, MINIMIZE;
+    MAXIMIZE, MINIMIZE;
 }

@@ -31,38 +31,37 @@ import java.io.IOException;
  */
 public final class Main {
 
-	public static void main(String[] args) {
-		if (args.length < 1) {
-			System.out.println("Usage: java " + Main.class.getName()
-					+ " <file1> [<file2> ... ]");
-			System.exit(-1);
-		}
-		for (int i = 0; i < args.length; i++) {
-			String file = args[i];
-			System.out.println("Parsing file: " + file);
-			Parser p = new Parser(file);
-			try {
-				LinearProgram lp = p.parse();
-				Solver solver = new Solver(lp);
-				String result = solver.solve();
-				System.out.print("non-negativ: ");
-				for (boolean nonNeg : lp.getNonNegativity())
-					System.out.print(nonNeg + " ");
-				System.out.println();
-				System.out.println(result);
-			} catch (UnsupportedOperationException e) {
-				System.out.println("\t" + e.getMessage());
-				e.printStackTrace(System.out);
-			} catch (IllegalArgumentException e) {
-				System.out.println("\t" + e.getMessage());
-				e.printStackTrace(System.out);
-			} catch (IllegalStateException e) {
-				System.out.println("\t" + e.getMessage());
-			} catch (FileNotFoundException e) {
-				System.out.println("\tfile not found");
-			} catch (IOException e) {
-				System.out.println("\tio-exception: " + e.getMessage());
-			}
-		}
-	}
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            System.out.println("Usage: java " + Main.class.getName() + " <file1> [<file2> ... ]");
+            System.exit(-1);
+        }
+        for (int i = 0; i < args.length; i++) {
+            String file = args[i];
+            System.out.println("Parsing file: " + file);
+            Parser p = new Parser(file);
+            try {
+                LinearProgram lp = p.parse();
+                Solver solver = new Solver(lp);
+                String result = solver.solve();
+                System.out.print("non-negativ: ");
+                for (boolean nonNeg : lp.getNonNegativity())
+                    System.out.print(nonNeg + " ");
+                System.out.println();
+                System.out.println(result);
+            } catch (UnsupportedOperationException e) {
+                System.out.println("\t" + e.getMessage());
+                e.printStackTrace(System.out);
+            } catch (IllegalArgumentException e) {
+                System.out.println("\t" + e.getMessage());
+                e.printStackTrace(System.out);
+            } catch (IllegalStateException e) {
+                System.out.println("\t" + e.getMessage());
+            } catch (FileNotFoundException e) {
+                System.out.println("\tfile not found");
+            } catch (IOException e) {
+                System.out.println("\tio-exception: " + e.getMessage());
+            }
+        }
+    }
 }

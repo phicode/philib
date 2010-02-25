@@ -26,19 +26,18 @@ import java.io.File;
 
 public final class ParserTests {
 
-	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.out.println("Usage: " + ParserTests.class.getName()
-					+ " <test-folder>");
-			System.exit(1);
-		}
-		String folder = args[0];
-		File dir = new File(folder);
-		File[] files = dir.listFiles();
-		String[] fileNames = new String[files.length];
-		for (int i = 0; i < files.length; i++) {
-			fileNames[i] = files[i].getAbsolutePath();
-		}
-		Main.main(fileNames);
-	}
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Usage: " + ParserTests.class.getName() + " <test-folder>");
+            System.exit(1);
+        }
+        String folder = args[0];
+        File dir = new File(folder);
+        File[] files = dir.listFiles();
+        String[] fileNames = new String[files.length];
+        for (int i = 0; i < files.length; i++) {
+            fileNames[i] = files[i].getAbsolutePath();
+        }
+        Main.main(fileNames);
+    }
 }
