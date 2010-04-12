@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.data;
 
 /**
@@ -32,10 +31,10 @@ package ch.bind.philib.data;
  * <pre>
  * &#64;Override
  * public int hashCode() {
- *     int hash = HashUtil.start(field1);
- *     hash = HashUtil.next(field2);
+ *     int hash = HashUtil.startHash(field1);
+ *     hash = HashUtil.nextHash(field2);
  *     ...
- *     hash = HashUtil.next(fieldN);
+ *     hash = HashUtil.nextHash(fieldN);
  *     return hash;
  * }
  * </pre>
@@ -48,79 +47,78 @@ public final class HashUtil {
 
     private HashUtil() {
     }
-
     private static final int HASH_PRIME_START = 17;
     private static final int HASH_PRIME_STEP = 31;
 
-    public static final int start(final Object obj) {
-        return next(HASH_PRIME_START, obj);
+    public static final int startHash(final Object obj) {
+        return nextHash(HASH_PRIME_START, obj);
     }
 
-    public static final int next(int hash, final Object obj) {
+    public static final int nextHash(int hash, final Object obj) {
         return hash * HASH_PRIME_STEP + ((obj == null) ? 0 : obj.hashCode());
     }
 
-    public static final int start(final boolean value) {
-        return next(HASH_PRIME_START, value);
+    public static final int startHash(final boolean value) {
+        return nextHash(HASH_PRIME_START, value);
     }
 
-    public static final int next(int hash, final boolean value) {
+    public static final int nextHash(int hash, final boolean value) {
         return hash * HASH_PRIME_STEP + (value ? 1 : 0);
     }
 
-    public static final int start(final byte value) {
-        return next(HASH_PRIME_START, value);
+    public static final int startHash(final byte value) {
+        return nextHash(HASH_PRIME_START, value);
     }
 
-    public static final int next(int hash, final byte value) {
+    public static final int nextHash(int hash, final byte value) {
         return hash * HASH_PRIME_STEP + (int) value;
     }
 
-    public static final int start(final char value) {
-        return next(HASH_PRIME_START, value);
+    public static final int startHash(final char value) {
+        return nextHash(HASH_PRIME_START, value);
     }
 
-    public static final int next(int hash, final char value) {
+    public static final int nextHash(int hash, final char value) {
         return hash * HASH_PRIME_STEP + value;
     }
 
-    public static final int start(final short value) {
-        return next(HASH_PRIME_START, value);
+    public static final int startHash(final short value) {
+        return nextHash(HASH_PRIME_START, value);
     }
 
-    public static final int next(int hash, final short value) {
+    public static final int nextHash(int hash, final short value) {
         return hash * HASH_PRIME_STEP + value;
     }
 
-    public static final int start(final int value) {
-        return next(HASH_PRIME_START, value);
+    public static final int startHash(final int value) {
+        return nextHash(HASH_PRIME_START, value);
     }
 
-    public static final int next(int hash, final int value) {
+    public static final int nextHash(int hash, final int value) {
         return hash * HASH_PRIME_STEP + value;
     }
 
-    public static final int start(final long value) {
-        return next(HASH_PRIME_START, value);
+    public static final int startHash(final long value) {
+        return nextHash(HASH_PRIME_START, value);
     }
 
-    public static final int next(int hash, final long value) {
+    public static final int nextHash(int hash, final long value) {
         return hash * HASH_PRIME_STEP + (int) (value ^ (value >>> 32));
     }
 
-    public static final int start(final float value) {
-        return next(HASH_PRIME_START, value);
+    public static final int startHash(final float value) {
+        return nextHash(HASH_PRIME_START, value);
     }
 
-    public static final int next(final int hash, final float value) {
-        return next(hash, Float.floatToIntBits(value));
+    public static final int nextHash(final int hash, final float value) {
+        return nextHash(hash, Float.floatToIntBits(value));
     }
 
-    public static final int start(final double value) {
-        return next(HASH_PRIME_START, value);
+    public static final int startHash(final double value) {
+        return nextHash(HASH_PRIME_START, value);
     }
 
-    public static final int next(final int hash, final double value) {
-        return next(hash, Double.doubleToLongBits(value));
+    public static final int nextHash(final int hash, final double value) {
+        return nextHash(hash, Double.doubleToLongBits(value));
     }
 }
