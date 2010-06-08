@@ -32,9 +32,9 @@ package ch.bind.philib.data;
  * &#64;Override
  * public int hashCode() {
  *     int hash = HashUtil.startHash(field1);
- *     hash = HashUtil.nextHash(field2);
+ *     hash = HashUtil.nextHash(hash, field2);
  *     ...
- *     hash = HashUtil.nextHash(fieldN);
+ *     hash = HashUtil.nextHash(hash, fieldN);
  *     return hash;
  * }
  * </pre>
