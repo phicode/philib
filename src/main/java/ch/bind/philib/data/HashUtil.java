@@ -71,7 +71,7 @@ public final class HashUtil {
     }
 
     public static final int nextHash(int hash, final byte value) {
-        return hash * HASH_PRIME_STEP + (int) value;
+        return hash * HASH_PRIME_STEP + value;
     }
 
     public static final int startHash(final char value) {
