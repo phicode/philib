@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<name>philib</name>
+	<description>utility classes by Philipp Meinen &lt;philipp@bind.ch&gt;</description>
+
+	<groupId>ch.bind</groupId>
+	<artifactId>philib</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<properties>
+		<svn.url>http://svn.bind.ch/svn/philib/trunk</svn.url>
+	</properties>
+
+	<scm>
+		<connection>${svn.url}</connection>
+		<developerConnection>${svn.url}</developerConnection>
+		<url>${svn.url}</url>
+	</scm>
+
+	<dependencies>
+		<dependency>
+			<artifactId>junit</artifactId>
+			<groupId>junit</groupId>
+			<version>[4.8.2,)</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
