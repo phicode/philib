@@ -55,7 +55,6 @@ public final class LockGroup {
     }
 
     private static final class LockableComparator implements Comparator<Lockable> {
-
         @Override
         public int compare(final Lockable o1, final Lockable o2) {
             final long diff = o1.getLockId() - o2.getLockId();
@@ -65,7 +64,5 @@ public final class LockGroup {
                 return -1;
             return 0;
         }
-
     }
-
 }
