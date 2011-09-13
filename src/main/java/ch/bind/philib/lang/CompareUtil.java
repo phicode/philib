@@ -61,4 +61,12 @@ public final class CompareUtil {
             }
         }
     }
+
+    public static final int normalize(int diff) {
+        return diff < 0 ? -1 : (diff == 0 ? 0 : 1);
+    }
+
+    public static final int normalize(long diff) {
+        return (int) (diff < 0 ? -1 : (diff == 0 ? 0 : 1));
+    }
 }
