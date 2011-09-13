@@ -21,7 +21,7 @@
  */
 
 /**
- * Provides classes with helper-methods for data related tasks.
+ * Provides classes with helper-methods for language and therefore data related tasks.
  * @author Philipp Meinen
  */
-package ch.bind.philib.data;
+package ch.bind.philib.lang;

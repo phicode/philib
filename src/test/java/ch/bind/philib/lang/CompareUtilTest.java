@@ -1,10 +1,12 @@
-package ch.bind.philib.data;
+package ch.bind.philib.lang;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import ch.bind.philib.lang.CompareUtil;
 
 public class CompareUtilTest {
 

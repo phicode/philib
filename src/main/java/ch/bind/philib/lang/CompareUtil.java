@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.data;
+package ch.bind.philib.lang;
 
 /**
  * Provides helper methods for object comparison.
