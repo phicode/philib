@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.junit.Test;
 
-import ch.bind.philib.PhiArrays;
+import ch.bind.philib.lang.ArrayUtils;
 
 public class LockGroupTest {
 
@@ -14,7 +14,7 @@ public class LockGroupTest {
     private static final int NUM_LOCKGROUPS = 25;
     private static final int NUM_LOCKABLE_PER_GROUP = 20;
     private static final int NUM_THREADS = 8;
-    private static final int NUM_ITERATIONS_PER_THREAD = 100000;
+    private static final int NUM_ITERATIONS_PER_THREAD = 10000;
 
     private Thread[] threads;
     private Lockable[] lockables;
@@ -37,7 +37,7 @@ public class LockGroupTest {
         lockgroups = new LockGroup[NUM_LOCKGROUPS];
         Lockable[] lockInGrp = new Lockable[NUM_LOCKABLE_PER_GROUP];
         for (int i = 0; i < NUM_LOCKGROUPS; i++) {
-            PhiArrays.pickRandom(lockables, lockInGrp);
+            ArrayUtils.pickRandom(lockables, lockInGrp);
             lockgroups[i] = new LockGroup(lockInGrp);
         }
     }
