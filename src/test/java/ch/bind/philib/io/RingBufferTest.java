@@ -2,6 +2,7 @@ package ch.bind.philib.io;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -16,11 +17,13 @@ public class RingBufferTest {
 
     private static final int TEST_BUF_SIZE = 1 * 1024 * 1024;
 
-    private static final int RANDOM_PERF_TEST_SIZE = 16 * 1024 * 1024;
+    private static final int MB = 1024 * 1024;
+    private static final int RANDOM_PERF_TEST_SIZE = 16 * MB;
+    private static final int RANDOM_PERF_TEST_MAX_BUF_SIZE = 4 * MB;
+    private static final int RANDOM_PERF_TEST_MAX_CHUNK_SIZE = 256;
 
     @Test
     public void frontAndBack() {
-        RingBuffer.debug = false;
         LinkedList<byte[]> bufExp = new LinkedList<byte[]>();
         RingBuffer buf = new RingBuffer();
         assertEquals(0, buf.available());
@@ -45,40 +48,44 @@ public class RingBufferTest {
 
     @Test
     public void randomAccess() {
-        RingBuffer.debug = true;
         LinkedList<Byte> bufExp = new LinkedList<Byte>();
-        RingBuffer buf = new RingBuffer();
+        RingBuffer ringBuf = new RingBuffer();
         int size = 0;
-        int performed = 0;
+        long performed = 0;
         while (performed < RANDOM_PERF_TEST_SIZE) {
-            int num = rand.nextInt(32) + 1;
-            byte[] b = new byte[num];
-            boolean doRead = buf.available() >= num ? rand.nextBoolean() : false;
+            int len = rand.nextInt(RANDOM_PERF_TEST_MAX_CHUNK_SIZE) + 1;
+            byte[] buf = new byte[len];
+            int a = ringBuf.available();
+            boolean doRead = a >= len ? rand.nextBoolean() : false;
+            if (!doRead && a + len > RANDOM_PERF_TEST_MAX_BUF_SIZE) {
+                doRead = true;
+            }
             boolean doFront = rand.nextBoolean();
             if (doRead) {
                 if (doFront) {
-                    buf.read(b);
-                    verifyRead(b, bufExp);
+                    ringBuf.read(buf);
+                    verifyRead(buf, bufExp);
                 } else {
-                    buf.readBack(b);
-                    verifyReadBack(b, bufExp);
+                    ringBuf.readBack(buf);
+                    verifyReadBack(buf, bufExp);
                 }
-                size -= num;
+                size -= len;
             } else {
-                rand.nextBytes(b);
+                rand.nextBytes(buf);
                 if (doFront) {
-                    buf.writeFront(b);
-                    prepend(b, bufExp);
+                    ringBuf.writeFront(buf);
+                    prepend(buf, bufExp);
                 } else {
-                    buf.write(b);
-                    append(b, bufExp);
+                    ringBuf.write(buf);
+                    append(buf, bufExp);
                 }
-                size += num;
+                size += len;
             }
-            assertEquals(size, buf.available());
+            assertEquals(size, ringBuf.available());
             assertEquals(size, bufExp.size());
-            performed += num;
+            performed += len;
         }
+        System.out.printf("%d bytes%n", performed);
     }
 
     private void verifyReadBack(byte[] bs, LinkedList<Byte> bufExp) {
@@ -134,6 +141,36 @@ public class RingBufferTest {
         byte[] b = new byte[16];
         buf.write(b);
         buf.read(b, 0, -1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void tooBigReadForInbuf() {
+        RingBuffer buf = new RingBuffer();
+        byte[] b = new byte[16];
+        buf.write(b);
+        buf.write(b);
+        assertEquals(32, buf.available());
+        buf.read(b, 0, 17); // too big read
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void tooBigWriteForOutbuf() {
+        RingBuffer buf = new RingBuffer();
+        byte[] b = new byte[16];
+        buf.write(b, 0, 17); // too big write
+    }
+
+    @Test
+    public void tooBigReadForBuf() {
+        RingBuffer buf = new RingBuffer();
+        byte[] b = new byte[16];
+        buf.write(b, 0, 8); // 8 bytes in buffer
+        try {
+            buf.read(b, 0, 9); // try to read too much
+            fail("should have thrown an illegal-argument-exc");
+        } catch (IllegalArgumentException e) {
+
+        }
     }
 
     private void verifyBuf(List<byte[]> expected, RingBuffer buf) {

@@ -47,7 +47,7 @@ public class RingBuffer implements DoubleSidedBuffer {
         if (len == 0) {
             return;
         }
-        _readSizeCheck(len);
+        _readLenCheck(len);
         _read(data, 0, len);
         _consumed(len);
     }
@@ -65,7 +65,7 @@ public class RingBuffer implements DoubleSidedBuffer {
         SimpleValidation.notNegative(len, "offset");
         _bufferSpaceCheck(data, off, len);
 
-        _readSizeCheck(len);
+        _readLenCheck(len);
         _readBack(data, 0, len);
         _consumedBack(len);
     }
@@ -115,6 +115,8 @@ public class RingBuffer implements DoubleSidedBuffer {
     }
 
     private void _bufferSpaceCheck(byte[] data, int off, int len) {
+        // FIXME
+        // off + len > data.length could overflow and therefore fail
         if (off + len > data.length) {
             throw new IllegalArgumentException("not enough space in buffer");
         }
@@ -137,7 +139,6 @@ public class RingBuffer implements DoubleSidedBuffer {
     }
 
     private void _read(byte[] buf, int off, int len) {
-        System.out.println("_read");
         int availToEnd = ringCapacity - ringOffset;
         if (availToEnd >= len) {
             // all data is available from one read
@@ -145,40 +146,24 @@ public class RingBuffer implements DoubleSidedBuffer {
         } else {
             // read available space from the offset to the end of the buffer
             // then read the rest of the required data from the beginning
-            int rem = ringSize - availToEnd;
+            int rem = len - availToEnd;
             ac(ringBuf, ringOffset, buf, off, availToEnd);
             ac(ringBuf, 0, buf, off + availToEnd, rem);
         }
     }
 
     private void _readBack(byte[] buf, int off, int len) {
-        System.out.println("_readBack");
-        dumpVars();
         int firstReadOffset = _offsetPlus(ringSize - len);
-        SimpleValidation.isTrue(firstReadOffset >= 0, "1");
-        SimpleValidation.isTrue(firstReadOffset < ringCapacity, firstReadOffset + " < " + ringCapacity);
-
         int availToEnd = ringCapacity - firstReadOffset;
         int numReadOne = Math.min(availToEnd, len);
-        SimpleValidation.isTrue(numReadOne >= 0, "3");
-        SimpleValidation.isTrue(numReadOne <= len, "4");
-
         int numReadTwo = len - numReadOne;
-        SimpleValidation.isTrue(numReadTwo >= 0, "5");
         ac(ringBuf, firstReadOffset, buf, off, numReadOne);
-
         if (numReadTwo > 0) {
             ac(ringBuf, 0, buf, off + numReadOne, numReadTwo);
         }
     }
 
-    private void dumpVars() {
-        System.out.printf("size=%d, offset=%d%n", ringSize, ringOffset);
-        System.out.flush();
-    }
-
     private void _write(byte[] data, int off, int len) {
-        System.out.println("_write");
         int writePosOne = _offsetPlus(ringSize);
         int availBack = ringCapacity - writePosOne;
         int numWriteOne = Math.min(availBack, len);
@@ -191,7 +176,6 @@ public class RingBuffer implements DoubleSidedBuffer {
     }
 
     private void _writeFront(byte[] data, int off, int len) {
-        System.out.println("_writeFront");
         int writePosOne = _offsetMinus(len);
         int availBack = ringCapacity - writePosOne;
         int numWriteOne = Math.min(availBack, len);
@@ -211,23 +195,19 @@ public class RingBuffer implements DoubleSidedBuffer {
         ringSize -= len;
     }
 
-    private void _readSizeCheck(int size) {
-        if (this.ringSize < size) {
-            throw new IndexOutOfBoundsException();
+    private void _readLenCheck(int len) {
+        if (this.ringSize < len) {
+            throw new IllegalArgumentException();
         }
     }
 
     private int _offsetPlus(int shift) {
-        // TODO: remove assertion
-        SimpleValidation.isTrue(shift >= 0);
         int offset = ringOffset + shift;
         offset %= ringCapacity;
         return offset;
     }
 
     private int _offsetMinus(int shift) {
-        // TODO: remove assertion
-        SimpleValidation.isTrue(shift >= 0);
         int offset = ringOffset - shift;
         if (offset < 0) {
             offset += ringCapacity;
@@ -235,13 +215,8 @@ public class RingBuffer implements DoubleSidedBuffer {
         return offset;
     }
 
-    static volatile boolean debug = true;
-
-    private synchronized void ac(byte[] src, int srcPos, byte[] dst, int dstPos, int length) {
-        if (debug) {
-            System.out.printf("ac(byte[%d], %d, byte[%d], %d, %d)%n", src.length, srcPos, dst.length, dstPos, length);
-            System.out.flush();
-        }
+    // shorten all those arraycopy calls
+    private final void ac(byte[] src, int srcPos, byte[] dst, int dstPos, int length) {
         System.arraycopy(src, srcPos, dst, dstPos, length);
     }
 }
