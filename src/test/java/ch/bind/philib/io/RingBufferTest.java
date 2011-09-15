@@ -13,14 +13,20 @@ import org.junit.Test;
 
 public class RingBufferTest {
 
-    private Random rand = new Random();
-
-    private static final int TEST_BUF_SIZE = 1 * 1024 * 1024;
+    private final Random rand = new Random();
 
     private static final int MB = 1024 * 1024;
-    private static final int RANDOM_PERF_TEST_SIZE = 16 * MB;
-    private static final int RANDOM_PERF_TEST_MAX_BUF_SIZE = 4 * MB;
-    private static final int RANDOM_PERF_TEST_MAX_CHUNK_SIZE = 256;
+    private static final long GB = (long) (1024 * 1024 * 1024);
+
+    private static final int TEST_BUF_SIZE = 1 * MB;
+
+    private static final int RANDOM_TEST_SIZE = 16 * MB;
+    private static final int RANDOM_TEST_MAX_BUF_SIZE = 4 * MB;
+    private static final int RANDOM_TEST_MAX_CHUNK_SIZE = 256;
+
+    private static final long PERF_SIZE = 32 * GB;
+    private static final int PERF_CHUNKSIZE = 4096;
+    private static final int PERF_MAX_BUFSIZE = 64 * MB;
 
     @Test
     public void frontAndBack() {
@@ -52,12 +58,12 @@ public class RingBufferTest {
         RingBuffer ringBuf = new RingBuffer();
         int size = 0;
         long performed = 0;
-        while (performed < RANDOM_PERF_TEST_SIZE) {
-            int len = rand.nextInt(RANDOM_PERF_TEST_MAX_CHUNK_SIZE) + 1;
+        while (performed < RANDOM_TEST_SIZE) {
+            int len = rand.nextInt(RANDOM_TEST_MAX_CHUNK_SIZE) + 1;
             byte[] buf = new byte[len];
             int a = ringBuf.available();
             boolean doRead = a >= len ? rand.nextBoolean() : false;
-            if (!doRead && a + len > RANDOM_PERF_TEST_MAX_BUF_SIZE) {
+            if (!doRead && a + len > RANDOM_TEST_MAX_BUF_SIZE) {
                 doRead = true;
             }
             boolean doFront = rand.nextBoolean();
@@ -85,7 +91,44 @@ public class RingBufferTest {
             assertEquals(size, bufExp.size());
             performed += len;
         }
-        System.out.printf("%d bytes%n", performed);
+    }
+
+    @Test
+    public void perfTest() {
+        final long start = System.currentTimeMillis();
+        RingBuffer ringBuf = new RingBuffer();
+        byte[] buf = new byte[PERF_CHUNKSIZE];
+        rand.nextBytes(buf);
+        int size = 0;
+        long performed = 0;
+        while (performed < PERF_SIZE) {
+            int a = ringBuf.available();
+            boolean doRead = a >= PERF_CHUNKSIZE ? rand.nextBoolean() : false;
+            if (!doRead && a + PERF_CHUNKSIZE > PERF_MAX_BUFSIZE) {
+                doRead = true;
+            }
+            boolean doFront = rand.nextBoolean();
+            if (doRead) {
+                if (doFront) {
+                    ringBuf.read(buf);
+                } else {
+                    ringBuf.readBack(buf);
+                }
+                size -= PERF_CHUNKSIZE;
+            } else {
+                rand.nextBytes(buf);
+                if (doFront) {
+                    ringBuf.writeFront(buf);
+                } else {
+                    ringBuf.write(buf);
+                }
+                size += PERF_CHUNKSIZE;
+            }
+            assertEquals(size, ringBuf.available());
+            performed += PERF_CHUNKSIZE;
+        }
+        final long time = System.currentTimeMillis() - start;
+        System.out.printf("%d MB in %dms%n", performed / MB, time);
     }
 
     private void verifyReadBack(byte[] bs, LinkedList<Byte> bufExp) {
