@@ -46,7 +46,7 @@ public class RingBufferTest {
     private static final int RANDOM_TEST_MAX_BUF_SIZE = 4 * MB;
     private static final int RANDOM_TEST_MAX_CHUNK_SIZE = 256;
 
-    private static final long PERF_SIZE = 32 * GB;
+    private static final long PERF_SIZE = 4 * GB;
     private static final int PERF_CHUNKSIZE = 4096;
     private static final int PERF_MAX_BUFSIZE = 64 * MB;
 
@@ -121,37 +121,19 @@ public class RingBufferTest {
         RingBuffer ringBuf = new RingBuffer();
         byte[] buf = new byte[PERF_CHUNKSIZE];
         rand.nextBytes(buf);
-        int size = 0;
         long performed = 0;
         while (performed < PERF_SIZE) {
-            int a = ringBuf.available();
-            boolean doRead = a >= PERF_CHUNKSIZE ? rand.nextBoolean() : false;
-            if (!doRead && a + PERF_CHUNKSIZE > PERF_MAX_BUFSIZE) {
-                doRead = true;
-            }
-            boolean doFront = rand.nextBoolean();
-            if (doRead) {
-                if (doFront) {
-                    ringBuf.read(buf);
-                } else {
-                    ringBuf.readBack(buf);
-                }
-                size -= PERF_CHUNKSIZE;
-            } else {
-                rand.nextBytes(buf);
-                if (doFront) {
-                    ringBuf.writeFront(buf);
-                } else {
-                    ringBuf.write(buf);
-                }
-                size += PERF_CHUNKSIZE;
-            }
-            assertEquals(size, ringBuf.available());
-            performed += PERF_CHUNKSIZE;
+            ringBuf.write(buf);
+            ringBuf.writeFront(buf);
+            ringBuf.read(buf);
+            ringBuf.readBack(buf);
+            assertEquals(0, ringBuf.available());
+            performed += (PERF_CHUNKSIZE * 4);
         }
         final long time = System.currentTimeMillis() - start;
 	double mbPerSec = performed / MB / (time / 1000f);
-	System.out.printf("%d MB in %dms = %.1fMB/s%n", performed / MB, time, mbPerSec);
+	System.out.printf("%s - %d MB in %dms = %.1fMB/s%n", //
+            getClass().getSimpleName(), performed / MB, time, mbPerSec);
     }
 
     private void verifyReadBack(byte[] bs, LinkedList<Byte> bufExp) {
@@ -235,8 +217,18 @@ public class RingBufferTest {
             buf.read(b, 0, 9); // try to read too much
             fail("should have thrown an illegal-argument-exc");
         } catch (IllegalArgumentException e) {
-
+            // expected
         }
+    }
+
+    @Test
+    public void clear() {
+        RingBuffer buf = new RingBuffer();
+	byte[] a = { 0, 1, 2, 3 };
+        buf.write(a);
+        assertEquals(a.length, buf.available());
+        buf.clear();
+        assertEquals(0, buf.available());
     }
 
     private void verifyBuf(List<byte[]> expected, RingBuffer buf) {
