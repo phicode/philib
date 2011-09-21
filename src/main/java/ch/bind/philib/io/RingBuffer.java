@@ -54,6 +54,12 @@ public class RingBuffer implements DoubleSidedBuffer {
     }
 
     @Override
+    public void clear() {
+        ringOffset = 0;
+        ringSize = 0;
+    }
+
+    @Override
     public void read(byte[] data) {
         SimpleValidation.notNull(data, "data-buffer");
         read(data, 0, data.length);

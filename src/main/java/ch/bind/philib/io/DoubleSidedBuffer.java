@@ -26,6 +26,8 @@ public interface DoubleSidedBuffer {
 
     int available();
 
+    void clear();
+
     void read(byte[] data);
     
     void read(byte[] data, int off, int len);
