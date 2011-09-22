@@ -22,7 +22,7 @@
 
 package ch.bind.philib.validation;
 
-public class SimpleValidation {
+public final class SimpleValidation {
 
     private SimpleValidation() {
     }
