@@ -244,7 +244,7 @@ public class RingBuffer implements DoubleSidedBuffer {
     }
 
     // shorten all those arraycopy calls
-    private final void ac(byte[] src, int srcPos, byte[] dst, int dstPos, int length) {
+    private static final void ac(byte[] src, int srcPos, byte[] dst, int dstPos, int length) {
         System.arraycopy(src, srcPos, dst, dstPos, length);
     }
 }
