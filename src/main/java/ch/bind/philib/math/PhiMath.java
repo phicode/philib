@@ -38,7 +38,7 @@ public final class PhiMath {
      * f(3) = 6<br/>
      * f(10) = 55<br/>
      * f(100) = 5050<br/>
-	 * </code>
+     * </code>
      * 
      * @param end
      *            The end value of the sum-range.
