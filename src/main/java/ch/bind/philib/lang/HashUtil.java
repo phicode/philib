@@ -47,6 +47,7 @@ public final class HashUtil {
 
     private HashUtil() {
     }
+
     private static final int HASH_PRIME_START = 17;
     private static final int HASH_PRIME_STEP = 31;
 
