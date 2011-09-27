@@ -28,8 +28,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import ch.bind.philib.lang.CompareUtil;
-
 public class CompareUtilTest {
 
     @Test

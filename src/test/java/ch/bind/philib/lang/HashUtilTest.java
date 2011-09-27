@@ -26,8 +26,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import ch.bind.philib.lang.HashUtil;
-
 public class HashUtilTest {
 
     @Test

@@ -31,8 +31,6 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import ch.bind.philib.lang.ArrayUtils;
-
 public class ArrayUtilsTest {
 
     @Test(expected = NullPointerException.class)
