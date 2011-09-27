@@ -22,8 +22,11 @@
 
 package ch.bind.philib.concurrency;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
+
+import ch.bind.philib.lang.CompareUtil;
 
 public final class LockGroup {
 
@@ -54,15 +57,14 @@ public final class LockGroup {
         }
     }
 
-    private static final class LockableComparator implements Comparator<Lockable> {
+    private static final class LockableComparator implements Comparator<Lockable>, Serializable {
+
+        private static final long serialVersionUID = 157755479046748535L;
+
         @Override
         public int compare(final Lockable o1, final Lockable o2) {
             final long diff = o1.getLockId() - o2.getLockId();
-            if (diff > 0)
-                return 1;
-            if (diff < 0)
-                return -1;
-            return 0;
+            return CompareUtil.normalize(diff);
         }
     }
 }
