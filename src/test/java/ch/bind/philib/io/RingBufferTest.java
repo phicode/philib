@@ -48,7 +48,6 @@ public class RingBufferTest {
 
     private static final long PERF_SIZE = 4 * GB;
     private static final int PERF_CHUNKSIZE = 4096;
-    private static final int PERF_MAX_BUFSIZE = 64 * MB;
 
     @Test
     public void frontAndBack() {
