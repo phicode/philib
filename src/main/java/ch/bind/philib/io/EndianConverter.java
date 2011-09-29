@@ -144,4 +144,70 @@ public final class EndianConverter {
                 ((input[offset + 2] & 0xFF) << 16) | //
                 ((input[offset + 3] & 0xFF)) << 24;
     }
+
+    // #################
+    // # ENCODE INT 16 #
+    // #################
+
+    public static void encodeInt16BE(int value, byte[] output) {
+        encodeInt16BE(value, output, 0);
+    }
+
+    public static void encodeInt16LE(int value, byte[] output) {
+        encodeInt16LE(value, output, 0);
+    }
+
+    public static void encodeInt16BE(int value, byte[] output, int offset) {
+        output[offset + 0] = (byte) (value >> 8 & 0xFF);
+        output[offset + 1] = (byte) (value & 0xFF);
+    }
+
+    public static void encodeInt16LE(int value, byte[] output, int offset) {
+        output[offset + 0] = (byte) (value & 0xFF);
+        output[offset + 1] = (byte) (value >> 8 & 0xFF);
+    }
+
+    // #################
+    // # DECODE INT 16 #
+    // #################
+    public static int decodeInt16BE(byte[] input) {
+        return decodeInt16BE(input, 0);
+    }
+
+    public static int decodeInt16LE(byte[] input) {
+        return decodeInt16LE(input, 0);
+    }
+
+    public static int decodeInt16BE(byte[] input, int offset) {
+        return ((input[offset + 2] & 0xFF) << 8) | //
+                (input[offset + 3] & 0xFF);
+    }
+
+    public static int decodeInt16LE(byte[] input, int offset) {
+        return (input[offset + 0] & 0xFF) | //
+                ((input[offset + 1] & 0xFF) << 8);
+    }
+
+    // ################
+    // # ENCODE INT 8 #
+    // ################
+
+    public static void encodeInt8(int value, byte[] output) {
+        encodeInt8(value, output, 0);
+    }
+
+    public static void encodeInt8(int value, byte[] output, int offset) {
+        output[offset] = (byte) (value & 0xFF);
+    }
+
+    // ################
+    // # DECODE INT 8 #
+    // ################
+    public static int decodeInt8(byte[] input) {
+        return decodeInt8(input, 0);
+    }
+
+    public static int decodeInt8(byte[] input, int offset) {
+        return input[offset] & 0xFF;
+    }
 }
