@@ -93,4 +93,55 @@ public final class EndianConverter {
                 ((input[offset + 6] & 0xFF) << 48) | //
                 ((input[offset + 7] & 0xFF)) << 56;
     }
+
+    // #################
+    // # ENCODE INT 32 #
+    // #################
+
+    public static void encodeInt32BE(int value, byte[] output) {
+        encodeInt32BE(value, output, 0);
+    }
+
+    public static void encodeInt32LE(int value, byte[] output) {
+        encodeInt32LE(value, output, 0);
+    }
+
+    public static void encodeInt32BE(int value, byte[] output, int offset) {
+        output[offset + 0] = (byte) (value >> 24 & 0xFF);
+        output[offset + 1] = (byte) (value >> 16 & 0xFF);
+        output[offset + 2] = (byte) (value >> 8 & 0xFF);
+        output[offset + 3] = (byte) (value & 0xFF);
+    }
+
+    public static void encodeInt32LE(int value, byte[] output, int offset) {
+        output[offset + 0] = (byte) (value & 0xFF);
+        output[offset + 1] = (byte) (value >> 8 & 0xFF);
+        output[offset + 2] = (byte) (value >> 16 & 0xFF);
+        output[offset + 3] = (byte) (value >> 24 & 0xFF);
+    }
+
+    // #################
+    // # DECODE INT 32 #
+    // #################
+    public static int decodeInt32BE(byte[] input) {
+        return decodeInt32BE(input, 0);
+    }
+
+    public static int decodeInt32LE(byte[] input) {
+        return decodeInt32LE(input, 0);
+    }
+
+    public static int decodeInt32BE(byte[] input, int offset) {
+        return ((input[offset + 0] & 0xFF) << 24) | //
+                ((input[offset + 1] & 0xFF) << 16) | //
+                ((input[offset + 2] & 0xFF) << 8) | //
+                (input[offset + 3] & 0xFF);
+    }
+
+    public static int decodeInt32LE(byte[] input, int offset) {
+        return (input[offset + 0] & 0xFF) | //
+                ((input[offset + 1] & 0xFF) << 8) | //
+                ((input[offset + 2] & 0xFF) << 16) | //
+                ((input[offset + 3] & 0xFF)) << 24;
+    }
 }
