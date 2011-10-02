@@ -117,4 +117,30 @@ public class CompareUtilTest {
         int cmp = CompareUtil.compare(a, b);
         assertEquals(0, cmp); // a == b
     }
+
+    @Test
+    public void normalizeInt() {
+        assertEquals(0, CompareUtil.normalize(0));
+        for (int i = -1000; i < 0; i++) {
+            assertEquals(-1, CompareUtil.normalize(i));
+        }
+        for (int i = 1; i <= 1000; i++) {
+            assertEquals(1, CompareUtil.normalize(i));
+        }
+        assertEquals(-1, CompareUtil.normalize(Integer.MIN_VALUE));
+        assertEquals(1, CompareUtil.normalize(Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void normalizeLong() {
+        assertEquals(0L, CompareUtil.normalize(0L));
+        for (long i = -1000; i < 0; i++) {
+            assertEquals(-1L, CompareUtil.normalize(i));
+        }
+        for (long i = 1; i <= 1000; i++) {
+            assertEquals(1L, CompareUtil.normalize(i));
+        }
+        assertEquals(-1L, CompareUtil.normalize(Long.MIN_VALUE));
+        assertEquals(1L, CompareUtil.normalize(Long.MAX_VALUE));
+    }
 }
