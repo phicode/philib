@@ -38,6 +38,18 @@ public final class SimpleValidation {
             throw new IllegalArgumentException(name + " must not be negative");
         }
     }
+    
+    public static void notNegative(long value) {
+        if (value < 0) {
+            throw new IllegalArgumentException("value must not be negative");
+        }
+    }
+
+    public static void notNegative(long value, String name) {
+        if (value < 0) {
+            throw new IllegalArgumentException(name + " must not be negative");
+        }
+    }
 
     public static void notNull(Object obj) {
         if (obj == null) {
