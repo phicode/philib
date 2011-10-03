@@ -32,7 +32,7 @@ public final class CompareUtil {
     private CompareUtil() {
     }
 
-    public static final boolean equals(final Object o1, final Object o2) {
+    public static boolean equals(final Object o1, final Object o2) {
         if (o1 == o2)
             return true;
         if (o1 == null) {
@@ -47,7 +47,7 @@ public final class CompareUtil {
         }
     }
 
-    public static final <T> int compare(final Comparable<T> o1, final T o2) {
+    public static <T> int compare(final Comparable<T> o1, final T o2) {
         if (o1 == o2)
             return 0;
         if (o1 == null) {
@@ -62,6 +62,10 @@ public final class CompareUtil {
         }
     }
 
+    public static int compareBool(boolean a, boolean b) {
+		return (a == b ? 0 : (a ? 1 : -1));
+	}
+    
     public static final int normalize(int diff) {
         return diff < 0 ? -1 : (diff == 0 ? 0 : 1);
     }
