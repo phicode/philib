@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 Philipp Meinen <philipp@bind.ch>
+ * Copyright (c) 2009-2011 Philipp Meinen <philipp@bind.ch>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
