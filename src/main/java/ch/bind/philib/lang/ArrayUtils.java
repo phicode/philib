@@ -91,4 +91,16 @@ public final class ArrayUtils {
         return c;
     }
 
+    public static byte[] extractBack(byte[] data, int len) {
+    	  byte[] rv = new byte[len];
+    	  int offset = data.length - len;
+    	  System.arraycopy(data, offset, rv, 0, len);
+    	  return rv;
+    }
+    	 
+    public static byte[] extractFront(byte[] data, int len) {
+    	  byte[] rv = new byte[len];
+    	  System.arraycopy(data, 0, rv, 0, len);
+    	  return rv;
+    }
 }
