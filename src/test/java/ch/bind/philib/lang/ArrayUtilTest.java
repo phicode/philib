@@ -31,26 +31,26 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-public class ArrayUtilsTest {
+public class ArrayUtilTest {
 
     @Test(expected = NullPointerException.class)
     public void sourceNull() {
         Object[] arr = new Object[1];
 
-        ArrayUtils.pickRandom(null, arr);
+        ArrayUtil.pickRandom(null, arr);
     }
 
     @Test(expected = NullPointerException.class)
     public void destinationNull() {
         Object[] arr = new Object[1];
-        ArrayUtils.pickRandom(arr, null);
+        ArrayUtil.pickRandom(arr, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void sourceSmallerThenDestination() {
         Object[] src = new Object[1];
         Object[] dst = new Object[2];
-        ArrayUtils.pickRandom(src, dst);
+        ArrayUtil.pickRandom(src, dst);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class ArrayUtilsTest {
         for (int i = 0; i < N; i++) {
             src[i] = i;
         }
-        ArrayUtils.pickRandom(src, dst);
+        ArrayUtil.pickRandom(src, dst);
         for (int i = 0; i < N; i++) {
             int v = dst[i].intValue();
             assertTrue(v >= 0);
@@ -74,28 +74,28 @@ public class ArrayUtilsTest {
 
     @Test
     public void concatNullNull() {
-        byte[] r = ArrayUtils.concat(null, null);
+        byte[] r = ArrayUtil.concat(null, null);
         assertNotNull(r);
         assertEquals(0, r.length);
     }
 
     @Test
     public void concatNullEmpty() {
-        byte[] r = ArrayUtils.concat(null, ArrayUtils.EMPTY_BYTE_ARRAY);
+        byte[] r = ArrayUtil.concat(null, ArrayUtil.EMPTY_BYTE_ARRAY);
         assertNotNull(r);
         assertEquals(0, r.length);
     }
 
     @Test
     public void concatEmptyNull() {
-        byte[] r = ArrayUtils.concat(ArrayUtils.EMPTY_BYTE_ARRAY, null);
+        byte[] r = ArrayUtil.concat(ArrayUtil.EMPTY_BYTE_ARRAY, null);
         assertNotNull(r);
         assertEquals(0, r.length);
     }
 
     @Test
     public void concatEmptyEmpty() {
-        byte[] r = ArrayUtils.concat(ArrayUtils.EMPTY_BYTE_ARRAY, ArrayUtils.EMPTY_BYTE_ARRAY);
+        byte[] r = ArrayUtil.concat(ArrayUtil.EMPTY_BYTE_ARRAY, ArrayUtil.EMPTY_BYTE_ARRAY);
         assertNotNull(r);
         assertEquals(0, r.length);
     }
@@ -104,7 +104,7 @@ public class ArrayUtilsTest {
     public void concatNormalNull() {
         byte[] a = "123".getBytes();
         byte[] b = null;
-        byte[] c = ArrayUtils.concat(a, b);
+        byte[] c = ArrayUtil.concat(a, b);
         assertNotNull(c);
         assertEquals(3, c.length);
         assertTrue(Arrays.equals(a, c));
@@ -114,7 +114,7 @@ public class ArrayUtilsTest {
     public void concatNullNormal() {
         byte[] a = null;
         byte[] b = "123".getBytes();
-        byte[] c = ArrayUtils.concat(a, b);
+        byte[] c = ArrayUtil.concat(a, b);
         assertNotNull(c);
         assertEquals(3, c.length);
         assertTrue(Arrays.equals(b, c));
@@ -124,7 +124,7 @@ public class ArrayUtilsTest {
     public void concatNormalNormal() {
         byte[] a = "123".getBytes();
         byte[] b = "abc".getBytes();
-        byte[] c = ArrayUtils.concat(a, b);
+        byte[] c = ArrayUtil.concat(a, b);
         byte[] ce = "123abc".getBytes();
         assertNotNull(c);
         assertEquals(6, c.length);

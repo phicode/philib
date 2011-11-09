@@ -31,11 +31,11 @@ import java.util.Random;
  * @author Philipp Meinen
  * @since 2009-06-10
  */
-public final class ArrayUtils {
+public final class ArrayUtil {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-    private ArrayUtils() {
+    private ArrayUtil() {
     }
 
     // java.util.Random is updated atomically => this is thread-safe

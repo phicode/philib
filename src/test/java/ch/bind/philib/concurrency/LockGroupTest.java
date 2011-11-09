@@ -28,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.junit.Test;
 
-import ch.bind.philib.lang.ArrayUtils;
+import ch.bind.philib.lang.ArrayUtil;
 
 public class LockGroupTest {
 
@@ -59,7 +59,7 @@ public class LockGroupTest {
         lockgroups = new LockGroup[NUM_LOCKGROUPS];
         Lockable[] lockInGrp = new Lockable[NUM_LOCKABLE_PER_GROUP];
         for (int i = 0; i < NUM_LOCKGROUPS; i++) {
-            ArrayUtils.pickRandom(lockables, lockInGrp);
+            ArrayUtil.pickRandom(lockables, lockInGrp);
             lockgroups[i] = new LockGroup(lockInGrp);
         }
     }
