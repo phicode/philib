@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -17,10 +16,28 @@
 	</properties>
 
 	<scm>
+		<!-- read only connection -->
 		<connection>${svn.url}</connection>
+		<!-- read/write connection -->
 		<developerConnection>${svn.url}</developerConnection>
+		<!-- browsable url -->
 		<url>${svn.url}</url>
 	</scm>
+
+	<developers>
+		<developer>
+			<name>Philipp Meinen</name>
+			<email>philipp@bind.ch</email>
+			<url>http://www.bind.ch</url>
+			<timezone>1</timezone>
+			<!-- scm username -->
+			<id>philipp</id>
+			<roles>
+				<role>owner</role>
+				<role>developer</role>
+			</roles>
+		</developer>
+	</developers>
 
 	<dependencies>
 		<dependency>
