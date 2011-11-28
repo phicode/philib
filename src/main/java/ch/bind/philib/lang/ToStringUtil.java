@@ -28,143 +28,158 @@ package ch.bind.philib.lang;
  */
 public final class ToStringUtil {
 
-    private ToStringUtil() {
-    }
+	private ToStringUtil() {
+	}
 
-    /**
-     * Pretty-prints a matrix.
-     * 
-     * @param matrix
-     *            The matrix which must be printed in a friendly way.
-     * @return The result of the matrix pretty-printing.
-     */
-    public static String matrixOutput(String[][] matrix) {
-        checkMatrix(matrix);
-        StringBuilder sb = new StringBuilder();
-        final int N = matrix.length;
-        if (N == 0)
-            return "";
-        final int M = matrix[0].length;
+	/**
+	 * Pretty-prints a matrix.
+	 * 
+	 * @param matrix
+	 *            The matrix which must be printed in a friendly way.
+	 * @return The result of the matrix pretty-printing.
+	 */
+	public static String matrixOutput(String[][] matrix) {
+		checkMatrix(matrix);
+		StringBuilder sb = new StringBuilder();
+		final int N = matrix.length;
+		if (N == 0)
+			return "";
+		final int M = matrix[0].length;
 
-        int max = 0;
-        for (int x = 0; x < N; x++) {
-            for (int y = 0; y < M; y++) {
-                final String str = matrix[x][y];
-                if (str != null) {
-                    int len = matrix[x][y].length();
-                    if (len > max) {
-                        max = len;
-                    }
-                }
-            }
-        }
-        // N * <maximale länge> + (N-1) mal " | "
-        int linelen = N * max + (N - 1) * 3;
-        char[] linepad = new char[linelen + 2];
-        for (int x = 1; x <= linelen; x++)
-            linepad[x] = '-';
-        linepad[0] = linepad[linelen + 1] = '\n';
+		int max = 0;
+		for (int x = 0; x < N; x++) {
+			for (int y = 0; y < M; y++) {
+				final String str = matrix[x][y];
+				if (str != null) {
+					int len = matrix[x][y].length();
+					if (len > max) {
+						max = len;
+					}
+				}
+			}
+		}
+		// N * <maximale länge> + (N-1) mal " | "
+		int linelen = N * max + (N - 1) * 3;
+		char[] linepad = new char[linelen + 2];
+		for (int x = 1; x <= linelen; x++)
+			linepad[x] = '-';
+		linepad[0] = linepad[linelen + 1] = '\n';
 
-        for (int y = 0; y < M; y++) {
-            for (int x = 0; x < N; x++) {
-                if (x != 0)
-                    sb.append(' ');
-                String val = matrix[x][y];
-                if (val == null)
-                    val = "";
-                int len = val.length();
-                int pad = max - len;
-                for (int p = 0; p < pad; p++)
-                    sb.append(' ');
+		for (int y = 0; y < M; y++) {
+			for (int x = 0; x < N; x++) {
+				if (x != 0)
+					sb.append(' ');
+				String val = matrix[x][y];
+				if (val == null)
+					val = "";
+				int len = val.length();
+				int pad = max - len;
+				for (int p = 0; p < pad; p++)
+					sb.append(' ');
 
-                sb.append(val);
+				sb.append(val);
 
-                if (x < (N - 1))
-                    sb.append(" |");
-            }
-            sb.append(linepad);
-        }
+				if (x < (N - 1))
+					sb.append(" |");
+			}
+			sb.append(linepad);
+		}
 
-        return sb.toString();
-    }
+		return sb.toString();
+	}
 
-    private static void checkMatrix(String[][] matrix) {
-        if (matrix == null) {
-            throw new IllegalArgumentException("matrix == null");
-        }
-        final int N = matrix.length;
-        if (N > 0) {
-            final String[] first = matrix[0];
-            if (first == null)
-                throw new IllegalArgumentException("matrix[0] == null");
-            final int M = first.length;
-            for (int i = 1; i < N; i++) {
-                final String[] cur = matrix[i];
-                if (cur == null)
-                    throw new IllegalArgumentException("matrix[" + i + "] == null");
-                if (cur.length != M)
-                    throw new IllegalArgumentException("matrix[" + i + "].length != matrix[0].length");
-            }
-        }
-    }
+	private static void checkMatrix(String[][] matrix) {
+		if (matrix == null) {
+			throw new IllegalArgumentException("matrix == null");
+		}
+		final int N = matrix.length;
+		if (N > 0) {
+			final String[] first = matrix[0];
+			if (first == null)
+				throw new IllegalArgumentException("matrix[0] == null");
+			final int M = first.length;
+			for (int i = 1; i < N; i++) {
+				final String[] cur = matrix[i];
+				if (cur == null)
+					throw new IllegalArgumentException("matrix[" + i + "] == null");
+				if (cur.length != M)
+					throw new IllegalArgumentException("matrix[" + i + "].length != matrix[0].length");
+			}
+		}
+	}
 
-    public static StringBuilder start(Object obj) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(obj.getClass().getSimpleName());
-        sb.append('[');
-        return sb;
-    }
+	public static StringBuilder start(Object obj) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(obj.getClass().getSimpleName());
+		sb.append('[');
+		return sb;
+	}
 
-    public static void finis(StringBuilder sb) {
-        sb.append(']');
-    }
+	public static String finish(StringBuilder sb) {
+		return sb.append(']').toString();
+	}
 
-    public static void firstObj(StringBuilder sb, String name, Object obj) {
-        sb.append(name);
-        sb.append('=');
-        sb.append(obj);
-    }
+	public static void firstObj(StringBuilder sb, String name, Object obj) {
+		sb.append(name);
+		sb.append('=');
+		sb.append(obj);
+	}
 
-    public static void addObj(StringBuilder sb, String name, Object obj) {
-        sb.append(", ");
-        firstObj(sb, name, obj);
-    }
+	public static void addObj(StringBuilder sb, String name, Object obj) {
+		sb.append(", ");
+		firstObj(sb, name, obj);
+	}
 
-    public static void addObj(StringBuilder sb, Object obj) {
-        sb.append(", ");
-        sb.append(obj);
-    }
+	public static void addObj(StringBuilder sb, Object obj) {
+		sb.append(", ");
+		sb.append(obj);
+	}
 
-    public static void firstInt(StringBuilder sb, String name, int v) {
-        sb.append(name);
-        sb.append('=');
-        sb.append(v);
-    }
+	public static void firstInt(StringBuilder sb, String name, int v) {
+		sb.append(name);
+		sb.append('=');
+		sb.append(v);
+	}
 
-    public static void addInt(StringBuilder sb, String name, int v) {
-        sb.append(", ");
-        firstInt(sb, name, v);
-    }
+	public static void addInt(StringBuilder sb, String name, int v) {
+		sb.append(", ");
+		firstInt(sb, name, v);
+	}
 
-    public static void firstLong(StringBuilder sb, String name, long v) {
-        sb.append(name);
-        sb.append('=');
-        sb.append(v);
-    }
+	public static void addInt(StringBuilder sb, int v) {
+		sb.append(", ");
+		sb.append(v);
+	}
 
-    public static void addLong(StringBuilder sb, String name, long v) {
-        sb.append(", ");
-        firstLong(sb, name, v);
-    }
+	public static void firstLong(StringBuilder sb, String name, long v) {
+		sb.append(name);
+		sb.append('=');
+		sb.append(v);
+	}
 
-    public static void firstStr(StringBuilder sb, String name, String v) {
-        sb.append(name);
-        sb.append('=');
-        sb.append(v);
-    }
+	public static void addLong(StringBuilder sb, String name, long v) {
+		sb.append(", ");
+		firstLong(sb, name, v);
+	}
 
-    public static void addStr(StringBuilder sb, String name, String v) {
-        sb.append(", ");
-        firstStr(sb, name, v);
-    }
+	public static void addLong(StringBuilder sb, long v) {
+		sb.append(", ");
+		sb.append(v);
+	}
+
+	public static void firstStr(StringBuilder sb, String name, String v) {
+		sb.append(name);
+		sb.append('=');
+		sb.append(v);
+	}
+
+	public static void addStr(StringBuilder sb, String name, String v) {
+		sb.append(", ");
+		firstStr(sb, name, v);
+	}
+
+	public static void addStr(StringBuilder sb, String v) {
+		sb.append(", ");
+		sb.append(v);
+	}
 }
