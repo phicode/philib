@@ -25,6 +25,8 @@ package ch.bind.philib.io;
 public interface DoubleSidedBuffer {
 
     int available();
+    
+    int capacity();
 
     void clear();
 

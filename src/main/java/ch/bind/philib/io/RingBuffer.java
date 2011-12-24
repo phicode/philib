@@ -54,6 +54,11 @@ public final class RingBuffer implements DoubleSidedBuffer {
 	}
 
 	@Override
+	public int capacity() {
+		return ringCapacity;
+	}
+
+	@Override
 	public void clear() {
 		ringOffset = 0;
 		ringSize = 0;
@@ -171,8 +176,7 @@ public final class RingBuffer implements DoubleSidedBuffer {
 		if (availToEnd >= len) {
 			// all data is available from one read
 			ac(ringBuf, ringOffset, buf, off, len);
-		}
-		else {
+		} else {
 			// read available space from the offset to the end of the buffer
 			// then read the rest of the required data from the beginning
 			int rem = len - availToEnd;
