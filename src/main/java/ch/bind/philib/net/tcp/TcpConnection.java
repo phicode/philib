@@ -6,24 +6,39 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
+import ch.bind.philib.net.NetConnection;
 import ch.bind.philib.net.SocketAddresses;
+import ch.bind.philib.validation.SimpleValidation;
 
-public class TcpConnection {
+public class TcpConnection implements NetConnection {
 
-	private SocketChannel channel;
+	private static final int BUFFER_SIZE = 8*1024;
+	private final SocketChannel channel;
+	private ByteBuffer buffer;
 
-	void open(SocketAddress endpoint) throws IOException {
+	public TcpConnection(SocketChannel channel) {
+		SimpleValidation.notNull(channel);
+		this.channel = channel;
+		channel.configureBlocking(false);
+		channel.
+	}
+
+	static TcpConnection open(SocketAddress endpoint) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
-		channel.connect(endpoint);
+		if (!channel.connect(endpoint)) {
+			channel.finishConnect();
+		}
 
 		System.out.println("connected to: " + endpoint);
-		this.channel = channel;
+		return new TcpConnection(channel);
 	}
 
 	public void run() throws IOException {
@@ -134,5 +149,43 @@ public class TcpConnection {
 	public int read(byte[] buf, int off, int len) throws IOException {
 		ByteBuffer bb = ByteBuffer.wrap(buf, off, len);
 		return channel.read(bb);
+	}
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("TODO");
+	}
+
+	@Override
+	public SelectableChannel getChannel() {
+		return channel;
+	}
+
+	@Override
+	public int getSelectorOps() {
+		return SelectionKey.OP_READ | SelectionKey.OP_WRITE;
+	}
+
+	@Override
+	public void handle(int selectOp) {
+		if (selectOp == SelectionKey.OP_READ) {
+			doRead();
+		} else if (selectOp == SelectionKey.OP_WRITE) {
+			doWrite();
+		} else {
+			throw new IllegalArgumentException("illegal select-op");
+		}
+	}
+
+	private void doRead() {
+
+		// TODO Auto-generated method stub
+
+	}
+
+	private void doWrite() {
+		// TODO Auto-generated method stub
+		writeReady = true;
 	}
 }

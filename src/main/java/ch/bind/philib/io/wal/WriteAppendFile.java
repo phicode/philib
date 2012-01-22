@@ -27,15 +27,17 @@ import ch.bind.philib.tx.Transactional;
 
 public final class WriteAppendFile implements Transactional {
 
-    @Override
-    public void begin() throws TransactionException {
-    }
+	// private Queue<ByteBuffer>
 
-    @Override
-    public void commit() throws TransactionException {
-    }
+	@Override
+	public void begin() throws TransactionException {
+	}
 
-    @Override
-    public void rollback() throws TransactionException {
-    }
+	@Override
+	public void commit() throws TransactionException {
+	}
+
+	@Override
+	public void rollback() throws TransactionException {
+	}
 }

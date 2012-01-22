@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -14,35 +15,74 @@ import java.nio.channels.SocketChannel;
 import java.util.Set;
 
 import ch.bind.philib.io.RingBuffer;
+import ch.bind.philib.net.NetSelector;
+import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SocketAddresses;
 
-public class TcpServer {
+public class TcpServer implements NetServer {
 
 	// TODO: configurable
 	private static final int DEFAULT_BACKLOG = 100;
 
+	private NetSelector selector;
 	private ServerSocketChannel channel;
 
-	void open(SocketAddress endpoint) throws IOException {
+	// TODO: open(SocketAddress) with default netselector
+	void open(NetSelector selector, SocketAddress bindAddress) throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
-		socket.bind(endpoint, DEFAULT_BACKLOG);
-		System.out.println("listening on: " + endpoint);
+		socket.bind(bindAddress, DEFAULT_BACKLOG);
+		// TODO: log bridge
+		System.out.println("listening on: " + bindAddress);
 		this.channel = channel;
+		selector.register(this);
 	}
 
-	public void run() throws IOException {
-		while (true) {
-			SocketChannel clientChannel = channel.accept();
-			new Thread(new Handler2(clientChannel)).start();
+	@Override
+	public SelectableChannel getChannel() {
+		// TODO: validate open
+		return channel;
+	}
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+
+		selector.unregister(this);
+		channel.close();
+		throw new UnsupportedOperationException("TODO");
+	}
+
+	@Override
+	public int getSelectorOps() {
+		return SelectionKey.OP_ACCEPT | SelectionKey.OP_CONNECT;
+	}
+
+	@Override
+	public void handle(int selectOp) {
+		if (selectOp == SelectionKey.OP_ACCEPT) {
+			doAccept();
+		} else if (selectOp == SelectionKey.OP_CONNECT) {
+			doConnect();
+		} else {
+			throw new IllegalArgumentException("illegal select-op");
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		TcpServer server = new TcpServer();
-		InetSocketAddress endpoint = SocketAddresses.wildcard(1234);
-		server.open(endpoint);
-		server.run();
+	private void doAccept() {
+		try {
+			SocketChannel clientChannel = channel.accept();
+			TcpConnection connection = new TcpConnection(this, clientChannel);
+			selector.register(connection);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void doConnect() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("TODO");
 	}
 
 	private static class Handler implements Runnable {
