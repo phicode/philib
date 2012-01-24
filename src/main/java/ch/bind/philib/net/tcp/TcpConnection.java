@@ -13,23 +13,30 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.net.NetConnection;
+import ch.bind.philib.net.NetConnectionListener;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpConnection implements NetConnection {
 
-	private static final int BUFFER_SIZE = 8*1024;
+	private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
+
 	private final SocketChannel channel;
+
 	private ByteBuffer buffer;
 
-	public TcpConnection(SocketChannel channel) {
+	private final NetConnectionListener connectionListener;
+
+	public TcpConnection(SocketChannel channel, NetConnectionListener connectionListener) throws IOException {
 		SimpleValidation.notNull(channel);
+		SimpleValidation.notNull(connectionListener);
 		this.channel = channel;
+		this.connectionListener = connectionListener;
+		this.buffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
 		channel.configureBlocking(false);
-		channel.
 	}
 
-	static TcpConnection open(SocketAddress endpoint) throws IOException {
+	static TcpConnection open(SocketAddress endpoint, NetConnectionListener connectionListener) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
@@ -38,108 +45,108 @@ public class TcpConnection implements NetConnection {
 		}
 
 		System.out.println("connected to: " + endpoint);
-		return new TcpConnection(channel);
+		return new TcpConnection(channel, connectionListener);
 	}
 
-	public void run() throws IOException {
-		InputStream in = channel.socket().getInputStream();
-		OutputStream out = channel.socket().getOutputStream();
+//	public void run() throws IOException {
+//		InputStream in = channel.socket().getInputStream();
+//		OutputStream out = channel.socket().getOutputStream();
+//
+//		AtomicLong txCnt = new AtomicLong();
+//		AtomicLong rxCnt = new AtomicLong();
+//
+//		Sender sender = new Sender(txCnt, out);
+//		Receiver receiver = new Receiver(txCnt, in);
+//
+//		Thread tw = new Thread(sender);
+//		Thread tr = new Thread(receiver);
+//		tw.start();
+//		tr.start();
+//
+//		while (tr.isAlive()) {
+//			try {
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				tw.interrupt();
+//				tr.interrupt();
+//				try {
+//					tw.join();
+//				} catch (InterruptedException e1) {
+//					e1.printStackTrace();
+//				}
+//				try {
+//					tr.join();
+//				} catch (InterruptedException e1) {
+//					e1.printStackTrace();
+//				}
+//			}
+//			long tx = txCnt.get();
+//			long rx = rxCnt.get();
+//			System.out.println("tx=" + tx + " rx=" + rx);
+//		}
+//	}
 
-		AtomicLong txCnt = new AtomicLong();
-		AtomicLong rxCnt = new AtomicLong();
+//	public static void main(String[] args) throws IOException {
+//		TcpConnection client = new TcpConnection();
+//		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
+//		client.open(endpoint);
+//		client.run();
+//	}
 
-		Sender sender = new Sender(txCnt, out);
-		Receiver receiver = new Receiver(txCnt, in);
+//	private static class Sender implements Runnable {
+//		final AtomicLong txCnt;
+//		final OutputStream out;
+//
+//		public Sender(AtomicLong txCnt, OutputStream out) {
+//			super();
+//			this.txCnt = txCnt;
+//			this.out = out;
+//		}
+//
+//		@Override
+//		public void run() {
+//			try {
+//				byte[] buffer = new byte[4096];
+//				new Random().nextBytes(buffer);
+//				while (true) {
+//					out.write(buffer);
+//					out.flush();
+//					txCnt.addAndGet(buffer.length);
+//				}
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 
-		Thread tw = new Thread(sender);
-		Thread tr = new Thread(receiver);
-		tw.start();
-		tr.start();
-
-		while (tr.isAlive()) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				tw.interrupt();
-				tr.interrupt();
-				try {
-					tw.join();
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-				try {
-					tr.join();
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			}
-			long tx = txCnt.get();
-			long rx = rxCnt.get();
-			System.out.println("tx=" + tx + " rx=" + rx);
-		}
-	}
-
-	public static void main(String[] args) throws IOException {
-		TcpConnection client = new TcpConnection();
-		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
-		client.open(endpoint);
-		client.run();
-	}
-
-	private static class Sender implements Runnable {
-		final AtomicLong txCnt;
-		final OutputStream out;
-
-		public Sender(AtomicLong txCnt, OutputStream out) {
-			super();
-			this.txCnt = txCnt;
-			this.out = out;
-		}
-
-		@Override
-		public void run() {
-			try {
-				byte[] buffer = new byte[4096];
-				new Random().nextBytes(buffer);
-				while (true) {
-					out.write(buffer);
-					out.flush();
-					txCnt.addAndGet(buffer.length);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private static class Receiver implements Runnable {
-		final AtomicLong rxCnt;
-		final InputStream in;
-
-		public Receiver(AtomicLong rxCnt, InputStream in) {
-			super();
-			this.rxCnt = rxCnt;
-			this.in = in;
-		}
-
-		@Override
-		public void run() {
-			try {
-				byte[] buffer = new byte[4096];
-				while (true) {
-					int len = in.read(buffer);
-					if (len == -1) {
-						System.out.println("connection closed");
-						return;
-					} else {
-						rxCnt.addAndGet(len);
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+//	private static class Receiver implements Runnable {
+//		final AtomicLong rxCnt;
+//		final InputStream in;
+//
+//		public Receiver(AtomicLong rxCnt, InputStream in) {
+//			super();
+//			this.rxCnt = rxCnt;
+//			this.in = in;
+//		}
+//
+//		@Override
+//		public void run() {
+//			try {
+//				byte[] buffer = new byte[4096];
+//				while (true) {
+//					int len = in.read(buffer);
+//					if (len == -1) {
+//						System.out.println("connection closed");
+//						return;
+//					} else {
+//						rxCnt.addAndGet(len);
+//					}
+//				}
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 
 	public int write(byte[] buf) throws IOException {
 		ByteBuffer bb = ByteBuffer.wrap(buf);

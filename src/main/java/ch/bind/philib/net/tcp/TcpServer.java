@@ -25,6 +25,7 @@ public class TcpServer implements NetServer {
 	private static final int DEFAULT_BACKLOG = 100;
 
 	private NetSelector selector;
+
 	private ServerSocketChannel channel;
 
 	// TODO: open(SocketAddress) with default netselector
@@ -46,8 +47,7 @@ public class TcpServer implements NetServer {
 
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-
+		// TODO: client connections
 		selector.unregister(this);
 		channel.close();
 		throw new UnsupportedOperationException("TODO");
@@ -72,10 +72,10 @@ public class TcpServer implements NetServer {
 	private void doAccept() {
 		try {
 			SocketChannel clientChannel = channel.accept();
-			TcpConnection connection = new TcpConnection(this, clientChannel);
+			TcpConnection connection = new TcpConnection(clientChannel);
 			selector.register(connection);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// TODO
 			e.printStackTrace();
 		}
 	}
