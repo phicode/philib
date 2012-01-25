@@ -12,12 +12,12 @@ import java.nio.channels.SocketChannel;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-import ch.bind.philib.net.NetConnection;
-import ch.bind.philib.net.NetConnectionListener;
+import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.validation.SimpleValidation;
 
-public class TcpConnection implements NetConnection {
+public class TcpConnection implements Connection {
 
 	private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 

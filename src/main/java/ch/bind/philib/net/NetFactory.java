@@ -5,8 +5,8 @@ import java.net.SocketAddress;
 
 public interface NetFactory {
 
-	NetConnection openClient(SocketAddress endpoint) throws IOException;
+	Connection openClient(SocketAddress endpoint) throws IOException;
 
-	NetServer openServer(SocketAddress bindAddress, NetConnectionListenerFactory factory) throws IOException;
+	NetServer openServer(SocketAddress bindAddress, ConsumerFactory factory) throws IOException;
 
 }
