@@ -1,38 +1,63 @@
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Random;
 
+import ch.bind.philib.net.Consumer;
 import ch.bind.philib.net.SocketAddresses;
 
-public class EchoClient {
-    public static void main(String[] args) throws Exception {
-        TcpConnection con = new TcpConnection();
+//TODO: reply data validation
+//TODO: speed measurements
+//TODO: many threads
+public class EchoClient implements Consumer {
 
-        con.open(SocketAddresses.fromIp("10.0.0.67", 1234));
+	private byte[] buf;
 
-        byte[] buf = new byte[16 * 1024];
-        new Random().nextBytes(buf);
-        byte[] bufC = buf.clone();
+	private TcpConnection connection;
 
-        while (true) {
-            if (con.write(buf) != buf.length) {
-                System.out.println("write length failed");
-                return;
-            }
-            int len = con.read(buf, 0, buf.length);
-            while (len != buf.length) {
-//                System.out.println("not a whole read");
-                len += con.read(buf, len, buf.length - len);
-            }
-            if (!Arrays.equals(buf, bufC)) {
-                System.out.println("buffers dont match!");
-            } else {
-                System.arraycopy(bufC, 0, buf, 0, buf.length);
-            }
-        }
-    }
+	private int missingInput;
+
+	public static void main(String[] args) throws Exception {
+		new EchoClient().run();
+	}
+
+	private void run() throws IOException {
+		InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.67", 1234);
+		connection = TcpConnection.open(endpoint, this);
+
+		byte[] buf = new byte[16 * 1024];
+		new Random().nextBytes(buf);
+
+		send();
+	}
+
+	private void send() {
+		connection.send(buf);
+		missingInput = buf.length;
+	}
+
+	@Override
+	public void receive(byte[] data) {
+		missingInput -= data.length;
+		if (missingInput < 0) {
+			System.out.println("server sent back more data then we sent, WTF?");
+			send();
+		}
+		else if (missingInput == 0) {
+			System.out.println("server replied, sending question again");
+			send();
+		}
+		else {
+			System.out.println("received data, but still missing: " + missingInput);
+		}
+	}
+
+	@Override
+	public void closed() {
+		System.out.println("connection closed");
+	}
 }

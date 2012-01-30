@@ -3,7 +3,6 @@ package ch.bind.philib.net.tcp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -15,9 +14,11 @@ import java.nio.channels.SocketChannel;
 import java.util.Set;
 
 import ch.bind.philib.io.RingBuffer;
+import ch.bind.philib.net.Consumer;
+import ch.bind.philib.net.ConsumerFactory;
 import ch.bind.philib.net.NetSelector;
 import ch.bind.philib.net.NetServer;
-import ch.bind.philib.net.SocketAddresses;
+import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpServer implements NetServer {
 
@@ -27,6 +28,13 @@ public class TcpServer implements NetServer {
 	private NetSelector selector;
 
 	private ServerSocketChannel channel;
+
+	private final ConsumerFactory consumerFactory;
+
+	TcpServer(ConsumerFactory consumerFactory) {
+		SimpleValidation.notNull(consumerFactory);
+		this.consumerFactory = consumerFactory;
+	}
 
 	// TODO: open(SocketAddress) with default netselector
 	void open(NetSelector selector, SocketAddress bindAddress) throws IOException {
@@ -62,9 +70,11 @@ public class TcpServer implements NetServer {
 	public void handle(int selectOp) {
 		if (selectOp == SelectionKey.OP_ACCEPT) {
 			doAccept();
-		} else if (selectOp == SelectionKey.OP_CONNECT) {
+		}
+		else if (selectOp == SelectionKey.OP_CONNECT) {
 			doConnect();
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("illegal select-op");
 		}
 	}
@@ -73,7 +83,8 @@ public class TcpServer implements NetServer {
 		try {
 			SocketChannel clientChannel = channel.accept();
 			TcpConnection connection = new TcpConnection(clientChannel);
-			selector.register(connection);
+			Consumer consumer = consumerFactory.acceptConnection(connection);
+			connection.init(consumer, selector);
 		} catch (IOException e) {
 			// TODO
 			e.printStackTrace();
@@ -143,13 +154,15 @@ public class TcpServer implements NetServer {
 							if (len == -1) {
 								System.out.println("connection closed");
 								return;
-							} else {
+							}
+							else {
 								System.out.println("read: " + len);
 							}
 							buffer.flip();
 							receiveBuffer.write(buffer.array(), buffer.arrayOffset(), len);
 							printInputBufferFullIfFull = true;
-						} else {
+						}
+						else {
 							if (printInputBufferFullIfFull) {
 								System.out.println("input buffer full");
 							}
@@ -196,7 +209,8 @@ public class TcpServer implements NetServer {
 								}
 								totalWrite += written;
 								lastWrite = System.currentTimeMillis();
-							} else {
+							}
+							else {
 								receiveBuffer.writeFront(buffer.array(), buffer.arrayOffset() + buffer.position(), buffer.remaining());
 								break;
 							}
@@ -276,7 +290,8 @@ public class TcpServer implements NetServer {
 					if (len == -1) {
 						System.out.println("connection closed");
 						return;
-					} else {
+					}
+					else {
 						out.write(buffer, 0, len);
 						out.flush();
 						total += len;
