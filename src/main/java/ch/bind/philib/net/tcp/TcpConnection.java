@@ -21,7 +21,8 @@ public class TcpConnection implements Connection {
 
 	private Consumer consumer;
 
-	private ByteBuffer buffer;
+	private ByteBuffer rbuf;
+	private ByteBuffer wbuf;
 
 	private boolean writeReady;
 
@@ -33,7 +34,8 @@ public class TcpConnection implements Connection {
 	void init(Consumer consumer, NetSelector selector) throws IOException {
 		this.consumer = consumer;
 		this.channel.configureBlocking(false);
-		this.buffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+		this.rbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+		this.wbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
 		selector.register(this);
 	}
 
@@ -163,9 +165,13 @@ public class TcpConnection implements Connection {
 	// }
 
 	@Override
-	public void send(byte[] data) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
+	public void send(byte[] data) throws IOException {
+		wbuf.clear();
+		wbuf.put(data);
+		wbuf.flip();
+		channel.write(wbuf);
+		// // TODO Auto-generated method stub
+		// throw new UnsupportedOperationException("TODO");
 	}
 
 	@Override
@@ -181,12 +187,14 @@ public class TcpConnection implements Connection {
 
 	@Override
 	public int getSelectorOps() {
-		return SelectionKey.OP_READ | SelectionKey.OP_WRITE;
+		return SelectionKey.OP_READ | SelectionKey.OP_WRITE | SelectionKey.OP_CONNECT;
 	}
 
 	@Override
 	public void handle(int selectOp) {
-		if (selectOp == SelectionKey.OP_READ) {
+		if (selectOp == SelectionKey.OP_CONNECT) {
+			doConnect();
+		} else if (selectOp == SelectionKey.OP_READ) {
 			doRead();
 		} else if (selectOp == SelectionKey.OP_WRITE) {
 			doWrite();
@@ -195,21 +203,26 @@ public class TcpConnection implements Connection {
 		}
 	}
 
+	private void doConnect() {
+		// TODO
+		System.out.println("op connect");
+	}
+
 	private void doRead() {
 		// TODO: implement
 		try {
-			int num = channel.read(buffer);
+			int num = channel.read(rbuf);
 			if (num == -1) {
 				// TODO
 				throw new UnsupportedOperationException("TODO: closed stream");
 			} else {
-				buffer.flip();
-				byte[] b = new byte[buffer.limit()];
-				buffer.get(b);
+				rbuf.flip();
+				byte[] b = new byte[rbuf.limit()];
+				rbuf.get(b);
 				consumer.receive(b);
 			}
 		} catch (IOException e) {
-			// TODO:handle
+			// TODO: handle
 			e.printStackTrace();
 		}
 	}

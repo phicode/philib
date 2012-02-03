@@ -27,7 +27,7 @@ public class TcpEchoClient implements Consumer {
 	}
 
 	private void run() throws IOException {
-		InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.67", 1234);
+		InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.65", 1234);
 		connection = TcpConnection.open(endpoint, this);
 
 		byte[] buf = new byte[16 * 1024];
@@ -36,13 +36,13 @@ public class TcpEchoClient implements Consumer {
 		send();
 	}
 
-	private void send() {
+	private void send() throws IOException {
 		connection.send(buf);
 		missingInput = buf.length;
 	}
 
 	@Override
-	public void receive(byte[] data) {
+	public void receive(byte[] data) throws IOException {
 		missingInput -= data.length;
 		if (missingInput < 0) {
 			System.out.println("server sent back more data then we sent, WTF?");
