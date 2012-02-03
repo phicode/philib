@@ -2,9 +2,6 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Random;
 
 import ch.bind.philib.net.Consumer;
@@ -47,12 +44,10 @@ public class TcpEchoClient implements Consumer {
 		if (missingInput < 0) {
 			System.out.println("server sent back more data then we sent, WTF?");
 			send();
-		}
-		else if (missingInput == 0) {
+		} else if (missingInput == 0) {
 			System.out.println("server replied, sending question again");
 			send();
-		}
-		else {
+		} else {
 			System.out.println("received data, but still missing: " + missingInput);
 		}
 	}
