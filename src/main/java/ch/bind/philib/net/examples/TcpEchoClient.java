@@ -1,4 +1,4 @@
-package ch.bind.philib.net.tcp;
+package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,11 +9,12 @@ import java.util.Random;
 
 import ch.bind.philib.net.Consumer;
 import ch.bind.philib.net.SocketAddresses;
+import ch.bind.philib.net.tcp.TcpConnection;
 
 //TODO: reply data validation
 //TODO: speed measurements
 //TODO: many threads
-public class EchoClient implements Consumer {
+public class TcpEchoClient implements Consumer {
 
 	private byte[] buf;
 
@@ -22,7 +23,7 @@ public class EchoClient implements Consumer {
 	private int missingInput;
 
 	public static void main(String[] args) throws Exception {
-		new EchoClient().run();
+		new TcpEchoClient().run();
 	}
 
 	private void run() throws IOException {

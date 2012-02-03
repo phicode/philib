@@ -36,9 +36,10 @@ public class SimpleNetSelector implements NetSelector {
 	public void run() {
 		thread = Thread.currentThread();
 		try {
-			// TODO: wait while there is no channel registered
+			// TODO: wait as long as there is no channel registered
 			while (true) {
-				int num = selector.select();
+				System.out.println("asdfasdfasdfadf");
+				int num = selector.select(1000L);
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
 					for (SelectionKey key : selected) {

@@ -37,7 +37,7 @@ public class TcpConnection implements Connection {
 		selector.register(this);
 	}
 
-	static TcpConnection open(SocketAddress endpoint, Consumer consumer) throws IOException {
+	public static TcpConnection open(SocketAddress endpoint, Consumer consumer) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
@@ -188,11 +188,9 @@ public class TcpConnection implements Connection {
 	public void handle(int selectOp) {
 		if (selectOp == SelectionKey.OP_READ) {
 			doRead();
-		}
-		else if (selectOp == SelectionKey.OP_WRITE) {
+		} else if (selectOp == SelectionKey.OP_WRITE) {
 			doWrite();
-		}
-		else {
+		} else {
 			throw new IllegalArgumentException("illegal select-op");
 		}
 	}
@@ -204,8 +202,7 @@ public class TcpConnection implements Connection {
 			if (num == -1) {
 				// TODO
 				throw new UnsupportedOperationException("TODO: closed stream");
-			}
-			else {
+			} else {
 				buffer.flip();
 				byte[] b = new byte[buffer.limit()];
 				buffer.get(b);
@@ -218,6 +215,7 @@ public class TcpConnection implements Connection {
 	}
 
 	private void doWrite() {
+		System.out.println("i am now writable, wheeee :)");
 		// TODO Auto-generated method stub
 		writeReady = true;
 	}
