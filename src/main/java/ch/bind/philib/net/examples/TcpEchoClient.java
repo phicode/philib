@@ -24,7 +24,7 @@ public class TcpEchoClient implements Consumer {
 	}
 
 	private void run() throws IOException {
-		InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.65", 1234);
+		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 		connection = TcpConnection.open(endpoint, this);
 
 		byte[] buf = new byte[16 * 1024];

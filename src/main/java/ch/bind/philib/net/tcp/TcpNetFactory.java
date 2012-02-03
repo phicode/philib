@@ -12,11 +12,11 @@ import ch.bind.philib.net.impl.SimpleNetSelector;
 
 public class TcpNetFactory implements NetFactory {
 
-	@Override
-	public Connection openClient(SocketAddress endpoint) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Connection openClient(SocketAddress endpoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 	@Override
 	public NetServer openServer(SocketAddress bindAddress, ConsumerFactory consumerFactory) throws IOException {
@@ -26,5 +26,4 @@ public class TcpNetFactory implements NetFactory {
 		server.open(sel, bindAddress);
 		return server;
 	}
-
 }
