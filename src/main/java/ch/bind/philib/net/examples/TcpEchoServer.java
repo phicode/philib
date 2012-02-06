@@ -20,8 +20,9 @@ public class TcpEchoServer implements ConsumerFactory {
 
 	private void foo() throws IOException {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
-
-		NetServer server = new TcpNetFactory().openServer(bindAddress, this);
+		ConsumerFactory consumerFactory = this;
+		NetServer server = new TcpNetFactory().openServer(bindAddress, consumerFactory);
+//		server.close();
 	}
 
 	@Override

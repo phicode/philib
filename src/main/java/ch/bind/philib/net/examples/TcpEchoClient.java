@@ -27,7 +27,7 @@ public class TcpEchoClient implements Consumer {
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 		connection = TcpConnection.open(endpoint, this);
 
-		byte[] buf = new byte[16 * 1024];
+		buf = new byte[8 * 1024];
 		new Random().nextBytes(buf);
 
 		send();

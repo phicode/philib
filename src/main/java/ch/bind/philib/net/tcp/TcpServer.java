@@ -32,8 +32,8 @@ public class TcpServer implements NetServer {
 
 	// TODO: open(SocketAddress) with default netselector
 	void open(NetSelector selector, SocketAddress bindAddress) throws IOException {
-		this.selector=selector;
-		
+		this.selector = selector;
+
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		socket.bind(bindAddress, DEFAULT_BACKLOG);
@@ -77,6 +77,13 @@ public class TcpServer implements NetServer {
 		} else {
 			throw new IllegalArgumentException("illegal select-op");
 		}
+	}
+	
+	@Override
+	public void closed() {
+		// TODO Auto-generated method stub
+//	consumer.closed();	
+		throw new IllegalStateException();
 	}
 
 	private void doAccept() {

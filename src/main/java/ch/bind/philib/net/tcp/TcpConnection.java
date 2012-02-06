@@ -6,7 +6,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import ch.bind.philib.io.RingBuffer;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Consumer;
 import ch.bind.philib.net.NetSelector;
@@ -15,223 +19,156 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpConnection implements Connection {
 
-    private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
+	private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 
-    private final SocketChannel channel;
+	private final SocketChannel channel;
 
-    private Consumer consumer;
+	// private final Queue<byte[]> outQueue = new
+	// ConcurrentLinkedQueue<byte[]>();
 
-    private ByteBuffer rbuf;
-    private ByteBuffer wbuf;
+	private final RingBuffer ringBuffer = new RingBuffer();
 
-    private boolean writeReady;
+	private Consumer consumer;
 
-    public TcpConnection(SocketChannel channel) throws IOException {
-        SimpleValidation.notNull(channel);
-        this.channel = channel;
-    }
+	private ByteBuffer rbuf;
 
-    void init(Consumer consumer, NetSelector selector) throws IOException {
-        this.consumer = consumer;
-        this.channel.configureBlocking(false);
-        this.rbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-        this.wbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-        selector.register(this);
-    }
+	private ByteBuffer wbuf;
 
-    public static TcpConnection open(SocketAddress endpoint, Consumer consumer) throws IOException {
-        SocketChannel channel = SocketChannel.open();
+	private final AtomicBoolean regForWrite = new AtomicBoolean();
 
-        channel.configureBlocking(true);
-        if (!channel.connect(endpoint)) {
-            channel.finishConnect();
-        }
+	private NetSelector netSelector;
 
-        System.out.println("connected to: " + endpoint);
-        TcpConnection con = new TcpConnection(channel);
-        // TODO: selector through params
-        con.init(consumer, SimpleNetSelector.open());
-        return con;
-    }
+	public TcpConnection(SocketChannel channel) throws IOException {
+		SimpleValidation.notNull(channel);
+		this.channel = channel;
+	}
 
-    // public void run() throws IOException {
-    // InputStream in = channel.socket().getInputStream();
-    // OutputStream out = channel.socket().getOutputStream();
-    //
-    // AtomicLong txCnt = new AtomicLong();
-    // AtomicLong rxCnt = new AtomicLong();
-    //
-    // Sender sender = new Sender(txCnt, out);
-    // Receiver receiver = new Receiver(txCnt, in);
-    //
-    // Thread tw = new Thread(sender);
-    // Thread tr = new Thread(receiver);
-    // tw.start();
-    // tr.start();
-    //
-    // while (tr.isAlive()) {
-    // try {
-    // Thread.sleep(1000);
-    // } catch (InterruptedException e) {
-    // tw.interrupt();
-    // tr.interrupt();
-    // try {
-    // tw.join();
-    // } catch (InterruptedException e1) {
-    // e1.printStackTrace();
-    // }
-    // try {
-    // tr.join();
-    // } catch (InterruptedException e1) {
-    // e1.printStackTrace();
-    // }
-    // }
-    // long tx = txCnt.get();
-    // long rx = rxCnt.get();
-    // System.out.println("tx=" + tx + " rx=" + rx);
-    // }
-    // }
+	void init(Consumer consumer, NetSelector netSelector) throws IOException {
+		this.consumer = consumer;
+		this.netSelector = netSelector;
+		this.channel.configureBlocking(false);
+		this.rbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+		this.wbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+		netSelector.register(this);
+	}
 
-    // public static void main(String[] args) throws IOException {
-    // TcpConnection client = new TcpConnection();
-    // InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
-    // client.open(endpoint);
-    // client.run();
-    // }
+	public static TcpConnection open(SocketAddress endpoint, Consumer consumer) throws IOException {
+		SocketChannel channel = SocketChannel.open();
 
-    // private static class Sender implements Runnable {
-    // final AtomicLong txCnt;
-    // final OutputStream out;
-    //
-    // public Sender(AtomicLong txCnt, OutputStream out) {
-    // super();
-    // this.txCnt = txCnt;
-    // this.out = out;
-    // }
-    //
-    // @Override
-    // public void run() {
-    // try {
-    // byte[] buffer = new byte[4096];
-    // new Random().nextBytes(buffer);
-    // while (true) {
-    // out.write(buffer);
-    // out.flush();
-    // txCnt.addAndGet(buffer.length);
-    // }
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // }
-    // }
-    // }
+		channel.configureBlocking(true);
+		if (!channel.connect(endpoint)) {
+			channel.finishConnect();
+		}
 
-    // private static class Receiver implements Runnable {
-    // final AtomicLong rxCnt;
-    // final InputStream in;
-    //
-    // public Receiver(AtomicLong rxCnt, InputStream in) {
-    // super();
-    // this.rxCnt = rxCnt;
-    // this.in = in;
-    // }
-    //
-    // @Override
-    // public void run() {
-    // try {
-    // byte[] buffer = new byte[4096];
-    // while (true) {
-    // int len = in.read(buffer);
-    // if (len == -1) {
-    // System.out.println("connection closed");
-    // return;
-    // } else {
-    // rxCnt.addAndGet(len);
-    // }
-    // }
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // }
-    // }
-    // }
+		System.out.println("connected to: " + endpoint);
+		TcpConnection con = new TcpConnection(channel);
+		// TODO: selector through params
+		con.init(consumer, SimpleNetSelector.open());
+		return con;
+	}
 
-    // public int write(byte[] buf) throws IOException {
-    // ByteBuffer bb = ByteBuffer.wrap(buf);
-    // return channel.write(bb);
-    // }
-    //
-    // public int read(byte[] buf, int off, int len) throws IOException {
-    // ByteBuffer bb = ByteBuffer.wrap(buf, off, len);
-    // return channel.read(bb);
-    // }
+	@Override
+	public void send(byte[] data) throws IOException {
+		//TODO: handle data.length > wbuf.capacity
+		System.out.println("write: " + data.length);
+		wbuf.clear();
+		wbuf.put(data);
+		wbuf.flip();
+		channel.write(wbuf);
+		int rem = wbuf.remaining();
+		if (rem > 0) {
+			int off = data.length - rem;
+			ringBuffer.write(data, off, rem);
+			registerForWrite();
+		}
+	}
 
-    @Override
-    public void send(byte[] data) throws IOException {
-        System.out.println("write: " + data.length);
-        wbuf.clear();
-        wbuf.put(data);
-        wbuf.flip();
-        channel.write(wbuf);
-        // // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("TODO");
-    }
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("TODO");
+	}
 
-    @Override
-    public void close() throws IOException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("TODO");
-    }
+	@Override
+	public SelectableChannel getChannel() {
+		return channel;
+	}
 
-    @Override
-    public SelectableChannel getChannel() {
-        return channel;
-    }
+	@Override
+	public int getSelectorOps() {
+		return SelectionKey.OP_READ /* | SelectionKey.OP_CONNECT */;
+	}
 
-    @Override
-    public int getSelectorOps() {
-        return SelectionKey.OP_READ | SelectionKey.OP_WRITE | SelectionKey.OP_CONNECT;
-    }
+	@Override
+	public void handle(int selectOp) {
+		if (selectOp == SelectionKey.OP_CONNECT) {
+			doConnect();
+		} else if (selectOp == SelectionKey.OP_READ) {
+			doRead();
+		} else if (selectOp == SelectionKey.OP_WRITE) {
+			doWrite();
+		} else {
+			throw new IllegalArgumentException("illegal select-op");
+		}
+	}
+	
+	@Override
+	public void closed() {
+		// TODO Auto-generated method stub
+	consumer.closed();	
+	}
 
-    @Override
-    public void handle(int selectOp) {
-        if (selectOp == SelectionKey.OP_CONNECT) {
-            doConnect();
-        } else if (selectOp == SelectionKey.OP_READ) {
-            doRead();
-        } else if (selectOp == SelectionKey.OP_WRITE) {
-            doWrite();
-        } else {
-            throw new IllegalArgumentException("illegal select-op");
-        }
-    }
+	private void doConnect() {
+		// TODO
+		System.out.println("op connect");
+	}
 
-    private void doConnect() {
-        // TODO
-        System.out.println("op connect");
-    }
+	private void doRead() {
+		// TODO: implement
+		try {
+			int num = channel.read(rbuf);
+			if (num == -1) {
+				// TODO
+				throw new UnsupportedOperationException("TODO: closed stream");
+			} else {
+				rbuf.flip();
+				byte[] b = new byte[rbuf.limit()];
+				rbuf.get(b);
+				System.out.println("read: " + b.length);
+				consumer.receive(b);
+			}
+		} catch (IOException e) {
+			// TODO: handle
+			e.printStackTrace();
+		}
+	}
 
-    private void doRead() {
-        // TODO: implement
-        try {
-            int num = channel.read(rbuf);
-            if (num == -1) {
-                // TODO
-                throw new UnsupportedOperationException("TODO: closed stream");
-            } else {
-                rbuf.flip();
-                byte[] b = new byte[rbuf.limit()];
-                rbuf.get(b);
-                System.out.println("read: " + b.length);
-                consumer.receive(b);
-            }
-        } catch (IOException e) {
-            // TODO: handle
-            e.printStackTrace();
-        }
-    }
+	private void doWrite() {
+		System.out.println("i am now writable, wheeee :)");
+		byte[] transfer = new byte[4096];
+		int toRead = Math.min(transfer.length, ringBuffer.available());
+		ringBuffer.read(transfer, 0, toRead);
+		try {
+			send(transfer);
+			if (ringBuffer.available() == 0) {
+				unregisterForWrite();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-    private void doWrite() {
-        System.out.println("i am now writable, wheeee :)");
-        // TODO Auto-generated method stub
-        writeReady = true;
-    }
+	private void registerForWrite() {
+		SimpleValidation.notNull(netSelector);
+		if (regForWrite.compareAndSet(false, true)) {
+			netSelector.reRegWithWrite(this);
+		}
+	}
+
+	private void unregisterForWrite() {
+		SimpleValidation.notNull(netSelector);
+		if (regForWrite.compareAndSet(true, false)) {
+			netSelector.reRegWithoutWrite(this);
+		}
+	}
 }

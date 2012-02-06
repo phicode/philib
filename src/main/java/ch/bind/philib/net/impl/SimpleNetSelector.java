@@ -13,7 +13,7 @@ import ch.bind.philib.net.NetSelector;
 import ch.bind.philib.net.Selectable;
 
 // TODO: thread safe
-public class SimpleNetSelector implements NetSelector {
+public final class SimpleNetSelector implements NetSelector {
 
 	private static final AtomicLong NAME_SEQ = new AtomicLong(0);
 
@@ -68,17 +68,23 @@ public class SimpleNetSelector implements NetSelector {
 			return;
 		}
 		int readyOps = key.readyOps();
-		if (checkMask(readyOps, SelectionKey.OP_ACCEPT)) {
-			selectable.handle(SelectionKey.OP_ACCEPT);
-		}
-		if (checkMask(readyOps, SelectionKey.OP_CONNECT)) {
-			selectable.handle(SelectionKey.OP_CONNECT);
-		}
-		if (checkMask(readyOps, SelectionKey.OP_READ)) {
-			selectable.handle(SelectionKey.OP_READ);
-		}
-		if (checkMask(readyOps, SelectionKey.OP_WRITE)) {
-			selectable.handle(SelectionKey.OP_WRITE);
+		try {
+			if (checkMask(readyOps, SelectionKey.OP_READ)) {
+				selectable.handle(SelectionKey.OP_READ);
+			}
+			if (checkMask(readyOps, SelectionKey.OP_WRITE)) {
+				selectable.handle(SelectionKey.OP_WRITE);
+			}
+			if (checkMask(readyOps, SelectionKey.OP_ACCEPT)) {
+				selectable.handle(SelectionKey.OP_ACCEPT);
+			}
+			if (checkMask(readyOps, SelectionKey.OP_CONNECT)) {
+				selectable.handle(SelectionKey.OP_CONNECT);
+			}
+		} catch (Exception e) {
+			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			selectable.closed();
+			unregister(selectable);
 		}
 	}
 
@@ -86,22 +92,51 @@ public class SimpleNetSelector implements NetSelector {
 		return (field & mask) == mask;
 	}
 
+	@Override
 	public void register(Selectable selectable) {
 		try {
 			SelectableChannel channel = selectable.getChannel();
 			int ops = selectable.getSelectorOps();
+			if ((ops & SelectionKey.OP_WRITE) != 0) {
+				throw new IllegalArgumentException("SelectionKey.OP_WRITE is set in the default set");
+			}
 
-			SelectionKey key = channel.register(selector, ops);
-			key.attach(selectable);
+			SelectionKey key = channel.register(selector, ops, selectable);
+			System.out.println("registered keys: " + selector.keys().size());
 		} catch (ClosedChannelException e) {
 			e.printStackTrace();
 		}
 	}
 
+	@Override
 	public void unregister(Selectable selectable) {
 		SelectableChannel channel = selectable.getChannel();
 		SelectionKey key = channel.keyFor(selector);
 		key.cancel();
 		key.attach(null);
+	}
+
+	@Override
+	public void reRegWithWrite(Selectable selectable) {
+		try {
+			SelectableChannel channel = selectable.getChannel();
+			int ops = SelectionKey.OP_WRITE | selectable.getSelectorOps();
+			SelectionKey key = channel.register(selector, ops, selectable);
+			System.out.println("reRegWithWrite keys: " + selector.keys().size());
+		} catch (ClosedChannelException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void reRegWithoutWrite(Selectable selectable) {
+		try {
+			SelectableChannel channel = selectable.getChannel();
+			int ops = selectable.getSelectorOps();
+			SelectionKey key = channel.register(selector, ops, selectable);
+			System.out.println("reRegWithoutWrite keys: " + selector.keys().size());
+		} catch (ClosedChannelException e) {
+			e.printStackTrace();
+		}
 	}
 }
