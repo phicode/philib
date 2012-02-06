@@ -34,6 +34,11 @@ public class TcpEchoClient implements Consumer {
 	}
 
 	private void send() throws IOException {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		connection.send(buf);
 		missingInput = buf.length;
 	}

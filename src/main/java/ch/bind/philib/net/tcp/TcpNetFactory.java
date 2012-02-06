@@ -24,7 +24,6 @@ public class TcpNetFactory implements NetFactory {
 		// InetSocketAddress endpoint = SocketAddresses.wildcard(1234);
 		NetSelector sel = SimpleNetSelector.open();
 		server.open(sel, bindAddress);
-		sel.register(server);
 		return server;
 	}
 }
