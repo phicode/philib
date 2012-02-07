@@ -41,7 +41,7 @@ public class TcpEchoServer implements ConsumerFactory {
 
 		@Override
 		public void receive(byte[] data) throws IOException {
-			System.out.println("received: " + Arrays.toString(data));
+			System.out.println("received: " + data.length);
 			// echo the data
 			connection.send(data);
 		}

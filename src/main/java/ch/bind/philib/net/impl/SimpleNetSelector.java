@@ -38,7 +38,7 @@ public final class SimpleNetSelector implements NetSelector {
 		try {
 			// TODO: wait as long as there is no channel registered
 			while (true) {
-				System.out.println("asdfasdfasdfadf");
+				// System.out.println("asdfasdfasdfadf");
 				int num = selector.select(1000L);
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
@@ -70,15 +70,19 @@ public final class SimpleNetSelector implements NetSelector {
 		int readyOps = key.readyOps();
 		try {
 			if (checkMask(readyOps, SelectionKey.OP_READ)) {
+				System.out.println("OP_READ");
 				selectable.handle(SelectionKey.OP_READ);
 			}
 			if (checkMask(readyOps, SelectionKey.OP_WRITE)) {
+				System.out.println("OP_WRITE");
 				selectable.handle(SelectionKey.OP_WRITE);
 			}
 			if (checkMask(readyOps, SelectionKey.OP_ACCEPT)) {
+				System.out.println("OP_ACCEPT");
 				selectable.handle(SelectionKey.OP_ACCEPT);
 			}
 			if (checkMask(readyOps, SelectionKey.OP_CONNECT)) {
+				System.out.println("OP_CONNECT");
 				selectable.handle(SelectionKey.OP_CONNECT);
 			}
 		} catch (Exception e) {

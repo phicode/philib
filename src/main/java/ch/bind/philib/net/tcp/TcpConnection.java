@@ -69,8 +69,7 @@ public class TcpConnection implements Connection {
 
 	@Override
 	public void send(byte[] data) throws IOException {
-		//TODO: handle data.length > wbuf.capacity
-		System.out.println("write: " + data.length);
+		// TODO: handle data.length > wbuf.capacity
 		wbuf.clear();
 		wbuf.put(data);
 		wbuf.flip();
@@ -80,6 +79,9 @@ public class TcpConnection implements Connection {
 			int off = data.length - rem;
 			ringBuffer.write(data, off, rem);
 			registerForWrite();
+			System.out.println("wrote: " + off + " / " + data.length + ", bufSize=" + ringBuffer.available());
+		} else {
+			System.out.println("wrote: " + data.length);
 		}
 	}
 
@@ -111,11 +113,11 @@ public class TcpConnection implements Connection {
 			throw new IllegalArgumentException("illegal select-op");
 		}
 	}
-	
+
 	@Override
 	public void closed() {
 		// TODO Auto-generated method stub
-	consumer.closed();	
+		consumer.closed();
 	}
 
 	private void doConnect() {
@@ -162,6 +164,8 @@ public class TcpConnection implements Connection {
 		SimpleValidation.notNull(netSelector);
 		if (regForWrite.compareAndSet(false, true)) {
 			netSelector.reRegWithWrite(this);
+		} else {
+			System.out.println("already registered for write");
 		}
 	}
 
@@ -169,6 +173,8 @@ public class TcpConnection implements Connection {
 		SimpleValidation.notNull(netSelector);
 		if (regForWrite.compareAndSet(true, false)) {
 			netSelector.reRegWithoutWrite(this);
+		} else {
+			System.out.println("already unregistered from write");
 		}
 	}
 }

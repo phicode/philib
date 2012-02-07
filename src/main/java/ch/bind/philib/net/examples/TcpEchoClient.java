@@ -3,6 +3,7 @@ package ch.bind.philib.net.examples;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import ch.bind.philib.net.Consumer;
 import ch.bind.philib.net.SocketAddresses;
@@ -17,7 +18,7 @@ public class TcpEchoClient implements Consumer {
 
 	private TcpConnection connection;
 
-	private int missingInput;
+	private AtomicInteger missingInput = new AtomicInteger();
 
 	public static void main(String[] args) throws Exception {
 		new TcpEchoClient().run();
@@ -34,22 +35,24 @@ public class TcpEchoClient implements Consumer {
 	}
 
 	private void send() throws IOException {
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		// try {
+		// Thread.sleep(5000);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
 		connection.send(buf);
-		missingInput = buf.length;
+		missingInput.addAndGet(buf.length);
 	}
 
 	@Override
 	public void receive(byte[] data) throws IOException {
-		missingInput -= data.length;
-		if (missingInput < 0) {
-			System.out.println("server sent back more data then we sent, WTF?");
-			send();
-		} else if (missingInput == 0) {
+		missingInput.addAndGet(-data.length);
+		int missing = missingInput.get();
+		if (missing < 0) {
+			String msg = "server sent back more data then we sent, WTF?";
+			System.out.println(msg);
+			throw new Error(msg);
+		} else if (missing == 0) {
 			System.out.println("server replied, sending question again");
 			send();
 		} else {
