@@ -123,7 +123,7 @@ public class TcpConnection implements Connection {
 				byte[] b = new byte[num];
 				rbuf.get(b);
 				SimpleValidation.isTrue(0 == rbuf.remaining());
-//				System.out.println("read: " + b.length);
+				// System.out.println("read: " + b.length);
 				consumer.receive(b);
 			}
 		} catch (IOException e) {
@@ -131,24 +131,44 @@ public class TcpConnection implements Connection {
 			e.printStackTrace();
 		}
 	}
-	
+
+	private AtomicBoolean inSend = new AtomicBoolean(false);
+
 	@Override
 	public void send(byte[] data) throws IOException {
+		boolean ok = inSend.compareAndSet(false, true);
+		SimpleValidation.isTrue(ok);
+		try {
+			int off = 0;
+			int rem = data.length;
+			do {
+				int n = Math.min(rem, wbuf.capacity());
+				_send(data, off, n);
+				rem -= n;
+				off += n;
+			} while (rem > 0);
+		} finally {
+			inSend.set(false);
+		}
+	}
+
+	private void _send(byte[] data, int dOff, int wlen) throws IOException {
 		// TODO: handle data.length > wbuf.capacity
 		wbuf.clear();
-		wbuf.put(data);
+		wbuf.put(data, dOff, wlen);
 		wbuf.flip();
 		// TODO: remove
-		SimpleValidation.isTrue(wbuf.remaining() == data.length);
+		SimpleValidation.isTrue(wbuf.remaining() == wlen, wbuf.remaining() + " != " + wlen);
 		channel.write(wbuf);
 		int rem = wbuf.remaining();
 		if (rem > 0) {
 			int off = data.length - rem;
 			ringBuffer.write(data, off, rem);
 			registerForWrite();
-//			System.out.println("wrote: " + off + " / " + data.length + ", bufSize=" + ringBuffer.available());
+			// System.out.println("wrote: " + off + " / " + data.length +
+			// ", bufSize=" + ringBuffer.available());
 		} else {
-//			System.out.println("wrote: " + data.length);
+			// System.out.println("wrote: " + data.length);
 		}
 	}
 

@@ -19,7 +19,7 @@ public class TcpEchoClient implements Consumer {
 
 	private TcpConnection connection;
 
-	private AtomicInteger missingInput = new AtomicInteger();
+	private AtomicInteger expectInput = new AtomicInteger();
 
 	private AtomicLong counter = new AtomicLong();
 	private long start;
@@ -33,7 +33,8 @@ public class TcpEchoClient implements Consumer {
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 		connection = TcpConnection.open(endpoint, this);
 
-		buf = new byte[8 * 1024];
+		// buf = new byte[8 * 1024];
+		buf = new byte[128 * 1024];
 		new Random().nextBytes(buf);
 
 		start = System.currentTimeMillis();
@@ -46,8 +47,8 @@ public class TcpEchoClient implements Consumer {
 		// } catch (InterruptedException e) {
 		// e.printStackTrace();
 		// }
+		expectInput.addAndGet(buf.length);
 		connection.send(buf);
-		missingInput.addAndGet(buf.length);
 		counter.addAndGet(buf.length);
 		long now = System.currentTimeMillis();
 		if (now > nextBlubber) {
@@ -60,17 +61,17 @@ public class TcpEchoClient implements Consumer {
 
 	@Override
 	public void receive(byte[] data) throws IOException {
-		missingInput.addAndGet(-data.length);
-		int missing = missingInput.get();
+		expectInput.addAndGet(-data.length);
+		int missing = expectInput.get();
 		if (missing < 0) {
 			String msg = "server sent back more data then we sent, WTF?";
 			System.out.println(msg);
 			throw new Error(msg);
 		} else if (missing == 0) {
-//			System.out.println("server replied, sending question again");
+			// System.out.println("server replied, sending question again");
 			send();
 		} else {
-			System.out.println("received data, but still missing: " + missingInput);
+			System.out.println("received data, but still missing: " + missing);
 		}
 	}
 
