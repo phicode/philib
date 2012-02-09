@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.net.NetSelector;
 import ch.bind.philib.net.Selectable;
+import ch.bind.philib.validation.SimpleValidation;
 
 // TODO: thread safe
 public final class SimpleNetSelector implements NetSelector {
@@ -70,23 +71,24 @@ public final class SimpleNetSelector implements NetSelector {
 		int readyOps = key.readyOps();
 		try {
 			if (checkMask(readyOps, SelectionKey.OP_READ)) {
-				System.out.println("OP_READ");
+//				System.out.println("OP_READ");
 				selectable.handle(SelectionKey.OP_READ);
 			}
 			if (checkMask(readyOps, SelectionKey.OP_WRITE)) {
-				System.out.println("OP_WRITE");
+//				System.out.println("OP_WRITE");
 				selectable.handle(SelectionKey.OP_WRITE);
 			}
 			if (checkMask(readyOps, SelectionKey.OP_ACCEPT)) {
-				System.out.println("OP_ACCEPT");
+//				System.out.println("OP_ACCEPT");
 				selectable.handle(SelectionKey.OP_ACCEPT);
 			}
 			if (checkMask(readyOps, SelectionKey.OP_CONNECT)) {
-				System.out.println("OP_CONNECT");
+//				System.out.println("OP_CONNECT");
 				selectable.handle(SelectionKey.OP_CONNECT);
 			}
 		} catch (Exception e) {
 			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			e.printStackTrace();
 			selectable.closed();
 			unregister(selectable);
 		}
@@ -126,6 +128,8 @@ public final class SimpleNetSelector implements NetSelector {
 			SelectableChannel channel = selectable.getChannel();
 			int ops = SelectionKey.OP_WRITE | selectable.getSelectorOps();
 			SelectionKey key = channel.register(selector, ops, selectable);
+			// TODO: remove
+			SimpleValidation.isTrue(key.interestOps() == ops);
 			System.out.println("reRegWithWrite keys: " + selector.keys().size());
 		} catch (ClosedChannelException e) {
 			e.printStackTrace();
@@ -138,6 +142,8 @@ public final class SimpleNetSelector implements NetSelector {
 			SelectableChannel channel = selectable.getChannel();
 			int ops = selectable.getSelectorOps();
 			SelectionKey key = channel.register(selector, ops, selectable);
+			// TODO: remove
+			SimpleValidation.isTrue(key.interestOps() == ops);
 			System.out.println("reRegWithoutWrite keys: " + selector.keys().size());
 		} catch (ClosedChannelException e) {
 			e.printStackTrace();

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.net.Consumer;
 import ch.bind.philib.net.SocketAddresses;
@@ -20,6 +21,10 @@ public class TcpEchoClient implements Consumer {
 
 	private AtomicInteger missingInput = new AtomicInteger();
 
+	private AtomicLong counter = new AtomicLong();
+	private long start;
+	private long nextBlubber;
+
 	public static void main(String[] args) throws Exception {
 		new TcpEchoClient().run();
 	}
@@ -31,6 +36,7 @@ public class TcpEchoClient implements Consumer {
 		buf = new byte[8 * 1024];
 		new Random().nextBytes(buf);
 
+		start = System.currentTimeMillis();
 		send();
 	}
 
@@ -42,6 +48,14 @@ public class TcpEchoClient implements Consumer {
 		// }
 		connection.send(buf);
 		missingInput.addAndGet(buf.length);
+		counter.addAndGet(buf.length);
+		long now = System.currentTimeMillis();
+		if (now > nextBlubber) {
+			nextBlubber = now + 1000;
+			long t = now - start;
+			double mbPerSec = (counter.get() / (1024f * 1024f)) / (t / 1000f);
+			System.out.printf("%d bytes in %d ms => %.3f mb/sec%n", counter.get(), t, mbPerSec);
+		}
 	}
 
 	@Override
@@ -53,7 +67,7 @@ public class TcpEchoClient implements Consumer {
 			System.out.println(msg);
 			throw new Error(msg);
 		} else if (missing == 0) {
-			System.out.println("server replied, sending question again");
+//			System.out.println("server replied, sending question again");
 			send();
 		} else {
 			System.out.println("received data, but still missing: " + missingInput);

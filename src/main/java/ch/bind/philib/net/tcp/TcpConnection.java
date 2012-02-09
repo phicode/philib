@@ -68,24 +68,6 @@ public class TcpConnection implements Connection {
 	}
 
 	@Override
-	public void send(byte[] data) throws IOException {
-		// TODO: handle data.length > wbuf.capacity
-		wbuf.clear();
-		wbuf.put(data);
-		wbuf.flip();
-		channel.write(wbuf);
-		int rem = wbuf.remaining();
-		if (rem > 0) {
-			int off = data.length - rem;
-			ringBuffer.write(data, off, rem);
-			registerForWrite();
-			System.out.println("wrote: " + off + " / " + data.length + ", bufSize=" + ringBuffer.available());
-		} else {
-			System.out.println("wrote: " + data.length);
-		}
-	}
-
-	@Override
 	public void close() throws IOException {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO");
@@ -128,20 +110,45 @@ public class TcpConnection implements Connection {
 	private void doRead() {
 		// TODO: implement
 		try {
+			rbuf.clear();
 			int num = channel.read(rbuf);
 			if (num == -1) {
 				// TODO
 				throw new UnsupportedOperationException("TODO: closed stream");
 			} else {
 				rbuf.flip();
-				byte[] b = new byte[rbuf.limit()];
+				// TODO: remove
+				SimpleValidation.isTrue(num == rbuf.limit());
+				SimpleValidation.isTrue(num == rbuf.remaining());
+				byte[] b = new byte[num];
 				rbuf.get(b);
-				System.out.println("read: " + b.length);
+				SimpleValidation.isTrue(0 == rbuf.remaining());
+//				System.out.println("read: " + b.length);
 				consumer.receive(b);
 			}
 		} catch (IOException e) {
 			// TODO: handle
 			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void send(byte[] data) throws IOException {
+		// TODO: handle data.length > wbuf.capacity
+		wbuf.clear();
+		wbuf.put(data);
+		wbuf.flip();
+		// TODO: remove
+		SimpleValidation.isTrue(wbuf.remaining() == data.length);
+		channel.write(wbuf);
+		int rem = wbuf.remaining();
+		if (rem > 0) {
+			int off = data.length - rem;
+			ringBuffer.write(data, off, rem);
+			registerForWrite();
+//			System.out.println("wrote: " + off + " / " + data.length + ", bufSize=" + ringBuffer.available());
+		} else {
+//			System.out.println("wrote: " + data.length);
 		}
 	}
 

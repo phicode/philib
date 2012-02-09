@@ -2,7 +2,6 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Consumer;
@@ -41,7 +40,7 @@ public class TcpEchoServer implements ConsumerFactory {
 
 		@Override
 		public void receive(byte[] data) throws IOException {
-			System.out.println("received: " + data.length);
+//			System.out.println("received: " + data.length);
 			// echo the data
 			connection.send(data);
 		}
