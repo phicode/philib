@@ -22,7 +22,9 @@ public class TcpEchoClient implements Consumer {
 	private AtomicInteger expectInput = new AtomicInteger();
 
 	private AtomicLong counter = new AtomicLong();
+	
 	private long start;
+	
 	private long nextBlubber;
 
 	public static void main(String[] args) throws Exception {

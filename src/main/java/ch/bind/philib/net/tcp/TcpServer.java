@@ -70,10 +70,11 @@ public class TcpServer implements NetServer {
 	}
 
 	@Override
-	public void handle(int selectOp) {
+	public boolean handle(int selectOp) {
 		if (selectOp == SelectionKey.OP_ACCEPT) {
 			System.out.println("doAccept");
 			doAccept();
+			return false;
 		} else {
 			throw new IllegalArgumentException("illegal select-op");
 		}

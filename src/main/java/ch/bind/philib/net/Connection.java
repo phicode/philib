@@ -5,6 +5,12 @@ import java.io.IOException;
 
 public interface Connection extends Closeable, Selectable {
 
-    void send(byte[] data) throws IOException;
+	/**
+	 * 
+	 * @param data
+	 * @return {@code true} if closed, {@code false} otherwise.
+	 * @throws IOException
+	 */
+	void send(byte[] data) throws IOException;
 
 }

@@ -120,6 +120,7 @@ public final class SimpleNetSelector implements NetSelector {
 		SelectionKey key = channel.keyFor(selector);
 		key.cancel();
 		key.attach(null);
+		System.out.println("registered keys: " + selector.keys().size());
 	}
 
 	@Override

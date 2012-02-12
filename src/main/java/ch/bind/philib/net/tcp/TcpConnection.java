@@ -84,13 +84,14 @@ public class TcpConnection implements Connection {
 	}
 
 	@Override
-	public void handle(int selectOp) {
+	public boolean handle(int selectOp) {
 		if (selectOp == SelectionKey.OP_CONNECT) {
 			doConnect();
+			return false;
 		} else if (selectOp == SelectionKey.OP_READ) {
-			doRead();
+			return doRead();
 		} else if (selectOp == SelectionKey.OP_WRITE) {
-			doWrite();
+			return doWrite();
 		} else {
 			throw new IllegalArgumentException("illegal select-op");
 		}
@@ -107,14 +108,16 @@ public class TcpConnection implements Connection {
 		System.out.println("op connect");
 	}
 
-	private void doRead() {
+	private boolean doRead() {
 		// TODO: implement
 		try {
 			rbuf.clear();
 			int num = channel.read(rbuf);
 			if (num == -1) {
+				return true;
 				// TODO
-				throw new UnsupportedOperationException("TODO: closed stream");
+				// throw new
+				// UnsupportedOperationException("TODO: closed stream");
 			} else {
 				rbuf.flip();
 				// TODO: remove
@@ -125,10 +128,12 @@ public class TcpConnection implements Connection {
 				SimpleValidation.isTrue(0 == rbuf.remaining());
 				// System.out.println("read: " + b.length);
 				consumer.receive(b);
+				return false;
 			}
 		} catch (IOException e) {
 			// TODO: handle
 			e.printStackTrace();
+			return true;
 		}
 	}
 
@@ -172,7 +177,7 @@ public class TcpConnection implements Connection {
 		}
 	}
 
-	private void doWrite() {
+	private boolean doWrite() {
 		System.out.println("i am now writable, wheeee :)");
 		byte[] transfer = new byte[4096];
 		int toRead = Math.min(transfer.length, ringBuffer.available());
@@ -182,8 +187,10 @@ public class TcpConnection implements Connection {
 			if (ringBuffer.available() == 0) {
 				unregisterForWrite();
 			}
+			return false;
 		} catch (IOException e) {
 			e.printStackTrace();
+			return true;
 		}
 	}
 

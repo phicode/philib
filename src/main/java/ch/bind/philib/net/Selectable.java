@@ -8,7 +8,7 @@ public interface Selectable {
 
 	int getSelectorOps();
 
-	void handle(int selectOp);
+	boolean handle(int selectOp);
 	
 	void closed();
 

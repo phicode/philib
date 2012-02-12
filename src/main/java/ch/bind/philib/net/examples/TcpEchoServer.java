@@ -21,7 +21,7 @@ public class TcpEchoServer implements ConsumerFactory {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
 		ConsumerFactory consumerFactory = this;
 		NetServer server = new TcpNetFactory().openServer(bindAddress, consumerFactory);
-//		server.close();
+		// server.close();
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class TcpEchoServer implements ConsumerFactory {
 
 		@Override
 		public void receive(byte[] data) throws IOException {
-//			System.out.println("received: " + data.length);
+			// System.out.println("received: " + data.length);
 			// echo the data
 			connection.send(data);
 		}
