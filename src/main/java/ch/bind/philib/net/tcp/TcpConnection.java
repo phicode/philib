@@ -132,7 +132,7 @@ public class TcpConnection implements Connection {
 			}
 		} catch (IOException e) {
 			// TODO: handle
-			e.printStackTrace();
+//			e.printStackTrace();
 			return true;
 		}
 	}

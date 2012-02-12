@@ -36,6 +36,7 @@ public final class SimpleNetSelector implements NetSelector {
 	@Override
 	public void run() {
 		thread = Thread.currentThread();
+		int lastKeys = 0;
 		try {
 			// TODO: wait as long as there is no channel registered
 			while (true) {
@@ -47,6 +48,11 @@ public final class SimpleNetSelector implements NetSelector {
 						handleReadyKey(key);
 					}
 					selected.clear();
+				}
+				int keys = selector.keys().size();
+				if (keys != lastKeys) {
+					System.out.printf("keys now=%d, last=%d%n", keys, lastKeys);
+					lastKeys = keys;
 				}
 			}
 		} catch (IOException e) {
@@ -69,28 +75,32 @@ public final class SimpleNetSelector implements NetSelector {
 			return;
 		}
 		int readyOps = key.readyOps();
+		boolean closed = false;
 		try {
 			if (checkMask(readyOps, SelectionKey.OP_READ)) {
-//				System.out.println("OP_READ");
-				selectable.handle(SelectionKey.OP_READ);
+				// System.out.println("OP_READ");
+				closed = selectable.handle(SelectionKey.OP_READ);
 			}
 			if (checkMask(readyOps, SelectionKey.OP_WRITE)) {
-//				System.out.println("OP_WRITE");
-				selectable.handle(SelectionKey.OP_WRITE);
+				// System.out.println("OP_WRITE");
+				closed = selectable.handle(SelectionKey.OP_WRITE);
 			}
 			if (checkMask(readyOps, SelectionKey.OP_ACCEPT)) {
-//				System.out.println("OP_ACCEPT");
-				selectable.handle(SelectionKey.OP_ACCEPT);
+				// System.out.println("OP_ACCEPT");
+				closed = selectable.handle(SelectionKey.OP_ACCEPT);
 			}
 			if (checkMask(readyOps, SelectionKey.OP_CONNECT)) {
-//				System.out.println("OP_CONNECT");
-				selectable.handle(SelectionKey.OP_CONNECT);
+				// System.out.println("OP_CONNECT");
+				closed = selectable.handle(SelectionKey.OP_CONNECT);
 			}
 		} catch (Exception e) {
+			closed = true;
 			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			e.printStackTrace();
-			selectable.closed();
+		}
+		if (closed) {
 			unregister(selectable);
+			selectable.closed();
 		}
 	}
 
@@ -106,9 +116,9 @@ public final class SimpleNetSelector implements NetSelector {
 			if ((ops & SelectionKey.OP_WRITE) != 0) {
 				throw new IllegalArgumentException("SelectionKey.OP_WRITE is set in the default set");
 			}
-
 			SelectionKey key = channel.register(selector, ops, selectable);
-			System.out.println("registered keys: " + selector.keys().size());
+			selector.wakeup();
+			System.out.println("reg, keys: " + selector.keys().size());
 		} catch (ClosedChannelException e) {
 			e.printStackTrace();
 		}
@@ -118,9 +128,14 @@ public final class SimpleNetSelector implements NetSelector {
 	public void unregister(Selectable selectable) {
 		SelectableChannel channel = selectable.getChannel();
 		SelectionKey key = channel.keyFor(selector);
-		key.cancel();
-		key.attach(null);
-		System.out.println("registered keys: " + selector.keys().size());
+		if (key != null) {
+			key.cancel();
+			key.attach(null);
+			selector.wakeup();
+			System.out.println("unreg, keys: " + selector.keys().size());
+		} else {
+			System.out.println("unreg failed, not registered");
+		}
 	}
 
 	@Override
@@ -129,9 +144,10 @@ public final class SimpleNetSelector implements NetSelector {
 			SelectableChannel channel = selectable.getChannel();
 			int ops = SelectionKey.OP_WRITE | selectable.getSelectorOps();
 			SelectionKey key = channel.register(selector, ops, selectable);
+			selector.wakeup();
 			// TODO: remove
 			SimpleValidation.isTrue(key.interestOps() == ops);
-			System.out.println("reRegWithWrite keys: " + selector.keys().size());
+			System.out.println("re-reg write, keys: " + selector.keys().size());
 		} catch (ClosedChannelException e) {
 			e.printStackTrace();
 		}
@@ -143,9 +159,10 @@ public final class SimpleNetSelector implements NetSelector {
 			SelectableChannel channel = selectable.getChannel();
 			int ops = selectable.getSelectorOps();
 			SelectionKey key = channel.register(selector, ops, selectable);
+			selector.wakeup();
 			// TODO: remove
 			SimpleValidation.isTrue(key.interestOps() == ops);
-			System.out.println("reRegWithoutWrite keys: " + selector.keys().size());
+			System.out.println("re-reg nowrite, keys: " + selector.keys().size());
 		} catch (ClosedChannelException e) {
 			e.printStackTrace();
 		}

@@ -66,14 +66,14 @@ public class TcpEchoClient implements Consumer {
 		expectInput.addAndGet(-data.length);
 		int missing = expectInput.get();
 		if (missing < 0) {
-			String msg = "server sent back more data then we sent, WTF?";
+			String msg = "server sent back more data then we sent, WTF? " + missing;
 			System.out.println(msg);
 			throw new Error(msg);
 		} else if (missing == 0) {
 			// System.out.println("server replied, sending question again");
 			send();
 		} else {
-			System.out.println("received data, but still missing: " + missing);
+//			System.out.println("received data, but still missing: " + missing);
 		}
 	}
 
