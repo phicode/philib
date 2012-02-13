@@ -15,6 +15,7 @@ import ch.bind.philib.validation.SimpleValidation;
 public final class NQueue<E> implements Queue<E> {
 
 	private final Semaphore sem;
+
 	private final Queue<E> queue;
 
 	public NQueue(Semaphore sem) {
@@ -26,6 +27,33 @@ public final class NQueue<E> implements Queue<E> {
 		SimpleValidation.notNull(queue);
 		this.sem = sem;
 		this.queue = queue;
+	}
+
+	@Override
+	public boolean add(E e) {
+		boolean added = queue.add(e);
+		if (added) {
+			sem.release();
+		}
+		return added;
+	}
+
+	@Override
+	public boolean offer(E e) {
+		boolean added = queue.offer(e);
+		if (added) {
+			sem.release();
+		}
+		return added;
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends E> c) {
+		boolean changed = queue.addAll(c);
+		if (changed) {
+			sem.release();
+		}
+		return changed;
 	}
 
 	@Override
@@ -69,11 +97,6 @@ public final class NQueue<E> implements Queue<E> {
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends E> c) {
-		return queue.addAll(c);
-	}
-
-	@Override
 	public boolean removeAll(Collection<?> c) {
 		return queue.removeAll(c);
 	}
@@ -86,24 +109,6 @@ public final class NQueue<E> implements Queue<E> {
 	@Override
 	public void clear() {
 		queue.clear();
-	}
-
-	@Override
-	public boolean add(E e) {
-		boolean added = queue.add(e);
-		if (added) {
-			sem.release();
-		}
-		return added;
-	}
-
-	@Override
-	public boolean offer(E e) {
-		boolean added = queue.offer(e);
-		if (added) {
-			sem.release();
-		}
-		return added;
 	}
 
 	@Override
