@@ -8,8 +8,10 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ch.bind.philib.io.NQueue;
 import ch.bind.philib.io.RingBuffer;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Consumer;
@@ -28,7 +30,7 @@ public class TcpConnection implements Connection {
 
 	private final RingBuffer ringBuffer = new RingBuffer();
 
-	private Consumer consumer;
+//	private Consumer consumer;
 
 	private ByteBuffer rbuf;
 
@@ -38,13 +40,16 @@ public class TcpConnection implements Connection {
 
 	private NetSelector netSelector;
 
-	public TcpConnection(SocketChannel channel) throws IOException {
+	private final NQueue<byte[]> inbox;
+
+	public TcpConnection(SocketChannel channel, Semaphore receiveSem) throws IOException {
 		SimpleValidation.notNull(channel);
 		this.channel = channel;
+		this.inbox = new NQueue<byte[]>(receiveSem);
 	}
 
-	void init(Consumer consumer, NetSelector netSelector) throws IOException {
-		this.consumer = consumer;
+	void init(NetSelector netSelector) throws IOException {
+//		this.consumer = consumer;
 		this.netSelector = netSelector;
 		this.channel.configureBlocking(false);
 		this.rbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
@@ -52,7 +57,7 @@ public class TcpConnection implements Connection {
 		netSelector.register(this);
 	}
 
-	public static TcpConnection open(SocketAddress endpoint, Consumer consumer) throws IOException {
+	public static TcpConnection open(SocketAddress endpoint, Semaphore receiveSem) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
@@ -61,9 +66,9 @@ public class TcpConnection implements Connection {
 		}
 
 		System.out.println("connected to: " + endpoint);
-		TcpConnection con = new TcpConnection(channel);
+		TcpConnection con = new TcpConnection(channel, receiveSem);
 		// TODO: selector through params
-		con.init(consumer, SimpleNetSelector.open());
+		con.init( SimpleNetSelector.open());
 		return con;
 	}
 
@@ -88,11 +93,14 @@ public class TcpConnection implements Connection {
 		if (selectOp == SelectionKey.OP_CONNECT) {
 			doConnect();
 			return false;
-		} else if (selectOp == SelectionKey.OP_READ) {
+		}
+		else if (selectOp == SelectionKey.OP_READ) {
 			return doRead();
-		} else if (selectOp == SelectionKey.OP_WRITE) {
+		}
+		else if (selectOp == SelectionKey.OP_WRITE) {
 			return doWrite();
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("illegal select-op");
 		}
 	}
@@ -100,7 +108,30 @@ public class TcpConnection implements Connection {
 	@Override
 	public void closed() {
 		// TODO Auto-generated method stub
-		consumer.closed();
+//		consumer.closed();
+	}
+	
+	@Override
+	public void flush() throws IOException {
+		// TODO Auto-generated method stub
+	throw new UnsupportedOperationException("TODO")	;
+	}
+	
+	@Override
+	public byte[] peekMessage() {
+		return inbox.peek();
+	}
+	
+	@Override
+	public byte[] pollMessage() {
+		return inbox.poll();
+	}
+	
+	@Override
+	public byte[] pollMessage(long timeout) {
+		
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private void doConnect() {
@@ -118,7 +149,8 @@ public class TcpConnection implements Connection {
 				// TODO
 				// throw new
 				// UnsupportedOperationException("TODO: closed stream");
-			} else {
+			}
+			else {
 				rbuf.flip();
 				// TODO: remove
 				SimpleValidation.isTrue(num == rbuf.limit());
@@ -132,7 +164,7 @@ public class TcpConnection implements Connection {
 			}
 		} catch (IOException e) {
 			// TODO: handle
-//			e.printStackTrace();
+			// e.printStackTrace();
 			return true;
 		}
 	}
@@ -172,7 +204,8 @@ public class TcpConnection implements Connection {
 			registerForWrite();
 			// System.out.println("wrote: " + off + " / " + data.length +
 			// ", bufSize=" + ringBuffer.available());
-		} else {
+		}
+		else {
 			// System.out.println("wrote: " + data.length);
 		}
 	}
@@ -198,7 +231,8 @@ public class TcpConnection implements Connection {
 		SimpleValidation.notNull(netSelector);
 		if (regForWrite.compareAndSet(false, true)) {
 			netSelector.reRegWithWrite(this);
-		} else {
+		}
+		else {
 			System.out.println("already registered for write");
 		}
 	}
@@ -207,7 +241,8 @@ public class TcpConnection implements Connection {
 		SimpleValidation.notNull(netSelector);
 		if (regForWrite.compareAndSet(true, false)) {
 			netSelector.reRegWithoutWrite(this);
-		} else {
+		}
+		else {
 			System.out.println("already unregistered from write");
 		}
 	}
