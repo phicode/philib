@@ -1,6 +1,9 @@
 package ch.bind.philib.io;
 
-public class BufferPool extends ObjectPool<byte[]> {
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+public final class BufferPool extends ObjPool<byte[]> {
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;
 
@@ -22,11 +25,16 @@ public class BufferPool extends ObjectPool<byte[]> {
 		this.bufSize = bufferSize;
 	}
 
+	private final AtomicLong creates=new AtomicLong();
 	@Override
 	protected byte[] create() {
+		creates.incrementAndGet();
 		return new byte[bufSize];
 	}
 
+	public long getNumCreates() {
+		return creates.get();
+	}
 	@Override
 	public void release(byte[] buf) {
 		// discard buffers which do not have the right size
