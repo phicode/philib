@@ -40,21 +40,35 @@ public abstract class ObjPool<E> {
 
 	public void release(final E e) {
 		if (e != null) {
-			int size = this.size.get();
-			if (size < maxEntries) {
-				
-			}
-			boolean canAdd = incrementWithMax(size, maxEntries);
-			if (canAdd) {
-				int pos = wpos.get();
-				if (pool.compareAndSet(pos, null, e)) {
-					
+			while (true) {
+				int size = this.size.get();
+				if (size < maxEntries) {
+					int pos = wpos.get();
+					int nextPos = (pos + 1) % maxEntries;
+					if (pool.compareAndSet(pos, null, e)) {
+//						incMod(wpos, maxEntries);
+						boolean ok = wpos.compareAndSet(pos, nextPos);
+						SimpleValidation.isTrue(ok);
+						// this.size.incrementAndGet();
+						// ok = this.size.compareAndSet(size, size +1);
+						// SimpleValidation.isTrue(ok);
+						this.size.incrementAndGet();
+						return;
+					}
 				}
-				
-				int i = getAndIncrementMod(wpos, maxEntries);
-				boolean ok = pool.compareAndSet(i, null, e);
-				SimpleValidation.isTrue(ok, "write to pos " + i + ": field is not null but should be");
+				else {
+					return;
+				}
 			}
+			// boolean canAdd = incrementWithMax(size, maxEntries);
+			// if (canAdd) {
+			//
+			//
+			// int i = getAndIncrementMod(wpos, maxEntries);
+			// boolean ok = pool.compareAndSet(i, null, e);
+			// SimpleValidation.isTrue(ok, "write to pos " + i +
+			// ": field is not null but should be");
+			// }
 		}
 	}
 
@@ -94,6 +108,16 @@ public abstract class ObjPool<E> {
 			int newVal = (value + 1) % mod;
 			if (ai.compareAndSet(value, newVal)) {
 				return value;
+			}
+		}
+	}
+
+	private static void incMod(AtomicInteger ai, int mod) {
+		while (true) {
+			int value = ai.get();
+			int newVal = (value + 1) % mod;
+			if (ai.compareAndSet(value, newVal)) {
+				return;
 			}
 		}
 	}

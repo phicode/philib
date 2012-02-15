@@ -69,8 +69,8 @@ public class BufferPoolTest {
 		long numOps = 32L * 1024L * 1024L;
 		// release fewer then we get -> the buffer pool has to create new
 		// objects
-//		 int getOps = 100;
-//		 int putOps = 99;
+		// int getOps = 100;
+		// int putOps = 99;
 		int getOps = 5;
 		int putOps = 4;
 		boolean firstRun = true;
@@ -162,22 +162,25 @@ public class BufferPoolTest {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			long ops = 0;
-			byte[][] bufs = new byte[getOps][];
-			while (ops < numOps) {
-				for (int i = 0; i < getOps; i++) {
-					byte[] b = bp.get();
-					assertNotNull(b);
-					bufs[i] = b;
+			try {
+				long ops = 0;
+				byte[][] bufs = new byte[getOps][];
+				while (ops < numOps) {
+					for (int i = 0; i < getOps; i++) {
+						byte[] b = bp.get();
+						assertNotNull(b);
+						bufs[i] = b;
+					}
+					for (int i = 0; i < putOps; i++) {
+						assertNotNull(bufs[i]);
+						bp.release(bufs[i]);
+					}
+					ops += getOps;
+					ops += putOps;
 				}
-				for (int i = 0; i < putOps; i++) {
-					assertNotNull(bufs[i]);
-					bp.release(bufs[i]);
-				}
-				ops += getOps;
-				ops += putOps;
+			} finally {
+				end.release();
 			}
-			end.release();
 		}
 	}
 }
