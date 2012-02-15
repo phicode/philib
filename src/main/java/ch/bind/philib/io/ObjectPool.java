@@ -3,6 +3,7 @@ package ch.bind.philib.io;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import ch.bind.philib.validation.SimpleValidation;
 
@@ -241,4 +242,5 @@ public abstract class ObjectPool<E> {
 			return e;
 		}
 	}
+	
 }

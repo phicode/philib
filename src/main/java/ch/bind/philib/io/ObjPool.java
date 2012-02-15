@@ -43,17 +43,20 @@ public abstract class ObjPool<E> {
 			while (true) {
 				int size = this.size.get();
 				if (size < maxEntries) {
-					int pos = wpos.get();
-					int nextPos = (pos + 1) % maxEntries;
-					if (pool.compareAndSet(pos, null, e)) {
+				    int p = getAndIncrementMod(wpos, maxEntries);
+//					int pos = wpos.get();
+//					int nextPos = (pos + 1) % maxEntries;
+					if (pool.compareAndSet(p, null, e)) {
 //						incMod(wpos, maxEntries);
-						boolean ok = wpos.compareAndSet(pos, nextPos);
-						SimpleValidation.isTrue(ok);
+//						boolean ok = wpos.compareAndSet(pos, nextPos);
+//						SimpleValidation.isTrue(ok);
 						// this.size.incrementAndGet();
 						// ok = this.size.compareAndSet(size, size +1);
 						// SimpleValidation.isTrue(ok);
 						this.size.incrementAndGet();
 						return;
+					} else {
+					    throw new Error();
 					}
 				}
 				else {
