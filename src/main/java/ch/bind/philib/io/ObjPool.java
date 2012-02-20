@@ -1,12 +1,16 @@
 package ch.bind.philib.io;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import ch.bind.philib.validation.SimpleValidation;
 
 public abstract class ObjPool<E> {
 
+	private final AtomicLong[] readableMask;
+	private final AtomicLong[] writableMask;
+	
 	private final AtomicReferenceArray<E> pool;
 
 	private final int maxEntries;
@@ -19,11 +23,25 @@ public abstract class ObjPool<E> {
 
 	public ObjPool(int maxEntries) {
 		System.out.println("maxEntries: " + maxEntries);
+		int numMasks = maxEntries / 64;
+		if (numMasks*64 < maxEntries) {
+			numMasks++;
+		}
+		readableMask = new AtomicLong[numMasks];
+		writableMask = new AtomicLong[numMasks];
+		for (int i = 0; i < numMasks; i++) {
+			readableMask[i] = new AtomicLong(0);
+			writableMask[i] = new AtomicLong();
+			long wmask = 
+		}
+		
+		
 		this.maxEntries = maxEntries;
 		pool = new AtomicReferenceArray<E>(maxEntries);
 	}
 
 	protected abstract E create();
+	protected abstract void destroy(E e);
 
 	public E get() {
 		boolean hasElement = decrementNotNegative(size);

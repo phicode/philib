@@ -31,6 +31,10 @@ public final class BufferPool extends ObjPool<byte[]> {
 		creates.incrementAndGet();
 		return new byte[bufSize];
 	}
+	
+	@Override
+	protected void destroy(byte[] e) {
+	}
 
 	public long getNumCreates() {
 		return creates.get();
