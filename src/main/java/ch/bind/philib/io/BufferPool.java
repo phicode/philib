@@ -25,13 +25,14 @@ public final class BufferPool extends ObjPool<byte[]> {
 		this.bufSize = bufferSize;
 	}
 
-	private final AtomicLong creates=new AtomicLong();
+	private final AtomicLong creates = new AtomicLong();
+
 	@Override
 	protected byte[] create() {
 		creates.incrementAndGet();
 		return new byte[bufSize];
 	}
-	
+
 	@Override
 	protected void destroy(byte[] e) {
 	}
@@ -39,6 +40,7 @@ public final class BufferPool extends ObjPool<byte[]> {
 	public long getNumCreates() {
 		return creates.get();
 	}
+
 	@Override
 	public void release(byte[] buf) {
 		// discard buffers which do not have the right size

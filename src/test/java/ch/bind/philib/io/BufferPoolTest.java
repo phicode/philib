@@ -66,8 +66,8 @@ public class BufferPoolTest {
 
 	@Test
 	public void stressTest() throws Exception {
-//		long numOps = 32L * 1024L * 1024L;
-	    long numOps = 2L * 1024L * 1024L;
+		long numOps = 32L * 1024L * 1024L;
+//	    long numOps = 2L * 1024L * 1024L;
 		// release fewer then we get -> the buffer pool has to create new
 		// objects
 		// int getOps = 100;

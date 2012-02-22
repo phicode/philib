@@ -27,19 +27,36 @@ public final class AtomicBitSet {
 			b.set(v);
 		}
 	}
-	
-	
+
 	public int switchAnyToFalse() {
-		int startBucket = (int)(Thread.currentThread().getId() % bs.length);
+		final int startBucket = (int) (Thread.currentThread().getId() % bs.length);
+//		final int startBucket = 0;
 		for (int i = 0; i < bs.length; i++) {
-			int bucketIdx = (startBucket + i) % bs.length;
-			AtomicLong b = bs[bucketIdx];
-			long v = b.get();
-			if (v != 0) {
-				
+			final int bucketIdx = (startBucket + i) % bs.length;
+			int idx = switchAnyToFalseInBucket(bucketIdx);
+			if (idx != -1) {
+				return idx;
 			}
 		}
-		
+		return -1;
+	}
+
+	private int switchAnyToFalseInBucket(int bucketIdx) {
+		final AtomicLong b = bs[bucketIdx];
+		long v = b.get();
+		while (v != 0) {
+			final int bitIdx = BitOps.findLowestSetBitIdx64(v);
+			assert (bitIdx != -1); // v!=0, there must be a bit set
+			final long mask = 1L << bitIdx;
+			final long newV = v ^ mask;
+			if (b.compareAndSet(v, newV)) {
+				return (bucketIdx * 64) + bitIdx;
+			}
+			else {
+				v = b.get();
+			}
+		}
+		return -1;
 	}
 
 	// public boolean get(int idx) {
@@ -56,13 +73,13 @@ public final class AtomicBitSet {
 		rangeCheck(idx);
 		int chunk = idx / 64;
 		int bit = idx & 63; // mod 64
-		long mask = 1 << bit;
+		long mask = 1L << bit;
 		AtomicLong b = bs[chunk];
 		while (true) {
 			long v = b.get();
 			boolean set = ((v & mask) == mask);
 			if (set) {
-				long newV = v & (~mask);
+				long newV = v ^ mask;
 				if (b.compareAndSet(v, newV)) {
 					return true;
 				}
@@ -78,7 +95,7 @@ public final class AtomicBitSet {
 		rangeCheck(idx);
 		int chunk = idx / 64;
 		int bit = idx & 63; // mod 64
-		long mask = 1 << bit;
+		long mask = 1L << bit;
 		AtomicLong b = bs[chunk];
 		while (true) {
 			long v = b.get();
