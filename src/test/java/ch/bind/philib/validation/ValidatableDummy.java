@@ -40,5 +40,4 @@ public class ValidatableDummy implements Validatable {
         if (isGenerateError())
             results.addError("error " + (counter++));
     }
-
 }

@@ -13,21 +13,21 @@ public abstract class ObjectPool<E> {
 
 	private static final int NUMLISTSMASK = 0;
 
-	private final AtomicBoolean[] listLocks;
+	// private final AtomicBoolean[] listLocks;
 
 	private final AtomicReference<Node<E>>[] freeLists;
 
 	private final AtomicReference<Node<E>>[] objLists;
 
-	// private final Node<E> END_DUMMY = new Node<E>();
+	private final Node<E> LOCK_DUMMY = new Node<E>();
 
 	public ObjectPool(int maxEntries) {
 		super();
-		this.listLocks = new AtomicBoolean[NUMLISTS];
+		// this.listLocks = new AtomicBoolean[NUMLISTS];
 		this.freeLists = new AtomicReference[NUMLISTS];
 		this.objLists = new AtomicReference[NUMLISTS];
 		for (int i = 0; i < NUMLISTS; i++) {
-			this.listLocks[i] = new AtomicBoolean(false);
+			// this.listLocks[i] = new AtomicBoolean(false);
 			this.freeLists[i] = new AtomicReference<Node<E>>();
 			this.objLists[i] = new AtomicReference<Node<E>>();
 		}
@@ -43,6 +43,8 @@ public abstract class ObjectPool<E> {
 
 	protected abstract E create();
 
+	protected abstract void destroy(E e);
+
 	public E get() {
 		int firstList = fl();
 		for (int i = 0; i < NUMLISTS; i++) {
@@ -56,38 +58,29 @@ public abstract class ObjectPool<E> {
 	}
 
 	private E tryGet(final int listIdx) {
-		AtomicBoolean lock = listLocks[listIdx];
-		if (lock.compareAndSet(false, true)) {
-			try {
-				AtomicReference<Node<E>> freeList = freeLists[listIdx];
-				AtomicReference<Node<E>> objList = objLists[listIdx];
-
-				final Node<E> node = take(objList);
-				if (node == null) {
-					return null;
-				}
-				else {
-					node.assertInObjList();
-					final E e = node.unsetEntry();
-					// TODO: remove
-					SimpleValidation.notNull(e);
-					node.setInFreeList();
-					put(freeList, node);
-					return e;
-				}
-			} finally {
-				lock.set(false);
-			}
+		AtomicReference<Node<E>> freeList = freeLists[listIdx];
+		AtomicReference<Node<E>> objList = objLists[listIdx];
+		
+		final Node<E> node = take(objList);
+		if (node == null) {
+			return null;
+		} else {
+			node.assertInObjList();
+			final E e = node.unsetEntry();
+			// TODO: remove
+			SimpleValidation.notNull(e);
+			node.setInFreeList();
+			put(freeList, node);
+			return e;
 		}
-		return null;
 	}
 
-//	private AtomicInteger _fl = new AtomicInteger();
+	// private AtomicInteger _fl = new AtomicInteger();
 	private int _fl;
 
 	private final int fl() {
 		return Math.abs(_fl++) & NUMLISTSMASK;
-//		return Math.abs(_fl.incrementAndGet()) & NUMLISTSMASK;
+		// return Math.abs(_fl.incrementAndGet()) & NUMLISTSMASK;
 		// return (int) (Thread.currentThread().getId() & NUMLISTSMASK);
 	}
 
@@ -139,10 +132,9 @@ public abstract class ObjectPool<E> {
 	private final Node<E> take(final AtomicReference<Node<E>> root) {
 		do {
 			final Node<E> head = root.get();
-			if (head == null) { // empty
+			if (head == null || head == LOCK_DUMMY) { // empty
 				return null;
-			}
-			else {
+			} else {
 				final Node<E> tail = head.getNext();
 				if (root.compareAndSet(head, tail)) {
 					head.unsetNext();
@@ -242,5 +234,5 @@ public abstract class ObjectPool<E> {
 			return e;
 		}
 	}
-	
+
 }

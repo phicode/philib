@@ -1,13 +1,14 @@
 package ch.bind.philib.io;
 
-import java.io.IOException;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.concurrent.Semaphore;
 
 import org.junit.Test;
 
 import ch.bind.philib.TestUtil;
 import ch.bind.philib.validation.SimpleValidation;
-import static org.junit.Assert.*;
 
 public class BufferPoolTest {
 
@@ -66,8 +67,8 @@ public class BufferPoolTest {
 
 	@Test
 	public void stressTest() throws Exception {
-		long numOps = 32L * 1024L * 1024L;
-//	    long numOps = 2L * 1024L * 1024L;
+		long numOps = 8L * 1024L * 1024L;
+		// long numOps = 2L * 1024L * 1024L;
 		// release fewer then we get -> the buffer pool has to create new
 		// objects
 		// int getOps = 100;
