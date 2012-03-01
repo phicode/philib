@@ -8,11 +8,15 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public abstract class ObjPool<E> {
 
+	private static final int CONC = 8;
+	
 	private final AtomicBitSet readable;
 
 	private final AtomicBitSet writable;
 
 	private final AtomicReferenceArray<E> pool;
+
+	private final AtomicInteger[] useCount;
 
 	private final int maxEntries;
 
@@ -23,10 +27,24 @@ public abstract class ObjPool<E> {
 	// private final AtomicInteger wpos = new AtomicInteger(0);
 
 	public ObjPool(int maxEntries) {
-		this.readable = new AtomicBitSet(maxEntries, false);
-		this.writable = new AtomicBitSet(maxEntries, true);
+		this.readable = AtomicBitSet.forNumBits(CONC, false);
+		this.writable = AtomicBitSet.forNumBits(CONC, true);
 		this.maxEntries = maxEntries;
 		this.pool = new AtomicReferenceArray<E>(maxEntries);
+		useCount = new AtomicInteger[maxEntries];
+		for (int i = 0; i < maxEntries; i++) {
+			useCount[i] = new AtomicInteger();
+		}
+	}
+
+	public void printUseCounts() {
+		System.out.println("UseCounts: ");
+		for (int i = 0; i < maxEntries; i++) {
+			System.out.printf("%10d ", useCount[i].get());
+			if (i % 10 == 9) {
+				System.out.println();
+			}
+		}
 	}
 
 	protected abstract E create();
@@ -39,6 +57,8 @@ public abstract class ObjPool<E> {
 			return create();
 		}
 		else {
+			useCount[idx].incrementAndGet();
+			
 			E e = pool.getAndSet(idx, null);
 			// TODO: make to assert
 			SimpleValidation.notNull(e);
@@ -46,19 +66,6 @@ public abstract class ObjPool<E> {
 			SimpleValidation.isTrue(ok);
 			return e;
 		}
-		//
-		// boolean hasElement = decrementNotNegative(size);
-		// if (hasElement) {
-		//
-		// int i = getAndIncrementMod(rpos, maxEntries);
-		// E e = pool.getAndSet(i, null);
-		// SimpleValidation.notNull(e, "read from pos " + i +
-		// ": field is null but should not be");
-		// return e;
-		// }
-		// else {
-		// return create();
-		// }
 	}
 
 	public void release(final E e) {
@@ -68,6 +75,8 @@ public abstract class ObjPool<E> {
 				destroy(e);
 			}
 			else {
+				useCount[idx].incrementAndGet();
+				
 				boolean ok = pool.compareAndSet(idx, null, e);
 				// TODO: make to assert
 				SimpleValidation.isTrue(ok);
@@ -75,91 +84,5 @@ public abstract class ObjPool<E> {
 				SimpleValidation.isTrue(ok);
 			}
 		}
-
-		// if (e != null) {
-		// while (true) {
-		// int size = this.size.get();
-		// if (size < maxEntries) {
-		// int p = getAndIncrementMod(wpos, maxEntries);
-		// // int pos = wpos.get();
-		// // int nextPos = (pos + 1) % maxEntries;
-		// if (pool.compareAndSet(p, null, e)) {
-		// // incMod(wpos, maxEntries);
-		// // boolean ok = wpos.compareAndSet(pos, nextPos);
-		// // SimpleValidation.isTrue(ok);
-		// // this.size.incrementAndGet();
-		// // ok = this.size.compareAndSet(size, size +1);
-		// // SimpleValidation.isTrue(ok);
-		// this.size.incrementAndGet();
-		// return;
-		// }
-		// else {
-		// throw new Error();
-		// }
-		// }
-		// else {
-		// return;
-		// }
-		// }
-		// boolean canAdd = incrementWithMax(size, maxEntries);
-		// if (canAdd) {
-		//
-		//
-		// int i = getAndIncrementMod(wpos, maxEntries);
-		// boolean ok = pool.compareAndSet(i, null, e);
-		// SimpleValidation.isTrue(ok, "write to pos " + i +
-		// ": field is not null but should be");
-		// }
-		// }
 	}
-
-	// private boolean incrementWithMax(AtomicInteger ai, int max) {
-	// while (true) {
-	// int val = ai.get();
-	// int newVal = val + 1;
-	// if (newVal > max) {
-	// return false;
-	// }
-	// else {
-	// if (ai.compareAndSet(val, newVal)) {
-	// return true;
-	// }
-	// }
-	// }
-	// }
-	//
-	// private boolean decrementNotNegative(AtomicInteger ai) {
-	// while (true) {
-	// int val = ai.get();
-	// int newVal = val - 1;
-	// if (newVal < 0) {
-	// return false;
-	// }
-	// else {
-	// if (ai.compareAndSet(val, newVal)) {
-	// return true;
-	// }
-	// }
-	// }
-	// }
-	//
-	// private static int getAndIncrementMod(AtomicInteger ai, int mod) {
-	// while (true) {
-	// int value = ai.get();
-	// int newVal = (value + 1) % mod;
-	// if (ai.compareAndSet(value, newVal)) {
-	// return value;
-	// }
-	// }
-	// }
-	//
-	// private static void incMod(AtomicInteger ai, int mod) {
-	// while (true) {
-	// int value = ai.get();
-	// int newVal = (value + 1) % mod;
-	// if (ai.compareAndSet(value, newVal)) {
-	// return;
-	// }
-	// }
-	// }
 }

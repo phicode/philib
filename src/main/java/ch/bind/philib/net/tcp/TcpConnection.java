@@ -28,7 +28,7 @@ public class TcpConnection implements Connection {
 	// private final Queue<byte[]> outQueue = new
 	// ConcurrentLinkedQueue<byte[]>();
 
-	private final RingBuffer ringBuffer = new RingBuffer();
+//	private final RingBuffer ringBuffer = new RingBuffer();
 
 	// private Consumer consumer;
 

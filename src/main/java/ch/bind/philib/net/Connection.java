@@ -17,6 +17,7 @@ public interface Connection extends Closeable, Selectable {
 
 	byte[] pollMessage();
 
+	byte[] pollMessage(long timeout);
+
 	byte[] peekMessage();
-	
 }

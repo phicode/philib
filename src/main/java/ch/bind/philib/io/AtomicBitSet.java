@@ -8,17 +8,25 @@ public final class AtomicBitSet {
 
 	private final int numBits;
 
-	public AtomicBitSet(int numBits, boolean initialValue) {
-		this.numBits = numBits;
-		int numEntries = numBits / 64;
-		if (numEntries * 64 < numBits) {
-			numEntries++;
-		}
-		bs = new AtomicLong[numEntries];
-		for (int i = 0; i < numEntries; i++) {
+	private AtomicBitSet(int numBuckets, boolean initialValue) {
+		bs = new AtomicLong[numBuckets];
+		for (int i = 0; i < numBuckets; i++) {
 			bs[i] = new AtomicLong();
 		}
 		setAll(initialValue);
+		numBits = numBuckets * 64;
+	}
+
+	public static AtomicBitSet forNumBuckets(int numBuckets, boolean initialValue) {
+		return new AtomicBitSet(numBuckets, initialValue);
+	}
+
+	public static AtomicBitSet forNumBits(int numBits, boolean initialValue) {
+		int numBuckets = numBits / 64;
+		if (numBuckets * 64 < numBits) {
+			numBuckets++;
+		}
+		return new AtomicBitSet(numBuckets, initialValue);
 	}
 
 	private void setAll(boolean value) {
@@ -30,7 +38,7 @@ public final class AtomicBitSet {
 
 	public int switchAnyToFalse() {
 		final int startBucket = (int) (Thread.currentThread().getId() % bs.length);
-//		final int startBucket = 0;
+		// final int startBucket = 0;
 		for (int i = 0; i < bs.length; i++) {
 			final int bucketIdx = (startBucket + i) % bs.length;
 			int idx = switchAnyToFalseInBucket(bucketIdx);
