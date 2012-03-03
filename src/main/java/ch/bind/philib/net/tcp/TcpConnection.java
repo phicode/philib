@@ -143,12 +143,9 @@ public class TcpConnection implements Connection {
 			int num = channel.read(rbuf);
 			if (num == -1) {
 				return true;
-				// TODO
-				// throw new
-				// UnsupportedOperationException("TODO: closed stream");
 			} else {
 				rbuf.flip();
-				// TODO: remove
+				// TODO: make assert
 				SimpleValidation.isTrue(num == rbuf.limit());
 				SimpleValidation.isTrue(num == rbuf.remaining());
 				byte[] b = new byte[num];
