@@ -11,11 +11,7 @@ public final class SocketAddresses {
 	}
 
 	public static InetSocketAddress wildcard(int port) {
-		try {
-			return fromIp("0.0.0.0", port);
-		} catch (UnknownHostException e) {
-			throw new RuntimeException("wildcard hostname not found: " + e.getMessage(), e);
-		}
+		return new InetSocketAddress((InetAddress) null, port);
 	}
 
 	public static InetSocketAddress fromIp(String address, int port) throws UnknownHostException {
