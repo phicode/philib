@@ -144,7 +144,7 @@ public abstract class ObjectPool<E> {
 		SimpleValidation.notNull(head);
 		do {
 			final Node<E> tail = root.get();
-			head.setNext(tail);
+			head.setTail(tail);
 			if (root.compareAndSet(tail, head)) {
 				return;
 			}
@@ -158,11 +158,11 @@ public abstract class ObjectPool<E> {
 				return null;
 			} else {
 				if (root.compareAndSet(head, LOCK_DUMMY)) {
-					final Node<E> tail = head.getNext();
+					final Node<E> tail = head.getTail();
 					boolean ok = root.compareAndSet(LOCK_DUMMY, tail);
 					// TODO: make assert
 					SimpleValidation.isTrue(ok);
-					head.unsetNext();
+					head.unsetTail();
 					return head;
 					// }
 				}
@@ -208,15 +208,15 @@ public abstract class ObjectPool<E> {
 		// AtomicReference<Node<E>>();
 
 		// private final AtomicReference<E> entry = new AtomicReference<E>();
-		private volatile Node<E> next;
+		private volatile Node<E> tail;
 
 		private volatile E entry;
 
-		void setNext(Node<E> n) {
+		void setTail(Node<E> t) {
 			// TODO: make this SimpleValidation an assert
 			// SimpleValidation.notNull(n);
 			// this.next.set(n);
-			this.next = n;
+			this.tail = t;
 		}
 
 		void setInFreeList() {
@@ -235,14 +235,14 @@ public abstract class ObjectPool<E> {
 			// SimpleValidation.isFalse(inFreeList.get());
 		}
 
-		Node<E> getNext() {
+		Node<E> getTail() {
 			// return next.get();
-			return next;
+			return tail;
 		}
 
-		void unsetNext() {
+		void unsetTail() {
 			// this.next.set(null);
-			next = null;
+			tail = null;
 		}
 
 		void setEntry(E e) {
