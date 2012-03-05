@@ -30,7 +30,7 @@ import ch.bind.philib.validation.SimpleValidation;
 public abstract class ObjPool<E> {
 
 	private static final int CONC = 8;
-	
+
 	private final AtomicBitSet readable;
 
 	private final AtomicBitSet writable;
@@ -46,8 +46,11 @@ public abstract class ObjPool<E> {
 	// private final AtomicInteger rpos = new AtomicInteger(0);
 	//
 	// private final AtomicInteger wpos = new AtomicInteger(0);
+	private final ObjPoolType<E> type;
 
-	public ObjPool(int maxEntries) {
+	public ObjPool(ObjPoolType<E> type, int maxEntries) {
+		SimpleValidation.notNull(type);
+		this.type = type;
 		this.readable = AtomicBitSet.forNumBits(CONC, false);
 		this.writable = AtomicBitSet.forNumBits(CONC, true);
 		this.maxEntries = maxEntries;
@@ -68,18 +71,13 @@ public abstract class ObjPool<E> {
 		}
 	}
 
-	protected abstract E create();
-
-	protected abstract void destroy(E e);
-
 	public E get() {
 		int idx = readable.switchAnyToFalse();
 		if (idx == -1) {
-			return create();
-		}
-		else {
+			return type.create();
+		} else {
 			useCount[idx].incrementAndGet();
-			
+
 			E e = pool.getAndSet(idx, null);
 			// TODO: make to assert
 			SimpleValidation.notNull(e);
@@ -93,11 +91,10 @@ public abstract class ObjPool<E> {
 		if (e != null) {
 			int idx = writable.switchAnyToFalse();
 			if (idx == -1) {
-				destroy(e);
-			}
-			else {
+				type.destroy(e);
+			} else {
 				useCount[idx].incrementAndGet();
-				
+
 				boolean ok = pool.compareAndSet(idx, null, e);
 				// TODO: make to assert
 				SimpleValidation.isTrue(ok);

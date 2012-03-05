@@ -24,7 +24,7 @@ package ch.bind.philib.io;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class BufferPool extends NoopObjPool<byte[]> {
+public final class BufferPool implements ObjPoolType<byte[]> {
 //public final class BufferPool extends ObjectPool<byte[]> {
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;
@@ -33,24 +33,26 @@ public final class BufferPool extends NoopObjPool<byte[]> {
 	public static final int DEFAULT_NUM_BUFFERS = 128;
 
 	private final int bufSize;
+	
+	private final ObjectPool<byte[]> pool;
 
-	public BufferPool() {
+	private BufferPool() {
 		this(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS);
 	}
 
-	public BufferPool(int bufferSize) {
+	private BufferPool(int bufferSize) {
 		this(bufferSize, DEFAULT_NUM_BUFFERS);
 	}
 
-	public BufferPool(int bufferSize, int maxBuffers) {
-		super(maxBuffers);
+	private BufferPool(int bufferSize, int maxBuffers) {
+//		super(maxBuffers);
 		this.bufSize = bufferSize;
 	}
 
 	private final AtomicLong creates = new AtomicLong();
 
 	@Override
-	protected byte[] create() {
+	public byte[] create() {
 		creates.incrementAndGet();
 		return new byte[bufSize];
 	}
