@@ -24,7 +24,7 @@ package ch.bind.philib.io;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class BufferPool extends ObjPool<byte[]> {
+public final class BufferPool extends ObjectPool<byte[]> {
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;
 

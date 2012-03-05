@@ -88,17 +88,17 @@ public class BufferPoolTest {
 
 	@Test
 	public void stressTest() throws Exception {
-//		long numOps = 32L * 1024L * 1024L;
-		 long numOps = 8L * 1024L * 1024L;
+		// long numOps = 32L * 1024L * 1024L;
+		long numOps = 8L * 1024L * 1024L;
 		// long numOps = 2L * 1024L * 1024L;
 		// release fewer then we get -> the buffer pool has to create new
 		// objects
-//		 int getOps = 100;
-//		 int putOps = 99;
-		 int getOps = 1000;
-		 int putOps = 1000;
-//		int getOps = 5;
-//		int putOps = 4;
+		// int getOps = 100;
+		// int putOps = 99;
+		int getOps = 1000;
+		int putOps = 1000;
+		// int getOps = 5;
+		// int putOps = 4;
 		boolean firstRun = true;
 		int numRuns = 1;
 		for (int i = 1; i <= 32; i *= 2) {
@@ -151,7 +151,7 @@ public class BufferPoolTest {
 			System.out.printf("%2d ; %9d ; %9d ; %4d ; %.3f%n", numThreads, numOps, bufsCreated, time, opsPerMs);
 
 			if (numThreads == 32) {
-				bp.printUseCounts();
+//				bp.printUseCounts();
 			}
 		}
 		return time;
@@ -191,6 +191,7 @@ public class BufferPoolTest {
 				go.acquire();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				end.release();
 			}
 			try {
 				long ops = 0;

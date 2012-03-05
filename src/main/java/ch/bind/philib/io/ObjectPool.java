@@ -81,7 +81,7 @@ public abstract class ObjectPool<E> {
 	private E tryGet(final int listIdx) {
 		AtomicReference<Node<E>> freeList = freeLists[listIdx];
 		AtomicReference<Node<E>> objList = objLists[listIdx];
-		
+
 		final Node<E> node = take(objList);
 		if (node == null) {
 			return null;
@@ -97,10 +97,11 @@ public abstract class ObjectPool<E> {
 	}
 
 	// private AtomicInteger _fl = new AtomicInteger();
-	private int _fl;
+	// private int _fl;
 
 	private final int fl() {
-		return Math.abs(_fl++) & NUMLISTSMASK;
+		return 0;
+		// return Math.abs(++_fl) & NUMLISTSMASK;
 		// return Math.abs(_fl.incrementAndGet()) & NUMLISTSMASK;
 		// return (int) (Thread.currentThread().getId() & NUMLISTSMASK);
 	}
@@ -118,24 +119,24 @@ public abstract class ObjectPool<E> {
 	}
 
 	private boolean tryRelease(int listIdx, E e) {
-		AtomicBoolean lock = listLocks[listIdx];
-		if (lock.compareAndSet(false, true)) {
-			try {
-				AtomicReference<Node<E>> freeList = freeLists[listIdx];
-				AtomicReference<Node<E>> objList = objLists[listIdx];
+		// AtomicBoolean lock = listLocks[listIdx];
+		// if (lock.compareAndSet(false, true)) {
+		// try {
+		AtomicReference<Node<E>> freeList = freeLists[listIdx];
+		AtomicReference<Node<E>> objList = objLists[listIdx];
 
-				final Node<E> node = take(freeList);
-				if (node != null) {
-					node.assertInFreeList();
-					node.setEntry(e);
-					node.setInObjList();
-					put(objList, node);
-					return true;
-				}
-			} finally {
-				lock.set(false);
-			}
+		final Node<E> node = take(freeList);
+		if (node != null) {
+			node.assertInFreeList();
+			node.setEntry(e);
+			node.setInObjList();
+			put(objList, node);
+			return true;
 		}
+		// } finally {
+		// lock.set(false);
+		// }
+		// }
 		return false;
 	}
 
@@ -156,10 +157,14 @@ public abstract class ObjectPool<E> {
 			if (head == null || head == LOCK_DUMMY) { // empty
 				return null;
 			} else {
-				final Node<E> tail = head.getNext();
-				if (root.compareAndSet(head, tail)) {
+				if (root.compareAndSet(head, LOCK_DUMMY)) {
+					final Node<E> tail = head.getNext();
+					boolean ok = root.compareAndSet(LOCK_DUMMY, tail);
+					// TODO: make assert
+					SimpleValidation.isTrue(ok);
 					head.unsetNext();
 					return head;
+					// }
 				}
 			}
 		} while (true);
