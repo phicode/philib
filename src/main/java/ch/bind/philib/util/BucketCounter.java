@@ -21,6 +21,8 @@
  */
 package ch.bind.philib.util;
 
+import ch.bind.philib.validation.SimpleValidation;
+
 public final class BucketCounter {
 
 	private final long capacity;
@@ -37,6 +39,8 @@ public final class BucketCounter {
 	}
 
 	public static BucketCounter withReleasePerSecond(double releasePerSecond, long capacity) {
+		SimpleValidation.isTrue(releasePerSecond >= 0.000001, "releasePerSecond must be >= 0.000001");
+		SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
 		long releaseIntervalNano = (long) Math.ceil(1000000000f / releasePerSecond);
 		return new BucketCounter(capacity, releaseIntervalNano);
 	}
@@ -62,7 +66,7 @@ public final class BucketCounter {
 		recalc(timeNano);
 		return currentCapacity;
 	}
-	
+
 	public long nextAvailableNano() {
 		return nextAvailableNano(System.nanoTime());
 	}
@@ -72,7 +76,8 @@ public final class BucketCounter {
 		if (currentCapacity > 0) {
 			// available immediately
 			return 0;
-		} else {
+		}
+		else {
 			long nextAvailNano = lastReleaseNano + releaseIntevalNano;
 			return nextAvailNano - timeNano;
 		}
@@ -88,7 +93,8 @@ public final class BucketCounter {
 		if (newVal > capacity) {
 			currentCapacity = capacity;
 			lastReleaseNano = timeNano;
-		} else {
+		}
+		else {
 			currentCapacity = newVal;
 			lastReleaseNano += (numRelease * releaseIntevalNano);
 		}
