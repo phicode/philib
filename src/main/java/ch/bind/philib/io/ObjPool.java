@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import ch.bind.philib.validation.SimpleValidation;
 
-public abstract class ObjPool<E> {
+public final class ObjPool<E> {
 
 	private static final int CONC = 8;
 

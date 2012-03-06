@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import ch.bind.philib.validation.SimpleValidation;
 
-public abstract class ObjectPool<E> {
+public final class ObjectPool<E> {
 
 	private static final int NUMLISTS = 1;
 
@@ -42,8 +42,11 @@ public abstract class ObjectPool<E> {
 
 	private final Node<E> LOCK_DUMMY = new Node<E>();
 
-	public ObjectPool(int maxEntries) {
+	private final ObjPoolType<E> type;
+
+	public ObjectPool(ObjPoolType<E> type,int maxEntries) {
 		super();
+		this.type = type;
 		// this.listLocks = new AtomicBoolean[NUMLISTS];
 		this.freeLists = new AtomicReference[NUMLISTS];
 		this.objLists = new AtomicReference[NUMLISTS];
@@ -62,9 +65,9 @@ public abstract class ObjectPool<E> {
 		}
 	}
 
-	protected abstract E create();
-
-	protected abstract void destroy(E e);
+//	protected abstract E create();
+//
+//	protected abstract void destroy(E e);
 
 	public E get() {
 		int firstList = fl();
@@ -75,7 +78,7 @@ public abstract class ObjectPool<E> {
 				return e;
 			}
 		}
-		return create();
+		return type.create();
 	}
 
 	private E tryGet(final int listIdx) {

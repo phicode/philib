@@ -48,6 +48,11 @@ public final class BufferPool implements ObjPoolType<byte[]> {
 //		super(maxBuffers);
 		this.bufSize = bufferSize;
 	}
+	
+	public BufferPool createPoolö(int bufferSize, int maxBuffers) {
+		ObjectPool<byte[]> pool = new ObjectPool<byte[]>();
+		return new BufferPool(bufferSize)
+	}
 
 	private final AtomicLong creates = new AtomicLong();
 
