@@ -62,6 +62,21 @@ public final class BucketCounter {
 		recalc(timeNano);
 		return currentCapacity;
 	}
+	
+	public long nextAvailableNano() {
+		return nextAvailableNano(System.nanoTime());
+	}
+
+	public long nextAvailableNano(long timeNano) {
+		recalc(timeNano);
+		if (currentCapacity > 0) {
+			// available immediately
+			return 0;
+		} else {
+			long nextAvailNano = lastReleaseNano + releaseIntevalNano;
+			return nextAvailNano - timeNano;
+		}
+	}
 
 	private void recalc(long timeNano) {
 		assert (timeNano >= lastReleaseNano);

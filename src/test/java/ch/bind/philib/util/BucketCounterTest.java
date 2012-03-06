@@ -50,14 +50,20 @@ public class BucketCounterTest {
 	public void fakeTimeCountSmallSteps() {
 		BucketCounter bc = BucketCounter.withReleasePerSecond(2500, 2500);
 		long time = SEC;
+		long interval = 400000; // SEC/2500
 		assertEquals(2500, bc.available(time));
+		assertEquals(0, bc.nextAvailableNano(time));
 		// simulate one whole day
 		for (int numSeconds = 0; numSeconds < 86400; numSeconds++) {
 			assertEquals(2500, bc.available(time));
+			assertEquals(0, bc.nextAvailableNano(time));
+			
 			bc.acquire(2500, time);
 			assertEquals(0, bc.available(time));
+			assertEquals(interval, bc.nextAvailableNano(time));
 			time++; // x sec + 1 nano
 			assertEquals(0, bc.available(time));
+			assertEquals(interval-1, bc.nextAvailableNano(time));
 
 			// x.5 sec - 1 nano
 			time += (SEC / 2 - 2);
