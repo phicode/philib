@@ -29,48 +29,65 @@ package ch.bind.philib.lang;
  */
 public final class CompareUtil {
 
-    private CompareUtil() {
-    }
+	private CompareUtil() {
+	}
 
-    public static boolean equals(final Object o1, final Object o2) {
-        if (o1 == o2)
-            return true;
-        if (o1 == null) {
-            // o2 is not null -> not equal
-            return false;
-        } else {
-            if (o2 == null) {
-                return false;
-            } else {
-                return o1.equals(o2);
-            }
-        }
-    }
+	/**
+	 * A null-safe equality checking method.<br/>
+	 * results:
+	 * 
+	 * <pre>
+	 *  a / b | null  | a         |
+	 * ------------------------------
+	 *  null  | true  | false       |
+	 *     b  | false | a.equals(b) |
+	 * </pre>
+	 * 
+	 * @param a
+	 *            -
+	 * @param b
+	 *            -
+	 * @return see above
+	 */
+	public static boolean equals(final Object a, final Object b) {
+		if (a == b)
+			return true;
+		if (a == null) {
+			// b is not null -> not equal
+			return false;
+		} else {
+			if (b == null) {
+				return false;
+			} else {
+				return a.equals(b);
+			}
+		}
+	}
 
-    public static <T> int compare(final Comparable<T> o1, final T o2) {
-        if (o1 == o2)
-            return 0;
-        if (o1 == null) {
-            // o2 is not null
-            return -1; // o1 < o2
-        } else {
-            if (o2 == null) {
-                return 1; // o1 > o2
-            } else {
-                return o1.compareTo(o2);
-            }
-        }
-    }
+	public static <T> int compare(final Comparable<T> a, final T b) {
+		if (a == b)
+			return 0;
+		if (a == null) {
+			// b is not null
+			return -1; // a < b
+		} else {
+			if (b == null) {
+				return 1; // a > b
+			} else {
+				return a.compareTo(b);
+			}
+		}
+	}
 
-    public static int compareBool(boolean a, boolean b) {
+	public static int compareBool(boolean a, boolean b) {
 		return (a == b ? 0 : (a ? 1 : -1));
 	}
-    
-    public static final int normalize(int diff) {
-        return diff < 0 ? -1 : (diff == 0 ? 0 : 1);
-    }
 
-    public static final int normalize(long diff) {
-        return (diff < 0 ? -1 : (diff == 0 ? 0 : 1));
-    }
+	public static final int normalize(int diff) {
+		return diff < 0 ? -1 : (diff == 0 ? 0 : 1);
+	}
+
+	public static final int normalize(long diff) {
+		return (diff < 0 ? -1 : (diff == 0 ? 0 : 1));
+	}
 }
