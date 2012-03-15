@@ -19,13 +19,12 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.io;
+package ch.bind.philib.pool;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class BufferPool implements ObjPoolType<byte[]> {
-//public final class BufferPool extends ObjectPool<byte[]> {
+public final class BufferPool {
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;
 
@@ -33,48 +32,60 @@ public final class BufferPool implements ObjPoolType<byte[]> {
 	public static final int DEFAULT_NUM_BUFFERS = 128;
 
 	private final int bufSize;
-	
+	private final ByteArrayObjectFactory factory;
+
 	private final ObjectPool<byte[]> pool;
 
-	private BufferPool() {
+	private static final class ByteArrayObjectFactory implements ObjectFactory<byte[]> {
+
+		private final int bufSize;
+		private final AtomicLong creates = new AtomicLong();
+
+		public ByteArrayObjectFactory(int bufSize) {
+			this.bufSize = bufSize;
+		}
+
+		@Override
+		public void destroy(byte[] e) {
+		}
+
+		@Override
+		public byte[] create() {
+			creates.incrementAndGet();
+			return new byte[bufSize];
+		}
+	}
+
+	public BufferPool() {
 		this(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS);
 	}
 
-	private BufferPool(int bufferSize) {
+	public BufferPool(int bufferSize) {
 		this(bufferSize, DEFAULT_NUM_BUFFERS);
 	}
 
-	private BufferPool(int bufferSize, int maxBuffers) {
-//		super(maxBuffers);
+	public BufferPool(int bufferSize, int maxBuffers) {
+		this(bufferSize, new ObjectPoolImpl<byte[]>(maxBuffers));
+	}
+
+	public BufferPool(int bufferSize, ObjectPool<byte[]> pool) {
 		this.bufSize = bufferSize;
-	}
-	
-	public BufferPool createPoolö(int bufferSize, int maxBuffers) {
-		ObjectPool<byte[]> pool = new ObjectPool<byte[]>();
-		return new BufferPool(bufferSize)
-	}
-
-	private final AtomicLong creates = new AtomicLong();
-
-	@Override
-	public byte[] create() {
-		creates.incrementAndGet();
-		return new byte[bufSize];
-	}
-
-	@Override
-	protected void destroy(byte[] e) {
+		this.factory = new ByteArrayObjectFactory(bufferSize);
+		this.pool = pool;
 	}
 
 	public long getNumCreates() {
-		return creates.get();
+		return factory.creates.get();
 	}
 
-	@Override
+	public byte[] get() {
+		return pool.get(factory);
+	}
+
 	public void release(byte[] buf) {
 		// discard buffers which do not have the right size
 		if (buf != null && buf.length == bufSize) {
-			super.release(buf);
+			pool.release(factory, buf);
 		}
 	}
 }

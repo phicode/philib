@@ -19,12 +19,13 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.io;
+package ch.bind.philib.pool;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
+import ch.bind.philib.io.AtomicBitSet;
 import ch.bind.philib.validation.SimpleValidation;
 
 public final class ObjPool<E> {
@@ -46,9 +47,9 @@ public final class ObjPool<E> {
 	// private final AtomicInteger rpos = new AtomicInteger(0);
 	//
 	// private final AtomicInteger wpos = new AtomicInteger(0);
-	private final ObjPoolType<E> type;
+	private final ObjectFactory<E> type;
 
-	public ObjPool(ObjPoolType<E> type, int maxEntries) {
+	public ObjPool(ObjectFactory<E> type, int maxEntries) {
 		SimpleValidation.notNull(type);
 		this.type = type;
 		this.readable = AtomicBitSet.forNumBits(CONC, false);

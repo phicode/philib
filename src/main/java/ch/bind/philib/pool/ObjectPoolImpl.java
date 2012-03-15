@@ -19,7 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.io;
+package ch.bind.philib.pool;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import ch.bind.philib.validation.SimpleValidation;
 
-public final class ObjectPool<E> {
+public final class ObjectPoolImpl<E> implements ObjectPool<E> {
 
 	private static final int NUMLISTS = 1;
 
@@ -42,11 +42,9 @@ public final class ObjectPool<E> {
 
 	private final Node<E> LOCK_DUMMY = new Node<E>();
 
-	private final ObjPoolType<E> type;
-
-	public ObjectPool(ObjPoolType<E> type,int maxEntries) {
+	public ObjectPoolImpl(int maxEntries) {
 		super();
-		this.type = type;
+		// this.type = type;
 		// this.listLocks = new AtomicBoolean[NUMLISTS];
 		this.freeLists = new AtomicReference[NUMLISTS];
 		this.objLists = new AtomicReference[NUMLISTS];
@@ -65,11 +63,7 @@ public final class ObjectPool<E> {
 		}
 	}
 
-//	protected abstract E create();
-//
-//	protected abstract void destroy(E e);
-
-	public E get() {
+	public E get(final ObjectFactory<E> factory) {
 		int firstList = fl();
 		for (int i = 0; i < NUMLISTS; i++) {
 			int listIdx = (i + firstList) & NUMLISTSMASK;
@@ -78,7 +72,20 @@ public final class ObjectPool<E> {
 				return e;
 			}
 		}
-		return type.create();
+		return factory.create();
+	}
+
+	public void release(final ObjectFactory<E> factory, final E e) {
+		if (e != null) {
+			int firstList = fl();
+			for (int i = 0; i < NUMLISTS; i++) {
+				int listIdx = (i + firstList) & NUMLISTSMASK;
+				if (tryRelease(listIdx, e)) {
+					return;
+				}
+			}
+			factory.destroy(e);
+		}
 	}
 
 	private E tryGet(final int listIdx) {
@@ -100,25 +107,13 @@ public final class ObjectPool<E> {
 	}
 
 	// private AtomicInteger _fl = new AtomicInteger();
-	// private int _fl;
+//	 private int _fl;
 
 	private final int fl() {
-		return 0;
-		// return Math.abs(++_fl) & NUMLISTSMASK;
+//		return 0;
+//		 return Math.abs(++_fl) & NUMLISTSMASK;
 		// return Math.abs(_fl.incrementAndGet()) & NUMLISTSMASK;
-		// return (int) (Thread.currentThread().getId() & NUMLISTSMASK);
-	}
-
-	public void release(final E e) {
-		if (e != null) {
-			int firstList = fl();
-			for (int i = 0; i < NUMLISTS; i++) {
-				int listIdx = (i + firstList) & NUMLISTSMASK;
-				if (tryRelease(listIdx, e)) {
-					return;
-				}
-			}
-		}
+		 return (int) (Thread.currentThread().getId() & NUMLISTSMASK);
 	}
 
 	private boolean tryRelease(int listIdx, E e) {
@@ -143,13 +138,17 @@ public final class ObjectPool<E> {
 		return false;
 	}
 
-	private final void put(final AtomicReference<Node<E>> root, final Node<E> head) {
-		SimpleValidation.notNull(head);
+	private final void put(final AtomicReference<Node<E>> root, final Node<E> newHead) {
+		SimpleValidation.notNull(newHead);
 		do {
 			final Node<E> tail = root.get();
-			head.setTail(tail);
-			if (root.compareAndSet(tail, head)) {
-				return;
+			if (tail != LOCK_DUMMY) {
+				if (root.compareAndSet(tail, LOCK_DUMMY)) {
+					newHead.setTail(tail);
+					boolean ok = root.compareAndSet(LOCK_DUMMY, newHead);
+					SimpleValidation.isTrue(ok);
+					return;
+				}
 			}
 		} while (true);
 	}
@@ -157,7 +156,7 @@ public final class ObjectPool<E> {
 	private final Node<E> take(final AtomicReference<Node<E>> root) {
 		do {
 			final Node<E> head = root.get();
-			if (head == null || head == LOCK_DUMMY) { // empty
+			if (head == null || head == LOCK_DUMMY) { // empty or locked
 				return null;
 			} else {
 				if (root.compareAndSet(head, LOCK_DUMMY)) {
@@ -205,7 +204,7 @@ public final class ObjectPool<E> {
 	// }
 
 	private static final class Node<E> {
-		// private final AtomicBoolean inFreeList = new AtomicBoolean();
+		private final AtomicBoolean inFreeList = new AtomicBoolean();
 
 		// private final AtomicReference<Node<E>> next = new
 		// AtomicReference<Node<E>>();
@@ -223,19 +222,19 @@ public final class ObjectPool<E> {
 		}
 
 		void setInFreeList() {
-			// inFreeList.set(true);
+			inFreeList.set(true);
 		}
 
 		void setInObjList() {
-			// inFreeList.set(false);
+			inFreeList.set(false);
 		}
 
 		void assertInFreeList() {
-			// SimpleValidation.isTrue(inFreeList.get());
+			SimpleValidation.isTrue(inFreeList.get());
 		}
 
 		void assertInObjList() {
-			// SimpleValidation.isFalse(inFreeList.get());
+			SimpleValidation.isFalse(inFreeList.get());
 		}
 
 		Node<E> getTail() {

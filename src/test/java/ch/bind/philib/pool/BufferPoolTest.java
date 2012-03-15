@@ -19,7 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.io;
+package ch.bind.philib.pool;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -88,6 +88,11 @@ public class BufferPoolTest {
 
 	@Test
 	public void stressTest() throws Exception {
+		stressTest(true);
+		stressTest(false);
+	}
+
+	public void stressTest(boolean onlyNew) throws Exception {
 		// long numOps = 32L * 1024L * 1024L;
 		long numOps = 8L * 1024L * 1024L;
 		// long numOps = 2L * 1024L * 1024L;
@@ -104,7 +109,7 @@ public class BufferPoolTest {
 		for (int i = 1; i <= 32; i *= 2) {
 			long total = 0;
 			for (int r = 0; r < numRuns; r++) {
-				total += stressTest(firstRun, i, numOps, getOps, putOps);
+				total += stressTest(onlyNew, firstRun, i, numOps, getOps, putOps);
 				firstRun = false;
 			}
 			long average = total / numRuns;
@@ -112,13 +117,18 @@ public class BufferPoolTest {
 		}
 	}
 
-	public long stressTest(boolean firstRun, int numThreads, long numOps, int getOps, int putOps) throws Exception {
+	public long stressTest(boolean onlyNew, boolean firstRun, int numThreads, long numOps, int getOps, int putOps) throws Exception {
 		TestUtil.gcAndSleep();
 
 		int totalBufSize = 32 * 1024 * 1024;
 		int bufSize = 16;
 		int numBufs = totalBufSize / bufSize / (4096 / 16);
-		BufferPool bp = new BufferPool(bufSize, numBufs);
+		BufferPool bp;
+		if (onlyNew) {
+			bp = new BufferPool(bufSize, new NoopObjPool<byte[]>());
+		} else {
+			bp = new BufferPool(bufSize, numBufs);
+		}
 		Thread[] ts = new Thread[numThreads];
 		long numOpsPerThread = numOps / numThreads;
 		Semaphore ready = new Semaphore(0);
@@ -151,7 +161,7 @@ public class BufferPoolTest {
 			System.out.printf("%2d ; %9d ; %9d ; %4d ; %.3f%n", numThreads, numOps, bufsCreated, time, opsPerMs);
 
 			if (numThreads == 32) {
-//				bp.printUseCounts();
+				// bp.printUseCounts();
 			}
 		}
 		return time;
