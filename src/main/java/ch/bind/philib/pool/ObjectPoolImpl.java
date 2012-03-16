@@ -22,9 +22,7 @@
 package ch.bind.philib.pool;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import ch.bind.philib.validation.SimpleValidation;
 
@@ -81,6 +79,7 @@ public final class ObjectPoolImpl<E> implements ObjectPool<E> {
 			for (int i = 0; i < NUMLISTS; i++) {
 				int listIdx = (i + firstList) & NUMLISTSMASK;
 				if (tryRelease(listIdx, e)) {
+					factory.released(e);
 					return;
 				}
 			}
@@ -107,13 +106,13 @@ public final class ObjectPoolImpl<E> implements ObjectPool<E> {
 	}
 
 	// private AtomicInteger _fl = new AtomicInteger();
-//	 private int _fl;
+	// private int _fl;
 
 	private final int fl() {
-//		return 0;
-//		 return Math.abs(++_fl) & NUMLISTSMASK;
+		// return 0;
+		// return Math.abs(++_fl) & NUMLISTSMASK;
 		// return Math.abs(_fl.incrementAndGet()) & NUMLISTSMASK;
-		 return (int) (Thread.currentThread().getId() & NUMLISTSMASK);
+		return (int) (Thread.currentThread().getId() & NUMLISTSMASK);
 	}
 
 	private boolean tryRelease(int listIdx, E e) {
@@ -262,5 +261,4 @@ public final class ObjectPoolImpl<E> implements ObjectPool<E> {
 			return e;
 		}
 	}
-
 }

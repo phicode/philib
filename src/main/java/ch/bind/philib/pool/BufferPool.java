@@ -21,6 +21,7 @@
  */
 package ch.bind.philib.pool;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -53,6 +54,11 @@ public final class BufferPool {
 		public byte[] create() {
 			creates.incrementAndGet();
 			return new byte[bufSize];
+		}
+
+		@Override
+		public void released(byte[] e) {
+			Arrays.fill(e, (byte) 0);
 		}
 	}
 
