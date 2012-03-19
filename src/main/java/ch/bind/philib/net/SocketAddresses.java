@@ -36,7 +36,7 @@ public final class SocketAddresses {
 	}
 
 	public static InetSocketAddress fromIp(String address, int port) throws UnknownHostException {
-		InetAddress inetAddr = Inet4Address.getByName(address);
+		InetAddress inetAddr = InetAddress.getByName(address);
 		return new InetSocketAddress(inetAddr, port);
 	}
 }
