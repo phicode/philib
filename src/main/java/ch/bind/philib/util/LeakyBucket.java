@@ -23,26 +23,31 @@ package ch.bind.philib.util;
 
 import ch.bind.philib.validation.SimpleValidation;
 
-public final class BucketCounter {
+public final class LeakyBucket {
 
 	private final long capacity;
 
-	private final long releaseIntevalNano;
+	private final long releaseIntervalNano;
 
 	private long lastReleaseNano;
 
 	private long currentCapacity;
 
-	private BucketCounter(long capacity, long releaseIntevalNano) {
+	private LeakyBucket(long capacity, long releaseIntervalNano) {
 		this.capacity = capacity;
-		this.releaseIntevalNano = releaseIntevalNano;
+		this.releaseIntervalNano = releaseIntervalNano;
 	}
 
-	public static BucketCounter withReleasePerSecond(double releasePerSecond, long capacity) {
+	/**
+	 * @param releasePerSecond
+	 * @param capacity
+	 * @return
+	 */
+	public static LeakyBucket withReleasePerSecond(double releasePerSecond, long capacity) {
 		SimpleValidation.isTrue(releasePerSecond >= 0.000001, "releasePerSecond must be >= 0.000001");
 		SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
 		long releaseIntervalNano = (long) Math.ceil(1000000000f / releasePerSecond);
-		return new BucketCounter(capacity, releaseIntervalNano);
+		return new LeakyBucket(capacity, releaseIntervalNano);
 	}
 
 	public long getCapacity() {
@@ -76,9 +81,8 @@ public final class BucketCounter {
 		if (currentCapacity > 0) {
 			// available immediately
 			return 0;
-		}
-		else {
-			long nextAvailNano = lastReleaseNano + releaseIntevalNano;
+		} else {
+			long nextAvailNano = lastReleaseNano + releaseIntervalNano;
 			return nextAvailNano - timeNano;
 		}
 	}
@@ -86,17 +90,16 @@ public final class BucketCounter {
 	private void recalc(long timeNano) {
 		assert (timeNano >= lastReleaseNano);
 		long elapsedNano = timeNano - lastReleaseNano;
-		long numRelease = elapsedNano / releaseIntevalNano;
+		long numRelease = elapsedNano / releaseIntervalNano;
 		long newVal = currentCapacity + numRelease;
 
 		// dont go over the limit
 		if (newVal > capacity) {
 			currentCapacity = capacity;
 			lastReleaseNano = timeNano;
-		}
-		else {
+		} else {
 			currentCapacity = newVal;
-			lastReleaseNano += (numRelease * releaseIntevalNano);
+			lastReleaseNano += (numRelease * releaseIntervalNano);
 		}
 	}
 }

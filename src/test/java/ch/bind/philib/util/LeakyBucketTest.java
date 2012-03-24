@@ -25,20 +25,20 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class BucketCounterTest {
+public class LeakyBucketTest {
 
 	private static final long SEC = 1000000000L;
 
 	@Test
 	public void normalTimeInitialCalc() {
-		BucketCounter bc = BucketCounter.withReleasePerSecond(2500, 1000);
+		LeakyBucket bc = LeakyBucket.withReleasePerSecond(2500, 1000);
 		assertEquals(1000, bc.available());
 		assertEquals(1000, bc.getCapacity());
 	}
 
 	@Test
 	public void fakeTimeInitialCalc() {
-		BucketCounter bc = BucketCounter.withReleasePerSecond(100, 1000);
+		LeakyBucket bc = LeakyBucket.withReleasePerSecond(100, 1000);
 		// not quite a second
 		long time = SEC - 1;
 		assertEquals(99, bc.available(time));
@@ -48,7 +48,7 @@ public class BucketCounterTest {
 
 	@Test
 	public void fakeTimeCountSmallSteps() {
-		BucketCounter bc = BucketCounter.withReleasePerSecond(2500, 2500);
+		LeakyBucket bc = LeakyBucket.withReleasePerSecond(2500, 2500);
 		long time = SEC;
 		long interval = 400000; // SEC/2500
 		assertEquals(2500, bc.available(time));
@@ -57,13 +57,13 @@ public class BucketCounterTest {
 		for (int numSeconds = 0; numSeconds < 86400; numSeconds++) {
 			assertEquals(2500, bc.available(time));
 			assertEquals(0, bc.nextAvailableNano(time));
-			
+
 			bc.acquire(2500, time);
 			assertEquals(0, bc.available(time));
 			assertEquals(interval, bc.nextAvailableNano(time));
 			time++; // x sec + 1 nano
 			assertEquals(0, bc.available(time));
-			assertEquals(interval-1, bc.nextAvailableNano(time));
+			assertEquals(interval - 1, bc.nextAvailableNano(time));
 
 			// x.5 sec - 1 nano
 			time += (SEC / 2 - 2);
@@ -88,19 +88,30 @@ public class BucketCounterTest {
 
 	@Test
 	public void acquireWithRealTime() {
-		BucketCounter bc = BucketCounter.withReleasePerSecond(2500, 1000);
+		LeakyBucket bc = LeakyBucket.withReleasePerSecond(2500, 1000);
 		long start = System.nanoTime();
 		assertEquals(1000, bc.available());
 		bc.acquire(1000);
 		long moreAcquired = 0;
+		long loops = 0;
+		long badNextAvailLoops = 0;
 		while (moreAcquired < 5000) {
+			loops++;
+			long nextAvail = bc.nextAvailableNano();
 			long a = bc.available();
 			if (a > 0) {
+				if (nextAvail > 0) {
+					badNextAvailLoops++;
+				}
 				bc.acquire(a);
 				moreAcquired += a;
+			} else {
+				assertTrue(nextAvail > 0);
 			}
 		}
 		long end = System.nanoTime();
+		System.out.printf("bad nextAvail loops: %d/%d%n", badNextAvailLoops, loops);
+
 		long totalTime = end - start;
 		// 2 milliseconds or 0.1% should be ok even for lame computers
 		long delta = 5 * 1000 * 1000;
