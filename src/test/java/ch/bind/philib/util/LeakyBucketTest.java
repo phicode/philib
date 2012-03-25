@@ -50,7 +50,7 @@ public class LeakyBucketTest {
 	public void fakeTimeCountSmallSteps() {
 		LeakyBucket bc = LeakyBucket.withReleasePerSecond(2500, 2500);
 		long time = SEC;
-		long interval = 400000; // SEC/2500
+		long interval = 400000; // SEC / 2500
 		assertEquals(2500, bc.available(time));
 		assertEquals(0, bc.nextAvailableNano(time));
 		// simulate one whole day
@@ -93,25 +93,19 @@ public class LeakyBucketTest {
 		assertEquals(1000, bc.available());
 		bc.acquire(1000);
 		long moreAcquired = 0;
-		long loops = 0;
-		long badNextAvailLoops = 0;
 		while (moreAcquired < 5000) {
-			loops++;
-			long nextAvail = bc.nextAvailableNano();
-			long a = bc.available();
+			long time = System.nanoTime();
+			long nextAvail = bc.nextAvailableNano(time);
+			long a = bc.available(time);
 			if (a > 0) {
-				if (nextAvail > 0) {
-					badNextAvailLoops++;
-				}
-				bc.acquire(a);
+				assertEquals(nextAvail, 0); // available now
+				bc.acquire(a, time);
 				moreAcquired += a;
 			} else {
 				assertTrue(nextAvail > 0);
 			}
 		}
 		long end = System.nanoTime();
-		System.out.printf("bad nextAvail loops: %d/%d%n", badNextAvailLoops, loops);
-
 		long totalTime = end - start;
 		// 2 milliseconds or 0.1% should be ok even for lame computers
 		long delta = 5 * 1000 * 1000;
