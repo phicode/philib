@@ -35,10 +35,4 @@ public interface Connection extends Closeable, Selectable {
 	void send(byte[] data) throws IOException;
 
 	void flush() throws IOException;
-
-	byte[] pollMessage();
-
-	byte[] pollMessage(long timeout);
-
-	byte[] peekMessage();
 }

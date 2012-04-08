@@ -34,27 +34,37 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpEchoServer implements ConsumerFactory {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		new TcpEchoServer().foo();
 	}
 
-	private void foo() throws IOException {
+	private void foo() throws Exception {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
 		ConsumerFactory consumerFactory = this;
 		NetServer server = new TcpNetFactory().openServer(bindAddress, consumerFactory);
-		// server.close();
+		while (true) {
+			Thread.sleep(10000);
+			System.out.println("active sessions: " + server.getActiveSessionCount());
+		}
 	}
 
 	@Override
-	public Consumer acceptConnection(Connection connection) {
-		return new EchoConsumer(connection);
+	public Consumer createConsumer() {
+		return new EchoConsumer();
 	}
 
+	// TODO: make an abstract-consumer which delas with this initialization
+	// stuff and prevents sending if not initialized.
+	// offer a postInit() method for specific setup stuff
 	private static class EchoConsumer implements Consumer {
 
-		private final Connection connection;
+		private Connection connection;
 
-		public EchoConsumer(Connection connection) {
+		EchoConsumer() {
+		}
+
+		@Override
+		public void init(Connection connection) {
 			SimpleValidation.notNull(connection);
 			this.connection = connection;
 		}

@@ -46,13 +46,6 @@ public class TcpConnection implements Connection {
 
 	private final SocketChannel channel;
 
-	// private final Queue<byte[]> outQueue = new
-	// ConcurrentLinkedQueue<byte[]>();
-
-//	private final RingBuffer ringBuffer = new RingBuffer();
-
-	// private Consumer consumer;
-
 	private ByteBuffer rbuf;
 
 	private ByteBuffer wbuf;
@@ -60,17 +53,15 @@ public class TcpConnection implements Connection {
 	private final AtomicBoolean regForWrite = new AtomicBoolean();
 
 	private NetSelector netSelector;
+	private AtomicBoolean inSend = new AtomicBoolean(false);
+	private final Consumer consumer;
 
-	private final NQueue<byte[]> inbox;
-
-	public TcpConnection(SocketChannel channel, Semaphore receiveSem) throws IOException {
+	public TcpConnection(SocketChannel channel, Consumer consumer, NetSelector netSelector) throws IOException {
 		SimpleValidation.notNull(channel);
+		SimpleValidation.notNull(consumer);
+		SimpleValidation.notNull(netSelector);
 		this.channel = channel;
-		this.inbox = new NQueue<byte[]>(receiveSem);
-	}
-
-	void init(NetSelector netSelector) throws IOException {
-		// this.consumer = consumer;
+		this.consumer = consumer;
 		this.netSelector = netSelector;
 		this.channel.configureBlocking(false);
 		this.rbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
@@ -78,7 +69,7 @@ public class TcpConnection implements Connection {
 		netSelector.register(this);
 	}
 
-	public static TcpConnection open(SocketAddress endpoint, Semaphore receiveSem) throws IOException {
+	public static TcpConnection open(SocketAddress endpoint, Consumer consumer) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
@@ -87,9 +78,8 @@ public class TcpConnection implements Connection {
 		}
 
 		System.out.println("connected to: " + endpoint);
-		TcpConnection con = new TcpConnection(channel, receiveSem);
-		// TODO: selector through params
-		con.init(SimpleNetSelector.open());
+		NetSelector sel = SimpleNetSelector.open();
+		TcpConnection con = new TcpConnection(channel, consumer, sel);
 		return con;
 	}
 
@@ -126,30 +116,13 @@ public class TcpConnection implements Connection {
 	@Override
 	public void closed() {
 		// TODO Auto-generated method stub
-		 consumer.closed();
+		consumer.closed();
 	}
 
 	@Override
 	public void flush() throws IOException {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO");
-	}
-
-	@Override
-	public byte[] peekMessage() {
-		return inbox.peek();
-	}
-
-	@Override
-	public byte[] pollMessage() {
-		return inbox.poll();
-	}
-
-	@Override
-	public byte[] pollMessage(long timeout) {
-
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	private void doConnect() {
@@ -186,8 +159,6 @@ public class TcpConnection implements Connection {
 			return true;
 		}
 	}
-
-	private AtomicBoolean inSend = new AtomicBoolean(false);
 
 	@Override
 	public void send(byte[] data) throws IOException {
@@ -260,5 +231,9 @@ public class TcpConnection implements Connection {
 		} else {
 			System.out.println("already unregistered from write");
 		}
+	}
+
+	public void setConsumer(Consumer consumer) {
+		this.consumer = consumer;
 	}
 }

@@ -25,4 +25,5 @@ import java.io.Closeable;
 
 public interface NetServer extends Closeable, Selectable {
 
+	int getActiveSessionCount();
 }

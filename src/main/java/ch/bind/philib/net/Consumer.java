@@ -25,6 +25,8 @@ import java.io.IOException;
 
 public interface Consumer {
 
+	void init(Connection connection);
+	
     void receive(byte[] data) throws IOException;
     
     void closed();

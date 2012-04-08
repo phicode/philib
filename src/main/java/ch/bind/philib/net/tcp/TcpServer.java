@@ -111,13 +111,19 @@ public class TcpServer implements NetServer {
 	private void doAccept() {
 		try {
 			SocketChannel clientChannel = channel.accept();
-			TcpConnection connection = new TcpConnection(clientChannel);
-			Consumer consumer = consumerFactory.acceptConnection(connection);
-			connection.init(consumer, selector);
+			Consumer consumer = consumerFactory.createConsumer();
+			TcpConnection connection = new TcpConnection(clientChannel, consumer, selector);
+			consumer.init(connection);
 		} catch (IOException e) {
 			// TODO
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public int getActiveSessionCount() {
+		//TODO
+		throw new UnsupportedOperationException("TODO");
 	}
 
 	// private static class Handler implements Runnable {
