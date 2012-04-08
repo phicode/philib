@@ -33,6 +33,7 @@ import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.net.NetSelector;
 import ch.bind.philib.net.Selectable;
 import ch.bind.philib.validation.SimpleValidation;
+import static ch.bind.philib.io.BitOps.*;
 
 // TODO: thread safe
 public final class SimpleNetSelector implements NetSelector {
@@ -123,10 +124,6 @@ public final class SimpleNetSelector implements NetSelector {
 			unregister(selectable);
 			selectable.closed();
 		}
-	}
-
-	private boolean checkMask(int field, int mask) {
-		return (field & mask) == mask;
 	}
 
 	@Override

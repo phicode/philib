@@ -2,7 +2,7 @@ package ch.bind.philib.pool;
 
 public interface ObjectPool<E> {
 
-	E get(final ObjectFactory<E> factory);
+	E get(ObjectFactory<E> factory);
 
-	void release(final ObjectFactory<E> factory, final E e);
+	void release(ObjectFactory<E> factory, E e);
 }

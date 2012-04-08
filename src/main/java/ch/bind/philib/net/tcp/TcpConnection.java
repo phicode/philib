@@ -126,7 +126,7 @@ public class TcpConnection implements Connection {
 	@Override
 	public void closed() {
 		// TODO Auto-generated method stub
-		// consumer.closed();
+		 consumer.closed();
 	}
 
 	@Override

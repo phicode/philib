@@ -26,7 +26,7 @@ public final class BitOps {
 	private BitOps() {
 	}
 
-	public static int findLowestSetBitIdx64(final long v) {
+	public static final int findLowestSetBitIdx64(final long v) {
 		if (v == 0) {
 			// no bits are set
 			return -1;
@@ -57,5 +57,9 @@ public final class BitOps {
 			shift += 1;
 		}
 		return shift;
+	}
+
+	public static final boolean checkMask(int bitset, int mask) {
+		return (bitset & mask) == mask;
 	}
 }

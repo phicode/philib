@@ -28,36 +28,19 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public final class ObjectPoolImpl<E> implements ObjectPool<E> {
 
-	private static final int NUMLISTS = 1;
+	private final AtomicReference<Node<E>> freeList;
 
-	private static final int NUMLISTSMASK = 0;
-
-	// private final AtomicBoolean[] listLocks;
-
-	private final AtomicReference<Node<E>>[] freeLists;
-
-	private final AtomicReference<Node<E>>[] objLists;
+	private final AtomicReference<Node<E>> objList;
 
 	private final Node<E> LOCK_DUMMY = new Node<E>();
 
 	public ObjectPoolImpl(int maxEntries) {
 		super();
-		// this.type = type;
-		// this.listLocks = new AtomicBoolean[NUMLISTS];
-		this.freeLists = new AtomicReference[NUMLISTS];
-		this.objLists = new AtomicReference[NUMLISTS];
-		for (int i = 0; i < NUMLISTS; i++) {
-			// this.listLocks[i] = new AtomicBoolean(false);
-			this.freeLists[i] = new AtomicReference<Node<E>>();
-			this.objLists[i] = new AtomicReference<Node<E>>();
-		}
-		// freeList.set(END_DUMMY);
-		// objList.set(END_DUMMY);
+		this.freeList = new AtomicReference<Node<E>>();
+		this.objList = new AtomicReference<Node<E>>();)
 		for (int i = 0; i < maxEntries; i++) {
 			Node<E> n = new Node<E>();
-			int listIdx = i & NUMLISTSMASK;
-			n.setInFreeList();
-			put(freeLists[listIdx], n);
+			put(freeList, n);
 		}
 	}
 
