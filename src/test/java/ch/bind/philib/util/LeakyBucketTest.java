@@ -21,7 +21,8 @@
  */
 package ch.bind.philib.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -114,5 +115,28 @@ public class LeakyBucketTest {
 		long max = 2 * 1000 * 1000 * 1000 + delta;
 		assertTrue(totalTime >= min && totalTime <= max);
 		System.out.println("time: " + totalTime);
+	}
+
+	@Test
+	public void exactRelease() {
+		long intervalNs = 100 * 1000000L; // 100ms
+		long i3 = intervalNs * 3;
+		long i4 = intervalNs * 4;
+		LeakyBucket bc = LeakyBucket.withReleaseIntervalNano(intervalNs, 1);
+		for (long t = 0; t < intervalNs; t += 10) {
+			assertTrue(bc.available(t) == 0);
+			assertTrue(bc.nextAvailableNano(t) == intervalNs - t);
+		}
+		for (long t = intervalNs; t < i3; t += 10) {
+			assertTrue(bc.available(t) == 1);
+			assertTrue(bc.nextAvailableNano(t) == 0);
+		}
+		bc.acquire(1, i3);
+		for (long t = i3; t < i4; t += 10) {
+			assertTrue(bc.available(t) == 0);
+			assertTrue(bc.nextAvailableNano(t) == i4 - t);
+		}
+		assertTrue(bc.available(i4 + 1) == 1);
+		assertTrue(bc.nextAvailableNano(i4 + 1) == 0);
 	}
 }

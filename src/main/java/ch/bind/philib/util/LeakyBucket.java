@@ -33,9 +33,9 @@ public final class LeakyBucket {
 
 	private long currentCapacity;
 
-	private LeakyBucket(long capacity, long releaseIntervalNano) {
-		this.capacity = capacity;
+	private LeakyBucket(long releaseIntervalNano, long capacity) {
 		this.releaseIntervalNano = releaseIntervalNano;
+		this.capacity = capacity;
 	}
 
 	/**
@@ -47,7 +47,13 @@ public final class LeakyBucket {
 		SimpleValidation.isTrue(releasePerSecond >= 0.000001, "releasePerSecond must be >= 0.000001");
 		SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
 		long releaseIntervalNano = (long) Math.ceil(1000000000f / releasePerSecond);
-		return new LeakyBucket(capacity, releaseIntervalNano);
+		return new LeakyBucket(releaseIntervalNano, capacity);
+	}
+
+	public static LeakyBucket withReleaseIntervalNano(long releaseIntervalNano, long capacity) {
+		SimpleValidation.isTrue(releaseIntervalNano >= 0, "releaseIntervalNano must be > 0");
+		SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
+		return new LeakyBucket(releaseIntervalNano, capacity);
 	}
 
 	public long getCapacity() {
@@ -84,6 +90,16 @@ public final class LeakyBucket {
 		} else {
 			long nextAvailNano = lastReleaseNano + releaseIntervalNano;
 			return nextAvailNano - timeNano;
+		}
+	}
+
+	public void sleepWhileNoneAvailable() throws InterruptedException {
+		long nextAvailNano = nextAvailableNano();
+		while (nextAvailNano > 0) {
+			long sleepMs = nextAvailNano / 1000000L;
+			int sleepNano = (int) (nextAvailNano % 1000000L);
+			Thread.sleep(sleepMs, sleepNano);
+			nextAvailNano = nextAvailableNano();
 		}
 	}
 
