@@ -27,9 +27,9 @@ import java.net.SocketAddress;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.ConsumerFactory;
 import ch.bind.philib.net.NetFactory;
-import ch.bind.philib.net.NetSelector;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.impl.SimpleNetSelector;
+import ch.bind.philib.net.sel.NetSelector;
 
 public class TcpNetFactory implements NetFactory {
 

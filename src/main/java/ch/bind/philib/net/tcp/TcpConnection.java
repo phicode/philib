@@ -36,8 +36,8 @@ import ch.bind.philib.io.NQueue;
 import ch.bind.philib.io.RingBuffer;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Consumer;
-import ch.bind.philib.net.NetSelector;
 import ch.bind.philib.net.impl.SimpleNetSelector;
+import ch.bind.philib.net.sel.NetSelector;
 import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpConnection implements Connection {

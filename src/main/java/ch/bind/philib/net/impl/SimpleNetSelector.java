@@ -30,8 +30,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.lang.ThreadUtil;
-import ch.bind.philib.net.NetSelector;
-import ch.bind.philib.net.Selectable;
+import ch.bind.philib.net.sel.NetSelector;
+import ch.bind.philib.net.sel.Selectable;
 import ch.bind.philib.validation.SimpleValidation;
 import static ch.bind.philib.io.BitOps.*;
 

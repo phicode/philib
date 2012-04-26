@@ -24,6 +24,8 @@ package ch.bind.philib.net;
 import java.io.Closeable;
 import java.io.IOException;
 
+import ch.bind.philib.net.sel.Selectable;
+
 public interface Connection extends Closeable, Selectable {
 
 	/**

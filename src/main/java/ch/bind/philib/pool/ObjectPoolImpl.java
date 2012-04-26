@@ -21,229 +21,130 @@
  */
 package ch.bind.philib.pool;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import ch.bind.philib.validation.SimpleValidation;
 
 public final class ObjectPoolImpl<E> implements ObjectPool<E> {
 
-	private final AtomicReference<Node<E>> freeList;
+    private final AtomicReference<Node<E>> freeList;
 
-	private final AtomicReference<Node<E>> objList;
+    private final AtomicReference<Node<E>> objList;
 
-	private final Node<E> LOCK_DUMMY = new Node<E>();
+    private final Node<E> LOCK_DUMMY = new Node<E>();
 
-	public ObjectPoolImpl(int maxEntries) {
-		super();
-		this.freeList = new AtomicReference<Node<E>>();
-		this.objList = new AtomicReference<Node<E>>();)
-		for (int i = 0; i < maxEntries; i++) {
-			Node<E> n = new Node<E>();
-			put(freeList, n);
-		}
-	}
+    public ObjectPoolImpl(int maxEntries) {
+        super();
+        SimpleValidation.isTrue(maxEntries > 0);
+        this.freeList = new AtomicReference<Node<E>>();
+        this.objList = new AtomicReference<Node<E>>();
+        for (int i = 0; i < maxEntries; i++) {
+            Node<E> n = new Node<E>();
+            put(freeList, n);
+        }
+    }
 
-	@Override
-	public E get(final ObjectFactory<E> factory) {
-		int firstList = fl();
-		for (int i = 0; i < NUMLISTS; i++) {
-			int listIdx = (i + firstList) & NUMLISTSMASK;
-			E e = tryGet(listIdx);
-			if (e != null) {
-				return e;
-			}
-		}
-		return factory.create();
-	}
+    @Override
+    public E get(final ObjectFactory<E> factory) {
+        SimpleValidation.notNull(factory);
+        E e = tryGet();
+        return e == null ? factory.create() : e;
+    }
 
-	@Override
-	public void release(final ObjectFactory<E> factory, final E e) {
-		if (e != null) {
-			int firstList = fl();
-			for (int i = 0; i < NUMLISTS; i++) {
-				int listIdx = (i + firstList) & NUMLISTSMASK;
-				if (tryRelease(listIdx, e)) {
-					factory.released(e);
-					return;
-				}
-			}
-			factory.destroy(e);
-		}
-	}
+    @Override
+    public void release(final ObjectFactory<E> factory, final E e) {
+        SimpleValidation.notNull(factory);
+        SimpleValidation.notNull(e);
+        if (tryRelease(e)) {
+            factory.released(e);
+        } else {
+            factory.destroy(e);
+        }
+    }
 
-	private E tryGet(final int listIdx) {
-		AtomicReference<Node<E>> freeList = freeLists[listIdx];
-		AtomicReference<Node<E>> objList = objLists[listIdx];
+    private E tryGet() {
+        final Node<E> node = take(objList);
+        if (node == null) {
+            return null;
+        } else {
+            final E e = node.unsetEntry();
+            assert (e != null);
+            put(freeList, node);
+            return e;
+        }
+    }
 
-		final Node<E> node = take(objList);
-		if (node == null) {
-			return null;
-		} else {
-			node.assertInObjList();
-			final E e = node.unsetEntry();
-			// TODO: remove
-			SimpleValidation.notNull(e);
-			node.setInFreeList();
-			put(freeList, node);
-			return e;
-		}
-	}
+    private boolean tryRelease(E e) {
+        final Node<E> node = take(freeList);
+        if (node != null) {
+            node.setEntry(e);
+            put(objList, node);
+            return true;
+        }
+        return false;
+    }
 
-	// private AtomicInteger _fl = new AtomicInteger();
-	// private int _fl;
+    private final void put(final AtomicReference<Node<E>> rootRef, final Node<E> newHead) {
+        assert (rootRef != null);
+        assert (newHead != null);
+        do {
+            final Node<E> tail = rootRef.get();
+            if (tail != LOCK_DUMMY) {
+                if (rootRef.compareAndSet(tail, LOCK_DUMMY)) {
+                    newHead.setTail(tail);
+                    boolean ok = rootRef.compareAndSet(LOCK_DUMMY, newHead);
+                    assert (ok);
+                    return;
+                }
+            }
+        } while (true);
+    }
 
-	private final int fl() {
-		// return 0;
-		// return Math.abs(++_fl) & NUMLISTSMASK;
-		// return Math.abs(_fl.incrementAndGet()) & NUMLISTSMASK;
-		return (int) (Thread.currentThread().getId() & NUMLISTSMASK);
-	}
+    private final Node<E> take(final AtomicReference<Node<E>> rootRef) {
+        assert (rootRef != null);
+        do {
+            final Node<E> head = rootRef.get();
+            if (head == null || head == LOCK_DUMMY) { // empty or locked
+                return null;
+            } else {
+                if (rootRef.compareAndSet(head, LOCK_DUMMY)) {
+                    final Node<E> tail = head.getTail();
+                    boolean ok = rootRef.compareAndSet(LOCK_DUMMY, tail);
+                    assert (ok);
+                    head.unsetTail();
+                    return head;
+                }
+            }
+        } while (true);
+    }
 
-	private boolean tryRelease(int listIdx, E e) {
-		// AtomicBoolean lock = listLocks[listIdx];
-		// if (lock.compareAndSet(false, true)) {
-		// try {
-		AtomicReference<Node<E>> freeList = freeLists[listIdx];
-		AtomicReference<Node<E>> objList = objLists[listIdx];
+    private static final class Node<E> {
 
-		final Node<E> node = take(freeList);
-		if (node != null) {
-			node.assertInFreeList();
-			node.setEntry(e);
-			node.setInObjList();
-			put(objList, node);
-			return true;
-		}
-		// } finally {
-		// lock.set(false);
-		// }
-		// }
-		return false;
-	}
+        private volatile Node<E> tail;
 
-	private final void put(final AtomicReference<Node<E>> root, final Node<E> newHead) {
-		SimpleValidation.notNull(newHead);
-		do {
-			final Node<E> tail = root.get();
-			if (tail != LOCK_DUMMY) {
-				if (root.compareAndSet(tail, LOCK_DUMMY)) {
-					newHead.setTail(tail);
-					boolean ok = root.compareAndSet(LOCK_DUMMY, newHead);
-					SimpleValidation.isTrue(ok);
-					return;
-				}
-			}
-		} while (true);
-	}
+        private volatile E entry;
 
-	private final Node<E> take(final AtomicReference<Node<E>> root) {
-		do {
-			final Node<E> head = root.get();
-			if (head == null || head == LOCK_DUMMY) { // empty or locked
-				return null;
-			} else {
-				if (root.compareAndSet(head, LOCK_DUMMY)) {
-					final Node<E> tail = head.getTail();
-					boolean ok = root.compareAndSet(LOCK_DUMMY, tail);
-					// TODO: make assert
-					SimpleValidation.isTrue(ok);
-					head.unsetTail();
-					return head;
-					// }
-				}
-			}
-		} while (true);
-	}
+        void setTail(Node<E> t) {
+            this.tail = t;
+        }
 
-	// private static final class Node<E> {
-	//
-	// private volatile Node<E> n;
-	//
-	// private volatile E e;
-	//
-	// void setNext(Node<E> n) {
-	// //TODO: make this SimpleValidation an assert
-	// // SimpleValidation.notNull(n);
-	// this.n=n;
-	// }
-	// public Node<E> getNext() {
-	// return n;
-	// }
-	// // void unsetNext() {
-	// // this.n=n;
-	// // }
-	//
-	// void setEntry(E e) {
-	// //TODO: make this SimpleValidation an assert
-	// SimpleValidation.notNull(e);
-	// this.e=e;
-	// }
-	//
-	// E unsetEntry() {
-	// E e = this.e;
-	// this.e=null;
-	// return e;
-	// }
-	// }
+        Node<E> getTail() {
+            return tail;
+        }
 
-	private static final class Node<E> {
-		private final AtomicBoolean inFreeList = new AtomicBoolean();
+        void unsetTail() {
+            tail = null;
+        }
 
-		// private final AtomicReference<Node<E>> next = new
-		// AtomicReference<Node<E>>();
+        void setEntry(E e) {
+            assert (e != null);
+            this.entry = e;
+        }
 
-		// private final AtomicReference<E> entry = new AtomicReference<E>();
-		private volatile Node<E> tail;
-
-		private volatile E entry;
-
-		void setTail(Node<E> t) {
-			// TODO: make this SimpleValidation an assert
-			// SimpleValidation.notNull(n);
-			// this.next.set(n);
-			this.tail = t;
-		}
-
-		void setInFreeList() {
-			inFreeList.set(true);
-		}
-
-		void setInObjList() {
-			inFreeList.set(false);
-		}
-
-		void assertInFreeList() {
-			SimpleValidation.isTrue(inFreeList.get());
-		}
-
-		void assertInObjList() {
-			SimpleValidation.isFalse(inFreeList.get());
-		}
-
-		Node<E> getTail() {
-			// return next.get();
-			return tail;
-		}
-
-		void unsetTail() {
-			// this.next.set(null);
-			tail = null;
-		}
-
-		void setEntry(E e) {
-			// TODO: make this SimpleValidation an assert
-			SimpleValidation.notNull(e);
-			// this.entry.set(e);
-			this.entry = e;
-		}
-
-		E unsetEntry() {
-
-			// return entry.getAndSet(null);
-			E e = this.entry;
-			this.entry = null;
-			return e;
-		}
-	}
+        E unsetEntry() {
+            E e = this.entry;
+            this.entry = null;
+            return e;
+        }
+    }
 }

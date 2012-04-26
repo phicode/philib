@@ -31,8 +31,8 @@ import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.net.Consumer;
 import ch.bind.philib.net.ConsumerFactory;
-import ch.bind.philib.net.NetSelector;
 import ch.bind.philib.net.NetServer;
+import ch.bind.philib.net.sel.NetSelector;
 import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpServer implements NetServer {
@@ -68,7 +68,7 @@ public class TcpServer implements NetServer {
 		// " connect: " + (ops & SelectionKey.OP_CONNECT) + //
 		// " accept: " + (ops & SelectionKey.OP_ACCEPT));
 		this.channel = channel;
-		selector.register(this);
+		selector.registerForAccept(this);
 	}
 
 	@Override
