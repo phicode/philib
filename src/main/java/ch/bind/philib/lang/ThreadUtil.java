@@ -62,6 +62,7 @@ public final class ThreadUtil {
 
 	private static final String FOREVER_RUNNER_NAME_FMT = "%s-for-%s-%d";
 
+	// TODO: documentation
 	public static Thread runForever(Runnable runnable) {
 		SimpleValidation.notNull(runnable);
 		String threadName = String.format(FOREVER_RUNNER_NAME_FMT, //
@@ -69,15 +70,18 @@ public final class ThreadUtil {
 		return runForever(runnable, threadName);
 	}
 
+	// TODO: documentation
 	public static Thread runForever(Runnable runnable, String threadName) {
 		return runForever(null, runnable, threadName);
 	}
 
+	// TODO: documentation
 	public static Thread runForever(ThreadGroup group, Runnable runnable, String threadName) {
 		// stackSize of 0 stands for: ignore this parameter
 		return runForever(null, runnable, threadName, 0);
 	}
 
+	// TODO: documentation
 	public static Thread runForever(ThreadGroup group, Runnable runnable, String threadName, long stackSize) {
 		SimpleValidation.notNull(runnable);
 		SimpleValidation.notNull(threadName);
