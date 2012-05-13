@@ -28,6 +28,6 @@ public interface NetFactory {
 
 	Connection openClient(SocketAddress endpoint) throws IOException;
 
-	NetServer openServer(SocketAddress bindAddress, ConsumerFactory factory) throws IOException;
+	NetServer openServer(SocketAddress bindAddress, SessionFactory factory) throws IOException;
 
 }

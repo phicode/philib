@@ -30,7 +30,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.net.Consumer;
-import ch.bind.philib.net.ConsumerFactory;
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.sel.NetSelector;
 import ch.bind.philib.validation.SimpleValidation;
@@ -44,9 +44,9 @@ public class TcpServer implements NetServer {
 
 	private ServerSocketChannel channel;
 
-	private final ConsumerFactory consumerFactory;
+	private final SessionFactory consumerFactory;
 
-	TcpServer(ConsumerFactory consumerFactory) {
+	TcpServer(SessionFactory consumerFactory) {
 		SimpleValidation.notNull(consumerFactory);
 		this.consumerFactory = consumerFactory;
 	}

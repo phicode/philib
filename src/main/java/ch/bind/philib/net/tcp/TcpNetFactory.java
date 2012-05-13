@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.ConsumerFactory;
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.NetFactory;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.impl.SimpleNetSelector;
@@ -40,7 +40,7 @@ public class TcpNetFactory implements NetFactory {
     }
 
 	@Override
-	public NetServer openServer(SocketAddress bindAddress, ConsumerFactory consumerFactory) throws IOException {
+	public NetServer openServer(SocketAddress bindAddress, SessionFactory consumerFactory) throws IOException {
 		TcpServer server = new TcpServer(consumerFactory);
 		// InetSocketAddress endpoint = SocketAddresses.wildcard(1234);
 		NetSelector sel = SimpleNetSelector.open();
