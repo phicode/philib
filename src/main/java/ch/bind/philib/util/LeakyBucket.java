@@ -87,7 +87,8 @@ public final class LeakyBucket {
 		if (currentCapacity > 0) {
 			// available immediately
 			return 0;
-		} else {
+		}
+		else {
 			long nextAvailNano = lastReleaseNano + releaseIntervalNano;
 			return nextAvailNano - timeNano;
 		}
@@ -113,7 +114,8 @@ public final class LeakyBucket {
 		if (newVal > capacity) {
 			currentCapacity = capacity;
 			lastReleaseNano = timeNano;
-		} else {
+		}
+		else {
 			currentCapacity = newVal;
 			lastReleaseNano += (numRelease * releaseIntervalNano);
 		}

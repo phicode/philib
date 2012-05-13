@@ -21,8 +21,8 @@
  */
 package ch.bind.philib.net;
 
-public interface ConsumerFactory {
+public interface SessionFactory {
 
-	Consumer createConsumer();
+	Session createSession();
 
 }

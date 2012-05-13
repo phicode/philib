@@ -27,15 +27,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import ch.bind.philib.io.NQueue;
-import ch.bind.philib.io.RingBuffer;
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.Consumer;
+import ch.bind.philib.net.Session;
 import ch.bind.philib.net.impl.SimpleNetSelector;
 import ch.bind.philib.net.sel.NetSelector;
 import ch.bind.philib.validation.SimpleValidation;
@@ -54,14 +49,14 @@ public class TcpConnection implements Connection {
 
 	private NetSelector netSelector;
 	private AtomicBoolean inSend = new AtomicBoolean(false);
-	private final Consumer consumer;
+	private final Session session;
 
-	public TcpConnection(SocketChannel channel, Consumer consumer, NetSelector netSelector) throws IOException {
+	public TcpConnection(SocketChannel channel, Session session, NetSelector netSelector) throws IOException {
 		SimpleValidation.notNull(channel);
-		SimpleValidation.notNull(consumer);
+		SimpleValidation.notNull(session);
 		SimpleValidation.notNull(netSelector);
 		this.channel = channel;
-		this.consumer = consumer;
+		this.session = session;
 		this.netSelector = netSelector;
 		this.channel.configureBlocking(false);
 		this.rbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
@@ -89,17 +84,17 @@ public class TcpConnection implements Connection {
 		throw new UnsupportedOperationException("TODO");
 	}
 
-	@Override
+//	@Override
 	public SelectableChannel getChannel() {
 		return channel;
 	}
 
-	@Override
+//	@Override
 	public int getSelectorOps() {
 		return SelectionKey.OP_READ /* | SelectionKey.OP_CONNECT */;
 	}
 
-	@Override
+//	@Override
 	public boolean handle(int selectOp) {
 		if (selectOp == SelectionKey.OP_CONNECT) {
 			doConnect();
@@ -113,10 +108,10 @@ public class TcpConnection implements Connection {
 		}
 	}
 
-	@Override
+//	@Override
 	public void closed() {
 		// TODO Auto-generated method stub
-		consumer.closed();
+		session.closed();
 	}
 
 	@Override
@@ -161,7 +156,7 @@ public class TcpConnection implements Connection {
 	}
 
 	@Override
-	public void send(byte[] data) throws IOException {
+	public synchronized void send(byte[] data) throws IOException {
 		boolean ok = inSend.compareAndSet(false, true);
 		SimpleValidation.isTrue(ok);
 		try {

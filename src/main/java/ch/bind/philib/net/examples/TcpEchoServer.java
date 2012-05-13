@@ -24,15 +24,13 @@ package ch.bind.philib.net.examples;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.Consumer;
-import ch.bind.philib.net.ConsumerFactory;
+import ch.bind.philib.net.BaseSession;
 import ch.bind.philib.net.NetServer;
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpNetFactory;
-import ch.bind.philib.validation.SimpleValidation;
 
-public class TcpEchoServer implements ConsumerFactory {
+public class TcpEchoServer implements SessionFactory {
 
 	public static void main(String[] args) throws Exception {
 		new TcpEchoServer().foo();
@@ -40,7 +38,7 @@ public class TcpEchoServer implements ConsumerFactory {
 
 	private void foo() throws Exception {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
-		ConsumerFactory consumerFactory = this;
+		SessionFactory consumerFactory = this;
 		NetServer server = new TcpNetFactory().openServer(bindAddress, consumerFactory);
 		while (true) {
 			Thread.sleep(10000);
@@ -49,31 +47,20 @@ public class TcpEchoServer implements ConsumerFactory {
 	}
 
 	@Override
-	public Consumer createConsumer() {
-		return new EchoConsumer();
+	public EchoSession createSession() {
+		return new EchoSession();
 	}
 
 	// TODO: make an abstract-consumer which delas with this initialization
 	// stuff and prevents sending if not initialized.
 	// offer a postInit() method for specific setup stuff
-	private static class EchoConsumer implements Consumer {
-
-		private Connection connection;
-
-		EchoConsumer() {
-		}
-
-		@Override
-		public void init(Connection connection) {
-			SimpleValidation.notNull(connection);
-			this.connection = connection;
-		}
+	private static class EchoSession extends BaseSession {
 
 		@Override
 		public void receive(byte[] data) throws IOException {
 			// System.out.println("received: " + data.length);
 			// echo the data
-			connection.send(data);
+			send(data);
 		}
 
 		@Override

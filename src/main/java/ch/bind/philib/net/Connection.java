@@ -26,12 +26,10 @@ import java.io.IOException;
 
 import ch.bind.philib.net.sel.Selectable;
 
-public interface Connection extends Closeable {
+public interface Connection extends Closeable, Selectable {
 
 	void send(byte[] data) throws IOException;
 	
-	void receive(byte[] data) throws IOException;
-
 	void flush() throws IOException;
 	
 	void closed();
