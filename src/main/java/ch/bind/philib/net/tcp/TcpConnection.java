@@ -153,11 +153,9 @@ public class TcpConnection implements Connection {
 				rbuf.clear();
 				int num = channel.read(rbuf);
 				if (num == -1) {
-					System.out.println("CLOSED");
 					return true;
 				}
 				else if (num == 0) {
-					System.out.println("EOF");
 					return false;
 				}
 				else {
@@ -168,7 +166,6 @@ public class TcpConnection implements Connection {
 					byte[] received = new byte[num];
 					rbuf.get(received);
 					SimpleValidation.isTrue(0 == rbuf.remaining());
-					System.out.println("read: " + received.length);
 					session.receive(received);
 				}
 			} catch (IOException e) {
@@ -209,7 +206,7 @@ public class TcpConnection implements Connection {
 			rem -= actual;
 			off += actual;
 			if (actual != n) {
-				return rem;
+				return (len - rem);
 			}
 		} while (rem > 0);
 		return len;
@@ -221,12 +218,11 @@ public class TcpConnection implements Connection {
 		wbuf.flip();
 		// TODO: remove
 		SimpleValidation.isTrue(wbuf.remaining() == wlen, wbuf.remaining() + " != " + wlen);
-		channel.write(wbuf);
-		int rem = wbuf.remaining();
-		if (rem > 0) {
+		int num = channel.write(wbuf);
+		if (num < wlen) {
 			registerForWrite();
 		}
-		return rem;
+		return num;
 	}
 
 	private boolean doWrite() {

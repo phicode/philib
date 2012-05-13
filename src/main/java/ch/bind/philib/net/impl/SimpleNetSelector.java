@@ -92,7 +92,7 @@ public final class SimpleNetSelector implements NetSelector {
 		long selEnd = System.nanoTime();
 		long selTime = selEnd - selStart;
 		long selMs = selTime / (1000L * 1000L);
-		if (selMs <= 5 || selMs >= 1005) {
+		if (selMs >= 1005) {
 			System.out.printf("select took %dms, num=%d%n", selMs, num);
 		}
 		return num;
