@@ -17,8 +17,8 @@ public abstract class BaseSession implements Session {
 	}
 
 	@Override
-	public final void send(byte[] data) throws IOException {
-		connection.send(data);
+	public final int send(byte[] data) throws IOException {
+		return connection.send(data);
 	}
 
 	@Override

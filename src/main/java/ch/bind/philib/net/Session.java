@@ -7,9 +7,9 @@ public interface Session extends Closeable {
 
 	void init(Connection connection);
 
-	void receive(byte[] data) throws IOException;
+	void receive(byte[] data);
 
-	void send(byte[] data) throws IOException;
+	int send(byte[] data) throws IOException;
 
 	void closed();
 

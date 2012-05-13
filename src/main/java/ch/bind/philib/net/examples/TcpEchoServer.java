@@ -23,6 +23,9 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import ch.bind.philib.net.BaseSession;
 import ch.bind.philib.net.NetServer;
@@ -42,13 +45,38 @@ public class TcpEchoServer implements SessionFactory {
 		NetServer server = new TcpNetFactory().openServer(bindAddress, consumerFactory);
 		while (true) {
 			Thread.sleep(10000);
-			System.out.println("active sessions: " + server.getActiveSessionCount());
+			synchronized (sessions) {
+				long now = System.nanoTime();
+				long tooFarAgo = now - 5000000L; // 5ms
+				Iterator<EchoSession> iter = sessions.iterator();
+				while (iter.hasNext()) {
+					EchoSession s = iter.next();
+					if (s.closed) {
+						iter.remove();
+					}
+					else {
+						if (s.lastInteractionNs < tooFarAgo) {
+							double lastSec = (now - s.lastInteractionNs) / 1000000000f;
+							System.out.printf("last interaction with a session: %.5fsec%n", lastSec);
+						}
+						System.out.printf("data echoed: %d%n", s.numEchoed);
+					}
+				}
+			}
+
+			// System.out.println("sessions: " +
+			// server.getActiveSessionCount());
+			System.out.println("sessions in our list: " + sessions.size());
 		}
 	}
 
+	private List<EchoSession> sessions = new ArrayList<EchoSession>();
+
 	@Override
-	public EchoSession createSession() {
-		return new EchoSession();
+	public synchronized EchoSession createSession() {
+		EchoSession session = new EchoSession();
+		sessions.add(session);
+		return session;
 	}
 
 	// TODO: make an abstract-consumer which delas with this initialization
@@ -56,16 +84,35 @@ public class TcpEchoServer implements SessionFactory {
 	// offer a postInit() method for specific setup stuff
 	private static class EchoSession extends BaseSession {
 
+		private long lastInteractionNs;
+
+		private boolean closed;
+
+		private long numEchoed;
+
 		@Override
-		public void receive(byte[] data) throws IOException {
-			// System.out.println("received: " + data.length);
-			// echo the data
-			send(data);
+		public void receive(byte[] data) {
+			try {
+				int num = send(data);
+				numEchoed += num;
+				if (num != data.length) {
+					System.out.printf("cant echo back! only %d out of %d was sent.%n", num, data.length);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				try {
+					close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+			lastInteractionNs = System.nanoTime();
 		}
 
 		@Override
 		public void closed() {
-			System.out.println("closed()");
+			this.closed = true;
+			System.out.println("closed() numEchoed=" + numEchoed);
 		}
 	}
 }

@@ -26,13 +26,16 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ch.bind.philib.io.BufferQueue;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.impl.SimpleNetSelector;
 import ch.bind.philib.net.sel.NetSelector;
+import ch.bind.philib.net.sel.SelOps;
 import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpConnection implements Connection {
@@ -47,11 +50,27 @@ public class TcpConnection implements Connection {
 
 	private final AtomicBoolean regForWrite = new AtomicBoolean();
 
-	private NetSelector netSelector;
+	private final NetSelector netSelector;
+
 	private AtomicBoolean inSend = new AtomicBoolean(false);
+
 	private final Session session;
 
-	public TcpConnection(SocketChannel channel, Session session, NetSelector netSelector) throws IOException {
+	private boolean isWriteRegistered;
+
+	private enum WriteState {
+		WRITE_DIRECTLY, WRITE_BY_SELECTOR
+	}
+
+	private WriteState writeState = WriteState.WRITE_DIRECTLY;
+
+	private final Object writeLock = new Object();
+
+	// TODO: make the access to the sendqueue synchronized, since it can be
+	// accessed by external threads or the net-selector
+	private final BufferQueue sendQueue = new BufferQueue(DEFAULT_BUFFER_SIZE);
+
+	TcpConnection(SocketChannel channel, Session session, NetSelector netSelector) throws IOException {
 		SimpleValidation.notNull(channel);
 		SimpleValidation.notNull(session);
 		SimpleValidation.notNull(netSelector);
@@ -61,10 +80,13 @@ public class TcpConnection implements Connection {
 		this.channel.configureBlocking(false);
 		this.rbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
 		this.wbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-		netSelector.register(this);
 	}
 
-	public static TcpConnection open(SocketAddress endpoint, Consumer consumer) throws IOException {
+	void register() {
+		netSelector.register(this, SelOps.READ);
+	}
+
+	public static TcpConnection open(SocketAddress endpoint, Session session) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
@@ -74,7 +96,8 @@ public class TcpConnection implements Connection {
 
 		System.out.println("connected to: " + endpoint);
 		NetSelector sel = SimpleNetSelector.open();
-		TcpConnection con = new TcpConnection(channel, consumer, sel);
+		TcpConnection con = new TcpConnection(channel, session, sel);
+		con.register();
 		return con;
 	}
 
@@ -84,31 +107,29 @@ public class TcpConnection implements Connection {
 		throw new UnsupportedOperationException("TODO");
 	}
 
-//	@Override
+	@Override
 	public SelectableChannel getChannel() {
 		return channel;
 	}
 
-//	@Override
-	public int getSelectorOps() {
-		return SelectionKey.OP_READ /* | SelectionKey.OP_CONNECT */;
-	}
-
-//	@Override
+	@Override
 	public boolean handle(int selectOp) {
 		if (selectOp == SelectionKey.OP_CONNECT) {
 			doConnect();
 			return false;
-		} else if (selectOp == SelectionKey.OP_READ) {
+		}
+		else if (selectOp == SelectionKey.OP_READ) {
 			return doRead();
-		} else if (selectOp == SelectionKey.OP_WRITE) {
+		}
+		else if (selectOp == SelectionKey.OP_WRITE) {
 			return doWrite();
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("illegal select-op");
 		}
 	}
 
-//	@Override
+	@Override
 	public void closed() {
 		// TODO Auto-generated method stub
 		session.closed();
@@ -127,54 +148,74 @@ public class TcpConnection implements Connection {
 
 	private boolean doRead() {
 		// TODO: implement
-		try {
-			rbuf.clear();
-			int num = channel.read(rbuf);
-			if (num == -1) {
-				return true;
-			} else {
-				rbuf.flip();
-				// TODO: make assert
-				SimpleValidation.isTrue(num == rbuf.limit());
-				SimpleValidation.isTrue(num == rbuf.remaining());
-				byte[] b = new byte[num];
-				rbuf.get(b);
-				SimpleValidation.isTrue(0 == rbuf.remaining());
-				// System.out.println("read: " + b.length);
-				if (!inbox.offer(b)) {
-					return false;
-				} else {
-					// TODO: log or exception?
+		while (true) {
+			try {
+				rbuf.clear();
+				int num = channel.read(rbuf);
+				if (num == -1) {
+					System.out.println("CLOSED");
 					return true;
 				}
+				else if (num == 0) {
+					System.out.println("EOF");
+					return false;
+				}
+				else {
+					rbuf.flip();
+					// TODO: make assert
+					SimpleValidation.isTrue(num == rbuf.limit());
+					SimpleValidation.isTrue(num == rbuf.remaining());
+					byte[] received = new byte[num];
+					rbuf.get(received);
+					SimpleValidation.isTrue(0 == rbuf.remaining());
+					System.out.println("read: " + received.length);
+					session.receive(received);
+				}
+			} catch (IOException e) {
+				// TODO: handle
+				// e.printStackTrace();
+				return true;
 			}
-		} catch (IOException e) {
-			// TODO: handle
-			// e.printStackTrace();
-			return true;
 		}
 	}
 
 	@Override
-	public synchronized void send(byte[] data) throws IOException {
-		boolean ok = inSend.compareAndSet(false, true);
-		SimpleValidation.isTrue(ok);
-		try {
-			int off = 0;
-			int rem = data.length;
-			do {
-				int n = Math.min(rem, wbuf.capacity());
-				_send(data, off, n);
-				rem -= n;
-				off += n;
-			} while (rem > 0);
-		} finally {
-			inSend.set(false);
+	public int send(byte[] data) throws IOException {
+		if (data == null || data.length == 0) {
+			return 0;
+		}
+		synchronized (writeLock) {
+			if (writeState == WriteState.WRITE_DIRECTLY) {
+				return _sendBig(data);
+			}
+			else {
+				if (sendQueue.offer(data)) {
+					return data.length;
+				}
+				else {
+					return 0;
+				}
+			}
 		}
 	}
 
-	private void _send(byte[] data, int dOff, int wlen) throws IOException {
-		// TODO: handle data.length > wbuf.capacity
+	private int _sendBig(byte[] data) throws IOException {
+		int len = data.length;
+		int off = 0;
+		int rem = len;
+		do {
+			int n = Math.min(rem, wbuf.capacity());
+			int actual = _send(data, off, n);
+			rem -= actual;
+			off += actual;
+			if (actual != n) {
+				return rem;
+			}
+		} while (rem > 0);
+		return len;
+	}
+
+	private int _send(byte[] data, int dOff, int wlen) throws IOException {
 		wbuf.clear();
 		wbuf.put(data, dOff, wlen);
 		wbuf.flip();
@@ -183,52 +224,62 @@ public class TcpConnection implements Connection {
 		channel.write(wbuf);
 		int rem = wbuf.remaining();
 		if (rem > 0) {
-			int off = data.length - rem;
-			ringBuffer.write(data, off, rem);
 			registerForWrite();
-			// System.out.println("wrote: " + off + " / " + data.length +
-			// ", bufSize=" + ringBuffer.available());
-		} else {
-			// System.out.println("wrote: " + data.length);
 		}
+		return rem;
 	}
 
 	private boolean doWrite() {
-		System.out.println("i am now writable, wheeee :)");
-		byte[] transfer = new byte[4096];
-		int toRead = Math.min(transfer.length, ringBuffer.available());
-		ringBuffer.read(transfer, 0, toRead);
-		try {
-			send(transfer);
-			if (ringBuffer.available() == 0) {
+		synchronized (writeLock) {
+			System.out.println("i am now writable, wheeee :)");
+			byte[] nextBuf = sendQueue.poll();
+			while (nextBuf != null) {
+				int actual;
+				try {
+					actual = _sendBig(nextBuf);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return true;
+				}
+				int numRem = nextBuf.length - actual;
+				// TODO: assert
+				SimpleValidation.notNegative(numRem);
+				if (numRem == 0) {
+					nextBuf = sendQueue.poll();
+				}
+				else {
+					byte[] rem = new byte[numRem];
+					System.arraycopy(nextBuf, actual, rem, 0, numRem);
+					boolean ok = sendQueue.offerFront(rem);
+					SimpleValidation.isTrue(ok);
+					return false;
+				}
+			}
+			if (nextBuf == null) {
 				unregisterForWrite();
 			}
 			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return true;
 		}
 	}
 
 	private void registerForWrite() {
-		SimpleValidation.notNull(netSelector);
-		if (regForWrite.compareAndSet(false, true)) {
-			netSelector.reRegWithWrite(this);
-		} else {
+		if (writeState == WriteState.WRITE_DIRECTLY) {
+			netSelector.reRegister(this, SelOps.READ_WRITE);
+			writeState = WriteState.WRITE_BY_SELECTOR;
+		}
+		else {
 			System.out.println("already registered for write");
 		}
 	}
 
 	private void unregisterForWrite() {
-		SimpleValidation.notNull(netSelector);
-		if (regForWrite.compareAndSet(true, false)) {
-			netSelector.reRegWithoutWrite(this);
-		} else {
+		if (writeState == WriteState.WRITE_BY_SELECTOR) {
+			netSelector.reRegister(this, SelOps.READ);
+			writeState = WriteState.WRITE_DIRECTLY;
+		}
+		else {
 			System.out.println("already unregistered from write");
 		}
-	}
-
-	public void setConsumer(Consumer consumer) {
-		this.consumer = consumer;
 	}
 }

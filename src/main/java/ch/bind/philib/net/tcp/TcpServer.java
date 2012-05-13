@@ -29,10 +29,11 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import ch.bind.philib.net.Consumer;
-import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.NetServer;
+import ch.bind.philib.net.Session;
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.sel.NetSelector;
+import ch.bind.philib.net.sel.SelOps;
 import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpServer implements NetServer {
@@ -44,11 +45,11 @@ public class TcpServer implements NetServer {
 
 	private ServerSocketChannel channel;
 
-	private final SessionFactory consumerFactory;
+	private final SessionFactory sessionFactory;
 
-	TcpServer(SessionFactory consumerFactory) {
-		SimpleValidation.notNull(consumerFactory);
-		this.consumerFactory = consumerFactory;
+	TcpServer(SessionFactory sessionFactory) {
+		SimpleValidation.notNull(sessionFactory);
+		this.sessionFactory = sessionFactory;
 	}
 
 	// TODO: open(SocketAddress) with default netselector
@@ -68,7 +69,7 @@ public class TcpServer implements NetServer {
 		// " connect: " + (ops & SelectionKey.OP_CONNECT) + //
 		// " accept: " + (ops & SelectionKey.OP_ACCEPT));
 		this.channel = channel;
-		selector.registerForAccept(this);
+		selector.register(this, SelOps.ACCEPT);
 	}
 
 	@Override
@@ -86,34 +87,31 @@ public class TcpServer implements NetServer {
 	}
 
 	@Override
-	public int getSelectorOps() {
-		return SelectionKey.OP_ACCEPT;
-	}
-
-	@Override
 	public boolean handle(int selectOp) {
 		if (selectOp == SelectionKey.OP_ACCEPT) {
 			System.out.println("doAccept");
 			doAccept();
 			return false;
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("illegal select-op");
 		}
 	}
-	
+
 	@Override
 	public void closed() {
 		// TODO Auto-generated method stub
-//	consumer.closed();	
+		// consumer.closed();
 		throw new IllegalStateException();
 	}
 
 	private void doAccept() {
 		try {
 			SocketChannel clientChannel = channel.accept();
-			Consumer consumer = consumerFactory.createConsumer();
-			TcpConnection connection = new TcpConnection(clientChannel, consumer, selector);
-			consumer.init(connection);
+			Session session = sessionFactory.createSession();
+			TcpConnection connection = new TcpConnection(clientChannel, session, selector);
+			session.init(connection);
+			connection.register();
 		} catch (IOException e) {
 			// TODO
 			e.printStackTrace();
@@ -122,7 +120,7 @@ public class TcpServer implements NetServer {
 
 	@Override
 	public int getActiveSessionCount() {
-		//TODO
+		// TODO
 		throw new UnsupportedOperationException("TODO");
 	}
 

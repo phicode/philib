@@ -22,6 +22,19 @@ public final class Ring<T> {
 		size++;
 	}
 
+	public void addFront(T value) {
+		if (value == null) {
+			return;
+		}
+		ensureRingSpace();
+		off--;
+		if (off == -1) {
+			off = ring.length - 1;
+		}
+		ring[off] = value;
+		size++;
+	}
+
 	public T get() {
 		if (size == 0) {
 			return null;

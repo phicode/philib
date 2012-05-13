@@ -23,16 +23,21 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
+import ch.bind.philib.net.BaseSession;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpConnection;
 
 //TODO: reply data validation
 //TODO: speed measurements
 //TODO: many threads
-public class TcpEchoClient /* implements Consumer */{
+public class TcpEchoClient extends BaseSession {
 
 	// private byte[] buf;
 
@@ -46,14 +51,15 @@ public class TcpEchoClient /* implements Consumer */{
 
 	// private long nextBlubber;
 
+	private BlockingQueue<byte[]> inbox = new LinkedBlockingQueue<byte[]>();
+
 	public static void main(String[] args) throws Exception {
 		new TcpEchoClient().run();
 	}
 
-	private void run() throws IOException {
+	private void run() throws IOException, InterruptedException {
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
-		Semaphore dataSem = new Semaphore(0);
-		connection = TcpConnection.open(endpoint, dataSem);
+		connection = TcpConnection.open(endpoint, this);
 
 		// buf = new byte[8 * 1024];
 		byte[] buf = new byte[128 * 1024];
@@ -65,14 +71,16 @@ public class TcpEchoClient /* implements Consumer */{
 		long total = 0;
 		long nextStatus = 0;
 		while (true) {
-			connection.send(buf);
-			long remaining = buf.length;
+			int num = connection.send(buf);
+			System.out.printf("sent: %d / %d%n", num, buf.length);
+			long remaining = num;
 			do {
 				// dataSem.acquire();
-				byte[] recv = connection.pollMessage();
+				byte[] recv = inbox.take();
 				if (recv != null) {
 					remaining -= recv.length;
-				} else {
+				}
+				else {
 					System.out.println("empty poll returned");
 				}
 			} while (remaining > 0);
@@ -87,6 +95,7 @@ public class TcpEchoClient /* implements Consumer */{
 			}
 		}
 	}
+
 	//
 	// private void send() throws IOException {
 	// // try {
@@ -106,6 +115,17 @@ public class TcpEchoClient /* implements Consumer */{
 	// mbPerSec);
 	// }
 	// }
+
+	@Override
+	public void receive(byte[] data) {
+		inbox.add(data);
+	}
+
+	@Override
+	public void closed() {
+		// TODO Auto-generated method stub
+
+	}
 
 	// @Override
 	// public void receive(byte[] data) throws IOException {

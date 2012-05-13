@@ -25,11 +25,10 @@ import java.io.Closeable;
 
 public interface NetSelector extends Runnable, Closeable {
 
-    void register(Selectable selectable);
+	void register(Selectable selectable, int ops);
 
-    void unregister(Selectable selectable);
+	void reRegister(Selectable selectable, int ops);
 
-    void reRegWithWrite(Selectable selectable);
+	void unregister(Selectable selectable);
 
-    void reRegWithoutWrite(Selectable selectable);
 }

@@ -16,6 +16,16 @@ public final class BufferQueue {
 		this.maxBufSize = maxBufSize;
 	}
 
+	public boolean canOffer(byte[] data) {
+		if (data == null || data.length == 0) {
+			return true;
+		}
+		else {
+			long newSize = data.length + curBufSize;
+			return newSize <= maxBufSize;
+		}
+	}
+
 	public boolean offer(byte[] data) {
 		if (data == null || data.length == 0) {
 			return true;
@@ -27,6 +37,23 @@ public final class BufferQueue {
 			}
 			else {
 				ring.add(data);
+				curBufSize = newSize;
+				return true;
+			}
+		}
+	}
+
+	public boolean offerFront(byte[] data) {
+		if (data == null || data.length == 0) {
+			return true;
+		}
+		else {
+			long newSize = data.length + curBufSize;
+			if (newSize > maxBufSize) {
+				return false;
+			}
+			else {
+				ring.addFront(data);
 				curBufSize = newSize;
 				return true;
 			}
