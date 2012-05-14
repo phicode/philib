@@ -29,8 +29,6 @@ import ch.bind.philib.net.sel.Selectable;
 public interface Connection extends Closeable, Selectable {
 
 	int send(byte[] data) throws IOException;
-	
-	void flush() throws IOException;
-	
+
 	void closed();
 }

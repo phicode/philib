@@ -26,9 +26,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import ch.bind.philib.io.BufferQueue;
 import ch.bind.philib.net.Connection;
@@ -48,15 +46,9 @@ public class TcpConnection implements Connection {
 
 	private ByteBuffer wbuf;
 
-	private final AtomicBoolean regForWrite = new AtomicBoolean();
-
 	private final NetSelector netSelector;
 
-	private AtomicBoolean inSend = new AtomicBoolean(false);
-
 	private final Session session;
-
-	private boolean isWriteRegistered;
 
 	private enum WriteState {
 		WRITE_DIRECTLY, WRITE_BY_SELECTOR
@@ -70,7 +62,7 @@ public class TcpConnection implements Connection {
 	// accessed by external threads or the net-selector
 	private final BufferQueue sendQueue = new BufferQueue(DEFAULT_BUFFER_SIZE);
 
-	TcpConnection(SocketChannel channel, Session session, NetSelector netSelector) throws IOException {
+	private TcpConnection(SocketChannel channel, Session session, NetSelector netSelector) throws IOException {
 		SimpleValidation.notNull(channel);
 		SimpleValidation.notNull(session);
 		SimpleValidation.notNull(netSelector);
@@ -80,6 +72,13 @@ public class TcpConnection implements Connection {
 		this.channel.configureBlocking(false);
 		this.rbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
 		this.wbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+	}
+
+	static TcpConnection create(SocketChannel clientChannel, Session session, NetSelector selector) throws IOException {
+		TcpConnection connection = new TcpConnection(clientChannel, session, selector);
+		session.init(connection);
+		connection.register();
+		return connection;
 	}
 
 	void register() {
@@ -96,9 +95,8 @@ public class TcpConnection implements Connection {
 
 		System.out.println("connected to: " + endpoint);
 		NetSelector sel = SimpleNetSelector.open();
-		TcpConnection con = new TcpConnection(channel, session, sel);
-		con.register();
-		return con;
+
+		return create(channel, session, sel);
 	}
 
 	@Override
@@ -114,11 +112,7 @@ public class TcpConnection implements Connection {
 
 	@Override
 	public boolean handle(int selectOp) {
-		if (selectOp == SelectionKey.OP_CONNECT) {
-			doConnect();
-			return false;
-		}
-		else if (selectOp == SelectionKey.OP_READ) {
+		if (selectOp == SelectionKey.OP_READ) {
 			return doRead();
 		}
 		else if (selectOp == SelectionKey.OP_WRITE) {
@@ -133,17 +127,6 @@ public class TcpConnection implements Connection {
 	public void closed() {
 		// TODO Auto-generated method stub
 		session.closed();
-	}
-
-	@Override
-	public void flush() throws IOException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
-	}
-
-	private void doConnect() {
-		// TODO
-		System.out.println("op connect");
 	}
 
 	private boolean doRead() {

@@ -13,6 +13,4 @@ public interface Session extends Closeable {
 
 	void closed();
 
-	void flush() throws IOException;
-
 }

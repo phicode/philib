@@ -9,6 +9,7 @@ public abstract class BaseSession implements Session {
 	@Override
 	public final void init(Connection connection) {
 		this.connection = connection;
+		System.out.println("initialized!");
 	}
 
 	@Override
@@ -19,10 +20,5 @@ public abstract class BaseSession implements Session {
 	@Override
 	public final int send(byte[] data) throws IOException {
 		return connection.send(data);
-	}
-
-	@Override
-	public final void flush() throws IOException {
-		connection.flush();
 	}
 }
