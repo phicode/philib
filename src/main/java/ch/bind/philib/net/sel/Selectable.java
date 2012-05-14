@@ -27,8 +27,14 @@ public interface Selectable {
 
 	SelectableChannel getChannel();
 
-	boolean handle(int selectOp);
-	
+	boolean handleRead();
+
+	boolean handleWrite();
+
+	boolean handleAccept();
+
+	boolean handleConnect();
+
 	void closed();
 
 }

@@ -25,18 +25,18 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.io.BufferQueue;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.impl.SimpleNetSelector;
+import ch.bind.philib.net.sel.BaseSelectable;
 import ch.bind.philib.net.sel.NetSelector;
 import ch.bind.philib.net.sel.SelOps;
 import ch.bind.philib.validation.SimpleValidation;
 
-public class TcpConnection implements Connection {
+public class TcpConnection extends BaseSelectable implements Connection {
 
 	private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 
@@ -111,16 +111,13 @@ public class TcpConnection implements Connection {
 	}
 
 	@Override
-	public boolean handle(int selectOp) {
-		if (selectOp == SelectionKey.OP_READ) {
-			return doRead();
-		}
-		else if (selectOp == SelectionKey.OP_WRITE) {
-			return doWrite();
-		}
-		else {
-			throw new IllegalArgumentException("illegal select-op");
-		}
+	public boolean handleRead() {
+		return doRead();
+	}
+
+	@Override
+	public boolean handleWrite() {
+		return doWrite();
 	}
 
 	@Override

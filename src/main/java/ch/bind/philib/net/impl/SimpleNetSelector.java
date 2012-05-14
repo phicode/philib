@@ -116,20 +116,16 @@ public final class SimpleNetSelector implements NetSelector {
 		boolean closed = false;
 		try {
 			if (checkMask(readyOps, SelOps.READ)) {
-				// System.out.println("OP_READ");
-				closed = selectable.handle(SelOps.READ);
+				closed = selectable.handleRead();
 			}
 			if (checkMask(readyOps, SelOps.WRITE)) {
-				// System.out.println("OP_WRITE");
-				closed = selectable.handle(SelOps.WRITE);
+				closed = selectable.handleWrite();
 			}
 			if (checkMask(readyOps, SelOps.ACCEPT)) {
-				// System.out.println("OP_ACCEPT");
-				closed = selectable.handle(SelOps.ACCEPT);
+				closed = selectable.handleAccept();
 			}
 			if (checkMask(readyOps, SelOps.CONNECT)) {
-				// System.out.println("OP_CONNECT");
-				closed = selectable.handle(SelOps.CONNECT);
+				closed = selectable.handleConnect();
 			}
 		} catch (Exception e) {
 			closed = true;
@@ -149,7 +145,7 @@ public final class SimpleNetSelector implements NetSelector {
 			if (checkMask(ops, SelOps.WRITE)) {
 				throw new IllegalArgumentException("SelectionKey.OP_WRITE is set in the default set");
 			}
-			SelectionKey key = channel.register(selector, ops, selectable);
+			channel.register(selector, ops, selectable);
 			if (useSelectorWakeup) {
 				selector.wakeup();
 			}

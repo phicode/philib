@@ -25,18 +25,18 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
 import java.nio.channels.SelectableChannel;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.sel.BaseSelectable;
 import ch.bind.philib.net.sel.NetSelector;
 import ch.bind.philib.net.sel.SelOps;
 import ch.bind.philib.validation.SimpleValidation;
 
-public class TcpServer implements NetServer {
+public class TcpServer extends BaseSelectable implements NetServer {
 
 	// TODO: configurable
 	private static final int DEFAULT_BACKLOG = 100;
@@ -81,15 +81,10 @@ public class TcpServer implements NetServer {
 	}
 
 	@Override
-	public boolean handle(int selectOp) {
-		if (selectOp == SelectionKey.OP_ACCEPT) {
-			System.out.println("doAccept");
-			doAccept();
-			return false;
-		}
-		else {
-			throw new IllegalArgumentException("illegal select-op");
-		}
+	public boolean handleAccept() {
+		System.out.println("doAccept");
+		doAccept();
+		return false;
 	}
 
 	@Override
