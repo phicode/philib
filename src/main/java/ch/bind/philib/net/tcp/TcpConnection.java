@@ -42,9 +42,9 @@ public class TcpConnection implements Connection {
 
 	private final SocketChannel channel;
 
-	private ByteBuffer rbuf;
+	private final ByteBuffer rbuf;
 
-	private ByteBuffer wbuf;
+	private final ByteBuffer wbuf;
 
 	private final NetSelector netSelector;
 

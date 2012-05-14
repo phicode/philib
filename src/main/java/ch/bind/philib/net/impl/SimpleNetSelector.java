@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.net.sel.NetSelector;
+import ch.bind.philib.net.sel.SelOps;
 import ch.bind.philib.net.sel.Selectable;
 import ch.bind.philib.validation.SimpleValidation;
 
@@ -114,21 +115,21 @@ public final class SimpleNetSelector implements NetSelector {
 		int readyOps = key.readyOps();
 		boolean closed = false;
 		try {
-			if (checkMask(readyOps, SelectionKey.OP_READ)) {
+			if (checkMask(readyOps, SelOps.READ)) {
 				// System.out.println("OP_READ");
-				closed = selectable.handle(SelectionKey.OP_READ);
+				closed = selectable.handle(SelOps.READ);
 			}
-			if (checkMask(readyOps, SelectionKey.OP_WRITE)) {
+			if (checkMask(readyOps, SelOps.WRITE)) {
 				// System.out.println("OP_WRITE");
-				closed = selectable.handle(SelectionKey.OP_WRITE);
+				closed = selectable.handle(SelOps.WRITE);
 			}
-			if (checkMask(readyOps, SelectionKey.OP_ACCEPT)) {
+			if (checkMask(readyOps, SelOps.ACCEPT)) {
 				// System.out.println("OP_ACCEPT");
-				closed = selectable.handle(SelectionKey.OP_ACCEPT);
+				closed = selectable.handle(SelOps.ACCEPT);
 			}
-			if (checkMask(readyOps, SelectionKey.OP_CONNECT)) {
+			if (checkMask(readyOps, SelOps.CONNECT)) {
 				// System.out.println("OP_CONNECT");
-				closed = selectable.handle(SelectionKey.OP_CONNECT);
+				closed = selectable.handle(SelOps.CONNECT);
 			}
 		} catch (Exception e) {
 			closed = true;
@@ -145,7 +146,7 @@ public final class SimpleNetSelector implements NetSelector {
 	public void register(Selectable selectable, int ops) {
 		try {
 			SelectableChannel channel = selectable.getChannel();
-			if ((ops & SelectionKey.OP_WRITE) != 0) {
+			if (checkMask(ops, SelOps.WRITE)) {
 				throw new IllegalArgumentException("SelectionKey.OP_WRITE is set in the default set");
 			}
 			SelectionKey key = channel.register(selector, ops, selectable);
