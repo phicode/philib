@@ -101,6 +101,7 @@ public class TcpConnection extends BaseSelectable implements Connection {
 
 	@Override
 	public void close() throws IOException {
+		6165145554655
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO");
 	}
@@ -134,11 +135,9 @@ public class TcpConnection extends BaseSelectable implements Connection {
 				int num = channel.read(rbuf);
 				if (num == -1) {
 					return true;
-				}
-				else if (num == 0) {
+				} else if (num == 0) {
 					return false;
-				}
-				else {
+				} else {
 					rbuf.flip();
 					// TODO: make assert
 					SimpleValidation.isTrue(num == rbuf.limit());
@@ -164,12 +163,10 @@ public class TcpConnection extends BaseSelectable implements Connection {
 		synchronized (writeLock) {
 			if (writeState == WriteState.WRITE_DIRECTLY) {
 				return _sendBig(data);
-			}
-			else {
+			} else {
 				if (sendQueue.offer(data)) {
 					return data.length;
-				}
-				else {
+				} else {
 					return 0;
 				}
 			}
@@ -198,7 +195,14 @@ public class TcpConnection extends BaseSelectable implements Connection {
 		wbuf.flip();
 		// TODO: remove
 		SimpleValidation.isTrue(wbuf.remaining() == wlen, wbuf.remaining() + " != " + wlen);
+		long startNs = System.nanoTime();
 		int num = channel.write(wbuf);
+		long endNs = System.nanoTime();
+		long t = endNs - startNs;
+		// 0.5ms
+		if (t > 500000L) {
+			System.out.printf("channel.write took %dns, %fms", t, (t / 1000000f));
+		}
 		if (num < wlen) {
 			registerForWrite();
 		}
@@ -223,8 +227,7 @@ public class TcpConnection extends BaseSelectable implements Connection {
 				SimpleValidation.notNegative(numRem);
 				if (numRem == 0) {
 					nextBuf = sendQueue.poll();
-				}
-				else {
+				} else {
 					byte[] rem = new byte[numRem];
 					System.arraycopy(nextBuf, actual, rem, 0, numRem);
 					boolean ok = sendQueue.offerFront(rem);
@@ -243,8 +246,7 @@ public class TcpConnection extends BaseSelectable implements Connection {
 		if (writeState == WriteState.WRITE_DIRECTLY) {
 			netSelector.reRegister(this, SelOps.READ_WRITE);
 			writeState = WriteState.WRITE_BY_SELECTOR;
-		}
-		else {
+		} else {
 			System.out.println("already registered for write");
 		}
 	}
@@ -253,9 +255,14 @@ public class TcpConnection extends BaseSelectable implements Connection {
 		if (writeState == WriteState.WRITE_BY_SELECTOR) {
 			netSelector.reRegister(this, SelOps.READ);
 			writeState = WriteState.WRITE_DIRECTLY;
-		}
-		else {
+		} else {
 			System.out.println("already unregistered from write");
 		}
+	}
+
+	public boolean isConnected() {
+		asdfasfdsadf
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

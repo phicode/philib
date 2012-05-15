@@ -31,4 +31,6 @@ public interface Connection extends Closeable, Selectable {
 	int send(byte[] data) throws IOException;
 
 	void closed();
+	
+	boolean isConnected();
 }

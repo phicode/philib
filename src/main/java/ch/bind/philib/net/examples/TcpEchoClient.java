@@ -72,8 +72,7 @@ public class TcpEchoClient extends BaseSession {
 			System.out.printf("sent: %d / %d%n", num, buf.length);
 		}
 		tx.addAndGet(num);
-		while (true) {
-
+		while (connection.isConnected()) {
 			long now = System.currentTimeMillis();
 			if (now > nextStatus) {
 				nextStatus = now + 1000;
