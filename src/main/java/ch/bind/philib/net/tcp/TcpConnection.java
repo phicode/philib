@@ -27,20 +27,17 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 
-import ch.bind.philib.io.BufferOps;
-import ch.bind.philib.io.BufferQueue;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.PureSession;
 import ch.bind.philib.net.impl.SimpleNetSelector;
-import ch.bind.philib.net.sel.SelectableBase;
 import ch.bind.philib.net.sel.NetSelector;
 import ch.bind.philib.net.sel.SelUtil;
-import ch.bind.philib.pool.impl.ObjectPool;
+import ch.bind.philib.net.sel.SelectableBase;
 import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpConnection extends SelectableBase implements Connection {
 
-	private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
+	// private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 
 	private final SocketChannel channel;
 
@@ -48,17 +45,18 @@ public class TcpConnection extends SelectableBase implements Connection {
 
 	private final PureSession session;
 
-	private enum WriteState {
-		WRITE_DIRECTLY, WRITE_BY_SELECTOR
-	}
+	// private enum WriteState {
+	// WRITE_DIRECTLY, WRITE_BY_SELECTOR
+	// }
 
-	private WriteState writeState = WriteState.WRITE_DIRECTLY;
+	// private WriteState writeState = WriteState.WRITE_DIRECTLY;
 
 	private final Object writeLock = new Object();
 
 	// TODO: make the access to the sendqueue synchronized, since it can be
 	// accessed by external threads or the net-selector
-	private final BufferQueue sendQueue = new BufferQueue(DEFAULT_BUFFER_SIZE);
+	// private final BufferQueue sendQueue = new
+	// BufferQueue(DEFAULT_BUFFER_SIZE);
 
 	private TcpConnection(SocketChannel channel, PureSession session, NetSelector netSelector) throws IOException {
 		SimpleValidation.notNull(channel);
