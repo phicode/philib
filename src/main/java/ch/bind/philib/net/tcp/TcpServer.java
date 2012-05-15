@@ -31,12 +31,12 @@ import java.nio.channels.SocketChannel;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
-import ch.bind.philib.net.sel.BaseSelectable;
+import ch.bind.philib.net.sel.SelectableBase;
 import ch.bind.philib.net.sel.NetSelector;
-import ch.bind.philib.net.sel.SelOps;
+import ch.bind.philib.net.sel.SelUtil;
 import ch.bind.philib.validation.SimpleValidation;
 
-public class TcpServer extends BaseSelectable implements NetServer {
+public class TcpServer extends SelectableBase implements NetServer {
 
 	// TODO: configurable
 	private static final int DEFAULT_BACKLOG = 100;
@@ -63,7 +63,7 @@ public class TcpServer extends BaseSelectable implements NetServer {
 		// TODO: log bridge
 		System.out.println("listening on: " + bindAddress);
 		this.channel = channel;
-		selector.register(this, SelOps.ACCEPT);
+		selector.register(this, SelUtil.ACCEPT);
 	}
 
 	@Override

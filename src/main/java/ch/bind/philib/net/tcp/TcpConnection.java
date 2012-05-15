@@ -31,12 +31,12 @@ import ch.bind.philib.io.BufferQueue;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.impl.SimpleNetSelector;
-import ch.bind.philib.net.sel.BaseSelectable;
+import ch.bind.philib.net.sel.SelectableBase;
 import ch.bind.philib.net.sel.NetSelector;
-import ch.bind.philib.net.sel.SelOps;
+import ch.bind.philib.net.sel.SelUtil;
 import ch.bind.philib.validation.SimpleValidation;
 
-public class TcpConnection extends BaseSelectable implements Connection {
+public class TcpConnection extends SelectableBase implements Connection {
 
 	private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 
@@ -82,7 +82,7 @@ public class TcpConnection extends BaseSelectable implements Connection {
 	}
 
 	void register() {
-		netSelector.register(this, SelOps.READ);
+		netSelector.register(this, SelUtil.READ);
 	}
 
 	public static TcpConnection open(SocketAddress endpoint, Session session) throws IOException {
@@ -101,9 +101,9 @@ public class TcpConnection extends BaseSelectable implements Connection {
 
 	@Override
 	public void close() throws IOException {
-		6165145554655
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
+		netSelector.unregister(this);
+		channel.close();
+		session.closed();
 	}
 
 	@Override
@@ -135,9 +135,11 @@ public class TcpConnection extends BaseSelectable implements Connection {
 				int num = channel.read(rbuf);
 				if (num == -1) {
 					return true;
-				} else if (num == 0) {
+				}
+				else if (num == 0) {
 					return false;
-				} else {
+				}
+				else {
 					rbuf.flip();
 					// TODO: make assert
 					SimpleValidation.isTrue(num == rbuf.limit());
@@ -163,10 +165,12 @@ public class TcpConnection extends BaseSelectable implements Connection {
 		synchronized (writeLock) {
 			if (writeState == WriteState.WRITE_DIRECTLY) {
 				return _sendBig(data);
-			} else {
+			}
+			else {
 				if (sendQueue.offer(data)) {
 					return data.length;
-				} else {
+				}
+				else {
 					return 0;
 				}
 			}
@@ -199,9 +203,9 @@ public class TcpConnection extends BaseSelectable implements Connection {
 		int num = channel.write(wbuf);
 		long endNs = System.nanoTime();
 		long t = endNs - startNs;
-		// 0.5ms
-		if (t > 500000L) {
-			System.out.printf("channel.write took %dns, %fms", t, (t / 1000000f));
+		// 3ms
+		if (t > 3000000L) {
+			System.out.printf("channel.write took %dns, %fms%n", t, (t / 1000000f));
 		}
 		if (num < wlen) {
 			registerForWrite();
@@ -227,7 +231,8 @@ public class TcpConnection extends BaseSelectable implements Connection {
 				SimpleValidation.notNegative(numRem);
 				if (numRem == 0) {
 					nextBuf = sendQueue.poll();
-				} else {
+				}
+				else {
 					byte[] rem = new byte[numRem];
 					System.arraycopy(nextBuf, actual, rem, 0, numRem);
 					boolean ok = sendQueue.offerFront(rem);
@@ -244,25 +249,29 @@ public class TcpConnection extends BaseSelectable implements Connection {
 
 	private void registerForWrite() {
 		if (writeState == WriteState.WRITE_DIRECTLY) {
-			netSelector.reRegister(this, SelOps.READ_WRITE);
+			netSelector.reRegister(this, SelUtil.READ_WRITE);
 			writeState = WriteState.WRITE_BY_SELECTOR;
-		} else {
+		}
+		else {
 			System.out.println("already registered for write");
 		}
 	}
 
 	private void unregisterForWrite() {
 		if (writeState == WriteState.WRITE_BY_SELECTOR) {
-			netSelector.reRegister(this, SelOps.READ);
+			netSelector.reRegister(this, SelUtil.READ);
 			writeState = WriteState.WRITE_DIRECTLY;
-		} else {
+		}
+		else {
 			System.out.println("already unregistered from write");
 		}
 	}
 
 	public boolean isConnected() {
-		asdfasfdsadf
-		// TODO Auto-generated method stub
-		return false;
+		return channel.isConnected();
+	}
+
+	public boolean isOpen() {
+		return channel.isOpen();
 	}
 }

@@ -1,6 +1,6 @@
 package ch.bind.philib.net.sel;
 
-public abstract class BaseSelectable implements Selectable {
+public abstract class SelectableBase implements Selectable {
 
 	@Override
 	public boolean handleRead() {

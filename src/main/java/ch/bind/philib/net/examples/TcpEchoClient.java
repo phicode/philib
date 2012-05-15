@@ -26,14 +26,14 @@ import java.net.InetSocketAddress;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-import ch.bind.philib.net.BaseSession;
+import ch.bind.philib.net.SessionBase;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpConnection;
 
 //TODO: reply data validation
 //TODO: speed measurements
 //TODO: many threads
-public class TcpEchoClient extends BaseSession {
+public class TcpEchoClient extends SessionBase {
 
 	private TcpConnection connection;
 
@@ -46,7 +46,9 @@ public class TcpEchoClient extends BaseSession {
 	}
 
 	private void run() throws IOException, InterruptedException {
-		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
+		InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
+		// InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1",
+		// 1234);
 		connection = TcpConnection.open(endpoint, this);
 
 		// buf = new byte[8 * 1024];
@@ -66,23 +68,19 @@ public class TcpEchoClient extends BaseSession {
 		});
 
 		long start = System.currentTimeMillis();
-		long nextStatus = 0;
 		int num = connection.send(buf);
 		if (num != buf.length) {
 			System.out.printf("sent: %d / %d%n", num, buf.length);
 		}
 		tx.addAndGet(num);
 		while (connection.isConnected()) {
-			long now = System.currentTimeMillis();
-			if (now > nextStatus) {
-				nextStatus = now + 1000;
-				long t = now - start;
-				long rx = this.rx.get();
-				long tx = this.tx.get();
-				double rxMbPerSec = (rx / (1024f * 1024f)) / (t / 1000f);
-				double txMbPerSec = (tx / (1024f * 1024f)) / (t / 1000f);
-				System.out.printf("rx=%d, tx=%d bytes in %d ms => %.3f %.3f mb/sec%n", rx, tx, t, rxMbPerSec, txMbPerSec);
-			}
+			long rx = this.rx.get();
+			long tx = this.tx.get();
+			long t = System.currentTimeMillis() - start;
+			double rxMbPerSec = (rx / (1024f * 1024f)) / (t / 1000f);
+			double txMbPerSec = (tx / (1024f * 1024f)) / (t / 1000f);
+			System.out.printf("rx=%d, tx=%d bytes in %d ms => %.3f %.3f mb/sec%n", rx, tx, t, rxMbPerSec, txMbPerSec);
+			Thread.sleep(5000);
 		}
 	}
 

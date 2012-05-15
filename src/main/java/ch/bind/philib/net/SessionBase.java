@@ -2,7 +2,7 @@ package ch.bind.philib.net;
 
 import java.io.IOException;
 
-public abstract class BaseSession implements Session {
+public abstract class SessionBase implements Session {
 
 	private Connection connection;
 

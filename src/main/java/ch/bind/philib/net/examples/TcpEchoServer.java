@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import ch.bind.philib.net.BaseSession;
+import ch.bind.philib.net.SessionBase;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
@@ -82,7 +82,7 @@ public class TcpEchoServer implements SessionFactory {
 	// TODO: make an abstract-consumer which delas with this initialization
 	// stuff and prevents sending if not initialized.
 	// offer a postInit() method for specific setup stuff
-	private static class EchoSession extends BaseSession {
+	private static class EchoSession extends SessionBase {
 
 		private long lastInteractionNs;
 

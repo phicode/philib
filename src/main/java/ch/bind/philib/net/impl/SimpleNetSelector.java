@@ -25,48 +25,55 @@ import static ch.bind.philib.io.BitOps.checkMask;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
+import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.net.sel.NetSelector;
-import ch.bind.philib.net.sel.SelOps;
+import ch.bind.philib.net.sel.SelUtil;
 import ch.bind.philib.net.sel.Selectable;
-import ch.bind.philib.validation.SimpleValidation;
 
 // TODO: thread safe
 public final class SimpleNetSelector implements NetSelector {
 
 	private static final AtomicLong NAME_SEQ = new AtomicLong(0);
 
-	private final boolean useSelectorWakeup = false;
+	private static final boolean doSelectTimings = false;
+
+	// private final boolean useSelectorWakeup = false;
 
 	private final Selector selector;
 
+	// private final AtomicBoolean wakeupCalled = new AtomicBoolean();
+
 	private volatile Thread thread;
+
+	private Queue<NewReg> newRegistrations = new ConcurrentLinkedQueue<NewReg>();
 
 	private SimpleNetSelector() throws IOException {
 		selector = Selector.open();
 	}
 
 	public static NetSelector open() throws IOException {
-		NetSelector rv = new SimpleNetSelector();
+		SimpleNetSelector rv = new SimpleNetSelector();
 		String threadName = SimpleNetSelector.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
-		new Thread(rv, threadName).start();
+		rv.thread = ThreadUtil.runForever(rv, threadName);
 		return rv;
 	}
 
 	@Override
 	public void run() {
-		thread = Thread.currentThread();
 		int lastKeys = 0;
 		try {
 			// TODO: wait as long as there is no channel registered
 			while (true) {
-				// System.out.println("asdfasdfasdfadf");
 				int num = doSelect();
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
@@ -81,28 +88,61 @@ public final class SimpleNetSelector implements NetSelector {
 					lastKeys = keys;
 				}
 			}
+		} catch (ClosedSelectorException e) {
+			System.out.println("shutting down");
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 	}
 
-	private int doSelect() throws IOException {
-		long selStart = System.nanoTime();
-		int num = selector.select(1000L);
-		long selEnd = System.nanoTime();
-		long selTime = selEnd - selStart;
-		long selMs = selTime / (1000L * 1000L);
-		if (selMs >= 1005) {
-			System.out.printf("select took %dms, num=%d%n", selMs, num);
-		}
+	private int doSelect() throws IOException, ClosedSelectorException {
+		int num;
+		do {
+			updateRegistrations();
+
+			if (doSelectTimings) {
+				long selStart = System.nanoTime();
+				num = selector.select(10000L);
+				long selEnd = System.nanoTime();
+				long selTime = selEnd - selStart;
+				long selMs = selTime / (10L * 1000L * 1000L);
+				if (selMs >= 10005) {
+					System.out.printf("select took %dms, num=%d%n", selMs, num);
+				}
+			}
+			else {
+				num = selector.select(10000L);
+			}
+		} while (num == 0);
 		return num;
+	}
+
+	private void updateRegistrations() {
+		NewReg reg = newRegistrations.poll();
+		while (reg != null) {
+			Selectable selectable = reg.getSelectable();
+			SelectableChannel channel = selectable.getChannel();
+			int ops = reg.getOps();
+			try {
+				long ts = System.nanoTime();
+				channel.register(selector, ops, selectable);
+				long te = System.nanoTime();
+				long t = te - ts;
+				System.out.printf("register took: %dns => %.5fms%n", t, (t / 1000000f));
+			} catch (ClosedChannelException e) {
+				System.out.println("cant register an already closed channel");
+			}
+
+			reg = newRegistrations.poll();
+		}
 	}
 
 	@Override
 	public void close() throws IOException {
 		ThreadUtil.interruptAndJoin(thread);
 		selector.close();
+		// TODO all registered clients as well???
 		throw new UnsupportedOperationException("TODO: finish");
 	}
 
@@ -115,60 +155,56 @@ public final class SimpleNetSelector implements NetSelector {
 		int readyOps = key.readyOps();
 		boolean closed = false;
 		try {
-			if (checkMask(readyOps, SelOps.READ)) {
+			if (checkMask(readyOps, SelUtil.READ)) {
 				closed = selectable.handleRead();
 			}
-			if (checkMask(readyOps, SelOps.WRITE)) {
+			if (!closed && checkMask(readyOps, SelUtil.WRITE)) {
 				closed = selectable.handleWrite();
 			}
-			if (checkMask(readyOps, SelOps.ACCEPT)) {
+			if (!closed && checkMask(readyOps, SelUtil.ACCEPT)) {
 				closed = selectable.handleAccept();
 			}
-			if (checkMask(readyOps, SelOps.CONNECT)) {
+			if (!closed && checkMask(readyOps, SelUtil.CONNECT)) {
 				closed = selectable.handleConnect();
 			}
 		} catch (Exception e) {
 			closed = true;
-			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-			e.printStackTrace();
+			System.out.println("selectable.handle*() failed: " + ExceptionUtil.buildMessageChain(e));
 		}
 		if (closed) {
-			unregister(selectable);
-			selectable.closed();
+			try {
+				selectable.close();
+			} catch (Exception e) {
+				System.out.println("exception while closing: " + e.getMessage());
+				e.printStackTrace();
+			}
 		}
 	}
 
 	@Override
 	public void register(Selectable selectable, int ops) {
-		try {
-			SelectableChannel channel = selectable.getChannel();
-			if (checkMask(ops, SelOps.WRITE)) {
-				throw new IllegalArgumentException("SelectionKey.OP_WRITE is set in the default set");
-			}
-			channel.register(selector, ops, selectable);
-			if (useSelectorWakeup) {
-				selector.wakeup();
-			}
-			System.out.println("reg, keys: " + selector.keys().size());
-		} catch (ClosedChannelException e) {
-			e.printStackTrace();
-		}
+		newRegistrations.add(new NewReg(selectable, ops));
+		wakeup();
+	}
+
+	private void wakeup() {
+		// TODO: only call wakeup if the calling thread is not the selector
+		// thread
+		// wakeupCalled.set(true);
+		selector.wakeup();
 	}
 
 	@Override
 	public void reRegister(Selectable selectable, int ops) {
-		try {
-			SelectableChannel channel = selectable.getChannel();
-			SelectionKey key = channel.register(selector, ops, selectable);
-			if (useSelectorWakeup) {
-				selector.wakeup();
-			}
-			// TODO: remove
-			SimpleValidation.isTrue(key.interestOps() == ops);
-			System.out.println("re-reg, keys: " + selector.keys().size());
-		} catch (ClosedChannelException e) {
-			e.printStackTrace();
+		SelectableChannel channel = selectable.getChannel();
+		SelectionKey key = channel.keyFor(selector);
+		if (key == null) {
+			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
 		}
+		else {
+			key.interestOps(ops);
+		}
+		wakeup();
 	}
 
 	@Override
@@ -178,13 +214,33 @@ public final class SimpleNetSelector implements NetSelector {
 		if (key != null) {
 			key.cancel();
 			key.attach(null);
-			if (useSelectorWakeup) {
-				selector.wakeup();
-			}
+			// if (useSelectorWakeup) {
+			// selector.wakeup();
+			// }
 			System.out.println("unreg, keys: " + selector.keys().size());
 		}
 		else {
 			System.out.println("unreg failed, not registered");
+		}
+	}
+
+	private static final class NewReg {
+
+		final Selectable selectable;
+
+		final int ops;
+
+		private NewReg(Selectable selectable, int ops) {
+			this.selectable = selectable;
+			this.ops = ops;
+		}
+
+		public Selectable getSelectable() {
+			return selectable;
+		}
+
+		public int getOps() {
+			return ops;
 		}
 	}
 }

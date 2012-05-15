@@ -1,10 +1,11 @@
 package ch.bind.philib.net.sel;
 
 import java.nio.channels.SelectionKey;
+import java.util.concurrent.atomic.AtomicLong;
 
-public final class SelOps {
+public final class SelUtil {
 
-	private SelOps() {
+	private SelUtil() {
 	}
 
 	public static final int READ = SelectionKey.OP_READ;
@@ -16,4 +17,5 @@ public final class SelOps {
 	public static final int ACCEPT = SelectionKey.OP_ACCEPT;
 
 	public static final int CONNECT = SelectionKey.OP_CONNECT;
+
 }

@@ -21,9 +21,11 @@
  */
 package ch.bind.philib.net.sel;
 
+import java.io.Closeable;
 import java.nio.channels.SelectableChannel;
+import java.util.concurrent.atomic.AtomicLong;
 
-public interface Selectable {
+public interface Selectable extends Closeable {
 
 	SelectableChannel getChannel();
 
