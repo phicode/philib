@@ -23,6 +23,7 @@ package ch.bind.philib.pool;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import ch.bind.philib.pool.impl.ObjectPool;
 import ch.bind.philib.validation.SimpleValidation;
 
 public final class ObjectPoolImpl<E> implements ObjectPool<E> {

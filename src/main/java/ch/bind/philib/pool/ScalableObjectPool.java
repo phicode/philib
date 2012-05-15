@@ -2,6 +2,8 @@ package ch.bind.philib.pool;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import ch.bind.philib.pool.impl.ObjectPool;
+
 public class ScalableObjectPool<E> implements ObjectPool<E> {
 
     private BoundToThreadLocal binder = new BoundToThreadLocal();

@@ -23,6 +23,6 @@ package ch.bind.philib.net;
 
 public interface SessionFactory {
 
-	Session createSession();
+	PureSession createSession();
 
 }

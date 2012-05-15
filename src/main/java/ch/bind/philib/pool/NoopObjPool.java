@@ -1,5 +1,7 @@
 package ch.bind.philib.pool;
 
+import ch.bind.philib.pool.impl.ObjectPool;
+
 public class NoopObjPool<E> implements ObjectPool<E> {
 
 	@Override

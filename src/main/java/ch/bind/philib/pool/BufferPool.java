@@ -24,7 +24,9 @@ package ch.bind.philib.pool;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class BufferPool {
+import ch.bind.philib.pool.impl.ObjectPool;
+
+public final class BufferPool implements Foo<byte[]> {
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;
 
@@ -32,6 +34,7 @@ public final class BufferPool {
 	public static final int DEFAULT_NUM_BUFFERS = 128;
 
 	private final int bufSize;
+
 	private final ByteArrayObjectFactory factory;
 
 	private final ObjectPool<byte[]> pool;
@@ -39,6 +42,7 @@ public final class BufferPool {
 	private static final class ByteArrayObjectFactory implements ObjectFactory<byte[]> {
 
 		private final int bufSize;
+
 		private final AtomicLong creates = new AtomicLong();
 
 		public ByteArrayObjectFactory(int bufSize) {
@@ -83,10 +87,12 @@ public final class BufferPool {
 		return factory.creates.get();
 	}
 
+	@Override
 	public byte[] get() {
 		return pool.get(factory);
 	}
 
+	@Override
 	public void release(byte[] buf) {
 		// discard buffers which do not have the right size
 		if (buf != null && buf.length == bufSize) {

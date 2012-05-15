@@ -1,4 +1,6 @@
-package ch.bind.philib.pool;
+package ch.bind.philib.pool.impl;
+
+import ch.bind.philib.pool.ObjectFactory;
 
 public interface ObjectPool<E> {
 

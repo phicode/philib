@@ -23,12 +23,13 @@ package ch.bind.philib.net;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import ch.bind.philib.net.sel.Selectable;
 
 public interface Connection extends Closeable, Selectable {
 
-	int send(byte[] data) throws IOException;
+	int send(ByteBuffer data) throws IOException;
 
 	void closed();
 	

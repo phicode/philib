@@ -29,7 +29,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.net.NetServer;
-import ch.bind.philib.net.Session;
+import ch.bind.philib.net.PureSession;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.sel.SelectableBase;
 import ch.bind.philib.net.sel.NetSelector;
@@ -97,7 +97,7 @@ public class TcpServer extends SelectableBase implements NetServer {
 	private void doAccept() {
 		try {
 			SocketChannel clientChannel = channel.accept();
-			Session session = sessionFactory.createSession();
+			PureSession session = sessionFactory.createSession();
 			TcpConnection.create(clientChannel, session, selector);
 		} catch (IOException e) {
 			// TODO

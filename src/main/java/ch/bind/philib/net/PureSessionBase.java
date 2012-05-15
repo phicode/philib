@@ -1,8 +1,9 @@
 package ch.bind.philib.net;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
-public abstract class SessionBase implements Session {
+public abstract class PureSessionBase implements PureSession {
 
 	private Connection connection;
 
@@ -18,7 +19,7 @@ public abstract class SessionBase implements Session {
 	}
 
 	@Override
-	public final int send(byte[] data) throws IOException {
+	public final int send(ByteBuffer data) throws IOException {
 		return connection.send(data);
 	}
 }
