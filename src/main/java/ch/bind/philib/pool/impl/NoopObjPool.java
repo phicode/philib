@@ -1,6 +1,5 @@
-package ch.bind.philib.pool;
+package ch.bind.philib.pool.impl;
 
-import ch.bind.philib.pool.impl.ObjectPool;
 
 public class NoopObjPool<E> implements ObjectPool<E> {
 

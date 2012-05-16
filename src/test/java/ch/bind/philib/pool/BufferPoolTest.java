@@ -29,6 +29,8 @@ import java.util.concurrent.Semaphore;
 import org.junit.Test;
 
 import ch.bind.philib.TestUtil;
+import ch.bind.philib.pool.impl.NoopObjPool;
+import ch.bind.philib.pool.impl.ScalableObjectPool;
 import ch.bind.philib.validation.SimpleValidation;
 
 public class BufferPoolTest {

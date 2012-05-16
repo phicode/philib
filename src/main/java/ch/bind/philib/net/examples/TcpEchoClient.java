@@ -23,17 +23,18 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-import ch.bind.philib.net.SessionBase;
+import ch.bind.philib.net.PureSessionBase;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpConnection;
 
 //TODO: reply data validation
 //TODO: speed measurements
 //TODO: many threads
-public class TcpEchoClient extends SessionBase {
+public class TcpEchoClient extends PureSessionBase {
 
 	private TcpConnection connection;
 
@@ -68,11 +69,14 @@ public class TcpEchoClient extends SessionBase {
 		});
 
 		long start = System.currentTimeMillis();
-		int num = connection.send(buf);
-		if (num != buf.length) {
-			System.out.printf("sent: %d / %d%n", num, buf.length);
+		ByteBuffer bb = ByteBuffer.wrap(buf);
+		while (bb.remaining() > 0) {
+			int num = connection.send(bb);
+			tx.addAndGet(num);
+			if (num != buf.length) {
+				System.out.printf("sent: %d / %d%n", num, buf.length);
+			}
 		}
-		tx.addAndGet(num);
 		while (connection.isConnected()) {
 			long rx = this.rx.get();
 			long tx = this.tx.get();
@@ -85,11 +89,15 @@ public class TcpEchoClient extends SessionBase {
 	}
 
 	@Override
-	public void receive(byte[] data) {
-		rx.addAndGet(data.length);
+	public void receive(ByteBuffer data) {
+		int received = data.remaining();
+		rx.addAndGet(received);
 		try {
-			send(data);
-			tx.addAndGet(data.length);
+			int num = send(data);
+			if (num != received) {
+				System.out.printf("cant echo back! only %d out of %d was sent.%n", num, received);
+			}
+			tx.addAndGet(num);
 		} catch (IOException e) {
 			e.printStackTrace();
 			try {

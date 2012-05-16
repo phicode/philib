@@ -1,4 +1,4 @@
-package ch.bind.philib.pool;
+package ch.bind.philib.pool.impl;
 
 public interface ObjectFactory<E> {
 
@@ -7,4 +7,6 @@ public interface ObjectFactory<E> {
 	void destroy(E e);
 	
 	void released(E e);
+	
+	boolean canRelease(E e);
 }

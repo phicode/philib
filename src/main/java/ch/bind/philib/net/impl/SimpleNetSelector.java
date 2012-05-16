@@ -57,12 +57,13 @@ public final class SimpleNetSelector implements NetSelector {
 
 	private Queue<NewReg> newRegistrations = new ConcurrentLinkedQueue<NewReg>();
 
-	private SimpleNetSelector() throws IOException {
-		selector = Selector.open();
+	private SimpleNetSelector(Selector selector) throws IOException {
+		this.selector = selector;
 	}
 
 	public static NetSelector open() throws IOException {
-		SimpleNetSelector rv = new SimpleNetSelector();
+		Selector selector = Selector.open();
+		SimpleNetSelector rv = new SimpleNetSelector(selector);
 		String threadName = SimpleNetSelector.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
 		rv.thread = ThreadUtil.runForever(rv, threadName);
 		return rv;

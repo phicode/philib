@@ -1,5 +1,6 @@
 package ch.bind.philib.pool;
 
+import ch.bind.philib.pool.impl.ObjectFactory;
 import ch.bind.philib.pool.impl.ObjectPool;
 import ch.bind.philib.validation.SimpleValidation;
 

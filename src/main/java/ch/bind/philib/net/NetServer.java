@@ -28,4 +28,6 @@ import ch.bind.philib.net.sel.Selectable;
 public interface NetServer extends Closeable, Selectable {
 
 	int getActiveSessionCount();
+	
+	NetContext getContext();
 }

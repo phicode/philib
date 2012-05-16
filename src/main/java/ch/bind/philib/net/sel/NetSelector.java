@@ -22,14 +22,8 @@
 package ch.bind.philib.net.sel;
 
 import java.io.Closeable;
-import java.nio.ByteBuffer;
-
-import ch.bind.philib.pool.BufferPool;
-import ch.bind.philib.pool.impl.ObjectPool;
 
 public interface NetSelector extends Runnable, Closeable {
-
-	ObjectPool<ByteBuffer> getBufferPool();
 
 	void register(Selectable selectable, int ops);
 

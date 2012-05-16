@@ -28,9 +28,8 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.PureSession;
-import ch.bind.philib.net.impl.SimpleNetSelector;
-import ch.bind.philib.net.sel.NetSelector;
 import ch.bind.philib.net.sel.SelUtil;
 import ch.bind.philib.net.sel.SelectableBase;
 import ch.bind.philib.validation.SimpleValidation;
@@ -38,10 +37,11 @@ import ch.bind.philib.validation.SimpleValidation;
 public class TcpConnection extends SelectableBase implements Connection {
 
 	// private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
+	private static final boolean doWriteTimings = false;
 
 	private final SocketChannel channel;
 
-	private final NetSelector netSelector;
+	private final NetContext context;
 
 	private final PureSession session;
 
@@ -58,13 +58,13 @@ public class TcpConnection extends SelectableBase implements Connection {
 	// private final BufferQueue sendQueue = new
 	// BufferQueue(DEFAULT_BUFFER_SIZE);
 
-	private TcpConnection(SocketChannel channel, PureSession session, NetSelector netSelector) throws IOException {
+	private TcpConnection(SocketChannel channel, PureSession session, NetContext context) throws IOException {
 		SimpleValidation.notNull(channel);
 		SimpleValidation.notNull(session);
-		SimpleValidation.notNull(netSelector);
+		SimpleValidation.notNull(context);
 		this.channel = channel;
 		this.session = session;
-		this.netSelector = netSelector;
+		this.context = context;
 		// TODO: move this somewhere else
 		this.channel.configureBlocking(false);
 
@@ -72,15 +72,20 @@ public class TcpConnection extends SelectableBase implements Connection {
 		// this.wbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
 	}
 
-	static TcpConnection create(SocketChannel clientChannel, PureSession session, NetSelector selector) throws IOException {
-		TcpConnection connection = new TcpConnection(clientChannel, session, selector);
+	@Override
+	public NetContext getContext() {
+		return context;
+	}
+
+	static TcpConnection create(SocketChannel clientChannel, PureSession session, NetContext context) throws IOException {
+		TcpConnection connection = new TcpConnection(clientChannel, session, context);
 		session.init(connection);
 		connection.register();
 		return connection;
 	}
 
 	void register() {
-		netSelector.register(this, SelUtil.READ);
+		context.getNetSelector().register(this, SelUtil.READ);
 	}
 
 	public static TcpConnection open(SocketAddress endpoint, PureSession session) throws IOException {
@@ -92,14 +97,28 @@ public class TcpConnection extends SelectableBase implements Connection {
 		}
 
 		System.out.println("connected to: " + endpoint);
-		NetSelector sel = SimpleNetSelector.open();
+		try {
+			NetContext context = NetContext.createDefault();
+			return create(channel, session, context);
+		} catch (IOException e) {
+			closeSafely(channel);
+			throw e;
+		}
+	}
 
-		return create(channel, session, sel);
+	private static void closeSafely(SocketChannel c) {
+		try {
+			c.close();
+		} catch (IOException e) {
+			System.out.println("!!!!! TODO");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void close() throws IOException {
-		netSelector.unregister(this);
+		context.getNetSelector().unregister(this);
 		channel.close();
 		session.closed();
 	}
@@ -128,9 +147,9 @@ public class TcpConnection extends SelectableBase implements Connection {
 	private boolean doRead() {
 		// TODO: implement
 		// read as much data as possible
+		final ByteBuffer rbuf = getBuffer();
 		while (true) {
 			try {
-				final ByteBuffer rbuf = getBuffer();
 				// TODO: move the clear to the buffer pool implementation
 				rbuf.clear();
 				// int num = BufferOps.readIntoBuffer(channel, rbuf);
@@ -155,6 +174,8 @@ public class TcpConnection extends SelectableBase implements Connection {
 				// TODO: handle
 				// e.printStackTrace();
 				return true;
+			} finally {
+				releaseBuffer(rbuf);
 			}
 		}
 	}
@@ -198,18 +219,25 @@ public class TcpConnection extends SelectableBase implements Connection {
 		// wbuf.put(data, dOff, wlen);
 		// wbuf.flip();
 		// TODO: remove
-		SimpleValidation.isTrue(data.remaining() > 0, data.remaining() + " <= 0");
-		long startNs = System.nanoTime();
-		int num = channel.write(data);
-		long endNs = System.nanoTime();
-		long t = endNs - startNs;
-		// 3ms
-		if (t > 3000000L) {
-			System.out.printf("channel.write took %dns, %fms%n", t, (t / 1000000f));
+		// SimpleValidation.isTrue(data.remaining() > 0, data.remaining() +
+		// " <= 0");
+		int num;
+		if (doWriteTimings) {
+			long startNs = System.nanoTime();
+			num = channel.write(data);
+			long endNs = System.nanoTime();
+			long t = endNs - startNs;
+			// 3ms
+			if (t > 3000000L) {
+				System.out.printf("channel.write took %dns, %fms%n", t, (t / 1000000f));
+			}
+			// if (num < wlen) {
+			// registerForWrite();
+			// }
 		}
-		// if (num < wlen) {
-		// registerForWrite();
-		// }
+		else {
+			num = channel.write(data);
+		}
 		return num;
 	}
 
@@ -280,7 +308,10 @@ public class TcpConnection extends SelectableBase implements Connection {
 	}
 
 	private ByteBuffer getBuffer() {
-		// TODO
-		return netSelector.getBufferPool().get(null);
+		return context.getBufferPool().get();
+	}
+
+	private void releaseBuffer(ByteBuffer buf) {
+		context.getBufferPool().release(buf);
 	}
 }

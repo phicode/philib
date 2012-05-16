@@ -25,26 +25,24 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.NetFactory;
 import ch.bind.philib.net.NetServer;
-import ch.bind.philib.net.impl.SimpleNetSelector;
-import ch.bind.philib.net.sel.NetSelector;
+import ch.bind.philib.net.SessionFactory;
 
 public class TcpNetFactory implements NetFactory {
 
-    @Override
-    public Connection openClient(SocketAddress endpoint) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	@Override
+	public Connection openClient(SocketAddress endpoint) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public NetServer openServer(SocketAddress bindAddress, SessionFactory consumerFactory) throws IOException {
-		TcpServer server = new TcpServer(consumerFactory);
-		// InetSocketAddress endpoint = SocketAddresses.wildcard(1234);
-		NetSelector sel = SimpleNetSelector.open();
-		server.open(sel, bindAddress);
+		NetContext context = NetContext.createDefault();
+		TcpServer server = new TcpServer(context, consumerFactory);
+		server.open(bindAddress);
 		return server;
 	}
 }

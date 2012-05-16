@@ -23,12 +23,13 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import ch.bind.philib.net.SessionBase;
 import ch.bind.philib.net.NetServer;
+import ch.bind.philib.net.PureSessionBase;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpNetFactory;
@@ -82,7 +83,7 @@ public class TcpEchoServer implements SessionFactory {
 	// TODO: make an abstract-consumer which delas with this initialization
 	// stuff and prevents sending if not initialized.
 	// offer a postInit() method for specific setup stuff
-	private static class EchoSession extends SessionBase {
+	private static class EchoSession extends PureSessionBase {
 
 		private long lastInteractionNs;
 
@@ -91,12 +92,13 @@ public class TcpEchoServer implements SessionFactory {
 		private long numEchoed;
 
 		@Override
-		public void receive(byte[] data) {
+		public void receive(ByteBuffer data) {
 			try {
+				int received = data.remaining();
 				int num = send(data);
 				numEchoed += num;
-				if (num != data.length) {
-					System.out.printf("cant echo back! only %d out of %d was sent.%n", num, data.length);
+				if (num != received) {
+					System.out.printf("cant echo back! only %d out of %d was sent.%n", num, received);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

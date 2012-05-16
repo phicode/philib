@@ -34,4 +34,6 @@ public interface Connection extends Closeable, Selectable {
 	void closed();
 	
 	boolean isConnected();
+	
+	NetContext getContext();
 }

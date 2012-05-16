@@ -28,12 +28,12 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.PureSession;
 import ch.bind.philib.net.SessionFactory;
-import ch.bind.philib.net.sel.SelectableBase;
-import ch.bind.philib.net.sel.NetSelector;
 import ch.bind.philib.net.sel.SelUtil;
+import ch.bind.philib.net.sel.SelectableBase;
 import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpServer extends SelectableBase implements NetServer {
@@ -41,21 +41,21 @@ public class TcpServer extends SelectableBase implements NetServer {
 	// TODO: configurable
 	private static final int DEFAULT_BACKLOG = 100;
 
-	private NetSelector selector;
+	private final NetContext context;
 
 	private ServerSocketChannel channel;
 
 	private final SessionFactory sessionFactory;
 
-	TcpServer(SessionFactory sessionFactory) {
+	TcpServer(NetContext context, SessionFactory sessionFactory) {
+		SimpleValidation.notNull(context);
 		SimpleValidation.notNull(sessionFactory);
+		this.context = context;
 		this.sessionFactory = sessionFactory;
 	}
 
 	// TODO: open(SocketAddress) with default netselector
-	void open(NetSelector selector, SocketAddress bindAddress) throws IOException {
-		this.selector = selector;
-
+	void open(SocketAddress bindAddress) throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		socket.bind(bindAddress, DEFAULT_BACKLOG);
@@ -63,7 +63,12 @@ public class TcpServer extends SelectableBase implements NetServer {
 		// TODO: log bridge
 		System.out.println("listening on: " + bindAddress);
 		this.channel = channel;
-		selector.register(this, SelUtil.ACCEPT);
+		context.getNetSelector().register(this, SelUtil.ACCEPT);
+	}
+
+	@Override
+	public NetContext getContext() {
+		return context;
 	}
 
 	@Override
@@ -75,7 +80,7 @@ public class TcpServer extends SelectableBase implements NetServer {
 	@Override
 	public void close() throws IOException {
 		// TODO: client connections
-		selector.unregister(this);
+		context.getNetSelector().unregister(this);
 		channel.close();
 		throw new UnsupportedOperationException("TODO");
 	}
@@ -98,7 +103,7 @@ public class TcpServer extends SelectableBase implements NetServer {
 		try {
 			SocketChannel clientChannel = channel.accept();
 			PureSession session = sessionFactory.createSession();
-			TcpConnection.create(clientChannel, session, selector);
+			TcpConnection.create(clientChannel, session, context);
 		} catch (IOException e) {
 			// TODO
 			e.printStackTrace();
