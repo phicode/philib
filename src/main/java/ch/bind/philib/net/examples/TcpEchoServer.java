@@ -21,15 +21,12 @@
  */
 package ch.bind.philib.net.examples;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import ch.bind.philib.net.NetServer;
-import ch.bind.philib.net.PureSessionBase;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpNetFactory;
@@ -52,15 +49,15 @@ public class TcpEchoServer implements SessionFactory {
 				Iterator<EchoSession> iter = sessions.iterator();
 				while (iter.hasNext()) {
 					EchoSession s = iter.next();
-					if (s.closed) {
+					if (s.isConnected()) {
 						iter.remove();
-					}
-					else {
-						if (s.lastInteractionNs < tooFarAgo) {
-							double lastSec = (now - s.lastInteractionNs) / 1000000000f;
+					} else {
+						long lastInteractionNs = s.getLastInteractionNs();
+						if (lastInteractionNs < tooFarAgo) {
+							double lastSec = (now - lastInteractionNs) / 1000000000f;
 							System.out.printf("last interaction with a session: %.5fsec%n", lastSec);
 						}
-						System.out.printf("data echoed: %d%n", s.numEchoed);
+						System.out.printf("data echoed: %d%n", s.getNumEchoed());
 					}
 				}
 			}
@@ -78,43 +75,5 @@ public class TcpEchoServer implements SessionFactory {
 		EchoSession session = new EchoSession();
 		sessions.add(session);
 		return session;
-	}
-
-	// TODO: make an abstract-consumer which delas with this initialization
-	// stuff and prevents sending if not initialized.
-	// offer a postInit() method for specific setup stuff
-	private static class EchoSession extends PureSessionBase {
-
-		private long lastInteractionNs;
-
-		private boolean closed;
-
-		private long numEchoed;
-
-		@Override
-		public void receive(ByteBuffer data) {
-			try {
-				int received = data.remaining();
-				int num = send(data);
-				numEchoed += num;
-				if (num != received) {
-					System.out.printf("cant echo back! only %d out of %d was sent.%n", num, received);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				try {
-					close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-			lastInteractionNs = System.nanoTime();
-		}
-
-		@Override
-		public void closed() {
-			this.closed = true;
-			System.out.println("closed() numEchoed=" + numEchoed);
-		}
 	}
 }

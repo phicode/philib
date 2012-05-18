@@ -15,5 +15,7 @@ public interface PureSession extends Closeable {
 	int send(ByteBuffer data) throws IOException;
 
 	void closed();
+	
+	boolean isConnected();
 
 }

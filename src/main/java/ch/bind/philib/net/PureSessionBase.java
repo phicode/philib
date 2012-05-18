@@ -6,15 +6,15 @@ import java.nio.ByteBuffer;
 public abstract class PureSessionBase implements PureSession {
 
 	private Connection connection;
-	
+
 	@Override
 	public final void init(Connection connection) {
 		this.connection = connection;
 		System.out.println("initialized!");
 	}
-	
+
 	@Override
-	public NetContext getContext() {
+	public final NetContext getContext() {
 		return connection.getContext();
 	}
 
@@ -26,5 +26,10 @@ public abstract class PureSessionBase implements PureSession {
 	@Override
 	public final int send(ByteBuffer data) throws IOException {
 		return connection.send(data);
+	}
+
+	@Override
+	public final boolean isConnected() {
+		return connection.isConnected();
 	}
 }

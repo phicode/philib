@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
+import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.net.PureSessionBase;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpConnection;
@@ -47,9 +48,9 @@ public class TcpEchoClient extends PureSessionBase {
 	}
 
 	private void run() throws IOException, InterruptedException {
-		InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
-		// InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1",
+		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221",
 		// 1234);
+		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 		connection = TcpConnection.open(endpoint, this);
 
 		// buf = new byte[8 * 1024];
@@ -77,6 +78,7 @@ public class TcpEchoClient extends PureSessionBase {
 				System.out.printf("sent: %d / %d%n", num, buf.length);
 			}
 		}
+		int loop = 1;
 		while (connection.isConnected()) {
 			long rx = this.rx.get();
 			long tx = this.tx.get();
@@ -84,7 +86,9 @@ public class TcpEchoClient extends PureSessionBase {
 			double rxMbPerSec = (rx / (1024f * 1024f)) / (t / 1000f);
 			double txMbPerSec = (tx / (1024f * 1024f)) / (t / 1000f);
 			System.out.printf("rx=%d, tx=%d bytes in %d ms => %.3f %.3f mb/sec%n", rx, tx, t, rxMbPerSec, txMbPerSec);
-			Thread.sleep(5000);
+			long sleepUntil = start + (loop * 5000L);
+			ThreadUtil.sleepUntilMs(sleepUntil);
+			loop++;
 		}
 	}
 

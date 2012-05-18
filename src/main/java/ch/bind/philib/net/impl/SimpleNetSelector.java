@@ -33,6 +33,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
@@ -53,7 +54,7 @@ public final class SimpleNetSelector implements NetSelector {
 
 	// private final AtomicBoolean wakeupCalled = new AtomicBoolean();
 
-	private volatile Thread thread;
+	private AtomicReference<Thread> thread = new AtomicReference<Thread>();
 
 	private Queue<NewReg> newRegistrations = new ConcurrentLinkedQueue<NewReg>();
 
@@ -65,7 +66,7 @@ public final class SimpleNetSelector implements NetSelector {
 		Selector selector = Selector.open();
 		SimpleNetSelector rv = new SimpleNetSelector(selector);
 		String threadName = SimpleNetSelector.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
-		rv.thread = ThreadUtil.runForever(rv, threadName);
+		rv.thread.set(ThreadUtil.runForever(rv, threadName));
 		return rv;
 	}
 
@@ -73,7 +74,6 @@ public final class SimpleNetSelector implements NetSelector {
 	public void run() {
 		int lastKeys = 0;
 		try {
-			// TODO: wait as long as there is no channel registered
 			while (true) {
 				int num = doSelect();
 				if (num > 0) {
@@ -111,8 +111,7 @@ public final class SimpleNetSelector implements NetSelector {
 				if (selMs >= 10005) {
 					System.out.printf("select took %dms, num=%d%n", selMs, num);
 				}
-			}
-			else {
+			} else {
 				num = selector.select(10000L);
 			}
 		} while (num == 0);
@@ -141,8 +140,12 @@ public final class SimpleNetSelector implements NetSelector {
 
 	@Override
 	public void close() throws IOException {
-		ThreadUtil.interruptAndJoin(thread);
-		selector.close();
+		Thread t = thread.get();
+		if (t != null) {
+			thread.set(null);
+			ThreadUtil.interruptAndJoin(t);
+			selector.close();
+		}
 		// TODO all registered clients as well???
 		throw new UnsupportedOperationException("TODO: finish");
 	}
@@ -189,10 +192,9 @@ public final class SimpleNetSelector implements NetSelector {
 	}
 
 	private void wakeup() {
-		// TODO: only call wakeup if the calling thread is not the selector
-		// thread
-		// wakeupCalled.set(true);
-		selector.wakeup();
+		if (thread.get() != Thread.currentThread()) {
+			selector.wakeup();
+		}
 	}
 
 	@Override
@@ -201,8 +203,7 @@ public final class SimpleNetSelector implements NetSelector {
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
-		}
-		else {
+		} else {
 			key.interestOps(ops);
 		}
 		wakeup();
@@ -215,12 +216,9 @@ public final class SimpleNetSelector implements NetSelector {
 		if (key != null) {
 			key.cancel();
 			key.attach(null);
-			// if (useSelectorWakeup) {
-			// selector.wakeup();
-			// }
+			wakeup();
 			System.out.println("unreg, keys: " + selector.keys().size());
-		}
-		else {
+		} else {
 			System.out.println("unreg failed, not registered");
 		}
 	}
