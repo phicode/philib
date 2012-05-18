@@ -34,6 +34,15 @@ public final class ThreadUtil {
 	private ThreadUtil() {
 	}
 
+	public static void sleepUntilMs(long time) throws InterruptedException {
+		long diff = time - System.currentTimeMillis();
+		if (diff <= 0) {
+			return;
+		} else {
+			Thread.sleep(diff);
+		}
+	}
+
 	public static boolean interruptAndJoin(Thread t) {
 		return interruptAndJoin(t, DEFAULT_WAIT_TIME_MS);
 	}
