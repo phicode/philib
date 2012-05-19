@@ -24,6 +24,7 @@ package ch.bind.philib.cache;
 import java.util.Arrays;
 
 import ch.bind.philib.cache.impl.LinkedObjectCache;
+import ch.bind.philib.cache.impl.NoopObjectCache;
 import ch.bind.philib.cache.impl.ObjectFactory;
 import ch.bind.philib.cache.impl.ScalableObjectCache;
 
@@ -36,6 +37,12 @@ public final class ByteArrayCache extends SpecificObjectCache<byte[]> {
 
 	private ByteArrayCache(ObjectCache<byte[]> cache) {
 		super(cache);
+	}
+
+	public static ByteArrayCache createSimple(int bufferSize) {
+		ObjectFactory<byte[]> factory = createFactory(bufferSize);
+		ObjectCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, DEFAULT_NUM_BUFFERS);
+		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createSimple(int bufferSize, int maxEntries) {
@@ -56,16 +63,22 @@ public final class ByteArrayCache extends SpecificObjectCache<byte[]> {
 		return new ByteArrayCache(cache);
 	}
 
+	public static ByteArrayCache createNoop(int bufferSize) {
+		ObjectFactory<byte[]> factory = createFactory(bufferSize);
+		ObjectCache<byte[]> cache = new NoopObjectCache<byte[]>(factory);
+		return new ByteArrayCache(cache);
+	}
+
 	public static ObjectFactory<byte[]> createFactory(int bufferSize) {
 		return new ByteArrayFactory(bufferSize);
 	}
 
 	private static final class ByteArrayFactory implements ObjectFactory<byte[]> {
 
-		private final int bufSize;
+		private final int bufferSize;
 
 		public ByteArrayFactory(int bufSize) {
-			this.bufSize = bufSize;
+			this.bufferSize = bufSize;
 		}
 
 		@Override
@@ -74,12 +87,12 @@ public final class ByteArrayCache extends SpecificObjectCache<byte[]> {
 
 		@Override
 		public byte[] create() {
-			return new byte[bufSize];
+			return new byte[bufferSize];
 		}
 
 		@Override
 		public boolean release(byte[] e) {
-			if (e.length == bufSize) {
+			if (e.length == bufferSize) {
 				Arrays.fill(e, (byte) 0);
 				return true;
 			}

@@ -28,7 +28,7 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 			caches[i] = new LinkedObjectCache<E>(factory, entriesPerBucket);
 		}
 	}
-
+	
 	@Override
 	public E acquire() {
 		return cacheByThread.get().acquire();

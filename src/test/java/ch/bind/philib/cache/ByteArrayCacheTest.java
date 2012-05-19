@@ -38,11 +38,11 @@ public class ByteArrayCacheTest {
 	@Test
 	public void testMaxEntries() {
 		int maxEntries = 1;
-		int bufSize = ByteArrayCache.DEFAULT_BUFFER_SIZE;
-		ByteArrayCache bp = new ByteArrayCache(bufSize, maxEntries);
+		int bufferSize = ByteArrayCache.DEFAULT_BUFFER_SIZE;
+		ByteArrayCache bp = ByteArrayCache.createSimple(bufferSize, maxEntries);
 
-		byte[] in1 = new byte[bufSize];
-		byte[] in2 = new byte[bufSize];
+		byte[] in1 = new byte[bufferSize];
+		byte[] in2 = new byte[bufferSize];
 
 		// the cache must accept this one because it is empty
 		bp.release(in1);
@@ -60,9 +60,9 @@ public class ByteArrayCacheTest {
 
 	@Test
 	public void useAnyBuffers() {
-		int bufSize = ByteArrayCache.DEFAULT_BUFFER_SIZE;
-		ByteArrayCache bp = new ByteArrayCache(bufSize);
-		byte[] in = new byte[bufSize];
+		int bufferSize = ByteArrayCache.DEFAULT_BUFFER_SIZE;
+		ByteArrayCache bp = ByteArrayCache.createSimple(bufferSize);
+		byte[] in = new byte[bufferSize];
 
 		bp.release(in);
 
@@ -75,9 +75,9 @@ public class ByteArrayCacheTest {
 
 	@Test
 	public void onlyTakeCorrectSizeBuffers() {
-		int bufSize = ByteArrayCache.DEFAULT_BUFFER_SIZE;
-		ByteArrayCache bp = new ByteArrayCache(bufSize);
-		byte[] b = new byte[bufSize / 2];
+		int bufferSize = ByteArrayCache.DEFAULT_BUFFER_SIZE;
+		ByteArrayCache bp = ByteArrayCache.createSimple(bufferSize);
+		byte[] b = new byte[bufferSize / 2];
 
 		bp.release(b);
 
@@ -124,22 +124,22 @@ public class ByteArrayCacheTest {
 	public long stressTest(int type, boolean firstRun, int numThreads, long numOps, int getOps, int putOps) throws Exception {
 		TestUtil.gcAndSleep();
 
-		int totalBufSize = 32 * 1024 * 1024;
-		int bufSize = 16;
-		int numBufs = totalBufSize / bufSize / (4096 / 16);
+		int totalbufferSize = 32 * 1024 * 1024;
+		int bufferSize = 16;
+		int numBufs = totalbufferSize / bufferSize / (4096 / 16);
 		ByteArrayCache bp;
 		String bpName;
 		switch (type) {
 		case 0:
-			bp = new ByteArrayCache(bufSize, numBufs);
+			bp = ByteArrayCache.createSimple(bufferSize, numBufs);
 			bpName = "normal";
 			break;
 		case 1:
-			bp = new ByteArrayCache(bufSize, new ScalableObjectCache<byte[]>(numBufs, 4));
+			bp = ByteArrayCache.createScalable(bufferSize, numBufs, 4);
 			bpName = "scalable";
 			break;
 		case 2:
-			bp = new ByteArrayCache(bufSize, new NoopObjectCache<byte[]>());
+			bp = ByteArrayCache.createNoop(bufferSize);
 			bpName = "null";
 			break;
 		default:
@@ -170,7 +170,8 @@ public class ByteArrayCacheTest {
 
 		double opsPerMs = numOps / ((double) time);
 		if (printResults) {
-			long bufsCreated = bp.getNumCreates();
+			// long bufsCreated = bp.getNumCreates();
+			long bufsCreated = 0;
 			if (firstRun) {
 				System.out.println(bpName + " #threads; #ops ; #new bufs ; time(ms); ops/msec");
 			}
