@@ -2,9 +2,9 @@ package ch.bind.philib.net;
 
 import java.io.IOException;
 
+import ch.bind.philib.cache.ByteBufferCache;
 import ch.bind.philib.net.impl.SimpleNetSelector;
 import ch.bind.philib.net.sel.NetSelector;
-import ch.bind.philib.pool.ByteBufferPool;
 import ch.bind.philib.validation.SimpleValidation;
 
 public final class NetContext {
@@ -13,19 +13,19 @@ public final class NetContext {
 
 	private static final int DEFAULT_NUM_BUFFERS = 32;
 
-	private final ByteBufferPool bufferPool;
+	private final ByteBufferCache bufferCache;
 
 	private final NetSelector netSelector;
 
-	public NetContext(ByteBufferPool bufferPool, NetSelector netSelector) {
-		SimpleValidation.notNull(bufferPool);
+	public NetContext(ByteBufferCache bufferCache, NetSelector netSelector) {
+		SimpleValidation.notNull(bufferCache);
 		SimpleValidation.notNull(netSelector);
-		this.bufferPool = bufferPool;
+		this.bufferCache = bufferCache;
 		this.netSelector = netSelector;
 	}
 
-	public ByteBufferPool getBufferPool() {
-		return bufferPool;
+	public ByteBufferCache getBufferCache() {
+		return bufferCache;
 	}
 
 	public NetSelector getNetSelector() {
@@ -39,7 +39,7 @@ public final class NetContext {
 	 */
 	public static NetContext createDefault() throws IOException {
 		NetSelector netSelector = SimpleNetSelector.open();
-		ByteBufferPool bufferPool = ByteBufferPool.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS);
-		return new NetContext(bufferPool, netSelector);
+		ByteBufferCache bufferCache = ByteBufferCache.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS);
+		return new NetContext(bufferCache, netSelector);
 	}
 }

@@ -54,7 +54,7 @@ public final class SimpleNetSelector implements NetSelector {
 
 	// private final AtomicBoolean wakeupCalled = new AtomicBoolean();
 
-	private AtomicReference<Thread> thread = new AtomicReference<Thread>();
+	private volatile Thread thread;
 
 	private Queue<NewReg> newRegistrations = new ConcurrentLinkedQueue<NewReg>();
 
@@ -66,7 +66,7 @@ public final class SimpleNetSelector implements NetSelector {
 		Selector selector = Selector.open();
 		SimpleNetSelector rv = new SimpleNetSelector(selector);
 		String threadName = SimpleNetSelector.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
-		rv.thread.set(ThreadUtil.runForever(rv, threadName));
+		rv.thread = ThreadUtil.runForever(rv, threadName);
 		return rv;
 	}
 
@@ -140,9 +140,9 @@ public final class SimpleNetSelector implements NetSelector {
 
 	@Override
 	public void close() throws IOException {
-		Thread t = thread.get();
+		Thread t = thread;
 		if (t != null) {
-			thread.set(null);
+			thread = null;
 			ThreadUtil.interruptAndJoin(t);
 			selector.close();
 		}
@@ -192,7 +192,7 @@ public final class SimpleNetSelector implements NetSelector {
 	}
 
 	private void wakeup() {
-		if (thread.get() != Thread.currentThread()) {
+		if (thread != Thread.currentThread()) {
 			selector.wakeup();
 		}
 	}

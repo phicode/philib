@@ -150,7 +150,7 @@ public class TcpConnection extends SelectableBase implements Connection {
 		final ByteBuffer rbuf = getBuffer();
 		while (true) {
 			try {
-				// TODO: move the clear to the buffer pool implementation
+				// TODO: move the clear to the buffer cache implementation
 				rbuf.clear();
 				// int num = BufferOps.readIntoBuffer(channel, rbuf);
 				int num = channel.read(rbuf);
@@ -308,10 +308,10 @@ public class TcpConnection extends SelectableBase implements Connection {
 	}
 
 	private ByteBuffer getBuffer() {
-		return context.getBufferPool().get();
+		return context.getBufferCache().acquire();
 	}
 
 	private void releaseBuffer(ByteBuffer buf) {
-		context.getBufferPool().release(buf);
+		context.getBufferCache().release(buf);
 	}
 }

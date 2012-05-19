@@ -53,8 +53,8 @@ public class TcpEchoClient extends PureSessionBase {
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 		connection = TcpConnection.open(endpoint, this);
 
-		// buf = new byte[8 * 1024];
-		byte[] buf = new byte[128 * 1024];
+		byte[] buf = new byte[32 * 1024];
+		// byte[] buf = new byte[128 * 1024];
 		new Random().nextBytes(buf);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
