@@ -299,6 +299,7 @@ public class TcpConnection extends SelectableBase implements Connection {
 	// }
 	// }
 
+	@Override
 	public boolean isConnected() {
 		return channel.isConnected();
 	}

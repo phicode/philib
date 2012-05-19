@@ -7,11 +7,11 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public final class ScalableObjectCache<E> implements ObjectCache<E> {
 
-	private CacheThreadLocal cacheByThread = new CacheThreadLocal();
+	private final CacheThreadLocal cacheByThread = new CacheThreadLocal();
 
-	private LinkedObjectCache<E>[] caches;
+	private final LinkedObjectCache<E>[] caches;
 
-	private AtomicLong usageCount = new AtomicLong(0);
+	private final AtomicLong usageCount = new AtomicLong(0);
 
 	public ScalableObjectCache(ObjectFactory<E> factory, int maxEntries) {
 		this(factory, maxEntries, Runtime.getRuntime().availableProcessors());

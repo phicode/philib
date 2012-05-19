@@ -1,7 +1,6 @@
 package ch.bind.philib.net.sel;
 
 import java.nio.channels.SelectionKey;
-import java.util.concurrent.atomic.AtomicLong;
 
 public final class SelUtil {
 
