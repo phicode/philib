@@ -132,6 +132,7 @@ public class PrivateConstructorTest {
 			ctor.setAccessible(true);
 			o = ctor.newInstance(new Object[0]);
 			ctor.setAccessible(false);
+			assertNotNull(o);
 		} else {
 			o = ctor.newInstance();
 		}
