@@ -88,12 +88,14 @@ public class ByteArrayCacheTest {
 
 	private static final boolean printResults = true;
 
-	@Test
+	// not really a unit test, only enable this while developing on the code
+	// @Test
 	public void stressTest() throws Exception {
 		// stressTest(true);
 		stressTest(0);
 		stressTest(1);
 		stressTest(2);
+		stressTest(3);
 	}
 
 	public void stressTest(int type) throws Exception {
@@ -127,6 +129,7 @@ public class ByteArrayCacheTest {
 		int totalbufferSize = 32 * 1024 * 1024;
 		int bufferSize = 16;
 		int numBufs = totalbufferSize / bufferSize / (4096 / 16);
+		// System.out.printf("using at most %d buffers%n", numBufs);
 		ByteArrayCache bp;
 		String bpName;
 		switch (type) {
@@ -136,9 +139,13 @@ public class ByteArrayCacheTest {
 			break;
 		case 1:
 			bp = ByteArrayCache.createScalable(bufferSize, numBufs, 4);
-			bpName = "scalable";
+			bpName = "scalable-4";
 			break;
 		case 2:
+			bp = ByteArrayCache.createScalable(bufferSize, numBufs, 32);
+			bpName = "scalable-32";
+			break;
+		case 3:
 			bp = ByteArrayCache.createNoop(bufferSize);
 			bpName = "null";
 			break;
