@@ -165,6 +165,5 @@ public class LockGroupTest {
                 lg.unlock();
             }
         }
-
     }
 }
