@@ -25,99 +25,101 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public final class LeakyBucket {
 
-	private final long capacity;
+    private final long capacity;
 
-	private final long releaseIntervalNano;
+    private final long releaseIntervalNano;
 
-	private long lastReleaseNano;
+    private long lastReleaseNano;
 
-	private long currentCapacity;
+    private long currentCapacity;
 
-	private LeakyBucket(long releaseIntervalNano, long capacity) {
-		this.releaseIntervalNano = releaseIntervalNano;
-		this.capacity = capacity;
-	}
+    private LeakyBucket(long releaseIntervalNano, long capacity) {
+        this.releaseIntervalNano = releaseIntervalNano;
+        this.capacity = capacity;
+    }
 
-	/**
-	 * @param releasePerSecond
-	 * @param capacity
-	 * @return
-	 */
-	public static LeakyBucket withReleasePerSecond(double releasePerSecond, long capacity) {
-		SimpleValidation.isTrue(releasePerSecond >= 0.000001, "releasePerSecond must be >= 0.000001");
-		SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
-		long releaseIntervalNano = (long) Math.ceil(1000000000f / releasePerSecond);
-		return new LeakyBucket(releaseIntervalNano, capacity);
-	}
+    /**
+     * @param releasePerSecond
+     * @param capacity
+     * @return
+     */
+    public static LeakyBucket withReleasePerSecond(double releasePerSecond, long capacity) {
+        SimpleValidation.isTrue(releasePerSecond >= 0.000001, "releasePerSecond must be >= 0.000001");
+        SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
+        long releaseIntervalNano = (long) Math.ceil(1000000000f / releasePerSecond);
+        return new LeakyBucket(releaseIntervalNano, capacity);
+    }
 
-	public static LeakyBucket withReleaseIntervalNano(long releaseIntervalNano, long capacity) {
-		SimpleValidation.isTrue(releaseIntervalNano >= 0, "releaseIntervalNano must be > 0");
-		SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
-		return new LeakyBucket(releaseIntervalNano, capacity);
-	}
+    public static LeakyBucket withReleaseIntervalNano(long releaseIntervalNano, long capacity) {
+        SimpleValidation.isTrue(releaseIntervalNano >= 0, "releaseIntervalNano must be > 0");
+        SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
+        return new LeakyBucket(releaseIntervalNano, capacity);
+    }
 
-	public long getCapacity() {
-		return capacity;
-	}
+    public long getCapacity() {
+        return capacity;
+    }
 
-	public void acquire(long amount) {
-		acquire(amount, System.nanoTime());
-	}
+    public void acquire(long amount) {
+        acquire(amount, System.nanoTime());
+    }
 
-	public void acquire(long amount, long timeNano) {
-		recalc(timeNano);
-		currentCapacity -= amount;
-	}
+    public void acquire(long amount, long timeNano) {
+        recalc(timeNano);
+        currentCapacity -= amount;
+    }
 
-	public long available() {
-		return available(System.nanoTime());
-	}
+    public long available() {
+        return available(System.nanoTime());
+    }
 
-	public long available(long timeNano) {
-		recalc(timeNano);
-		return currentCapacity;
-	}
+    public long available(long timeNano) {
+        recalc(timeNano);
+        return currentCapacity;
+    }
 
-	public long nextAvailableNano() {
-		return nextAvailableNano(System.nanoTime());
-	}
+    public long nextAvailableNano() {
+        return nextAvailableNano(System.nanoTime());
+    }
 
-	public long nextAvailableNano(long timeNano) {
-		recalc(timeNano);
-		if (currentCapacity > 0) {
-			// available immediately
-			return 0;
-		}
-		else {
-			long nextAvailNano = lastReleaseNano + releaseIntervalNano;
-			return nextAvailNano - timeNano;
-		}
-	}
+    public long nextAvailableNano(long timeNano) {
+        recalc(timeNano);
+        if (currentCapacity > 0) {
+            // available immediately
+            return 0;
+        } else {
+            long nextAvailNano = lastReleaseNano + releaseIntervalNano;
+            return nextAvailNano - timeNano;
+        }
+    }
 
-	public void sleepWhileNoneAvailable() throws InterruptedException {
-		long nextAvailNano = nextAvailableNano();
-		while (nextAvailNano > 0) {
-			long sleepMs = nextAvailNano / 1000000L;
-			int sleepNano = (int) (nextAvailNano % 1000000L);
-			Thread.sleep(sleepMs, sleepNano);
-			nextAvailNano = nextAvailableNano();
-		}
-	}
+    public void sleepWhileNoneAvailable() throws InterruptedException {
+        long nextAvailNano = nextAvailableNano();
+        while (nextAvailNano > 0) {
+            long sleepMs = nextAvailNano / 1000000L;
+            int sleepNano = (int) (nextAvailNano % 1000000L);
+            Thread.sleep(sleepMs, sleepNano);
+            nextAvailNano = nextAvailableNano();
+        }
+    }
 
-	private void recalc(long timeNano) {
-		assert (timeNano >= lastReleaseNano);
-		long elapsedNano = timeNano - lastReleaseNano;
-		long numRelease = elapsedNano / releaseIntervalNano;
-		long newVal = currentCapacity + numRelease;
+    private void recalc(final long timeNano) {
+        if (timeNano < lastReleaseNano) {
+            // it seems that someone adjusted his clock backwards
+            lastReleaseNano = timeNano;
+        } else {
+            long elapsedNano = timeNano - lastReleaseNano;
+            long numRelease = elapsedNano / releaseIntervalNano;
+            long newVal = currentCapacity + numRelease;
 
-		// dont go over the limit
-		if (newVal > capacity) {
-			currentCapacity = capacity;
-			lastReleaseNano = timeNano;
-		}
-		else {
-			currentCapacity = newVal;
-			lastReleaseNano += (numRelease * releaseIntervalNano);
-		}
-	}
+            // dont go over the limit
+            if (newVal > capacity) {
+                currentCapacity = capacity;
+                lastReleaseNano = timeNano;
+            } else {
+                currentCapacity = newVal;
+                lastReleaseNano += (numRelease * releaseIntervalNano);
+            }
+        }
+    }
 }
