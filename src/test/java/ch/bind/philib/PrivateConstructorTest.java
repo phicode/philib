@@ -113,7 +113,6 @@ public class PrivateConstructorTest {
 			return;
 		}
 		if (clazz.isAnonymousClass()) {
-			System.out.println("ignoring anonymous class: " + clazz.getName());
 			return;
 		}
 		// TODO: inner classes, anonymous classes
