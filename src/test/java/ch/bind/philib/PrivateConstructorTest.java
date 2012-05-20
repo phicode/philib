@@ -106,6 +106,9 @@ public class PrivateConstructorTest {
 			// System.out.println("ignoring because local class");
 			return;
 		}
+		if (clazz.isMemberClass()) {
+			return;
+		}
 		// TODO: inner classes, anonymous classes
 		Constructor<?>[] ctors = clazz.getDeclaredConstructors();
 		if (ctors.length < 1) {
