@@ -109,6 +109,13 @@ public class PrivateConstructorTest {
 		if (clazz.isMemberClass()) {
 			return;
 		}
+		if (clazz.isSynthetic()) {
+			return;
+		}
+		if (clazz.isAnonymousClass()) {
+			System.out.println("ignoring anonymous class: " + clazz.getName());
+			return;
+		}
 		// TODO: inner classes, anonymous classes
 		Constructor<?>[] ctors = clazz.getDeclaredConstructors();
 		if (ctors.length < 1) {
