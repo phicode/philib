@@ -23,12 +23,12 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 		if (maxEntries % numBuckets != 0) {
 			entriesPerBucket++;
 		}
-		caches = new LinkedObjectCache[numBuckets];
+		this.caches = new LinkedObjectCache[numBuckets];
 		for (int i = 0; i < numBuckets; i++) {
 			caches[i] = new LinkedObjectCache<E>(factory, entriesPerBucket);
 		}
 	}
-	
+
 	@Override
 	public E acquire() {
 		return cacheByThread.get().acquire();
