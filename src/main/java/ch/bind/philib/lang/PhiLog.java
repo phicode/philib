@@ -28,8 +28,13 @@ public final class PhiLog {
 
 	private final Logger logger;
 
-	public PhiLog(Class<?> clazz) {
-		logger = Logger.getLogger(clazz.getName());
+	private PhiLog(String name) {
+		logger = Logger.getLogger(name);
+	}
+
+	public static PhiLog getLogger(Class<?> clazz) {
+		String name = clazz.getName();
+		return new PhiLog(name);
 	}
 
 	public void info(String msg) {

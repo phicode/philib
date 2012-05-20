@@ -27,7 +27,7 @@ public class PhiLogTest {
 
 	@Test
 	public void logSomeStuff() {
-		PhiLog pl = new PhiLog(getClass());
+		PhiLog pl = PhiLog.getLogger(getClass());
 		String msg = "message for " + getClass().getSimpleName();
 		pl.info("should be info " + msg);
 		pl.warn("should be warn " + msg);

@@ -27,7 +27,7 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public final class ThreadUtil {
 
-	private static final PhiLog LOG = new PhiLog(ThreadUtil.class);
+	private static final PhiLog LOG = PhiLog.getLogger(ThreadUtil.class);
 
 	public static final long DEFAULT_WAIT_TIME_MS = 1000L;
 
