@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 public interface PureSession extends Closeable {
 
 	void init(Connection connection);
-	
+
 	NetContext getContext();
 
 	void receive(ByteBuffer data);
@@ -15,7 +15,9 @@ public interface PureSession extends Closeable {
 	int send(ByteBuffer data) throws IOException;
 
 	void closed();
-	
+
 	boolean isConnected();
+
+	boolean isOpen();
 
 }

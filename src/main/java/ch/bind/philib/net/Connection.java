@@ -33,8 +33,10 @@ public interface Connection extends Closeable, Selectable {
 
 	@Override
 	void closed();
-	
+
 	boolean isConnected();
-	
+
+	boolean isOpen();
+
 	NetContext getContext();
 }

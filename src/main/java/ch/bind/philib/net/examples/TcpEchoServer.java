@@ -39,8 +39,8 @@ public class TcpEchoServer implements SessionFactory {
 
 	private void foo() throws Exception {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
-		SessionFactory consumerFactory = this;
-		NetServer server = new TcpNetFactory().openServer(bindAddress, consumerFactory);
+		SessionFactory sessionFactory = this;
+		NetServer server = new TcpNetFactory().openServer(bindAddress, sessionFactory);
 		while (true) {
 			Thread.sleep(10000);
 			synchronized (sessions) {
@@ -49,9 +49,11 @@ public class TcpEchoServer implements SessionFactory {
 				Iterator<EchoSession> iter = sessions.iterator();
 				while (iter.hasNext()) {
 					EchoSession s = iter.next();
-					if (s.isConnected()) {
+					if (!s.isConnected()) {
+						System.out.println("removeing disconnected session: " + s);
 						iter.remove();
-					} else {
+					}
+					else {
 						long lastInteractionNs = s.getLastInteractionNs();
 						if (lastInteractionNs < tooFarAgo) {
 							double lastSec = (now - lastInteractionNs) / 1000000000f;
@@ -60,11 +62,8 @@ public class TcpEchoServer implements SessionFactory {
 						System.out.printf("data echoed: %d%n", s.getNumEchoed());
 					}
 				}
+				System.out.println("sessions in our list: " + sessions.size());
 			}
-
-			// System.out.println("sessions: " +
-			// server.getActiveSessionCount());
-			System.out.println("sessions in our list: " + sessions.size());
 		}
 	}
 
@@ -73,7 +72,9 @@ public class TcpEchoServer implements SessionFactory {
 	@Override
 	public synchronized EchoSession createSession() {
 		EchoSession session = new EchoSession();
-		sessions.add(session);
+		synchronized (sessions) {
+			sessions.add(session);
+		}
 		return session;
 	}
 }

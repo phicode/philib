@@ -32,4 +32,9 @@ public abstract class PureSessionBase implements PureSession {
 	public final boolean isConnected() {
 		return connection.isConnected();
 	}
+
+	@Override
+	public final boolean isOpen() {
+		return connection.isOpen();
+	}
 }
