@@ -51,7 +51,7 @@ public final class AtomicBitSet {
 	}
 
 	private void setAll(boolean value) {
-		long v = value ? 0xFFFFFFFFFFFFFFFFL : 0;
+		long v = value ? ~0x0L : 0;
 		for (AtomicLong b : bs) {
 			b.set(v);
 		}
