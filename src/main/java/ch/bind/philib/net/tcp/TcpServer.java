@@ -39,31 +39,35 @@ import ch.bind.philib.validation.SimpleValidation;
 public class TcpServer extends SelectableBase implements NetServer {
 
 	// TODO: configurable
-	private static final int DEFAULT_BACKLOG = 100;
+	private static final int DEFAULT_BACKLOG = 25;
 
 	private final NetContext context;
 
-	private ServerSocketChannel channel;
-
 	private final SessionFactory sessionFactory;
 
-	TcpServer(NetContext context, SessionFactory sessionFactory) {
+	private final ServerSocketChannel channel;
+
+	TcpServer(NetContext context, SessionFactory sessionFactory, ServerSocketChannel channel) {
 		SimpleValidation.notNull(context);
 		SimpleValidation.notNull(sessionFactory);
+		SimpleValidation.notNull(channel);
 		this.context = context;
 		this.sessionFactory = sessionFactory;
+		this.channel = channel;
 	}
 
 	// TODO: open(SocketAddress) with default netselector
-	void open(SocketAddress bindAddress) throws IOException {
+	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress) throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		socket.bind(bindAddress, DEFAULT_BACKLOG);
 		channel.configureBlocking(false);
 		// TODO: log bridge
 		System.out.println("listening on: " + bindAddress);
-		this.channel = channel;
-		context.getNetSelector().register(this, SelUtil.ACCEPT);
+
+		TcpServer server = new TcpServer(context, sessionFactory, channel);
+		context.getNetSelector().register(server, SelUtil.ACCEPT);
+		return server;
 	}
 
 	@Override
@@ -103,7 +107,7 @@ public class TcpServer extends SelectableBase implements NetServer {
 		try {
 			SocketChannel clientChannel = channel.accept();
 			PureSession session = sessionFactory.createSession();
-			TcpConnection.create(clientChannel, session, context);
+			TcpConnection.create(context, clientChannel, session);
 		} catch (IOException e) {
 			// TODO
 			e.printStackTrace();

@@ -17,6 +17,7 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 		this(factory, maxEntries, Runtime.getRuntime().availableProcessors());
 	}
 
+	@SuppressWarnings("unchecked")
 	public ScalableObjectCache(ObjectFactory<E> factory, int maxEntries, int numBuckets) {
 		SimpleValidation.notNull(factory);
 		int entriesPerBucket = maxEntries / numBuckets;

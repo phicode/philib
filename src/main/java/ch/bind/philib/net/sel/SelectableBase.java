@@ -3,12 +3,12 @@ package ch.bind.philib.net.sel;
 public abstract class SelectableBase implements Selectable {
 
 	@Override
-	public boolean handleRead() {
+	public boolean handleRead(Thread thread) {
 		throw new IllegalStateException("unsupported select operation: read");
 	}
 
 	@Override
-	public boolean handleWrite() {
+	public boolean handleWrite(Thread thread) {
 		throw new IllegalStateException("unsupported select operation: write");
 	}
 

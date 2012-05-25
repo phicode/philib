@@ -24,27 +24,26 @@ package ch.bind.philib.io;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import ch.bind.philib.validation.SimpleValidation;
 
 /**
- * A notifying queue. Every time an item is added to the queue semaphore is
- * released.
+ * An evented queue.
  */
-public final class NQueue<E> {
+public final class EventedQueue<E> {
 
 	private final Semaphore sem;
 
 	private final Queue<E> queue;
 
-	public NQueue(Semaphore sem) {
-		this(sem, new ConcurrentLinkedQueue<E>());
+	public EventedQueue() {
+		this(new ConcurrentLinkedQueue<E>());
 	}
 
-	public NQueue(Semaphore sem, Queue<E> queue) {
-		SimpleValidation.notNull(sem);
+	public EventedQueue(Queue<E> queue) {
 		SimpleValidation.notNull(queue);
-		this.sem = sem;
+		this.sem = new Semaphore(0);
 		this.queue = queue;
 	}
 
@@ -64,15 +63,19 @@ public final class NQueue<E> {
 		return queue.isEmpty();
 	}
 
-	public void clear() {
-		queue.clear();
-	}
+//	public void clear() {
+	// sem.drainPermits();
+//		queue.clear();
+//	}
 
 	public E poll() {
-		return queue.poll();
+		if (sem.tryAcquire()) {
+			return queue.poll();
+		}
 	}
 
 	public E peek() {
 		return queue.peek();
 	}
+
 }

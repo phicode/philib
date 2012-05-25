@@ -28,9 +28,9 @@ public interface Selectable extends Closeable {
 
 	SelectableChannel getChannel();
 
-	boolean handleRead();
+	boolean handleRead(Thread thread);
 
-	boolean handleWrite();
+	boolean handleWrite(Thread thread);
 
 	boolean handleAccept();
 

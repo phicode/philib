@@ -33,6 +33,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
+
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.net.sel.NetSelector;
@@ -46,15 +47,11 @@ public final class SimpleNetSelector implements NetSelector {
 
 	private static final boolean doSelectTimings = false;
 
-	// private final boolean useSelectorWakeup = false;
+	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<NewRegistration>();
 
 	private final Selector selector;
 
-	// private final AtomicBoolean wakeupCalled = new AtomicBoolean();
-
 	private volatile Thread thread;
-
-	private Queue<NewReg> newRegistrations = new ConcurrentLinkedQueue<NewReg>();
 
 	private SimpleNetSelector(Selector selector) throws IOException {
 		this.selector = selector;
@@ -77,7 +74,7 @@ public final class SimpleNetSelector implements NetSelector {
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
 					for (SelectionKey key : selected) {
-						handleReadyKey(key);
+						handleReadyKey(thread,key);
 					}
 					selected.clear();
 				}
@@ -109,7 +106,8 @@ public final class SimpleNetSelector implements NetSelector {
 				if (selMs >= 10005) {
 					System.out.printf("select took %dms, num=%d%n", selMs, num);
 				}
-			} else {
+			}
+			else {
 				num = selector.select(10000L);
 			}
 		} while (num == 0);
@@ -117,7 +115,7 @@ public final class SimpleNetSelector implements NetSelector {
 	}
 
 	private void updateRegistrations() {
-		NewReg reg = newRegistrations.poll();
+		NewRegistration reg = newRegistrations.poll();
 		while (reg != null) {
 			Selectable selectable = reg.getSelectable();
 			SelectableChannel channel = selectable.getChannel();
@@ -148,7 +146,7 @@ public final class SimpleNetSelector implements NetSelector {
 		throw new UnsupportedOperationException("TODO: finish");
 	}
 
-	private void handleReadyKey(SelectionKey key) {
+	private void handleReadyKey(final Thread thread, final SelectionKey key) {
 		Selectable selectable = (Selectable) key.attachment();
 		if (selectable == null) {
 			// canceled key
@@ -158,10 +156,10 @@ public final class SimpleNetSelector implements NetSelector {
 		boolean closed = false;
 		try {
 			if (checkMask(readyOps, SelUtil.READ)) {
-				closed = selectable.handleRead();
+				closed = selectable.handleRead(thread);
 			}
 			if (!closed && checkMask(readyOps, SelUtil.WRITE)) {
-				closed = selectable.handleWrite();
+				closed = selectable.handleWrite(thread);
 			}
 			if (!closed && checkMask(readyOps, SelUtil.ACCEPT)) {
 				closed = selectable.handleAccept();
@@ -185,7 +183,7 @@ public final class SimpleNetSelector implements NetSelector {
 
 	@Override
 	public void register(Selectable selectable, int ops) {
-		newRegistrations.add(new NewReg(selectable, ops));
+		newRegistrations.add(new NewRegistration(selectable, ops));
 		wakeup();
 	}
 
@@ -201,7 +199,8 @@ public final class SimpleNetSelector implements NetSelector {
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
-		} else {
+		}
+		else {
 			key.interestOps(ops);
 		}
 		wakeup();
@@ -216,18 +215,19 @@ public final class SimpleNetSelector implements NetSelector {
 			key.attach(null);
 			wakeup();
 			System.out.println("unreg, keys: " + selector.keys().size());
-		} else {
+		}
+		else {
 			System.out.println("unreg failed, not registered");
 		}
 	}
 
-	private static final class NewReg {
+	private static final class NewRegistration {
 
 		final Selectable selectable;
 
 		final int ops;
 
-		private NewReg(Selectable selectable, int ops) {
+		private NewRegistration(Selectable selectable, int ops) {
 			this.selectable = selectable;
 			this.ops = ops;
 		}

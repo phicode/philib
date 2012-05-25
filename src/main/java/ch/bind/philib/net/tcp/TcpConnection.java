@@ -26,6 +26,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicReference;
 
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetContext;
@@ -36,7 +37,6 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public class TcpConnection extends SelectableBase implements Connection {
 
-	// private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 	private static final boolean doWriteTimings = false;
 
 	private final SocketChannel channel;
@@ -45,31 +45,23 @@ public class TcpConnection extends SelectableBase implements Connection {
 
 	private final PureSession session;
 
-	// private enum WriteState {
-	// WRITE_DIRECTLY, WRITE_BY_SELECTOR
-	// }
+	// private final Object writeLock = new Object();
 
-	// private WriteState writeState = WriteState.WRITE_DIRECTLY;
+	private static final int WRITESTATE_NO_WRITE = 0;
 
-	private final Object writeLock = new Object();
+	private static final int WRITESTATE_NONBLOCK_WRITE = 1;
 
-	// TODO: make the access to the sendqueue synchronized, since it can be
-	// accessed by external threads or the net-selector
-	// private final BufferQueue sendQueue = new
-	// BufferQueue(DEFAULT_BUFFER_SIZE);
+	private final AtomicReference<Integer> writeState = new AtomicReference<Integer>(WRITESTATE_NO_WRITE);
 
-	private TcpConnection(SocketChannel channel, PureSession session, NetContext context) throws IOException {
+	private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
+		SimpleValidation.notNull(context);
 		SimpleValidation.notNull(channel);
 		SimpleValidation.notNull(session);
-		SimpleValidation.notNull(context);
+		this.context = context;
 		this.channel = channel;
 		this.session = session;
-		this.context = context;
 		// TODO: move this somewhere else
 		this.channel.configureBlocking(false);
-
-		// this.rbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-		// this.wbuf = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
 	}
 
 	@Override
@@ -77,8 +69,8 @@ public class TcpConnection extends SelectableBase implements Connection {
 		return context;
 	}
 
-	static TcpConnection create(SocketChannel clientChannel, PureSession session, NetContext context) throws IOException {
-		TcpConnection connection = new TcpConnection(clientChannel, session, context);
+	static TcpConnection create(NetContext context, SocketChannel channel, PureSession session) throws IOException {
+		TcpConnection connection = new TcpConnection(context, channel, session);
 		session.init(connection);
 		connection.register();
 		return connection;
@@ -99,7 +91,7 @@ public class TcpConnection extends SelectableBase implements Connection {
 		System.out.println("connected to: " + endpoint);
 		try {
 			NetContext context = NetContext.createDefault();
-			return create(channel, session, context);
+			return create(context, channel, session);
 		} catch (IOException e) {
 			closeSafely(channel);
 			throw e;
@@ -129,12 +121,12 @@ public class TcpConnection extends SelectableBase implements Connection {
 	}
 
 	@Override
-	public boolean handleRead() {
+	public boolean handleRead(Thread thread) {
 		return doRead();
 	}
 
 	@Override
-	public boolean handleWrite() {
+	public boolean handleWrite(Thread thread) {
 		return doWrite();
 	}
 
@@ -183,20 +175,53 @@ public class TcpConnection extends SelectableBase implements Connection {
 	@Override
 	public int send(ByteBuffer data) throws IOException {
 		SimpleValidation.notNull(data);
-		synchronized (writeLock) {
-			// if (writeState == WriteState.WRITE_DIRECTLY) {
-			return _send(data);
-			// }
-			// else {
-			// if (sendQueue.offer(data)) {
-			// return data.length;
-			// }
-			// else {
-			// return 0;
-			// }
-			// }
+
+		if (writeState.compareAndSet(WRITESTATE_NO_WRITE, WRITESTATE_NONBLOCK_WRITE)) {
+			try {
+				return sendNonBlocking(data);
+			} finally {
+				boolean ok = writeState.compareAndSet(WRITESTATE_NONBLOCK_WRITE, WRITESTATE_NO_WRITE);
+				// TODO: SimpleValidation.isTrue => assert
+				SimpleValidation.isTrue(ok);
+			}
 		}
+		else {
+			// someone else is writing
+			return 0;
+		}
+
+		// synchronized (writeLock) {
+		// // if (writeState == WriteState.WRITE_DIRECTLY) {
+		// return _send(data);
+		// }
+		// else {
+		// if (sendQueue.offer(data)) {
+		// return data.length;
+		// }
+		// else {
+		// return 0;
+		// }
+		// }
+		// }
 	}
+
+	// @Override
+	// public void sendBlocking(ByteBuffer data) throws IOException {
+	// SimpleValidation.notNull(data);
+	// synchronized (writeLock) {
+	// if (writeState == WriteState.WRITE_DIRECTLY) {
+	// return _send(data);
+	// }
+	// else {
+	// if (sendQueue.offer(data)) {
+	// return data.length;
+	// }
+	// else {
+	// return 0;
+	// }
+	// }
+	// }
+	// }
 
 	// private int _sendBig(ByteBuffer data) throws IOException {
 	// int len = data.length;
@@ -214,7 +239,7 @@ public class TcpConnection extends SelectableBase implements Connection {
 	// return len;
 	// }
 
-	private int _send(ByteBuffer data) throws IOException {
+	private int sendNonBlocking(ByteBuffer data) throws IOException {
 		// wbuf.clear();
 		// wbuf.put(data, dOff, wlen);
 		// wbuf.flip();
