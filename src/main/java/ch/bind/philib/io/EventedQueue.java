@@ -71,6 +71,8 @@ public final class EventedQueue<E> {
 	public E poll() {
 		if (sem.tryAcquire()) {
 			return queue.poll();
+		} else {
+			return null;
 		}
 	}
 
