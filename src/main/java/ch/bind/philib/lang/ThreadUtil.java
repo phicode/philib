@@ -29,7 +29,7 @@ public final class ThreadUtil {
 
 	private static final PhiLog LOG = PhiLog.getLogger(ThreadUtil.class);
 
-	public static final long DEFAULT_WAIT_TIME_MS = 1000L;
+	public static final long DEFAULT_JOIN_TIMEOUT_MS = 1000L;
 
 	private ThreadUtil() {
 	}
@@ -45,7 +45,7 @@ public final class ThreadUtil {
 	}
 
 	public static boolean interruptAndJoin(Thread t) {
-		return interruptAndJoin(t, DEFAULT_WAIT_TIME_MS);
+		return interruptAndJoin(t, DEFAULT_JOIN_TIMEOUT_MS);
 	}
 
 	public static boolean interruptAndJoin(Thread t, long waitTime) {
