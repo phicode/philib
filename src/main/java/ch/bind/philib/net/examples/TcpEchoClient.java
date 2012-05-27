@@ -39,19 +39,18 @@ public class TcpEchoClient extends PureSessionBase {
 
 	private TcpConnection connection;
 
-	private final AtomicLong tx = new AtomicLong(0);
-
-	private final AtomicLong rx = new AtomicLong(0);
-
 	public static void main(String[] args) throws Exception {
 		new TcpEchoClient().run();
 	}
 
 	private void run() throws IOException, InterruptedException {
-		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.66", 1234);
-		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
+		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.66",
+		// 1234);
+		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221",
+		// 1234);
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
-		connection = TcpConnection.open(endpoint, this);
+		EchoSession session = new EchoSession();
+		connection = TcpConnection.open(endpoint, session);
 
 		byte[] buf = new byte[32 * 1024];
 		// byte[] buf = new byte[128 * 1024];
@@ -71,17 +70,11 @@ public class TcpEchoClient extends PureSessionBase {
 
 		long start = System.currentTimeMillis();
 		ByteBuffer bb = ByteBuffer.wrap(buf);
-		while (bb.remaining() > 0) {
-			int num = connection.send(bb);
-			tx.addAndGet(num);
-			if (num != buf.length) {
-				System.out.printf("sent: %d / %d%n", num, buf.length);
-			}
-		}
+		connection.sendBlocking(bb);
 		int loop = 1;
 		while (connection.isConnected()) {
-			long rx = this.rx.get();
-			long tx = this.tx.get();
+			long rx = session.getRx();
+			long tx = session.getTx();
 			long t = System.currentTimeMillis() - start;
 			double rxMbPerSec = (rx / (1024f * 1024f)) / (t / 1000f);
 			double txMbPerSec = (tx / (1024f * 1024f)) / (t / 1000f);
@@ -94,22 +87,7 @@ public class TcpEchoClient extends PureSessionBase {
 
 	@Override
 	public void receive(ByteBuffer data) {
-		int received = data.remaining();
-		rx.addAndGet(received);
-		try {
-			int num = send(data);
-			if (num != received) {
-				System.out.printf("cant echo back! only %d out of %d was sent.%n", num, received);
-			}
-			tx.addAndGet(num);
-		} catch (IOException e) {
-			e.printStackTrace();
-			try {
-				close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-		}
+
 	}
 
 	@Override

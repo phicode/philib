@@ -3,8 +3,8 @@ package ch.bind.philib.net;
 import java.io.IOException;
 
 import ch.bind.philib.cache.ByteBufferCache;
-import ch.bind.philib.net.impl.SimpleNetSelector;
 import ch.bind.philib.net.sel.NetSelector;
+import ch.bind.philib.net.sel.SimpleNetSelector;
 import ch.bind.philib.validation.SimpleValidation;
 
 public final class NetContext {

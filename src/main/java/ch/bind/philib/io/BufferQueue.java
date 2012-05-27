@@ -36,7 +36,7 @@ public final class BufferQueue {
 				return false;
 			}
 			else {
-				ring.add(data);
+				ring.addBack(data);
 				curBufSize = newSize;
 				return true;
 			}
@@ -65,7 +65,7 @@ public final class BufferQueue {
 			return null;
 		}
 		else {
-			byte[] value = ring.get();
+			byte[] value = ring.poll();
 			assert (value != null);
 			curBufSize -= value.length;
 			return value;

@@ -31,6 +31,8 @@ public interface Connection extends Closeable, Selectable {
 
 	int send(ByteBuffer data) throws IOException;
 
+	void sendBlocking(ByteBuffer data) throws IOException, InterruptedException;
+
 	@Override
 	void closed();
 

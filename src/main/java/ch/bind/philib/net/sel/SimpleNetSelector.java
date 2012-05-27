@@ -19,7 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.impl;
+package ch.bind.philib.net.sel;
 
 import static ch.bind.philib.io.BitOps.checkMask;
 
@@ -36,9 +36,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
-import ch.bind.philib.net.sel.NetSelector;
-import ch.bind.philib.net.sel.SelUtil;
-import ch.bind.philib.net.sel.Selectable;
 
 // TODO: thread safe
 public final class SimpleNetSelector implements NetSelector {
@@ -74,7 +71,7 @@ public final class SimpleNetSelector implements NetSelector {
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
 					for (SelectionKey key : selected) {
-						handleReadyKey(thread,key);
+						handleReadyKey(thread, key);
 					}
 					selected.clear();
 				}
@@ -106,8 +103,7 @@ public final class SimpleNetSelector implements NetSelector {
 				if (selMs >= 10005) {
 					System.out.printf("select took %dms, num=%d%n", selMs, num);
 				}
-			}
-			else {
+			} else {
 				num = selector.select(10000L);
 			}
 		} while (num == 0);
@@ -194,16 +190,17 @@ public final class SimpleNetSelector implements NetSelector {
 	}
 
 	@Override
-	public void reRegister(Selectable selectable, int ops) {
+	public void reRegister(Selectable selectable, int ops, boolean asap) {
 		SelectableChannel channel = selectable.getChannel();
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
-		}
-		else {
+		} else {
 			key.interestOps(ops);
 		}
-		wakeup();
+		if (asap) {
+			wakeup();
+		}
 	}
 
 	@Override
@@ -215,8 +212,7 @@ public final class SimpleNetSelector implements NetSelector {
 			key.attach(null);
 			wakeup();
 			System.out.println("unreg, keys: " + selector.keys().size());
-		}
-		else {
+		} else {
 			System.out.println("unreg failed, not registered");
 		}
 	}

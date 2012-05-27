@@ -1,6 +1,6 @@
 package ch.bind.philib.io;
 
-public final class Ring<T> {
+public class Ring<T> {
 
 	private static final int INITIAL_RING_LEN = 4;
 
@@ -12,7 +12,7 @@ public final class Ring<T> {
 
 	private Object[] ring;
 
-	public void add(T value) {
+	public void addBack(T value) {
 		if (value == null) {
 			return;
 		}
@@ -35,11 +35,11 @@ public final class Ring<T> {
 		size++;
 	}
 
-	public T get() {
+	@SuppressWarnings("unchecked")
+	public T poll() {
 		if (size == 0) {
 			return null;
-		}
-		else {
+		} else {
 			Object value = ring[off];
 			size--;
 			off = (off + 1) % ring.length;
@@ -58,8 +58,7 @@ public final class Ring<T> {
 	private void ensureRingSpace() {
 		if (ring == null) {
 			ring = new Object[INITIAL_RING_LEN];
-		}
-		else {
+		} else {
 			if (size == ring.length) {
 				int newLen = ring.length * RING_LEN_ENHANCING_FACTOR;
 				if (newLen < 0) {
@@ -73,5 +72,4 @@ public final class Ring<T> {
 			}
 		}
 	}
-
 }

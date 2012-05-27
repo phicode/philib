@@ -27,7 +27,7 @@ public interface NetSelector extends Runnable, Closeable {
 
 	void register(Selectable selectable, int ops);
 
-	void reRegister(Selectable selectable, int ops);
+	void reRegister(Selectable selectable, int ops, boolean asap);
 
 	void unregister(Selectable selectable);
 

@@ -27,7 +27,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+import ch.bind.philib.io.Ring;
+import ch.bind.philib.io.RingBuffer;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.PureSession;
@@ -35,7 +38,7 @@ import ch.bind.philib.net.sel.SelUtil;
 import ch.bind.philib.net.sel.SelectableBase;
 import ch.bind.philib.validation.SimpleValidation;
 
-public class TcpConnection extends SelectableBase implements Connection {
+public final class TcpConnection extends SelectableBase implements Connection {
 
 	private static final boolean doWriteTimings = false;
 
@@ -50,6 +53,12 @@ public class TcpConnection extends SelectableBase implements Connection {
 	private static final int WRITESTATE_NO_WRITE = 0;
 
 	private static final int WRITESTATE_NONBLOCK_WRITE = 1;
+
+	private static final int WRITESTATE_BLOCKING_WRITE = 2;
+
+	private final Ring<ByteBuffer> writeQueue = new Ring<ByteBuffer>();
+
+	private boolean registeredForWrite = false;
 
 	private final AtomicReference<Integer> writeState = new AtomicReference<Integer>(WRITESTATE_NO_WRITE);
 
@@ -139,20 +148,18 @@ public class TcpConnection extends SelectableBase implements Connection {
 	private boolean doRead() {
 		// TODO: implement
 		// read as much data as possible
-		final ByteBuffer rbuf = getBuffer();
 		while (true) {
 			try {
+				final ByteBuffer rbuf = getBuffer();
 				// TODO: move the clear to the buffer cache implementation
 				rbuf.clear();
 				// int num = BufferOps.readIntoBuffer(channel, rbuf);
 				int num = channel.read(rbuf);
 				if (num == -1) {
 					return true;
-				}
-				else if (num == 0) {
+				} else if (num == 0) {
 					return false;
-				}
-				else {
+				} else {
 					rbuf.flip();
 					// TODO: make assert
 					SimpleValidation.isTrue(num == rbuf.limit());
@@ -166,8 +173,8 @@ public class TcpConnection extends SelectableBase implements Connection {
 				// TODO: handle
 				// e.printStackTrace();
 				return true;
-			} finally {
-				releaseBuffer(rbuf);
+				// } finally {
+				// releaseBuffer(rbuf);
 			}
 		}
 	}
@@ -184,8 +191,7 @@ public class TcpConnection extends SelectableBase implements Connection {
 				// TODO: SimpleValidation.isTrue => assert
 				SimpleValidation.isTrue(ok);
 			}
-		}
-		else {
+		} else {
 			// someone else is writing
 			return 0;
 		}
@@ -205,23 +211,27 @@ public class TcpConnection extends SelectableBase implements Connection {
 		// }
 	}
 
-	// @Override
-	// public void sendBlocking(ByteBuffer data) throws IOException {
-	// SimpleValidation.notNull(data);
-	// synchronized (writeLock) {
-	// if (writeState == WriteState.WRITE_DIRECTLY) {
-	// return _send(data);
-	// }
-	// else {
-	// if (sendQueue.offer(data)) {
-	// return data.length;
-	// }
-	// else {
-	// return 0;
-	// }
-	// }
-	// }
-	// }
+	@Override
+	public void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
+		SimpleValidation.notNull(data);
+		synchronized (writeQueue) {
+			ByteBuffer pending;
+			if (writeQueue.isEmpty()) {
+				pending = data;
+			} else {
+				writeQueue.addBack(data);
+				pending = writeQueue.poll();
+			}
+			while (pending != null && pending.remaining() > 0) {
+				sendNonBlocking(pending);
+				if (pending.remaining() > 0) {
+					writeQueue.addFront(pending);
+					registerForWrite();
+					writeQueue.wait();
+				}
+			}
+		}
+	}
 
 	// private int _sendBig(ByteBuffer data) throws IOException {
 	// int len = data.length;
@@ -259,70 +269,46 @@ public class TcpConnection extends SelectableBase implements Connection {
 			// if (num < wlen) {
 			// registerForWrite();
 			// }
-		}
-		else {
+		} else {
 			num = channel.write(data);
 		}
 		return num;
 	}
 
 	private boolean doWrite() {
-		// must not be called with the current implementation
-		SimpleValidation.isTrue(false);
-		return true;
-		// synchronized (writeLock) {
-		// System.out.println("i am now writable, wheeee :)");
-		// byte[] nextBuf = sendQueue.poll();
-		// while (nextBuf != null) {
-		// int actual;
-		// try {
-		// throw new IOException("whut");
-		// // actual = _sendBig(nextBuf);
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// return true;
-		// }
-		// int numRem = nextBuf.length - actual;
-		// // TODO: assert
-		// SimpleValidation.notNegative(numRem);
-		// if (numRem == 0) {
-		// nextBuf = sendQueue.poll();
-		// }
-		// else {
-		// byte[] rem = new byte[numRem];
-		// System.arraycopy(nextBuf, actual, rem, 0, numRem);
-		// boolean ok = sendQueue.offerFront(rem);
-		// SimpleValidation.isTrue(ok);
-		// return false;
-		// }
-		// }
-		// if (nextBuf == null) {
-		// unregisterForWrite();
-		// }
-		// return false;
-		// }
+		synchronized (writeQueue) {
+			ByteBuffer toWrite = writeQueue.poll();
+			while (toWrite != null) {
+				try {
+					sendNonBlocking(toWrite);
+				} catch (IOException e) {
+					return true;
+				}
+				if (toWrite.remaining() > 0) {
+					writeQueue.addFront(toWrite);
+					return false;
+				}
+				toWrite = writeQueue.poll();
+			}
+			// the write queue is empty, unregister from write events
+			unregisterForWrite();
+			return false;
+		}
 	}
 
-	// private void registerForWrite() {
-	// if (writeState == WriteState.WRITE_DIRECTLY) {
-	// netSelector.reRegister(this, SelUtil.READ_WRITE);
-	// writeState = WriteState.WRITE_BY_SELECTOR;
-	// }
-	// else {
-	// System.out.println("already registered for write");
-	// }
-	// }
-	//
-	// private void unregisterForWrite() {
-	// if (writeState == WriteState.WRITE_BY_SELECTOR) {
-	// netSelector.reRegister(this, SelUtil.READ);
-	// writeState = WriteState.WRITE_DIRECTLY;
-	// }
-	// else {
-	// System.out.println("already unregistered from write");
-	// }
-	// }
+	private void registerForWrite() {
+		if (!registeredForWrite) {
+			context.getNetSelector().reRegister(this, SelUtil.READ_WRITE, true);
+			registeredForWrite = true;
+		}
+	}
+
+	private void unregisterForWrite() {
+		if (registeredForWrite) {
+			context.getNetSelector().reRegister(this, SelUtil.READ, false);
+			registeredForWrite = false;
+		}
+	}
 
 	@Override
 	public boolean isConnected() {

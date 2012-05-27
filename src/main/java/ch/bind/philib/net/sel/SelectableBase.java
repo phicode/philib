@@ -1,5 +1,7 @@
 package ch.bind.philib.net.sel;
 
+import java.io.IOException;
+
 public abstract class SelectableBase implements Selectable {
 
 	@Override

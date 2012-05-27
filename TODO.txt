@@ -11,3 +11,7 @@ PRIO TASK
   1  internal buffer pool, so that directly allocated buffer can be managed
   1  no internal read/write buffers, but these ByteBuffers
   
+  
+bitstream codec
+
+is the memcached protocol documentation license MIT compatible ? (protocol.txt)
