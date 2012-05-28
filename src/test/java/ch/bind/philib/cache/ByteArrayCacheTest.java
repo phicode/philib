@@ -29,8 +29,6 @@ import java.util.concurrent.Semaphore;
 import org.junit.Test;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.cache.impl.NoopObjectCache;
-import ch.bind.philib.cache.impl.ScalableObjectCache;
 import ch.bind.philib.validation.SimpleValidation;
 
 public class ByteArrayCacheTest {
@@ -113,12 +111,13 @@ public class ByteArrayCacheTest {
 		boolean firstRun = true;
 		int numRuns = 1;
 		for (int i = 1; i <= 32; i *= 2) {
-			long total = 0;
+			// long total = 0;
 			for (int r = 0; r < numRuns; r++) {
-				total += stressTest(type, firstRun, i, numOps, getOps, putOps);
+				// total +=
+				stressTest(type, firstRun, i, numOps, getOps, putOps);
 				firstRun = false;
 			}
-			long average = total / numRuns;
+			// long average = total / numRuns;
 			// System.out.printf("threads=%d, average-time=%d%n", i, average);
 		}
 	}

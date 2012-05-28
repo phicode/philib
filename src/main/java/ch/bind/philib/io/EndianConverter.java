@@ -80,7 +80,7 @@ public final class EndianConverter {
                 ((long) (input[offset + 4] & 0xFF) << 24) | //
                 ((long) (input[offset + 5] & 0xFF) << 16) | //
                 ((long) (input[offset + 6] & 0xFF) << 8) | //
-                (long) (input[offset + 7] & 0xFF);
+                (input[offset + 7] & 0xFF);
     }
 
     public static long decodeInt64LE(byte[] input, int offset) {

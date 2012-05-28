@@ -1,7 +1,5 @@
 package ch.bind.philib.io;
 
-import ch.bind.philib.lang.ArrayUtil;
-
 public class BitStreamEncoder {
 
 	private static final int DEFAULT_INITIAL_SIZE = 16;

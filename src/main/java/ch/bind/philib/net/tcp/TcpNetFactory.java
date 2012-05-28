@@ -30,7 +30,12 @@ import ch.bind.philib.net.NetFactory;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SessionFactory;
 
-public class TcpNetFactory implements NetFactory {
+public final class TcpNetFactory implements NetFactory {
+
+	public static final TcpNetFactory INSTANCE = new TcpNetFactory();
+
+	private TcpNetFactory() {
+	}
 
 	@Override
 	public Connection openClient(SocketAddress endpoint) {

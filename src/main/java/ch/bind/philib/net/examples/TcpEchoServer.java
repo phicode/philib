@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpNetFactory;
@@ -40,7 +39,8 @@ public class TcpEchoServer implements SessionFactory {
 	private void foo() throws Exception {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
 		SessionFactory sessionFactory = this;
-		NetServer server = new TcpNetFactory().openServer(bindAddress, sessionFactory);
+		// NetServer server =
+		TcpNetFactory.INSTANCE.openServer(bindAddress, sessionFactory);
 		while (true) {
 			Thread.sleep(10000);
 			synchronized (sessions) {
