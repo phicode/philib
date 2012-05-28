@@ -11,10 +11,6 @@ public class EchoSession extends PureSessionBase {
 
 	private long lastInteractionNs;
 
-	// private boolean closed;
-
-	private long numEchoed;
-
 	private final AtomicLong tx = new AtomicLong(0);
 
 	private final AtomicLong rx = new AtomicLong(0);
@@ -25,6 +21,9 @@ public class EchoSession extends PureSessionBase {
 	public void receive(ByteBuffer data) {
 		try {
 			rx.addAndGet(data.remaining());
+//			if (pendingWrites.size() > 0) {
+//				System.out.printf("pending writes: %d%n", pendingWrites.size());
+//			}
 			ByteBuffer pending = pendingWrites.poll();
 			if (pending == null) {
 				pending = data;
@@ -52,21 +51,17 @@ public class EchoSession extends PureSessionBase {
 	@Override
 	public void closed() {
 		// this.closed = true;
-		System.out.println("closed() numEchoed=" + numEchoed);
+		System.out.printf("closed() rx=%d, tx=%d%n", rx.get(), tx.get());
 	}
 
 	public long getLastInteractionNs() {
 		return lastInteractionNs;
 	}
 
-	public long getNumEchoed() {
-		return numEchoed;
-	}
-	
 	public long getRx() {
 		return rx.get();
 	}
-	
+
 	public long getTx() {
 		return tx.get();
 	}

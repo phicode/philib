@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.net.PureSessionBase;
@@ -52,8 +51,9 @@ public class TcpEchoClient extends PureSessionBase {
 		EchoSession session = new EchoSession();
 		connection = TcpConnection.open(endpoint, session);
 
-		byte[] buf = new byte[32 * 1024];
-		// byte[] buf = new byte[128 * 1024];
+//		byte[] buf = new byte[32 * 1024];
+//		 byte[] buf = new byte[128 * 1024];
+		byte[] buf = new byte[512 * 1024];
 		new Random().nextBytes(buf);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {

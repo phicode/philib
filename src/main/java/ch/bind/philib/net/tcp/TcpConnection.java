@@ -27,10 +27,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import ch.bind.philib.io.Ring;
-import ch.bind.philib.io.RingBuffer;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.PureSession;
@@ -48,8 +46,6 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 	private final PureSession session;
 
-	// private final Object writeLock = new Object();
-
 	private static final int WRITESTATE_NO_WRITE = 0;
 
 	private static final int WRITESTATE_NONBLOCK_WRITE = 1;
@@ -62,6 +58,8 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 	private final AtomicReference<Integer> writeState = new AtomicReference<Integer>(WRITESTATE_NO_WRITE);
 
+	private Thread dispatcherThread;
+
 	private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
 		SimpleValidation.notNull(context);
 		SimpleValidation.notNull(channel);
@@ -69,8 +67,6 @@ public final class TcpConnection extends SelectableBase implements Connection {
 		this.context = context;
 		this.channel = channel;
 		this.session = session;
-		// TODO: move this somewhere else
-		this.channel.configureBlocking(false);
 	}
 
 	@Override
@@ -79,6 +75,7 @@ public final class TcpConnection extends SelectableBase implements Connection {
 	}
 
 	static TcpConnection create(NetContext context, SocketChannel channel, PureSession session) throws IOException {
+		channel.configureBlocking(false);
 		TcpConnection connection = new TcpConnection(context, channel, session);
 		session.init(connection);
 		connection.register();
@@ -131,7 +128,12 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 	@Override
 	public boolean handleRead(Thread thread) {
-		return doRead();
+		dispatcherThread = thread;
+		try {
+			return doRead();
+		} finally {
+			dispatcherThread = null;
+		}
 	}
 
 	@Override
@@ -158,6 +160,7 @@ public final class TcpConnection extends SelectableBase implements Connection {
 				if (num == -1) {
 					return true;
 				} else if (num == 0) {
+					// no more data to read
 					return false;
 				} else {
 					rbuf.flip();
@@ -214,6 +217,9 @@ public final class TcpConnection extends SelectableBase implements Connection {
 	@Override
 	public void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
 		SimpleValidation.notNull(data);
+		if (Thread.currentThread() == dispatcherThread) {
+			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
+		}
 		synchronized (writeQueue) {
 			ByteBuffer pending;
 			if (writeQueue.isEmpty()) {
@@ -276,7 +282,9 @@ public final class TcpConnection extends SelectableBase implements Connection {
 	}
 
 	private boolean doWrite() {
+		final long tStart = System.nanoTime();
 		synchronized (writeQueue) {
+			final long tSync = System.nanoTime() - tStart;
 			ByteBuffer toWrite = writeQueue.poll();
 			while (toWrite != null) {
 				try {
@@ -286,12 +294,16 @@ public final class TcpConnection extends SelectableBase implements Connection {
 				}
 				if (toWrite.remaining() > 0) {
 					writeQueue.addFront(toWrite);
+					final long tAll = System.nanoTime() - tStart;
+					System.out.printf("doWrite-stillRegister tSync=%d, tAll=%d%n", tSync, tAll);
 					return false;
 				}
 				toWrite = writeQueue.poll();
 			}
 			// the write queue is empty, unregister from write events
 			unregisterForWrite();
+			final long tAll = System.nanoTime() - tStart;
+			System.out.printf("doWrite-unregister tSync=%d, tAll=%d%n", tSync, tAll);
 			return false;
 		}
 	}

@@ -52,14 +52,13 @@ public class TcpEchoServer implements SessionFactory {
 					if (!s.isConnected()) {
 						System.out.println("removeing disconnected session: " + s);
 						iter.remove();
-					}
-					else {
+					} else {
 						long lastInteractionNs = s.getLastInteractionNs();
 						if (lastInteractionNs < tooFarAgo) {
 							double lastSec = (now - lastInteractionNs) / 1000000000f;
 							System.out.printf("last interaction with a session: %.5fsec%n", lastSec);
 						}
-						System.out.printf("data echoed: %d%n", s.getNumEchoed());
+						System.out.printf("rx=%d, tx=%d%n", s.getRx(), s.getTx());
 					}
 				}
 				System.out.println("sessions in our list: " + sessions.size());
