@@ -21,7 +21,7 @@
  */
 package ch.bind.philib.io;
 
-import static ch.bind.philib.io.BitOps.findLowestSetBitIdx64;
+import static ch.bind.philib.io.BitOps.*;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
@@ -86,5 +86,33 @@ public class BitOpsTest {
 		long tTotal = tEnd - tStart;
 		double perMsec = SPEED_LOOPS / ((double) tTotal);
 		System.out.printf("%d bit ops in %dms %.1fops/ms %n", SPEED_LOOPS, tTotal, perMsec);
+	}
+
+	@Test
+	public void rotl32() {
+		final int val = 0xFABC1234;
+		assertEquals(0xFABC1234, rotl(val, 0));
+		assertEquals(0xABC1234F, rotl(val, 4));
+		assertEquals(0xBC1234FA, rotl(val, 8));
+		assertEquals(0xC1234FAB, rotl(val, 12));
+		assertEquals(0x1234FABC, rotl(val, 16));
+		assertEquals(0x234FABC1, rotl(val, 20));
+		assertEquals(0x34FABC12, rotl(val, 24));
+		assertEquals(0x4FABC123, rotl(val, 28));
+		assertEquals(0xFABC1234, rotl(val, 32));
+	}
+	
+	@Test
+	public void rotr32() {
+		final int val = 0xFABC1234;
+		assertEquals(0xFABC1234, rotr(val, 0));
+		assertEquals(0x4FABC123, rotr(val, 4));
+		assertEquals(0x34FABC12, rotr(val, 8));
+		assertEquals(0x234FABC1, rotr(val, 12));
+		assertEquals(0x1234FABC, rotr(val, 16));
+		assertEquals(0xC1234FAB, rotr(val, 20));
+		assertEquals(0xBC1234FA, rotr(val, 24));
+		assertEquals(0xABC1234F, rotr(val, 28));
+		assertEquals(0xFABC1234, rotr(val, 32));
 	}
 }

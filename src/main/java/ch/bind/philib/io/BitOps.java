@@ -75,4 +75,31 @@ public final class BitOps {
 	// mask = ((mask << 1L) | 1L);
 	// }
 	// }
+
+	public static final int rotl(int value, int rotate) {
+		assert (rotate >= 0 && rotate <= 32);
+		int a = value << rotate;
+		int b = value >>> (32 - rotate);
+		return a | b;
+	}
+
+	public static final int rotr(int value, int rotate) {
+		assert (rotate >= 0 && rotate <= 32);
+		int a = value >>> rotate;
+		int b = value << (32 - rotate);
+		return a | b;
+	}
+	public static final long rotl(long value, int rotate) {
+		assert (rotate >= 0 && rotate <= 64);
+		long a = value << rotate;
+		long b = value >>> (64 - rotate);
+		return a | b;
+	}
+
+	public static final long rotr(long value, int rotate) {
+		assert (rotate >= 0 && rotate <= 64);
+		long a = value >>> rotate;
+		long b = value << (64 - rotate);
+		return a | b;
+	}
 }
