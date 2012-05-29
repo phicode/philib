@@ -15,3 +15,5 @@ PRIO TASK
 bitstream codec
 
 is the memcached protocol documentation license MIT compatible ? (protocol.txt)
+
+murmur hashing algorithm

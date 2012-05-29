@@ -135,4 +135,47 @@ public final class HashUtil {
 	public static final int hash(final double value) {
 		return hash(Double.doubleToLongBits(value));
 	}
-}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	Murmur2(key, len, seed)
+    m  <- 0x5bd1e995
+    r  <- 24
+    seed  <- 0x9747b28c
+
+
+    hash  <- seed xor len
+
+    for each fourByteChunk of key
+        k <- fourByteChunk
+
+        k <- k * m
+        k <- k xor (k >> r)
+        k <- k * m
+
+        hash <- hash * m
+        hash <- hash xor k
+
+    with any remainingBytesInKey
+        remainingBytes <- SwapEndianOrderOf(remainingBytesInKey)
+
+        hash <- hash xor remainingBytes
+        hash <- hash * m;
+
+    hash <- hash xor (hash >> 13)
+    hash <- hash * m;
+    hash <- hash xor (hash shr 15);

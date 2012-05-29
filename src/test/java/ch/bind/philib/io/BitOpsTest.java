@@ -100,8 +100,13 @@ public class BitOpsTest {
 		assertEquals(0x34FABC12, rotl(val, 24));
 		assertEquals(0x4FABC123, rotl(val, 28));
 		assertEquals(0xFABC1234, rotl(val, 32));
+
+		// 1010b -> 0xA
+		// 0101b -> 0x5
+		assertEquals(0xAAAAAAAA, rotl(0x55555555, 1));
+		assertEquals(0x55555555, rotl(0xAAAAAAAA, 1));
 	}
-	
+
 	@Test
 	public void rotr32() {
 		final int val = 0xFABC1234;
@@ -114,5 +119,10 @@ public class BitOpsTest {
 		assertEquals(0xBC1234FA, rotr(val, 24));
 		assertEquals(0xABC1234F, rotr(val, 28));
 		assertEquals(0xFABC1234, rotr(val, 32));
+
+		// 1010b -> 0xA
+		// 0101b -> 0x5
+		assertEquals(0xAAAAAAAA, rotr(0x55555555, 1));
+		assertEquals(0x55555555, rotr(0xAAAAAAAA, 1));
 	}
 }
