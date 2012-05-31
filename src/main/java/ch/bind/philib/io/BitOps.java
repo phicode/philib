@@ -76,30 +76,23 @@ public final class BitOps {
 	// }
 	// }
 
-	public static final int rotl(int value, int rotate) {
-		assert (rotate >= 0 && rotate <= 32);
-		int a = value << rotate;
-		int b = value >>> (32 - rotate);
-		return a | b;
+	public static final int rotl32(final int value, final int r) {
+		assert (r >= 0 && r <= 32);
+		return (value << r) | (value >>> (32 - r));
 	}
 
-	public static final int rotr(int value, int rotate) {
-		assert (rotate >= 0 && rotate <= 32);
-		int a = value >>> rotate;
-		int b = value << (32 - rotate);
-		return a | b;
-	}
-	public static final long rotl(long value, int rotate) {
-		assert (rotate >= 0 && rotate <= 64);
-		long a = value << rotate;
-		long b = value >>> (64 - rotate);
-		return a | b;
+	public static final long rotl64(final long value, final int r) {
+		assert (r >= 0 && r <= 64);
+		return (value << r) | (value >>> (64 - r));
 	}
 
-	public static final long rotr(long value, int rotate) {
-		assert (rotate >= 0 && rotate <= 64);
-		long a = value >>> rotate;
-		long b = value << (64 - rotate);
-		return a | b;
+	public static final int rotr32(final int value, final int r) {
+		assert (r >= 0 && r <= 32);
+		return (value >>> r) | (value << (32 - r));
+	}
+
+	public static final long rotr64(final long value, final int r) {
+		assert (r >= 0 && r <= 64);
+		return (value >>> r) | (value << (64 - r));
 	}
 }
