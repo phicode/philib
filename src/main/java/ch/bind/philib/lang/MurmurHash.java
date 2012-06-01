@@ -75,11 +75,11 @@ public final class MurmurHash {
 			int k = EndianConverter.decodeInt32LE(key, off);
 			off += 4;
 
-			k *= MURMUR3_32_C1;
-			k = BitOps.rotl32(k, 15);
-			k *= MURMUR3_32_C2;
-
-			hash ^= k;
+			// k *= MURMUR3_32_C1;
+			// k = BitOps.rotl32(k, 15);
+			// k *= MURMUR3_32_C2;
+			// hash ^= k;
+			hash ^= murmur3_round32(k);
 			hash = BitOps.rotl32(hash, 13);
 			hash = (hash * 5) + 0xe6546b64;
 		}
@@ -93,24 +93,23 @@ public final class MurmurHash {
 		case 1:
 			k ^= (key[off] & 0xFF);
 
-			k *= MURMUR3_32_C1;
-			k = BitOps.rotl32(k, 15);
-			k *= MURMUR3_32_C2;
-			hash ^= k;
+			// k *= MURMUR3_32_C1;
+			// k = BitOps.rotl32(k, 15);
+			// k *= MURMUR3_32_C2;
+			// hash ^= k;
+			hash ^= murmur3_round32(k);
 		}
 
 		hash ^= len;
 		hash = murmur3_fmix32(hash);
 		return hash;
 	}
-	
-	private static final int murmur3_round32(int hash) {
-		hash ^= hash >>> 16;
-		hash *= 0x85ebca6b;
-		hash ^= hash >>> 13;
-		hash *= 0xc2b2ae35;
-		hash ^= hash >>> 16;
-		return hash;
+
+	private static final int murmur3_round32(int k) {
+		k *= MURMUR3_32_C1;
+		k = BitOps.rotl32(k, 15);
+		k *= MURMUR3_32_C2;
+		return k;
 	}
 
 	private static final int murmur3_fmix32(int hash) {
@@ -130,4 +129,15 @@ public final class MurmurHash {
 	// k ^= k >>> 33;
 	// return k;
 	// }
+
+	public static final long optimize() {
+		byte[] b = {
+				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+		final long s = System.nanoTime();
+		for (int i = 0; i < 12000; i++) {
+			murmur2(b);
+			murmur3(b);
+		}
+		return (System.nanoTime() - s);
+	}
 }
