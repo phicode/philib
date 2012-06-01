@@ -21,8 +21,10 @@
  */
 package ch.bind.philib.io;
 
-import static ch.bind.philib.io.BitOps.*;
-import static org.junit.Assert.assertEquals;
+import static ch.bind.philib.io.BitOps.findLowestSetBitIdx64;
+import static ch.bind.philib.io.BitOps.rotl32;
+import static ch.bind.philib.io.BitOps.rotr32;
+import static junit.framework.Assert.assertEquals;
 
 import java.util.Random;
 
@@ -89,40 +91,40 @@ public class BitOpsTest {
 	}
 
 	@Test
-	public void rotl32() {
+	public void rotl_32() {
 		final int val = 0xFABC1234;
-		assertEquals(0xFABC1234, rotl(val, 0));
-		assertEquals(0xABC1234F, rotl(val, 4));
-		assertEquals(0xBC1234FA, rotl(val, 8));
-		assertEquals(0xC1234FAB, rotl(val, 12));
-		assertEquals(0x1234FABC, rotl(val, 16));
-		assertEquals(0x234FABC1, rotl(val, 20));
-		assertEquals(0x34FABC12, rotl(val, 24));
-		assertEquals(0x4FABC123, rotl(val, 28));
-		assertEquals(0xFABC1234, rotl(val, 32));
+		assertEquals(0xFABC1234, rotl32(val, 0));
+		assertEquals(0xABC1234F, rotl32(val, 4));
+		assertEquals(0xBC1234FA, rotl32(val, 8));
+		assertEquals(0xC1234FAB, rotl32(val, 12));
+		assertEquals(0x1234FABC, rotl32(val, 16));
+		assertEquals(0x234FABC1, rotl32(val, 20));
+		assertEquals(0x34FABC12, rotl32(val, 24));
+		assertEquals(0x4FABC123, rotl32(val, 28));
+		assertEquals(0xFABC1234, rotl32(val, 32));
 
 		// 1010b -> 0xA
 		// 0101b -> 0x5
-		assertEquals(0xAAAAAAAA, rotl(0x55555555, 1));
-		assertEquals(0x55555555, rotl(0xAAAAAAAA, 1));
+		assertEquals(0xAAAAAAAA, rotl32(0x55555555, 1));
+		assertEquals(0x55555555, rotl32(0xAAAAAAAA, 1));
 	}
 
 	@Test
-	public void rotr32() {
+	public void rotr_32() {
 		final int val = 0xFABC1234;
-		assertEquals(0xFABC1234, rotr(val, 0));
-		assertEquals(0x4FABC123, rotr(val, 4));
-		assertEquals(0x34FABC12, rotr(val, 8));
-		assertEquals(0x234FABC1, rotr(val, 12));
-		assertEquals(0x1234FABC, rotr(val, 16));
-		assertEquals(0xC1234FAB, rotr(val, 20));
-		assertEquals(0xBC1234FA, rotr(val, 24));
-		assertEquals(0xABC1234F, rotr(val, 28));
-		assertEquals(0xFABC1234, rotr(val, 32));
+		assertEquals(0xFABC1234, rotr32(val, 0));
+		assertEquals(0x4FABC123, rotr32(val, 4));
+		assertEquals(0x34FABC12, rotr32(val, 8));
+		assertEquals(0x234FABC1, rotr32(val, 12));
+		assertEquals(0x1234FABC, rotr32(val, 16));
+		assertEquals(0xC1234FAB, rotr32(val, 20));
+		assertEquals(0xBC1234FA, rotr32(val, 24));
+		assertEquals(0xABC1234F, rotr32(val, 28));
+		assertEquals(0xFABC1234, rotr32(val, 32));
 
 		// 1010b -> 0xA
 		// 0101b -> 0x5
-		assertEquals(0xAAAAAAAA, rotr(0x55555555, 1));
-		assertEquals(0x55555555, rotr(0xAAAAAAAA, 1));
+		assertEquals(0xAAAAAAAA, rotr32(0x55555555, 1));
+		assertEquals(0x55555555, rotr32(0xAAAAAAAA, 1));
 	}
 }
