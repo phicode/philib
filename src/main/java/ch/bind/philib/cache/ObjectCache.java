@@ -6,4 +6,6 @@ public interface ObjectCache<E> {
 
 	boolean release(E e);
 	
+	CacheStats getCacheStats();
+	
 }

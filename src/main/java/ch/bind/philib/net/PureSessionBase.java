@@ -37,4 +37,9 @@ public abstract class PureSessionBase implements PureSession {
 	public final boolean isOpen() {
 		return connection.isOpen();
 	}
+
+	@Override
+	public final void releaseBuffer(ByteBuffer buffer) {
+		connection.getContext().getBufferCache().release(buffer);
+	}
 }

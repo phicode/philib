@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.Ring;
 import ch.bind.philib.net.PureSessionBase;
+import ch.bind.philib.validation.SimpleValidation;
 
 public class EchoSession extends PureSessionBase {
 
@@ -19,24 +20,29 @@ public class EchoSession extends PureSessionBase {
 
 	@Override
 	public void receive(ByteBuffer data) {
+		lastInteractionNs = System.nanoTime();
 		try {
 			rx.addAndGet(data.remaining());
-//			if (pendingWrites.size() > 0) {
-//				System.out.printf("pending writes: %d%n", pendingWrites.size());
-//			}
 			ByteBuffer pending = pendingWrites.poll();
 			if (pending == null) {
 				pending = data;
 			} else {
 				pendingWrites.addBack(data);
 			}
+			// while (pending != null) {
 			int rem = pending.remaining();
+			SimpleValidation.isTrue(rem > 0);
 			int num = send(pending);
 			tx.addAndGet(num);
 			if (num != rem) {
-				System.out.printf("cant echo back! only %d out of %d was sent.%n", num, rem);
+				// System.out.printf("cant echo back! only %d out of %d was sent.%n",
+				// num, rem);
 				pendingWrites.addFront(pending);
+				return;
 			}
+			releaseBuffer(pending);
+			// pending = pendingWrites.poll();
+			// }
 		} catch (IOException e) {
 			e.printStackTrace();
 			try {
@@ -45,7 +51,6 @@ public class EchoSession extends PureSessionBase {
 				e1.printStackTrace();
 			}
 		}
-		lastInteractionNs = System.nanoTime();
 	}
 
 	@Override
@@ -64,5 +69,9 @@ public class EchoSession extends PureSessionBase {
 
 	public long getTx() {
 		return tx.get();
+	}
+
+	public void printCacheStats() {
+		System.out.println(getContext().getBufferCache().getCacheStats().toString());
 	}
 }

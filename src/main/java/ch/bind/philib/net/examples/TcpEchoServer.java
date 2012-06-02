@@ -59,6 +59,7 @@ public class TcpEchoServer implements SessionFactory {
 							System.out.printf("last interaction with a session: %.5fsec%n", lastSec);
 						}
 						System.out.printf("rx=%d, tx=%d%n", s.getRx(), s.getTx());
+						s.printCacheStats();
 					}
 				}
 				System.out.println("sessions in our list: " + sessions.size());

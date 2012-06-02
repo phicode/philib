@@ -2,6 +2,7 @@ package ch.bind.philib.cache.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import ch.bind.philib.cache.CacheStats;
 import ch.bind.philib.cache.ObjectCache;
 import ch.bind.philib.validation.SimpleValidation;
 
@@ -12,6 +13,8 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 	private final LinkedObjectCache<E>[] caches;
 
 	private final AtomicLong usageCount = new AtomicLong(0);
+
+	private final CombinedCacheStats stats;
 
 	public ScalableObjectCache(ObjectFactory<E> factory, int maxEntries) {
 		this(factory, maxEntries, Runtime.getRuntime().availableProcessors());
@@ -25,9 +28,12 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 			entriesPerBucket++;
 		}
 		this.caches = new LinkedObjectCache[numBuckets];
+		CacheStats[] stats = new CacheStats[numBuckets];
 		for (int i = 0; i < numBuckets; i++) {
 			caches[i] = new LinkedObjectCache<E>(factory, entriesPerBucket);
+			stats[i] = caches[i].getCacheStats();
 		}
+		this.stats = new CombinedCacheStats(stats);
 	}
 
 	@Override
@@ -38,6 +44,11 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 	@Override
 	public boolean release(E e) {
 		return cacheByThread.get().release(e);
+	}
+
+	@Override
+	public CacheStats getCacheStats() {
+		return stats;
 	}
 
 	private LinkedObjectCache<E> bind() {

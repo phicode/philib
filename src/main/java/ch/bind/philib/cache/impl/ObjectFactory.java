@@ -8,7 +8,5 @@ public interface ObjectFactory<E> {
 
 	boolean release(E e);
 
-//	boolean canRelease(E e);
-
 	boolean canReuse(E e);
 }

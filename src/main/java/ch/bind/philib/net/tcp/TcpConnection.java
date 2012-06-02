@@ -158,9 +158,11 @@ public final class TcpConnection extends SelectableBase implements Connection {
 				// int num = BufferOps.readIntoBuffer(channel, rbuf);
 				int num = channel.read(rbuf);
 				if (num == -1) {
+					releaseBuffer(rbuf);
 					return true;
 				} else if (num == 0) {
 					// no more data to read
+					releaseBuffer(rbuf);
 					return false;
 				} else {
 					rbuf.flip();

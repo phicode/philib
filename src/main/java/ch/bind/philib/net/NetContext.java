@@ -11,7 +11,7 @@ public final class NetContext {
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 
-	private static final int DEFAULT_NUM_BUFFERS = 32;
+	private static final int DEFAULT_NUM_BUFFERS = 128;
 
 	private final ByteBufferCache bufferCache;
 

@@ -20,4 +20,9 @@ public class SpecificObjectCache<E> implements ObjectCache<E> {
 	public final boolean release(E e) {
 		return cache.release(e);
 	}
+
+	@Override
+	public final CacheStats getCacheStats() {
+		return cache.getCacheStats();
+	}
 }

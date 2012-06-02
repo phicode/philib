@@ -32,7 +32,7 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 	private final AtomicReference<Node<E>> objList;
 
 	private final Node<E> LOCK_DUMMY = new Node<E>();
-
+	
 	public LinkedObjectCache(ObjectFactory<E> factory, int maxEntries) {
 		super(factory);
 		SimpleValidation.isTrue(maxEntries > 0);
