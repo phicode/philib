@@ -23,6 +23,8 @@ package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.net.SocketOption;
+import java.net.SocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
@@ -96,7 +98,7 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 		System.out.println("connected to: " + endpoint);
 		try {
-			NetContext context = NetContext.createDefault();
+			NetContext context = NetContext.createSimple();
 			return create(context, channel, session);
 		} catch (IOException e) {
 			closeSafely(channel);
@@ -158,6 +160,7 @@ public final class TcpConnection extends SelectableBase implements Connection {
 				// int num = BufferOps.readIntoBuffer(channel, rbuf);
 				int num = channel.read(rbuf);
 				if (num == -1) {
+					// connection closed
 					releaseBuffer(rbuf);
 					return true;
 				} else if (num == 0) {
@@ -166,20 +169,14 @@ public final class TcpConnection extends SelectableBase implements Connection {
 					return false;
 				} else {
 					rbuf.flip();
-					// TODO: make assert
-					SimpleValidation.isTrue(num == rbuf.limit());
-					SimpleValidation.isTrue(num == rbuf.remaining());
-					// byte[] received = new byte[num];
-					// rbuf.get(received);
-					// SimpleValidation.isTrue(0 == rbuf.remaining());
+					assert (num == rbuf.limit());
+					assert (num == rbuf.remaining());
 					session.receive(rbuf);
 				}
 			} catch (IOException e) {
 				// TODO: handle
-				// e.printStackTrace();
+				e.printStackTrace();
 				return true;
-				// } finally {
-				// releaseBuffer(rbuf);
 			}
 		}
 	}

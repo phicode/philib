@@ -51,8 +51,8 @@ public class TcpEchoClient extends PureSessionBase {
 		EchoSession session = new EchoSession();
 		connection = TcpConnection.open(endpoint, session);
 
-//		byte[] buf = new byte[32 * 1024];
-//		 byte[] buf = new byte[128 * 1024];
+		// byte[] buf = new byte[32 * 1024];
+		// byte[] buf = new byte[128 * 1024];
 		byte[] buf = new byte[512 * 1024];
 		new Random().nextBytes(buf);
 
@@ -70,18 +70,27 @@ public class TcpEchoClient extends PureSessionBase {
 
 		long start = System.currentTimeMillis();
 		ByteBuffer bb = ByteBuffer.wrap(buf);
+		long lastT = System.currentTimeMillis();
 		connection.sendBlocking(bb);
 		int loop = 1;
+		long lastRx = 0, lastTx = 0;
 		while (connection.isConnected()) {
 			long rx = session.getRx();
 			long tx = session.getTx();
-			long t = System.currentTimeMillis() - start;
-			double rxMbPerSec = (rx / (1024f * 1024f)) / (t / 1000f);
-			double txMbPerSec = (tx / (1024f * 1024f)) / (t / 1000f);
-			System.out.printf("rx=%d, tx=%d bytes in %d ms => %.3f %.3f mb/sec%n", rx, tx, t, rxMbPerSec, txMbPerSec);
+			long rxDiff = rx - lastRx;
+			long txDiff = rx - lastTx;
+			long now = System.currentTimeMillis();
+			long tDiff = now - lastT;
+			double rxMbPerSec = (rxDiff / (1024f * 1024f)) / (tDiff / 1000f);
+			double txMbPerSec = (txDiff / (1024f * 1024f)) / (tDiff / 1000f);
+			System.out.printf("total=%d in %d ms; last 5sec rx=%d, tx=%d bytes => %.3f %.3f mb/sec%n", //
+					(rx + tx), (now - start), rxDiff, txDiff, rxMbPerSec, txMbPerSec);
 			long sleepUntil = start + (loop * 5000L);
 			ThreadUtil.sleepUntilMs(sleepUntil);
 			loop++;
+			lastRx = rx;
+			lastTx = tx;
+			lastT = now;
 		}
 	}
 

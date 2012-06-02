@@ -45,7 +45,7 @@ public final class TcpNetFactory implements NetFactory {
 
 	@Override
 	public NetServer openServer(SocketAddress bindAddress, SessionFactory consumerFactory) throws IOException {
-		NetContext context = NetContext.createDefault();
+		NetContext context = NetContext.createSimple();
 		return TcpServer.open(context, consumerFactory, bindAddress);
 	}
 }

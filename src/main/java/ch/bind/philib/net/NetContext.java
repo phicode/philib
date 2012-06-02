@@ -35,11 +35,29 @@ public final class NetContext {
 	/**
 	 * 
 	 * @return
-	 * @throws IOException In case the selector creation failed.
+	 * @throws IOException
+	 *             In case the selector creation failed.
 	 */
-	public static NetContext createDefault() throws IOException {
+	public static NetContext createSimple() throws IOException {
+		// single threaded net selector and buffer cache
 		NetSelector netSelector = SimpleNetSelector.open();
-		ByteBufferCache bufferCache = ByteBufferCache.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS);
+		ByteBufferCache bufferCache = ByteBufferCache.createSimple(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS);
 		return new NetContext(bufferCache, netSelector);
+	}
+
+	/**
+	 * 
+	 * @return
+	 * @throws IOException
+	 *             In case the selector creation failed.
+	 */
+	public static NetContext createScalable() throws IOException {
+		// multi threaded net selector and buffer cache
+		throw new UnsupportedOperationException("TODO: scalable net selector");
+		// NetSelector netSelector = SimpleNetSelector.open();
+		// ByteBufferCache bufferCache =
+		// ByteBufferCache.createScalable(DEFAULT_BUFFER_SIZE,
+		// DEFAULT_NUM_BUFFERS);
+		// return new NetContext(bufferCache, netSelector);
 	}
 }
