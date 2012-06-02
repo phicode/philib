@@ -221,12 +221,11 @@ public final class TcpConnection extends SelectableBase implements Connection {
 			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
 		}
 		synchronized (writeQueue) {
-			ByteBuffer pending;
-			if (writeQueue.isEmpty()) {
+			ByteBuffer pending = writeQueue.poll();
+			if (pending == null) {
 				pending = data;
 			} else {
 				writeQueue.addBack(data);
-				pending = writeQueue.poll();
 			}
 			while (pending != null && pending.remaining() > 0) {
 				sendNonBlocking(pending);
@@ -302,6 +301,7 @@ public final class TcpConnection extends SelectableBase implements Connection {
 			}
 			// the write queue is empty, unregister from write events
 			unregisterForWrite();
+			writeQueue.notifyAll();
 			final long tAll = System.nanoTime() - tStart;
 			System.out.printf("doWrite-unregister tSync=%d, tAll=%d%n", tSync, tAll);
 			return false;

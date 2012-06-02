@@ -8,7 +8,7 @@ public class MurmurHashTest {
 
 	public static void main(String[] args) {
 		System.out.printf("optimized in: %dns%n", MurmurHash.optimize());
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 2; i++) {
 			testSpeed2(1);
 			testSpeed2(2);
 			testSpeed2(3);
