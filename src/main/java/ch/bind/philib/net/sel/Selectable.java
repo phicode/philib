@@ -30,7 +30,7 @@ public interface Selectable extends Closeable {
 
 	boolean handleRead(Thread thread);
 
-	boolean handleWrite(Thread thread);
+	boolean handleWrite();
 
 	boolean handleAccept();
 

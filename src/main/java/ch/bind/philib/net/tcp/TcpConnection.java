@@ -128,6 +128,8 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 	@Override
 	public boolean handleRead(Thread thread) {
+		// store the current dispatcher thread so that we can verify that the
+		// event-handler wont perform a blocking write operation
 		dispatcherThread = thread;
 		try {
 			return doRead();
@@ -137,7 +139,7 @@ public final class TcpConnection extends SelectableBase implements Connection {
 	}
 
 	@Override
-	public boolean handleWrite(Thread thread) {
+	public boolean handleWrite() {
 		return doWrite();
 	}
 
@@ -161,11 +163,13 @@ public final class TcpConnection extends SelectableBase implements Connection {
 					// connection closed
 					releaseBuffer(rbuf);
 					return true;
-				} else if (num == 0) {
+				}
+				else if (num == 0) {
 					// no more data to read
 					releaseBuffer(rbuf);
 					return false;
-				} else {
+				}
+				else {
 					rbuf.flip();
 					assert (num == rbuf.limit());
 					assert (num == rbuf.remaining());
@@ -192,7 +196,8 @@ public final class TcpConnection extends SelectableBase implements Connection {
 				// TODO: SimpleValidation.isTrue => assert
 				SimpleValidation.isTrue(ok);
 			}
-		} else {
+		}
+		else {
 			// someone else is writing
 			return 0;
 		}
@@ -222,7 +227,8 @@ public final class TcpConnection extends SelectableBase implements Connection {
 			ByteBuffer pending = writeQueue.poll();
 			if (pending == null) {
 				pending = data;
-			} else {
+			}
+			else {
 				writeQueue.addBack(data);
 			}
 			while (pending != null && pending.remaining() > 0) {
@@ -272,7 +278,8 @@ public final class TcpConnection extends SelectableBase implements Connection {
 			// if (num < wlen) {
 			// registerForWrite();
 			// }
-		} else {
+		}
+		else {
 			num = channel.write(data);
 		}
 		return num;

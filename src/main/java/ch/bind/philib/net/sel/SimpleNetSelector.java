@@ -155,7 +155,7 @@ public final class SimpleNetSelector implements NetSelector {
 				closed = selectable.handleRead(thread);
 			}
 			if (!closed && checkMask(readyOps, SelUtil.WRITE)) {
-				closed = selectable.handleWrite(thread);
+				closed = selectable.handleWrite();
 			}
 			if (!closed && checkMask(readyOps, SelUtil.ACCEPT)) {
 				closed = selectable.handleAccept();

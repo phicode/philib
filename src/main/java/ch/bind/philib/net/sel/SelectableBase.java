@@ -8,7 +8,7 @@ public abstract class SelectableBase implements Selectable {
 	}
 
 	@Override
-	public boolean handleWrite(Thread thread) {
+	public boolean handleWrite() {
 		throw new IllegalStateException("unsupported select operation: write");
 	}
 
