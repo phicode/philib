@@ -26,23 +26,29 @@ public class EchoSession extends PureSessionBase {
 			ByteBuffer pending = pendingWrites.poll();
 			if (pending == null) {
 				pending = data;
-			} else {
+			}
+			else {
 				pendingWrites.addBack(data);
 			}
-			// while (pending != null) {
-			int rem = pending.remaining();
-			SimpleValidation.isTrue(rem > 0);
-			int num = send(pending);
-			tx.addAndGet(num);
-			if (num != rem) {
-				// System.out.printf("cant echo back! only %d out of %d was sent.%n",
-				// num, rem);
-				pendingWrites.addFront(pending);
-				return;
+			int numGoodSends = 0;
+			while (pending != null) {
+				int rem = pending.remaining();
+				SimpleValidation.isTrue(rem > 0);
+				int num = send(pending);
+				tx.addAndGet(num);
+				if (num != rem) {
+					// System.out.printf("cant echo back! only %d out of %d was sent.%n",
+					// num, rem);
+					pendingWrites.addFront(pending);
+					break;
+				}
+				numGoodSends++;
+				releaseBuffer(pending);
+				pending = pendingWrites.poll();
 			}
-			releaseBuffer(pending);
-			// pending = pendingWrites.poll();
-			// }
+			if (numGoodSends > 1) {
+				System.out.println("good sends: " + numGoodSends);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			try {

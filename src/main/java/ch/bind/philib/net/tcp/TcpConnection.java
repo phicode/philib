@@ -23,8 +23,6 @@ package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.net.SocketOption;
-import java.net.SocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
