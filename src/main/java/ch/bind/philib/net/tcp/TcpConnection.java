@@ -175,7 +175,8 @@ public final class TcpConnection extends SelectableBase implements Connection {
 				}
 			} catch (IOException e) {
 				// TODO: handle
-				e.printStackTrace();
+				// e.printStackTrace();
+				System.out.println("closed stream detected in tcp-connection doRead: " + e.getMessage());
 				return true;
 			}
 		}
