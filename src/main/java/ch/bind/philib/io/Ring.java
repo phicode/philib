@@ -1,5 +1,7 @@
 package ch.bind.philib.io;
 
+import ch.bind.philib.validation.SimpleValidation;
+
 public class Ring<T> {
 
 	private static final int INITIAL_RING_LEN = 4;
@@ -39,11 +41,24 @@ public class Ring<T> {
 	public T poll() {
 		if (size == 0) {
 			return null;
-		} else {
+		}
+		else {
 			Object value = ring[off];
 			size--;
 			off = (off + 1) % ring.length;
 			return (T) value;
+		}
+	}
+
+	public T pollNext(T value) {
+		SimpleValidation.notNull(value);
+		if (size == 0) {
+			return value;
+		}
+		else {
+			T rv = poll();
+			addBack(value);
+			return rv;
 		}
 	}
 
@@ -58,7 +73,8 @@ public class Ring<T> {
 	private void ensureRingSpace() {
 		if (ring == null) {
 			ring = new Object[INITIAL_RING_LEN];
-		} else {
+		}
+		else {
 			if (size == ring.length) {
 				int newLen = ring.length * RING_LEN_ENHANCING_FACTOR;
 				if (newLen < 0) {
@@ -72,4 +88,5 @@ public class Ring<T> {
 			}
 		}
 	}
+
 }
