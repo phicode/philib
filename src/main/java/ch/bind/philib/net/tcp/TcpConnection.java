@@ -39,9 +39,9 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public final class TcpConnection extends SelectableBase implements Connection {
 
-	private static final boolean doWriteTimings = false;
-	// private static final boolean doWriteTimings = true;
-
+	// private static final boolean doWriteTimings = false;
+	private static final boolean doWriteTimings = true;
+	private static final boolean doReadTimings = true;
 	private final SocketChannel channel;
 
 	private final NetContext context;
@@ -169,7 +169,17 @@ public final class TcpConnection extends SelectableBase implements Connection {
 				// implementation
 				rbuf.clear();
 				// int num = BufferOps.readIntoBuffer(channel, rbuf);
-				int num = channel.read(rbuf);
+				int num;
+				if (doReadTimings) {
+					long tStart = System.nanoTime();
+					num = channel.read(rbuf);
+					long t = System.nanoTime() - tStart;
+					if (t > 2000000) {
+						System.out.printf("read took: %.6fms%n", (t / 1000000f));
+					}
+				} else {
+					num = channel.read(rbuf);
+				}
 				if (num == -1) {
 					// connection closed
 					releaseBuffer(rbuf);
@@ -293,17 +303,12 @@ public final class TcpConnection extends SelectableBase implements Connection {
 		// " <= 0");
 		int num;
 		if (doWriteTimings) {
-			long startNs = System.nanoTime();
+			long tStart = System.nanoTime();
 			num = channel.write(data);
-			long endNs = System.nanoTime();
-			long t = endNs - startNs;
-			// 5ms
-			if (t > 5000000L) {
-				System.out.printf("channel.write took %dns, %fms%n", t, (t / 1000000f));
+			long t = System.nanoTime() - tStart;
+			if (t > 2000000L) {
+				System.out.printf("write took %.6fms%n", (t / 1000000f));
 			}
-			// if (num < wlen) {
-			// registerForWrite();
-			// }
 		} else {
 			num = channel.write(data);
 		}
