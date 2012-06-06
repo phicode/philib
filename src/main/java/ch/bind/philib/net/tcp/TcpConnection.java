@@ -39,6 +39,7 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public final class TcpConnection extends SelectableBase implements Connection {
 
+	private static final int MAX_NONBLOCK_WRITE_IN_RECEIVE = 8192;
 	// private static final boolean doWriteTimings = false;
 	private static final boolean doWriteTimings = true;
 	private static final boolean doReadTimings = true;
@@ -63,9 +64,9 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 	private Thread dispatcherThread;
 
-	// private AtomicInteger writeWhileReading = new AtomicInteger(0);
+	private AtomicInteger writeWhileReading = new AtomicInteger(0);
 
-	// private AtomicBoolean reading = new AtomicBoolean(false);
+	private AtomicBoolean reading = new AtomicBoolean(false);
 
 	private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
 		SimpleValidation.notNull(context);
@@ -159,11 +160,10 @@ public final class TcpConnection extends SelectableBase implements Connection {
 	private boolean doRead() {
 		// TODO: implement
 		// read as much data as possible
-		// if (reading.compareAndSet(false, true)) {
-		// writeWhileReading.set(0);
-		// try {
-		while (true) {
+		if (reading.compareAndSet(false, true)) {
+			writeWhileReading.set(0);
 			try {
+				// while (true) {
 				final ByteBuffer rbuf = getBuffer();
 				// TODO: move the clear to the buffer cache
 				// implementation
@@ -194,21 +194,21 @@ public final class TcpConnection extends SelectableBase implements Connection {
 					assert (num == rbuf.remaining());
 					session.receive(rbuf);
 				}
+				// }
 			} catch (IOException e) {
 				// TODO: handle
 				// e.printStackTrace();
 				System.out.println("closed stream detected in tcp-connection doRead: " + e.getMessage());
 				return true;
 			}
+			//
+			finally {
+				reading.set(false);
+			}
+		} else {
+			System.out.println("WARNING: more then one read dispatcher at the same time????");
 		}
-		// } finally {
-		// reading.set(false);
-		// }
-		// }
-		// else {
-		// System.out.println("WARNING: more then one read dispatcher at the same time????");
-		// }
-		// return false;
+		return false;
 	}
 
 	@Override
@@ -217,20 +217,20 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 		// we want to limit the amount of data that can be sent in response to a
 		// read
-		// boolean isReading = reading.get();
-		// if (isReading) {
-		// if (writeWhileReading.get() > MAX_NONBLOCK_WRITE_IN_RECEIVE) {
-		// return 0;
-		// }
-		// }
+		boolean isReading = reading.get();
+		if (isReading) {
+			if (writeWhileReading.get() > MAX_NONBLOCK_WRITE_IN_RECEIVE) {
+				return 0;
+			}
+		}
 
 		// if (writeState.compareAndSet(WRITESTATE_NO_WRITE,
 		// WRITESTATE_NONBLOCK_WRITE)) {
 		// try {
 		int num = sendNonBlocking(data);
-		// if (isReading) {
-		// writeWhileReading.addAndGet(num);
-		// }
+		if (isReading) {
+			writeWhileReading.addAndGet(num);
+		}
 		return num;
 		// } finally {
 		// boolean ok = writeState.compareAndSet(WRITESTATE_NONBLOCK_WRITE,
