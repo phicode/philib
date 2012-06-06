@@ -39,8 +39,8 @@ public final class TcpNetFactory implements NetFactory {
 
 	@Override
 	public Connection openClient(SocketAddress endpoint) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO
+		throw new UnsupportedOperationException("TODO");
 	}
 
 	@Override
