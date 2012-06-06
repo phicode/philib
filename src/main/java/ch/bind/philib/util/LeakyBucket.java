@@ -27,14 +27,14 @@ public final class LeakyBucket {
 
     private final long capacity;
 
-    private final long releaseIntervalNano;
+    private final long releaseIntervalNs;
 
-    private long lastReleaseNano;
+    private long lastReleaseNs;
 
-    private long currentCapacity;
+    private long numLeases;
 
-    private LeakyBucket(long releaseIntervalNano, long capacity) {
-        this.releaseIntervalNano = releaseIntervalNano;
+    private LeakyBucket(long releaseIntervalNs, long capacity) {
+        this.releaseIntervalNs = releaseIntervalNs;
         this.capacity = capacity;
     }
 
@@ -64,32 +64,32 @@ public final class LeakyBucket {
         acquire(amount, System.nanoTime());
     }
 
-    public void acquire(long amount, long timeNano) {
-        recalc(timeNano);
-        currentCapacity -= amount;
+    public void acquire(long amount, long timeNs) {
+        recalc(timeNs);
+        numLeases -= amount;
     }
 
     public long available() {
         return available(System.nanoTime());
     }
 
-    public long available(long timeNano) {
-        recalc(timeNano);
-        return currentCapacity;
+    public long available(long timeNs) {
+        recalc(timeNs);
+        return numLeases;
     }
 
     public long nextAvailableNano() {
         return nextAvailableNano(System.nanoTime());
     }
 
-    public long nextAvailableNano(long timeNano) {
-        recalc(timeNano);
-        if (currentCapacity > 0) {
+    public long nextAvailableNano(long timeNs) {
+        recalc(timeNs);
+        if (numLeases > 0) {
             // available immediately
             return 0;
         } else {
-            long nextAvailNano = lastReleaseNano + releaseIntervalNano;
-            return nextAvailNano - timeNano;
+            long nextAvailNano = lastReleaseNs + releaseIntervalNs;
+            return nextAvailNano - timeNs;
         }
     }
 
@@ -103,22 +103,22 @@ public final class LeakyBucket {
         }
     }
 
-    private void recalc(final long timeNano) {
-        if (timeNano < lastReleaseNano) {
+    private void recalc(final long timeNs) {
+        if (timeNs < lastReleaseNs) {
             // it seems that someone adjusted his clock backwards
-            lastReleaseNano = timeNano;
+            lastReleaseNs = timeNs;
         } else {
-            long elapsedNano = timeNano - lastReleaseNano;
-            long numRelease = elapsedNano / releaseIntervalNano;
-            long newVal = currentCapacity + numRelease;
+            long elapsedNs = timeNs - lastReleaseNs;
+            long numRelease = elapsedNs / releaseIntervalNs;
+            long newLeases = numLeases + numRelease;
 
             // dont go over the limit
-            if (newVal > capacity) {
-                currentCapacity = capacity;
-                lastReleaseNano = timeNano;
+            if (newLeases > capacity) {
+                numLeases = capacity;
+                lastReleaseNs = timeNs;
             } else {
-                currentCapacity = newVal;
-                lastReleaseNano += (numRelease * releaseIntervalNano);
+                numLeases = newLeases;
+                lastReleaseNs += (numRelease * releaseIntervalNs);
             }
         }
     }

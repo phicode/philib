@@ -102,7 +102,8 @@ public class LeakyBucketTest {
 				assertEquals(nextAvail, 0); // available now
 				bc.acquire(a, time);
 				moreAcquired += a;
-			} else {
+			}
+			else {
 				assertTrue(nextAvail > 0);
 			}
 		}
@@ -119,6 +120,7 @@ public class LeakyBucketTest {
 
 	@Test
 	public void exactRelease() {
+		final long tStart = System.nanoTime();
 		long intervalNs = 100 * 1000000L; // 100ms
 		long i3 = intervalNs * 3;
 		long i4 = intervalNs * 4;
@@ -138,5 +140,6 @@ public class LeakyBucketTest {
 		}
 		assertTrue(bc.available(i4 + 1) == 1);
 		assertTrue(bc.nextAvailableNano(i4 + 1) == 0);
+		System.out.printf("time for exact-release: %.9fsec%n", ((System.nanoTime() - tStart) / 1000000000f));
 	}
 }
