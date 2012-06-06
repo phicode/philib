@@ -39,10 +39,8 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public final class TcpConnection extends SelectableBase implements Connection {
 
-	// private static final int MAX_NONBLOCK_WRITE_IN_RECEIVE = 16384;
-	// private static final int MAX_NONBLOCK_WRITE_IN_RECEIVE = 16384 * 16384;
-
 	private static final boolean doWriteTimings = false;
+	// private static final boolean doWriteTimings = true;
 
 	private final SocketChannel channel;
 
@@ -176,13 +174,11 @@ public final class TcpConnection extends SelectableBase implements Connection {
 					// connection closed
 					releaseBuffer(rbuf);
 					return true;
-				}
-				else if (num == 0) {
+				} else if (num == 0) {
 					// no more data to read
 					releaseBuffer(rbuf);
 					return false;
-				}
-				else {
+				} else {
 					rbuf.flip();
 					assert (num == rbuf.limit());
 					assert (num == rbuf.remaining());
@@ -211,12 +207,12 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 		// we want to limit the amount of data that can be sent in response to a
 		// read
-//		boolean isReading = reading.get();
-//		if (isReading) {
-//			if (writeWhileReading.get() > MAX_NONBLOCK_WRITE_IN_RECEIVE) {
-//				return 0;
-//			}
-//		}
+		// boolean isReading = reading.get();
+		// if (isReading) {
+		// if (writeWhileReading.get() > MAX_NONBLOCK_WRITE_IN_RECEIVE) {
+		// return 0;
+		// }
+		// }
 
 		// if (writeState.compareAndSet(WRITESTATE_NO_WRITE,
 		// WRITESTATE_NONBLOCK_WRITE)) {
@@ -301,15 +297,14 @@ public final class TcpConnection extends SelectableBase implements Connection {
 			num = channel.write(data);
 			long endNs = System.nanoTime();
 			long t = endNs - startNs;
-			// 3ms
-			if (t > 3000000L) {
+			// 5ms
+			if (t > 5000000L) {
 				System.out.printf("channel.write took %dns, %fms%n", t, (t / 1000000f));
 			}
 			// if (num < wlen) {
 			// registerForWrite();
 			// }
-		}
-		else {
+		} else {
 			num = channel.write(data);
 		}
 		return num;

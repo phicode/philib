@@ -23,14 +23,8 @@ public class EchoSession extends PureSessionBase {
 		lastInteractionNs = System.nanoTime();
 		try {
 			rx.addAndGet(data.remaining());
-			ByteBuffer pending = pendingWrites.poll();
-			if (pending == null) {
-				pending = data;
-			}
-			else {
-				pendingWrites.addBack(data);
-			}
-			int numGoodSends = 0;
+			ByteBuffer pending = pendingWrites.pollNext(data);
+//			int numGoodSends = 0;
 			while (pending != null) {
 				int rem = pending.remaining();
 				SimpleValidation.isTrue(rem > 0);
@@ -42,13 +36,13 @@ public class EchoSession extends PureSessionBase {
 					pendingWrites.addFront(pending);
 					break;
 				}
-				numGoodSends++;
+//				numGoodSends++;
 				releaseBuffer(pending);
 				pending = pendingWrites.poll();
 			}
-			if (numGoodSends > 1) {
-				System.out.println("good sends: " + numGoodSends);
-			}
+//			if (numGoodSends > 1) {
+//				System.out.println("good sends: " + numGoodSends);
+//			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			try {
