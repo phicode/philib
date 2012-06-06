@@ -28,7 +28,6 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import ch.bind.philib.io.Ring;
 import ch.bind.philib.net.Connection;
@@ -40,7 +39,8 @@ import ch.bind.philib.validation.SimpleValidation;
 
 public final class TcpConnection extends SelectableBase implements Connection {
 
-	private static final int MAX_NONBLOCK_WRITE_IN_RECEIVE = 16384;
+	// private static final int MAX_NONBLOCK_WRITE_IN_RECEIVE = 16384;
+	// private static final int MAX_NONBLOCK_WRITE_IN_RECEIVE = 16384 * 16384;
 
 	private static final boolean doWriteTimings = false;
 
@@ -50,23 +50,24 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 	private final PureSession session;
 
-	private static final int WRITESTATE_FREE = 0;
-
-	private static final int WRITESTATE_READING = 1;
-
-	private static final int WRITESTATE_WRITE_WHILE_READ = 2;
+	// private static final int WRITESTATE_FREE = 0;
+	//
+	// private static final int WRITESTATE_READING = 1;
+	//
+	// private static final int WRITESTATE_WRITE_WHILE_READ = 2;
 
 	private final Ring<ByteBuffer> writeQueue = new Ring<ByteBuffer>();
 
 	private boolean registeredForWrite = false;
 
-	private final AtomicReference<Integer> writeState = new AtomicReference<Integer>(WRITESTATE_FREE);
+	// private final AtomicReference<Integer> writeState = new
+	// AtomicReference<Integer>(WRITESTATE_FREE);
 
 	private Thread dispatcherThread;
 
-	private AtomicInteger writeWhileReading = new AtomicInteger(0);
+	// private AtomicInteger writeWhileReading = new AtomicInteger(0);
 
-	private AtomicBoolean reading = new AtomicBoolean(false);
+	// private AtomicBoolean reading = new AtomicBoolean(false);
 
 	private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
 		SimpleValidation.notNull(context);
@@ -160,70 +161,82 @@ public final class TcpConnection extends SelectableBase implements Connection {
 	private boolean doRead() {
 		// TODO: implement
 		// read as much data as possible
-		if (reading.compareAndSet(false, true)) {
-			writeWhileReading.set(0);
+		// if (reading.compareAndSet(false, true)) {
+		// writeWhileReading.set(0);
+		// try {
+		while (true) {
 			try {
-				while (true) {
-					try {
-						final ByteBuffer rbuf = getBuffer();
-						// TODO: move the clear to the buffer cache
-						// implementation
-						rbuf.clear();
-						// int num = BufferOps.readIntoBuffer(channel, rbuf);
-						int num = channel.read(rbuf);
-						if (num == -1) {
-							// connection closed
-							releaseBuffer(rbuf);
-							return true;
-						}
-						else if (num == 0) {
-							// no more data to read
-							releaseBuffer(rbuf);
-							return false;
-						}
-						else {
-							rbuf.flip();
-							assert (num == rbuf.limit());
-							assert (num == rbuf.remaining());
-							session.receive(rbuf);
-						}
-					} catch (IOException e) {
-						// TODO: handle
-						// e.printStackTrace();
-						System.out.println("closed stream detected in tcp-connection doRead: " + e.getMessage());
-						return true;
-					}
+				final ByteBuffer rbuf = getBuffer();
+				// TODO: move the clear to the buffer cache
+				// implementation
+				rbuf.clear();
+				// int num = BufferOps.readIntoBuffer(channel, rbuf);
+				int num = channel.read(rbuf);
+				if (num == -1) {
+					// connection closed
+					releaseBuffer(rbuf);
+					return true;
 				}
-			} finally {
-				reading.set(false);
+				else if (num == 0) {
+					// no more data to read
+					releaseBuffer(rbuf);
+					return false;
+				}
+				else {
+					rbuf.flip();
+					assert (num == rbuf.limit());
+					assert (num == rbuf.remaining());
+					session.receive(rbuf);
+				}
+			} catch (IOException e) {
+				// TODO: handle
+				// e.printStackTrace();
+				System.out.println("closed stream detected in tcp-connection doRead: " + e.getMessage());
+				return true;
 			}
 		}
+		// } finally {
+		// reading.set(false);
+		// }
+		// }
+		// else {
+		// System.out.println("WARNING: more then one read dispatcher at the same time????");
+		// }
+		// return false;
 	}
 
 	@Override
 	public int send(ByteBuffer data) throws IOException {
 		SimpleValidation.notNull(data);
 
-		// we want to limit the amount of data that can be sent in response to a read
-		if (reading.get() == true) {
-			if (writeWhileReading.get() > MAX_NONBLOCK_WRITE_IN_RECEIVE) {
-				return 0;
-			}
-		}
-		
-		if (writeState.compareAndSet(WRITESTATE_NO_WRITE, WRITESTATE_NONBLOCK_WRITE)) {
-			try {
-				return sendNonBlocking(data);
-			} finally {
-				boolean ok = writeState.compareAndSet(WRITESTATE_NONBLOCK_WRITE, WRITESTATE_NO_WRITE);
-				// TODO: SimpleValidation.isTrue => assert
-				SimpleValidation.isTrue(ok);
-			}
-		}
-		else {
-			// someone else is writing
-			return 0;
-		}
+		// we want to limit the amount of data that can be sent in response to a
+		// read
+//		boolean isReading = reading.get();
+//		if (isReading) {
+//			if (writeWhileReading.get() > MAX_NONBLOCK_WRITE_IN_RECEIVE) {
+//				return 0;
+//			}
+//		}
+
+		// if (writeState.compareAndSet(WRITESTATE_NO_WRITE,
+		// WRITESTATE_NONBLOCK_WRITE)) {
+		// try {
+		int num = sendNonBlocking(data);
+		// if (isReading) {
+		// writeWhileReading.addAndGet(num);
+		// }
+		return num;
+		// } finally {
+		// boolean ok = writeState.compareAndSet(WRITESTATE_NONBLOCK_WRITE,
+		// WRITESTATE_NO_WRITE);
+		// TODO: SimpleValidation.isTrue => assert
+		// SimpleValidation.isTrue(ok);
+		// }
+		// }
+		// else {
+		// // someone else is writing
+		// return 0;
+		// }
 
 		// synchronized (writeLock) {
 		// // if (writeState == WriteState.WRITE_DIRECTLY) {

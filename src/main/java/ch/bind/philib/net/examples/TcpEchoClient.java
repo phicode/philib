@@ -34,7 +34,7 @@ import ch.bind.philib.net.tcp.TcpConnection;
 //TODO: reply data validation
 //TODO: speed measurements
 //TODO: many threads
-public class TcpEchoClient extends PureSessionBase {
+public class TcpEchoClient {
 
 	private TcpConnection connection;
 
@@ -47,14 +47,14 @@ public class TcpEchoClient extends PureSessionBase {
 		// 1234);
 		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221",
 		// 1234);
+
+		byte[] buf = new byte[8 * 1024];
+		new Random().nextBytes(buf);
+		ByteBuffer seedBuffer = ByteBuffer.wrap(buf);
+
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 		EchoSession session = new EchoSession();
 		connection = TcpConnection.open(endpoint, session);
-
-		// byte[] buf = new byte[32 * 1024];
-		// byte[] buf = new byte[128 * 1024];
-		byte[] buf = new byte[512 * 1024];
-		new Random().nextBytes(buf);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -68,13 +68,16 @@ public class TcpEchoClient extends PureSessionBase {
 			}
 		});
 
-		long start = System.currentTimeMillis();
-		ByteBuffer bb = ByteBuffer.wrap(buf);
 		long lastT = System.currentTimeMillis();
-		connection.sendBlocking(bb);
+		connection.sendBlocking(seedBuffer);
+		long seeded = seedBuffer.capacity();
 		int loop = 1;
 		long lastRx = 0, lastTx = 0;
+		final long start = System.currentTimeMillis();
 		while (connection.isConnected()) {
+			long sleepUntil = start + (loop * 10000L);
+			ThreadUtil.sleepUntilMs(sleepUntil);
+
 			long rx = session.getRx();
 			long tx = session.getTx();
 			long rxDiff = rx - lastRx;
@@ -83,25 +86,18 @@ public class TcpEchoClient extends PureSessionBase {
 			long tDiff = now - lastT;
 			double rxMbPerSec = (rxDiff / (1024f * 1024f)) / (tDiff / 1000f);
 			double txMbPerSec = (txDiff / (1024f * 1024f)) / (tDiff / 1000f);
-			System.out.printf("total=%d in %d ms; last 5sec rx=%d, tx=%d bytes => %.3f %.3f mb/sec%n", //
-					(rx + tx), (now - start), rxDiff, txDiff, rxMbPerSec, txMbPerSec);
-			long sleepUntil = start + (loop * 5000L);
-			ThreadUtil.sleepUntilMs(sleepUntil);
+			System.out.printf("seeded=%d total=%d in %d ms; last 5sec rx=%d, tx=%d bytes => %.3f %.3f mb/sec%n", //
+					seeded, (rx + tx), (now - start), rxDiff, txDiff, rxMbPerSec, txMbPerSec);
+			if (seeded < 128 * 1024) {
+				System.out.println("seeding an additional " + seedBuffer.capacity() + " bytes into the echo chain");
+				seedBuffer.rewind();
+				connection.sendBlocking(seedBuffer);
+				seeded += seedBuffer.capacity();
+			}
 			loop++;
 			lastRx = rx;
 			lastTx = tx;
 			lastT = now;
 		}
-	}
-
-	@Override
-	public void receive(ByteBuffer data) {
-
-	}
-
-	@Override
-	public void closed() {
-		// TODO Auto-generated method stub
-		System.out.println("closed!");
 	}
 }
