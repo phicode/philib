@@ -94,6 +94,9 @@ public class TcpEchoClient {
 				connection.sendBlocking(seedBuffer);
 				seeded += seedBuffer.capacity();
 			}
+			if (rxDiff == 0 || txDiff == 0) {
+				session.forceWrite();
+			}
 			loop++;
 			lastRx = rx;
 			lastTx = tx;
