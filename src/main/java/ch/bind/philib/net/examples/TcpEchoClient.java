@@ -75,7 +75,7 @@ public class TcpEchoClient {
 		long lastRx = 0, lastTx = 0;
 		final long start = System.currentTimeMillis();
 		while (connection.isConnected()) {
-			long sleepUntil = start + (loop * 10000L);
+			long sleepUntil = start + (loop * 30000L);
 			ThreadUtil.sleepUntilMs(sleepUntil);
 
 			long rx = session.getRx();
