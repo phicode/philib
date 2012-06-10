@@ -23,7 +23,7 @@ package ch.bind.philib.lang;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import ch.bind.philib.validation.SimpleValidation;
+import ch.bind.philib.validation.Validation;
 
 public final class ThreadUtil {
 
@@ -75,7 +75,7 @@ public final class ThreadUtil {
 
 	// TODO: documentation
 	public static Thread runForever(Runnable runnable) {
-		SimpleValidation.notNull(runnable);
+		Validation.notNull(runnable);
 		String threadName = String.format(FOREVER_RUNNER_NAME_FMT, //
 				ForeverRunner.class.getSimpleName(), runnable.getClass().getSimpleName(), FOREVER_RUNNER_SEQ.getAndIncrement());
 		return runForever(runnable, threadName);
@@ -94,8 +94,8 @@ public final class ThreadUtil {
 
 	// TODO: documentation
 	public static Thread runForever(ThreadGroup group, Runnable runnable, String threadName, long stackSize) {
-		SimpleValidation.notNull(runnable);
-		SimpleValidation.notNull(threadName);
+		Validation.notNull(runnable);
+		Validation.notNull(threadName);
 		ForeverRunner runner = new ForeverRunner(threadName, runnable);
 		Thread t = new Thread(group, runner, threadName, stackSize);
 		t.start();

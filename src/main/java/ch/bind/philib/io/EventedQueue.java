@@ -24,7 +24,7 @@ package ch.bind.philib.io;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
-import ch.bind.philib.validation.SimpleValidation;
+import ch.bind.philib.validation.Validation;
 
 /**
  * An evented queue.
@@ -40,7 +40,7 @@ public final class EventedQueue<E> {
 	}
 
 	public EventedQueue(Queue<E> queue) {
-		SimpleValidation.notNull(queue);
+		Validation.notNull(queue);
 		this.sem = new Semaphore(0);
 		this.queue = queue;
 	}

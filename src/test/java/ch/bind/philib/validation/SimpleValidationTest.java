@@ -31,19 +31,19 @@ public class SimpleValidationTest {
     @Test
     public void isFalse() {
         try {
-            SimpleValidation.isFalse(false);
-            SimpleValidation.isFalse(false, "foo");
+            Validation.isFalse(false);
+            Validation.isFalse(false, "foo");
         } catch (IllegalArgumentException e) {
             fail("should not throw");
         }
         try {
-            SimpleValidation.isFalse(true);
+            Validation.isFalse(true);
             fail("should throw");
         } catch (IllegalArgumentException e) {
             // expected
         }
         try {
-            SimpleValidation.isFalse(true, "foo");
+            Validation.isFalse(true, "foo");
             fail("should throw");
         } catch (IllegalArgumentException e) {
             // expected
@@ -53,19 +53,19 @@ public class SimpleValidationTest {
     @Test
     public void isTrue() {
         try {
-            SimpleValidation.isTrue(true);
-            SimpleValidation.isTrue(true, "foo");
+            Validation.isTrue(true);
+            Validation.isTrue(true, "foo");
         } catch (IllegalArgumentException e) {
             fail("should not throw");
         }
         try {
-            SimpleValidation.isTrue(false);
+            Validation.isTrue(false);
             fail("should throw");
         } catch (IllegalArgumentException e) {
             // expected
         }
         try {
-            SimpleValidation.isTrue(false, "foo");
+            Validation.isTrue(false, "foo");
             fail("should throw");
         } catch (IllegalArgumentException e) {
             // expected
@@ -75,28 +75,28 @@ public class SimpleValidationTest {
     @Test
     public void notNegative() {
         try {
-            SimpleValidation.notNegative(0);
-            SimpleValidation.notNegative(0, "foo");
+            Validation.notNegative(0);
+            Validation.notNegative(0, "foo");
 
-            SimpleValidation.notNegative(0L);
-            SimpleValidation.notNegative(0L, "foo");
+            Validation.notNegative(0L);
+            Validation.notNegative(0L, "foo");
 
-            SimpleValidation.notNegative(Integer.MAX_VALUE);
-            SimpleValidation.notNegative(Integer.MAX_VALUE, "foo");
+            Validation.notNegative(Integer.MAX_VALUE);
+            Validation.notNegative(Integer.MAX_VALUE, "foo");
 
-            SimpleValidation.notNegative(Long.MAX_VALUE);
-            SimpleValidation.notNegative(Long.MAX_VALUE, "foo");
+            Validation.notNegative(Long.MAX_VALUE);
+            Validation.notNegative(Long.MAX_VALUE, "foo");
         } catch (IllegalArgumentException e) {
             fail("should not throw");
         }
         try {
-            SimpleValidation.notNegative(-1);
+            Validation.notNegative(-1);
             fail("should throw");
         } catch (IllegalArgumentException e) {
             // expected
         }
         try {
-            SimpleValidation.notNegative(-1, "foo");
+            Validation.notNegative(-1, "foo");
             fail("should throw");
         } catch (IllegalArgumentException e) {
             // expected
@@ -106,19 +106,19 @@ public class SimpleValidationTest {
     @Test
     public void notNull() {
         try {
-            SimpleValidation.notNull("");
-            SimpleValidation.notNull("", "foo");
+            Validation.notNull("");
+            Validation.notNull("", "foo");
         } catch (IllegalArgumentException e) {
             fail("should not throw");
         }
         try {
-            SimpleValidation.notNull(null);
+            Validation.notNull(null);
             fail("should throw");
         } catch (IllegalArgumentException e) {
             // expected
         }
         try {
-            SimpleValidation.notNull(null, "foo");
+            Validation.notNull(null, "foo");
             fail("should throw");
         } catch (IllegalArgumentException e) {
             // expected

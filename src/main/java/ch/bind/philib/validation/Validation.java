@@ -22,9 +22,9 @@
 
 package ch.bind.philib.validation;
 
-public final class SimpleValidation {
+public final class Validation {
 
-	private SimpleValidation() {
+	private Validation() {
 	}
 
 	public static void notNegative(int value) {

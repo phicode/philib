@@ -19,7 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.sel;
+package ch.bind.philib.net.events;
 
 import static ch.bind.philib.io.BitOps.checkMask;
 
@@ -38,7 +38,7 @@ import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
 
 // TODO: thread safe
-public final class SimpleNetSelector implements NetSelector {
+public final class SimpleEventDispatcher implements EventDispatcher {
 
 	private static final AtomicLong NAME_SEQ = new AtomicLong(0);
 
@@ -50,14 +50,14 @@ public final class SimpleNetSelector implements NetSelector {
 
 	private volatile Thread thread;
 
-	private SimpleNetSelector(Selector selector) throws IOException {
+	private SimpleEventDispatcher(Selector selector) throws IOException {
 		this.selector = selector;
 	}
 
-	public static NetSelector open() throws IOException {
+	public static EventDispatcher open() throws IOException {
 		Selector selector = Selector.open();
-		SimpleNetSelector rv = new SimpleNetSelector(selector);
-		String threadName = SimpleNetSelector.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
+		SimpleEventDispatcher rv = new SimpleEventDispatcher(selector);
+		String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
 		rv.thread = ThreadUtil.runForever(rv, threadName);
 		return rv;
 	}
@@ -113,7 +113,7 @@ public final class SimpleNetSelector implements NetSelector {
 	private void updateRegistrations() {
 		NewRegistration reg = newRegistrations.poll();
 		while (reg != null) {
-			Selectable selectable = reg.getSelectable();
+			EventHandler selectable = reg.getSelectable();
 			SelectableChannel channel = selectable.getChannel();
 			int ops = reg.getOps();
 			try {
@@ -143,7 +143,7 @@ public final class SimpleNetSelector implements NetSelector {
 	}
 
 	private void handleReadyKey(final Thread thread, final SelectionKey key) {
-		Selectable selectable = (Selectable) key.attachment();
+		EventHandler selectable = (EventHandler) key.attachment();
 		if (selectable == null) {
 			// canceled key
 			return;
@@ -151,16 +151,16 @@ public final class SimpleNetSelector implements NetSelector {
 		int readyOps = key.readyOps();
 		boolean closed = false;
 		try {
-			if (checkMask(readyOps, SelUtil.READ)) {
+			if (checkMask(readyOps, EventUtil.READ)) {
 				closed = selectable.handleRead(thread);
 			}
-			if (!closed && checkMask(readyOps, SelUtil.WRITE)) {
+			if (!closed && checkMask(readyOps, EventUtil.WRITE)) {
 				closed = selectable.handleWrite();
 			}
-			if (!closed && checkMask(readyOps, SelUtil.ACCEPT)) {
+			if (!closed && checkMask(readyOps, EventUtil.ACCEPT)) {
 				closed = selectable.handleAccept();
 			}
-			if (!closed && checkMask(readyOps, SelUtil.CONNECT)) {
+			if (!closed && checkMask(readyOps, EventUtil.CONNECT)) {
 				closed = selectable.handleConnect();
 			}
 		} catch (Exception e) {
@@ -178,7 +178,7 @@ public final class SimpleNetSelector implements NetSelector {
 	}
 
 	@Override
-	public void register(Selectable selectable, int ops) {
+	public void register(EventHandler selectable, int ops) {
 		newRegistrations.add(new NewRegistration(selectable, ops));
 		wakeup();
 	}
@@ -190,7 +190,7 @@ public final class SimpleNetSelector implements NetSelector {
 	}
 
 	@Override
-	public void reRegister(Selectable selectable, int ops, boolean asap) {
+	public void reRegister(EventHandler selectable, int ops, boolean asap) {
 		SelectableChannel channel = selectable.getChannel();
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
@@ -204,7 +204,7 @@ public final class SimpleNetSelector implements NetSelector {
 	}
 
 	@Override
-	public void unregister(Selectable selectable) {
+	public void unregister(EventHandler selectable) {
 		SelectableChannel channel = selectable.getChannel();
 		SelectionKey key = channel.keyFor(selector);
 		if (key != null) {
@@ -219,16 +219,16 @@ public final class SimpleNetSelector implements NetSelector {
 
 	private static final class NewRegistration {
 
-		final Selectable selectable;
+		final EventHandler selectable;
 
 		final int ops;
 
-		private NewRegistration(Selectable selectable, int ops) {
+		private NewRegistration(EventHandler selectable, int ops) {
 			this.selectable = selectable;
 			this.ops = ops;
 		}
 
-		public Selectable getSelectable() {
+		public EventHandler getSelectable() {
 			return selectable;
 		}
 

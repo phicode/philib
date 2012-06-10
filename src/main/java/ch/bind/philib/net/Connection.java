@@ -25,9 +25,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import ch.bind.philib.net.sel.Selectable;
+import ch.bind.philib.net.events.EventHandler;
 
-public interface Connection extends Closeable, Selectable {
+public interface Connection extends Closeable, EventHandler {
 
 	int send(ByteBuffer data) throws IOException;
 

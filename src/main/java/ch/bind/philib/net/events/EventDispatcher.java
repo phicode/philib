@@ -19,15 +19,16 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net;
+package ch.bind.philib.net.events;
 
 import java.io.Closeable;
 
-import ch.bind.philib.net.events.EventHandler;
+public interface EventDispatcher extends Runnable, Closeable {
 
-public interface NetServer extends Closeable, EventHandler {
+	void register(EventHandler selectable, int ops);
 
-	int getActiveSessionCount();
-	
-	NetContext getContext();
+	void reRegister(EventHandler selectable, int ops, boolean asap);
+
+	void unregister(EventHandler selectable);
+
 }

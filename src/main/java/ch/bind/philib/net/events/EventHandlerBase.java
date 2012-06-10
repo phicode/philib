@@ -1,6 +1,6 @@
-package ch.bind.philib.net.sel;
+package ch.bind.philib.net.events;
 
-public abstract class SelectableBase implements Selectable {
+public abstract class EventHandlerBase implements EventHandler {
 
 	@Override
 	public boolean handleRead(Thread thread) {

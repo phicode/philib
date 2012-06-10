@@ -1,4 +1,4 @@
-
+rename all "selectable" to "event-handler" specific names
 
 
 PRIO TASK
@@ -17,3 +17,42 @@ bitstream codec
 is the memcached protocol documentation license MIT compatible ? (protocol.txt)
 
 murmur hashing algorithm
+
+journal file
+	
+	long commit(byte[] data)
+	long commit(List<byte[]> data)
+	long commit(byte[][] data);
+	  ^
+	  |
+	  +---- corellation-id
+	on listener:
+	commited(long correlationId)
+	commited(long startCid, long endCid)
+	
+
+EventHandler
+	add writeBacklog (ringQueue)
+
+sendBlocking
+- not on event-dispatcher-thread
+- add to end of writeBacklog
+- write as many non-blocking as possible -> then register for write
+- wait on specific (!!!) write-complete event
+
+nonBlockingWriteAsMuchAsPossible
+- add to end of writeBacklog
+- write as much as possible
+- if writeBacklog.isEmpty and registered-for-write: unregister
+- if writeBacklog.isNotEmpty and not-registered for write: register
+- wakeup event-dispatcher if: new registered-for-write not on dispatcher-thread
+- writeBacklog.shrink() !
+- return value boolean: more write possible or waiting for write
+
+connection
+- getWriteBacklog: long (in bytes)
+- isWriteableNow() -> we can write non-blocking without further filling up the writeBacklog
+
+TODO: precise buffer management: release where?
+
+

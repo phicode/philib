@@ -19,16 +19,23 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.sel;
+package ch.bind.philib.net.events;
 
 import java.io.Closeable;
+import java.nio.channels.SelectableChannel;
 
-public interface NetSelector extends Runnable, Closeable {
+public interface EventHandler extends Closeable {
 
-	void register(Selectable selectable, int ops);
+	SelectableChannel getChannel();
 
-	void reRegister(Selectable selectable, int ops, boolean asap);
+	boolean handleRead(Thread thread);
 
-	void unregister(Selectable selectable);
+	boolean handleWrite();
+
+	boolean handleAccept();
+
+	boolean handleConnect();
+
+	void closed();
 
 }

@@ -32,11 +32,11 @@ import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.PureSession;
 import ch.bind.philib.net.SessionFactory;
-import ch.bind.philib.net.sel.SelUtil;
-import ch.bind.philib.net.sel.SelectableBase;
-import ch.bind.philib.validation.SimpleValidation;
+import ch.bind.philib.net.events.EventHandlerBase;
+import ch.bind.philib.net.events.EventUtil;
+import ch.bind.philib.validation.Validation;
 
-public class TcpServer extends SelectableBase implements NetServer {
+public class TcpServer extends EventHandlerBase implements NetServer {
 
 	// TODO: configurable
 	private static final int DEFAULT_BACKLOG = 25;
@@ -48,9 +48,9 @@ public class TcpServer extends SelectableBase implements NetServer {
 	private final ServerSocketChannel channel;
 
 	TcpServer(NetContext context, SessionFactory sessionFactory, ServerSocketChannel channel) {
-		SimpleValidation.notNull(context);
-		SimpleValidation.notNull(sessionFactory);
-		SimpleValidation.notNull(channel);
+		Validation.notNull(context);
+		Validation.notNull(sessionFactory);
+		Validation.notNull(channel);
 		this.context = context;
 		this.sessionFactory = sessionFactory;
 		this.channel = channel;
@@ -66,7 +66,7 @@ public class TcpServer extends SelectableBase implements NetServer {
 		System.out.println("listening on: " + bindAddress);
 
 		TcpServer server = new TcpServer(context, sessionFactory, channel);
-		context.getNetSelector().register(server, SelUtil.ACCEPT);
+		context.getNetSelector().register(server, EventUtil.ACCEPT);
 		return server;
 	}
 

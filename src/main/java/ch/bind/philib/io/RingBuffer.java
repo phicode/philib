@@ -22,7 +22,7 @@
 
 package ch.bind.philib.io;
 
-import ch.bind.philib.validation.SimpleValidation;
+import ch.bind.philib.validation.Validation;
 
 public final class RingBuffer implements DoubleSidedBuffer {
 
@@ -44,7 +44,7 @@ public final class RingBuffer implements DoubleSidedBuffer {
 	}
 
 	public RingBuffer(int capacity) {
-		SimpleValidation.notNegative(capacity, "capacity must not be negative");
+		Validation.notNegative(capacity, "capacity must not be negative");
 		_init(capacity);
 	}
 

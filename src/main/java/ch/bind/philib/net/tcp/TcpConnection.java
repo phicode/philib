@@ -33,11 +33,11 @@ import ch.bind.philib.io.Ring;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.PureSession;
-import ch.bind.philib.net.sel.SelUtil;
-import ch.bind.philib.net.sel.SelectableBase;
-import ch.bind.philib.validation.SimpleValidation;
+import ch.bind.philib.net.events.EventHandlerBase;
+import ch.bind.philib.net.events.EventUtil;
+import ch.bind.philib.validation.Validation;
 
-public final class TcpConnection extends SelectableBase implements Connection {
+public final class TcpConnection extends EventHandlerBase implements Connection {
 
 	private static final int MAX_NONBLOCK_WRITE_IN_RECEIVE = 8192;
 	// private static final boolean doWriteTimings = false;
@@ -69,9 +69,9 @@ public final class TcpConnection extends SelectableBase implements Connection {
 	private AtomicBoolean reading = new AtomicBoolean(false);
 
 	private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
-		SimpleValidation.notNull(context);
-		SimpleValidation.notNull(channel);
-		SimpleValidation.notNull(session);
+		Validation.notNull(context);
+		Validation.notNull(channel);
+		Validation.notNull(session);
 		this.context = context;
 		this.channel = channel;
 		this.session = session;
@@ -91,7 +91,7 @@ public final class TcpConnection extends SelectableBase implements Connection {
 	}
 
 	void register() {
-		context.getNetSelector().register(this, SelUtil.READ);
+		context.getNetSelector().register(this, EventUtil.READ);
 	}
 
 	public static TcpConnection open(SocketAddress endpoint, PureSession session) throws IOException {
@@ -213,7 +213,7 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 	@Override
 	public int send(ByteBuffer data) throws IOException {
-		SimpleValidation.notNull(data);
+		Validation.notNull(data);
 
 		// we want to limit the amount of data that can be sent in response to a
 		// read
@@ -261,7 +261,7 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 	@Override
 	public void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
-		SimpleValidation.notNull(data);
+		Validation.notNull(data);
 		if (Thread.currentThread() == dispatcherThread) {
 			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
 		}
@@ -334,6 +334,8 @@ public final class TcpConnection extends SelectableBase implements Connection {
 				}
 				toWrite = writeQueue.poll();
 			}
+			// TODO: notify client code that we can write more stuff
+
 			// the write queue is empty, unregister from write events
 			unregisterForWrite();
 			writeQueue.notifyAll();
@@ -345,14 +347,14 @@ public final class TcpConnection extends SelectableBase implements Connection {
 
 	private void registerForWrite() {
 		if (!registeredForWrite) {
-			context.getNetSelector().reRegister(this, SelUtil.READ_WRITE, true);
+			context.getNetSelector().reRegister(this, EventUtil.READ_WRITE, true);
 			registeredForWrite = true;
 		}
 	}
 
 	private void unregisterForWrite() {
 		if (registeredForWrite) {
-			context.getNetSelector().reRegister(this, SelUtil.READ, false);
+			context.getNetSelector().reRegister(this, EventUtil.READ, false);
 			registeredForWrite = false;
 		}
 	}

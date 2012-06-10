@@ -21,7 +21,7 @@
  */
 package ch.bind.philib.util;
 
-import ch.bind.philib.validation.SimpleValidation;
+import ch.bind.philib.validation.Validation;
 
 public final class LeakyBucket {
 
@@ -44,15 +44,15 @@ public final class LeakyBucket {
 	 * @return
 	 */
 	public static LeakyBucket withReleasePerSecond(double releasePerSecond, long capacity) {
-		SimpleValidation.isTrue(releasePerSecond >= 0.000001, "releasePerSecond must be >= 0.000001");
-		SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
+		Validation.isTrue(releasePerSecond >= 0.000001, "releasePerSecond must be >= 0.000001");
+		Validation.isTrue(capacity >= 1, "capacity must be >= 1");
 		long releaseIntervalNano = (long) Math.ceil(1000000000f / releasePerSecond);
 		return new LeakyBucket(releaseIntervalNano, capacity);
 	}
 
 	public static LeakyBucket withReleaseIntervalNano(long releaseIntervalNano, long capacity) {
-		SimpleValidation.isTrue(releaseIntervalNano > 0, "releaseIntervalNano must be > 0");
-		SimpleValidation.isTrue(capacity >= 1, "capacity must be >= 1");
+		Validation.isTrue(releaseIntervalNano > 0, "releaseIntervalNano must be > 0");
+		Validation.isTrue(capacity >= 1, "capacity must be >= 1");
 		return new LeakyBucket(releaseIntervalNano, capacity);
 	}
 

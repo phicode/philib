@@ -19,23 +19,31 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.sel;
 
-import java.io.Closeable;
+package ch.bind.philib.net.tcp;
+
+import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 
-public interface Selectable extends Closeable {
+import ch.bind.philib.net.events.EventHandlerBase;
 
-	SelectableChannel getChannel();
+public class TcpEventHandler extends EventHandlerBase {
 
-	boolean handleRead(Thread thread);
+	@Override
+	public SelectableChannel getChannel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-	boolean handleWrite();
+	@Override
+	public void closed() {
+		// TODO Auto-generated method stub
+		
+	}
 
-	boolean handleAccept();
-
-	boolean handleConnect();
-
-	void closed();
-
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 }

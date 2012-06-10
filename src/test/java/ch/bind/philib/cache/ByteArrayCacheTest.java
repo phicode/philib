@@ -29,7 +29,7 @@ import java.util.concurrent.Semaphore;
 import org.junit.Test;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.validation.SimpleValidation;
+import ch.bind.philib.validation.Validation;
 
 public class ByteArrayCacheTest {
 
@@ -207,7 +207,7 @@ public class ByteArrayCacheTest {
 		private final int putOps;
 
 		public StressTester(Semaphore ready, Semaphore go, Semaphore end, ByteArrayCache bp, long numOps, int getOps, int putOps) {
-			SimpleValidation.isTrue(getOps >= putOps);
+			Validation.isTrue(getOps >= putOps);
 			this.ready = ready;
 			this.go = go;
 			this.end = end;

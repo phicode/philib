@@ -1,4 +1,4 @@
-package ch.bind.philib.net.sel;
+package ch.bind.philib.net.events;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -7,9 +7,9 @@ import java.nio.channels.SelectionKey;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetContext;
 
-public final class SelUtil {
+public final class EventUtil {
 
-	private SelUtil() {
+	private EventUtil() {
 	}
 
 	public static final int READ = SelectionKey.OP_READ;

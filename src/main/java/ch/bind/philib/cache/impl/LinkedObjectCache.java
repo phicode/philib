@@ -23,7 +23,7 @@ package ch.bind.philib.cache.impl;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import ch.bind.philib.validation.SimpleValidation;
+import ch.bind.philib.validation.Validation;
 
 public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 
@@ -35,7 +35,7 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 	
 	public LinkedObjectCache(ObjectFactory<E> factory, int maxEntries) {
 		super(factory);
-		SimpleValidation.isTrue(maxEntries > 0);
+		Validation.isTrue(maxEntries > 0);
 		this.freeList = new AtomicReference<Node<E>>();
 		this.objList = new AtomicReference<Node<E>>();
 		for (int i = 0; i < maxEntries; i++) {
