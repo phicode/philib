@@ -37,7 +37,7 @@ import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
-public final class TcpConnection extends EventHandlerBase implements Connection {
+public final class TcpConnection  implements Connection {
 
 	private static final int MAX_NONBLOCK_WRITE_IN_RECEIVE = 8192;
 	// private static final boolean doWriteTimings = false;

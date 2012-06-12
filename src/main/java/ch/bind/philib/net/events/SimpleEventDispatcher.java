@@ -103,7 +103,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				if (selMs >= 10005) {
 					System.out.printf("select took %dms, num=%d%n", selMs, num);
 				}
-			} else {
+			}
+			else {
 				num = selector.select(10000L);
 			}
 		} while (num == 0);
@@ -113,12 +114,12 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	private void updateRegistrations() {
 		NewRegistration reg = newRegistrations.poll();
 		while (reg != null) {
-			EventHandler selectable = reg.getSelectable();
-			SelectableChannel channel = selectable.getChannel();
+			EventHandler eventHandler = reg.getEventHandler();
+			SelectableChannel channel = eventHandler.getChannel();
 			int ops = reg.getOps();
 			try {
 				long ts = System.nanoTime();
-				channel.register(selector, ops, selectable);
+				channel.register(selector, ops, eventHandler);
 				long te = System.nanoTime();
 				long t = te - ts;
 				System.out.printf("register took: %dns => %.5fms%n", t, (t / 1000000f));
@@ -143,8 +144,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	private void handleReadyKey(final Thread thread, final SelectionKey key) {
-		EventHandler selectable = (EventHandler) key.attachment();
-		if (selectable == null) {
+		EventHandler eventHandler = (EventHandler) key.attachment();
+		if (eventHandler == null) {
 			// canceled key
 			return;
 		}
@@ -152,24 +153,24 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		boolean closed = false;
 		try {
 			if (checkMask(readyOps, EventUtil.READ)) {
-				closed = selectable.handleRead(thread);
+				closed = eventHandler.handleRead(thread);
 			}
 			if (!closed && checkMask(readyOps, EventUtil.WRITE)) {
-				closed = selectable.handleWrite();
+				closed = eventHandler.handleWrite();
 			}
 			if (!closed && checkMask(readyOps, EventUtil.ACCEPT)) {
-				closed = selectable.handleAccept();
+				closed = eventHandler.handleAccept();
 			}
 			if (!closed && checkMask(readyOps, EventUtil.CONNECT)) {
-				closed = selectable.handleConnect();
+				closed = eventHandler.handleConnect();
 			}
 		} catch (Exception e) {
 			closed = true;
-			System.out.println("selectable.handle*() failed: " + ExceptionUtil.buildMessageChain(e));
+			System.out.println("eventHandler.handle*() failed: " + ExceptionUtil.buildMessageChain(e));
 		}
 		if (closed) {
 			try {
-				selectable.close();
+				eventHandler.close();
 			} catch (Exception e) {
 				System.out.println("exception while closing: " + e.getMessage());
 				e.printStackTrace();
@@ -178,8 +179,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public void register(EventHandler selectable, int ops) {
-		newRegistrations.add(new NewRegistration(selectable, ops));
+	public void register(EventHandler eventHandler, int ops) {
+		newRegistrations.add(new NewRegistration(eventHandler, ops));
 		wakeup();
 	}
 
@@ -190,12 +191,13 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public void reRegister(EventHandler selectable, int ops, boolean asap) {
-		SelectableChannel channel = selectable.getChannel();
+	public void reRegister(EventHandler eventHandler, int ops, boolean asap) {
+		SelectableChannel channel = eventHandler.getChannel();
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
-		} else {
+		}
+		else {
 			key.interestOps(ops);
 		}
 		if (asap) {
@@ -204,32 +206,33 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public void unregister(EventHandler selectable) {
-		SelectableChannel channel = selectable.getChannel();
+	public void unregister(EventHandler eventHandler) {
+		SelectableChannel channel = eventHandler.getChannel();
 		SelectionKey key = channel.keyFor(selector);
 		if (key != null) {
 			key.cancel();
 			key.attach(null);
 			wakeup();
 			System.out.println("unreg, keys: " + selector.keys().size());
-		} else {
+		}
+		else {
 			System.out.println("unreg failed, not registered");
 		}
 	}
 
 	private static final class NewRegistration {
 
-		final EventHandler selectable;
+		final EventHandler eventHandler;
 
 		final int ops;
 
-		private NewRegistration(EventHandler selectable, int ops) {
-			this.selectable = selectable;
+		private NewRegistration(EventHandler eventHandler, int ops) {
+			this.eventHandler = eventHandler;
 			this.ops = ops;
 		}
 
-		public EventHandler getSelectable() {
-			return selectable;
+		public EventHandler getEventHandler() {
+			return eventHandler;
 		}
 
 		public int getOps() {

@@ -25,10 +25,10 @@ import java.io.Closeable;
 
 public interface EventDispatcher extends Runnable, Closeable {
 
-	void register(EventHandler selectable, int ops);
+	void register(EventHandler eventHandler, int ops);
 
-	void reRegister(EventHandler selectable, int ops, boolean asap);
+	void reRegister(EventHandler eventHandler, int ops, boolean asap);
 
-	void unregister(EventHandler selectable);
+	void unregister(EventHandler eventHandler);
 
 }

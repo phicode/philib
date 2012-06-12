@@ -27,7 +27,7 @@ import java.nio.channels.SelectableChannel;
 
 import ch.bind.philib.net.events.EventHandlerBase;
 
-public class TcpEventHandler extends EventHandlerBase {
+class TcpConnectionEventHandler extends EventHandlerBase {
 
 	@Override
 	public SelectableChannel getChannel() {
