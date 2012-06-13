@@ -25,16 +25,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import ch.bind.philib.net.events.EventHandler;
-
-public interface Connection extends Closeable, EventHandler {
+public interface Connection extends Closeable {
 
 	int send(ByteBuffer data) throws IOException;
 
 	void sendBlocking(ByteBuffer data) throws IOException, InterruptedException;
-
-	@Override
-	void closed();
 
 	boolean isConnected();
 

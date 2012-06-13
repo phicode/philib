@@ -31,7 +31,6 @@ public abstract class PureSessionBase implements PureSession {
 	@Override
 	public final void init(Connection connection) {
 		this.connection = connection;
-		System.out.println("initialized!");
 	}
 
 	@Override

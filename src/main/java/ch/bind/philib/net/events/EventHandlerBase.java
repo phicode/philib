@@ -21,25 +21,27 @@
  */
 package ch.bind.philib.net.events;
 
+import java.io.IOException;
+
 public abstract class EventHandlerBase implements EventHandler {
 
 	@Override
-	public boolean handleRead(Thread thread) {
+	public void handleRead(Thread thread) throws IOException {
 		throw new IllegalStateException("unsupported select operation: read");
 	}
 
 	@Override
-	public boolean handleWrite() {
+	public void handleWrite() throws IOException {
 		throw new IllegalStateException("unsupported select operation: write");
 	}
 
 	@Override
-	public boolean handleConnect() {
+	public void handleConnect() throws IOException {
 		throw new IllegalStateException("unsupported select operation: connect");
 	}
 
 	@Override
-	public boolean handleAccept() {
+	public void handleAccept() throws IOException {
 		throw new IllegalStateException("unsupported select operation: accept");
 	}
 }

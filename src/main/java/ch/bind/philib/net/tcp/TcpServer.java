@@ -24,7 +24,6 @@ package ch.bind.philib.net.tcp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
@@ -32,11 +31,10 @@ import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.PureSession;
 import ch.bind.philib.net.SessionFactory;
-import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
-public class TcpServer extends EventHandlerBase implements NetServer {
+public class TcpServer implements NetServer {
 
 	// TODO: configurable
 	private static final int DEFAULT_BACKLOG = 25;
@@ -47,6 +45,8 @@ public class TcpServer extends EventHandlerBase implements NetServer {
 
 	private final ServerSocketChannel channel;
 
+	private TcpServerEventHandler serverEventHandler;
+
 	TcpServer(NetContext context, SessionFactory sessionFactory, ServerSocketChannel channel) {
 		Validation.notNull(context);
 		Validation.notNull(sessionFactory);
@@ -54,6 +54,7 @@ public class TcpServer extends EventHandlerBase implements NetServer {
 		this.context = context;
 		this.sessionFactory = sessionFactory;
 		this.channel = channel;
+
 	}
 
 	// TODO: open(SocketAddress) with default netselector
@@ -66,7 +67,8 @@ public class TcpServer extends EventHandlerBase implements NetServer {
 		System.out.println("listening on: " + bindAddress);
 
 		TcpServer server = new TcpServer(context, sessionFactory, channel);
-		context.getNetSelector().register(server, EventUtil.ACCEPT);
+		server.serverEventHandler = new TcpServerEventHandler(channel, server);
+		context.getNetSelector().register(server.serverEventHandler, EventUtil.ACCEPT);
 		return server;
 	}
 
@@ -76,47 +78,35 @@ public class TcpServer extends EventHandlerBase implements NetServer {
 	}
 
 	@Override
-	public SelectableChannel getChannel() {
-		// TODO: validate open
-		return channel;
-	}
-
-	@Override
 	public void close() throws IOException {
 		// TODO: client connections
-		context.getNetSelector().unregister(this);
+		context.getNetSelector().unregister(serverEventHandler);
 		channel.close();
 		throw new UnsupportedOperationException("TODO");
-	}
-
-	@Override
-	public boolean handleAccept() {
-		System.out.println("doAccept");
-		doAccept();
-		return false;
-	}
-
-	@Override
-	public void closed() {
-		// TODO Auto-generated method stub
-		// consumer.closed();
-		throw new IllegalStateException();
-	}
-
-	private void doAccept() {
-		try {
-			SocketChannel clientChannel = channel.accept();
-			PureSession session = sessionFactory.createSession();
-			TcpConnection.create(context, clientChannel, session);
-		} catch (IOException e) {
-			// TODO
-			e.printStackTrace();
-		}
 	}
 
 	@Override
 	public int getActiveSessionCount() {
 		// TODO
 		throw new UnsupportedOperationException("TODO");
+	}
+
+	void createSession(SocketChannel clientChannel) {
+		PureSession session = null;
+		try {
+			session = sessionFactory.createSession();
+		} catch (Exception e) {
+			// TODO: logging
+			System.err.println(e.getMessage());
+			e.printStackTrace(System.err);
+			return;
+		}
+		try {
+			TcpConnection.create(context, clientChannel, session);
+		} catch (IOException e) {
+			// TODO: notify an error handler
+			System.err.println("faild to create a tcp connection: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
 	}
 }

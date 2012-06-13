@@ -27,11 +27,15 @@ import ch.bind.philib.validation.Validation;
 
 public class RingQueue<E> {
 
-	private AtomicInteger writeIdx = new AtomicInteger();
+	private AtomicInteger nextWriteIdx = new AtomicInteger();
+
 	private AtomicInteger writeCommittedIdx = new AtomicInteger(-1);
+
 	private AtomicInteger readIdx = new AtomicInteger(-1);
+
 	private E[] entries;
 
+	@SuppressWarnings("unchecked")
 	public RingQueue(int numEntries) {
 		Validation.isTrue(numEntries > 0, "numEntries must be > 0");
 		this.entries = (E[]) new Object[numEntries];
@@ -39,7 +43,40 @@ public class RingQueue<E> {
 
 	public boolean offer(E e) {
 		Validation.notNull(e);
-		int wIdx = writeIdx.get();
-		return false;
+		do {
+			final int wIdx = nextWriteIdx.get();
+			if (wIdx == readIdx.get()) {
+				// queue is full
+				return false;
+			}
+			if (nextWriteIdx.compareAndSet(wIdx, wIdx + 1)) {
+				// we can now write to this index
+				entries[wIdx] = e;
+
+				int expectCidx = wIdx - 1;
+				do {
+					int commitIdx = writeCommittedIdx.get();
+					if (commitIdx < expectCidx) {
+						// someone else is writing with an index lower then our
+						// and has not commited
+						return true;
+					}
+					else if (commitIdx == expectCidx) {
+						// commit directly
+						boolean commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
+
+						int additionalCommitIdx = commitIdx + 1;
+						if (entries[additionalCommitIdx] != null) {
+							commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
+						}
+					}
+					else {
+						Validation.notNull(null);
+					}
+				} while (true);
+				return true;
+			}
+			// else: someone else already reserved this write-index, start anew
+		} while (true);
 	}
 }

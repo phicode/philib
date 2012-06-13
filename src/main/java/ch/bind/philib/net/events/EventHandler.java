@@ -22,19 +22,20 @@
 package ch.bind.philib.net.events;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 
 public interface EventHandler extends Closeable {
 
 	SelectableChannel getChannel();
 
-	boolean handleRead(Thread thread);
+	void handleRead(Thread thread) throws IOException;
 
-	boolean handleWrite();
+	void handleWrite() throws IOException;
 
-	boolean handleAccept();
+	void handleAccept() throws IOException;
 
-	boolean handleConnect();
+	void handleConnect() throws IOException;
 
 	void closed();
 

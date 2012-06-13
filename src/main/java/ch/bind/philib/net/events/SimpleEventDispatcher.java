@@ -48,7 +48,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	private final Selector selector;
 
-	private volatile Thread thread;
+	private volatile Thread dispatcherThread;
 
 	private SimpleEventDispatcher(Selector selector) throws IOException {
 		this.selector = selector;
@@ -58,20 +58,21 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		Selector selector = Selector.open();
 		SimpleEventDispatcher rv = new SimpleEventDispatcher(selector);
 		String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
-		rv.thread = ThreadUtil.runForever(rv, threadName);
+		rv.dispatcherThread = ThreadUtil.runForever(rv, threadName);
 		return rv;
 	}
 
 	@Override
 	public void run() {
 		int lastKeys = 0;
+		final Thread t = Thread.currentThread();
 		try {
 			while (true) {
 				int num = doSelect();
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
 					for (SelectionKey key : selected) {
-						handleReadyKey(thread, key);
+						handleReadyKey(t, key);
 					}
 					selected.clear();
 				}
@@ -133,9 +134,9 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	@Override
 	public void close() throws IOException {
-		Thread t = thread;
+		Thread t = dispatcherThread;
 		if (t != null) {
-			thread = null;
+			dispatcherThread = null;
 			ThreadUtil.interruptAndJoin(t);
 			selector.close();
 		}
@@ -149,32 +150,36 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			// canceled key
 			return;
 		}
+		if (!key.isValid()) {
+			closeHandler(eventHandler);
+		}
 		int readyOps = key.readyOps();
-		boolean closed = false;
 		try {
 			if (checkMask(readyOps, EventUtil.READ)) {
-				closed = eventHandler.handleRead(thread);
+				eventHandler.handleRead(thread);
 			}
-			if (!closed && checkMask(readyOps, EventUtil.WRITE)) {
-				closed = eventHandler.handleWrite();
+			if (checkMask(readyOps, EventUtil.WRITE)) {
+				eventHandler.handleWrite();
 			}
-			if (!closed && checkMask(readyOps, EventUtil.ACCEPT)) {
-				closed = eventHandler.handleAccept();
+			if (checkMask(readyOps, EventUtil.ACCEPT)) {
+				eventHandler.handleAccept();
 			}
-			if (!closed && checkMask(readyOps, EventUtil.CONNECT)) {
-				closed = eventHandler.handleConnect();
+			if (checkMask(readyOps, EventUtil.CONNECT)) {
+				eventHandler.handleConnect();
 			}
 		} catch (Exception e) {
-			closed = true;
-			System.out.println("eventHandler.handle*() failed: " + ExceptionUtil.buildMessageChain(e));
+			System.out.println("eventHandler.handle*() failed, closing: " + ExceptionUtil.buildMessageChain(e));
+			closeHandler(eventHandler);
 		}
-		if (closed) {
-			try {
-				eventHandler.close();
-			} catch (Exception e) {
-				System.out.println("exception while closing: " + e.getMessage());
-				e.printStackTrace();
-			}
+	}
+
+	private void closeHandler(EventHandler eventHandler) {
+		try {
+			eventHandler.close();
+		} catch (Exception e) {
+			// TODO
+			System.err.println("exception while closing: " + e.getMessage());
+			e.printStackTrace(System.err);
 		}
 	}
 
@@ -185,7 +190,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	private void wakeup() {
-		if (thread != Thread.currentThread()) {
+		Thread t = dispatcherThread;
+		if (t != null && t != Thread.currentThread()) {
 			selector.wakeup();
 		}
 	}
