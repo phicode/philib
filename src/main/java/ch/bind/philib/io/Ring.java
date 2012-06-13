@@ -22,6 +22,8 @@
 
 package ch.bind.philib.io;
 
+import java.util.Arrays;
+
 public class Ring<T> {
 
 	private static final int INITIAL_RING_LEN = 4;
@@ -61,10 +63,12 @@ public class Ring<T> {
 	public T poll() {
 		if (size == 0) {
 			return null;
-		} else {
+		}
+		else {
 			Object value = ring[off];
-			size--;
+			ring[off] = null;
 			off = (off + 1) % ring.length;
+			size--;
 			return (T) value;
 		}
 	}
@@ -72,7 +76,8 @@ public class Ring<T> {
 	public T pollNext(T value) {
 		if (size == 0) {
 			return value;
-		} else {
+		}
+		else {
 			T rv = poll();
 			if (value != null) {
 				addBack(value);
@@ -89,10 +94,17 @@ public class Ring<T> {
 		return size;
 	}
 
+	public void clear() {
+		off = 0;
+		size = 0;
+		Arrays.fill(ring, null);
+	}
+
 	private void ensureRingSpace() {
 		if (ring == null) {
 			ring = new Object[INITIAL_RING_LEN];
-		} else {
+		}
+		else {
 			if (size == ring.length) {
 				int newLen = ring.length * RING_LEN_ENHANCING_FACTOR;
 				if (newLen < 0) {
