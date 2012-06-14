@@ -45,10 +45,6 @@ public final class TcpConnection implements Connection {
 
 	private final PureSession session;
 
-	private boolean registeredForWrite = false;
-
-	private Thread dispatcherThread;
-
 	private AtomicBoolean reading = new AtomicBoolean(false);
 
 	private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
@@ -68,13 +64,11 @@ public final class TcpConnection implements Connection {
 	static TcpConnection create(NetContext context, SocketChannel channel, PureSession session) throws IOException {
 		channel.configureBlocking(false);
 		TcpConnection connection = new TcpConnection(context, channel, session);
-		session.init(connection);
-		connection.register();
-		return connection;
-	}
+		// TcpStreamEventHandler eventHandler =
+		TcpStreamEventHandler.create(context, connection, channel);
 
-	void register() {
-		context.getNetSelector().register(this, EventUtil.READ);
+		session.init(connection);
+		return connection;
 	}
 
 	public static TcpConnection open(SocketAddress endpoint, PureSession session) throws IOException {
@@ -112,56 +106,6 @@ public final class TcpConnection implements Connection {
 		session.closed();
 	}
 
-
-
-	
-
-	
-
-	private boolean doWrite() {
-		final long tStart = System.nanoTime();
-		synchronized (writeBacklog) {
-			final long tSync = System.nanoTime() - tStart;
-			ByteBuffer toWrite = writeBacklog.poll();
-			while (toWrite != null) {
-				try {
-					sendNonBlocking(toWrite);
-				} catch (IOException e) {
-					return true;
-				}
-				if (toWrite.remaining() > 0) {
-					writeBacklog.addFront(toWrite);
-					final long tAll = System.nanoTime() - tStart;
-					System.out.printf("doWrite-stillRegister tSync=%d, tAll=%d%n", tSync, tAll);
-					return false;
-				}
-				toWrite = writeBacklog.poll();
-			}
-			// TODO: notify client code that we can write more stuff
-
-			// the write queue is empty, unregister from write events
-			unregisterForWrite();
-			writeBacklog.notifyAll();
-			final long tAll = System.nanoTime() - tStart;
-			System.out.printf("doWrite-unregister tSync=%d, tAll=%d%n", tSync, tAll);
-			return false;
-		}
-	}
-
-	private void registerForWrite() {
-		if (!registeredForWrite) {
-			context.getNetSelector().reRegister(this, EventUtil.READ_WRITE, true);
-			registeredForWrite = true;
-		}
-	}
-
-	private void unregisterForWrite() {
-		if (registeredForWrite) {
-			context.getNetSelector().reRegister(this, EventUtil.READ, false);
-			registeredForWrite = false;
-		}
-	}
-
 	@Override
 	public boolean isConnected() {
 		return channel.isConnected();
@@ -174,9 +118,9 @@ public final class TcpConnection implements Connection {
 
 	void receive(ByteBuffer rbuf) {
 		try {
-		session.receive(rbuf);
+			session.receive(rbuf);
 		} catch (Exception e) {
-			
+clone();
 		}
 	}
 }

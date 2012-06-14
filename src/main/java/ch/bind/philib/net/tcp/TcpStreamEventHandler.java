@@ -30,6 +30,7 @@ import java.nio.channels.SocketChannel;
 import ch.bind.philib.io.Ring;
 import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
+import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
 class TcpStreamEventHandler extends EventHandlerBase {
@@ -42,16 +43,20 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	private final SocketChannel channel;
 
 	private final NetContext context;
-	
+
 	private final TcpConnection connection;
 
 	private final Ring<ByteBuffer> writeBacklog = new Ring<ByteBuffer>();
-
+	private boolean registeredForWrite = false;
 	private Thread dispatcherThread;
 
-	TcpStreamEventHandler(SocketChannel channel) {
+	private TcpStreamEventHandler(NetContext context, TcpConnection connection, SocketChannel channel) {
 		super();
+		Validation.notNull(context);
+		Validation.notNull(connection);
 		Validation.notNull(channel);
+		this.context = context;
+		this.connection = connection;
 		this.channel = channel;
 	}
 
@@ -100,8 +105,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000L) {
 				System.out.printf("write took %.6fms%n", (t / 1000000f));
 			}
-		}
-		else {
+		} else {
 			num = channel.write(data);
 		}
 		return num;
@@ -137,8 +141,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 				if (t > 2000000) {
 					System.out.printf("read took: %.6fms%n", (t / 1000000f));
 				}
-			}
-			else {
+			} else {
 				num = channel.read(rbuf);
 			}
 			if (num == -1) {
@@ -146,13 +149,11 @@ class TcpStreamEventHandler extends EventHandlerBase {
 				releaseBuffer(rbuf);
 				close();
 				return;
-			}
-			else if (num == 0) {
+			} else if (num == 0) {
 				// no more data to read
 				releaseBuffer(rbuf);
 				return;
-			}
-			else {
+			} else {
 				rbuf.flip();
 				assert (num == rbuf.limit());
 				assert (num == rbuf.remaining());
@@ -161,11 +162,61 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		}
 	}
 
+	private boolean doWrite() {
+		final long tStart = System.nanoTime();
+		synchronized (writeBacklog) {
+			final long tSync = System.nanoTime() - tStart;
+			ByteBuffer toWrite = writeBacklog.poll();
+			while (toWrite != null) {
+				try {
+					sendNonBlocking(toWrite);
+				} catch (IOException e) {
+					return true;
+				}
+				if (toWrite.remaining() > 0) {
+					writeBacklog.addFront(toWrite);
+					final long tAll = System.nanoTime() - tStart;
+					System.out.printf("doWrite-stillRegister tSync=%d, tAll=%d%n", tSync, tAll);
+					return false;
+				}
+				toWrite = writeBacklog.poll();
+			}
+			// TODO: notify client code that we can write more stuff
+
+			// the write queue is empty, unregister from write events
+			unregisterForWrite();
+			writeBacklog.notifyAll();
+			final long tAll = System.nanoTime() - tStart;
+			System.out.printf("doWrite-unregister tSync=%d, tAll=%d%n", tSync, tAll);
+			return false;
+		}
+	}
+	
 	private ByteBuffer getBuffer() {
 		return context.getBufferCache().acquire();
 	}
 
 	private void releaseBuffer(ByteBuffer buf) {
 		context.getBufferCache().release(buf);
+	}
+
+	private void registerForWrite() {
+		if (!registeredForWrite) {
+			context.getNetSelector().reRegister(this, EventUtil.READ_WRITE, true);
+			registeredForWrite = true;
+		}
+	}
+
+	private void unregisterForWrite() {
+		if (registeredForWrite) {
+			context.getNetSelector().reRegister(this, EventUtil.READ, false);
+			registeredForWrite = false;
+		}
+	}
+
+	public static TcpStreamEventHandler create(NetContext context, TcpConnection connection, SocketChannel channel) {
+		TcpStreamEventHandler rv = new TcpStreamEventHandler(context, connection, channel);
+		context.getNetSelector().register(rv, EventUtil.READ);
+		return rv;
 	}
 }
