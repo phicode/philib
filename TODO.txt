@@ -53,6 +53,8 @@ connection
 - getWriteBacklog: long (in bytes)
 - isWriteableNow() -> we can write non-blocking without further filling up the writeBacklog
 
-TODO: precise buffer management: release where?
+precise buffer management: release where?
+	- receive must consume a passed on buffer wholely, the event-handler can use the same buffer for every read
+	- send must not hold on to the buffer's data but store it in its own internal structures so that the sender can use it again
 
 
