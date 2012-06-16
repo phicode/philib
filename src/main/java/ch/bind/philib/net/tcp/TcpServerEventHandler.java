@@ -28,12 +28,6 @@ class TcpServerEventHandler extends EventHandlerBase {
 	}
 
 	@Override
-	public void closed() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
-	}
-	
-	@Override
 	public void close() throws IOException {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO");

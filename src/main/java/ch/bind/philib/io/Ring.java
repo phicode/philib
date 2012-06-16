@@ -22,7 +22,7 @@
 
 package ch.bind.philib.io;
 
-import java.util.Arrays;
+import ch.bind.philib.validation.Validation;
 
 public class Ring<T> {
 
@@ -36,7 +36,8 @@ public class Ring<T> {
 
 	private Object[] ring;
 
-	public void addBack(T value) {
+	public void addBack(final T value) {
+		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
 		if (value == null) {
 			return;
 		}
@@ -46,7 +47,8 @@ public class Ring<T> {
 		size++;
 	}
 
-	public void addFront(T value) {
+	public void addFront(final T value) {
+		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
 		if (value == null) {
 			return;
 		}
@@ -61,6 +63,7 @@ public class Ring<T> {
 
 	@SuppressWarnings("unchecked")
 	public T poll() {
+		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
 		if (size == 0) {
 			return null;
 		} else {
@@ -72,11 +75,13 @@ public class Ring<T> {
 		}
 	}
 
-	public T pollNext(T value) {
+	public T pollNext(final T value) {
+		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
 		if (size == 0) {
 			return value;
 		} else {
-			T rv = poll();
+			final T rv = poll();
+			Validation.notNull(rv);
 			if (value != null) {
 				addBack(value);
 			}
@@ -85,17 +90,19 @@ public class Ring<T> {
 	}
 
 	public boolean isEmpty() {
+		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
 		return size == 0;
 	}
 
 	public int size() {
+		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
 		return size;
 	}
 
 	public void clear() {
 		off = 0;
 		size = 0;
-		Arrays.fill(ring, null);
+		ring = null;
 	}
 
 	private void ensureRingSpace() {
@@ -106,7 +113,7 @@ public class Ring<T> {
 				int newLen = ring.length * RING_LEN_ENHANCING_FACTOR;
 				if (newLen < 0) {
 					// TODO
-					System.out.println("overflow!");
+					System.err.println("overflow!");
 					newLen = Integer.MAX_VALUE;
 				}
 				Object[] newRing = new Object[newLen];

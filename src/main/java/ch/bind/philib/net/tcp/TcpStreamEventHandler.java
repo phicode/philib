@@ -70,14 +70,6 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	@Override
-	public void closed() {
-		writeBacklog.clear();
-		System.out.println("TODO: propagate EventHandler.closed()");
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void handleRead(final Thread thread) throws IOException {
 		// store the current dispatcher thread so that we can verify that the
 		// event-handler wont perform a blocking write operation
@@ -102,11 +94,11 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	public void close() throws IOException {
 		context.getNetSelector().unregister(this);
 		channel.close();
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
+		writeBacklog.clear();
+		connection.notifyClosed();
 	}
 
-	void sendNonBlocking(ByteBuffer data) throws IOException {
+	void sendNonBlocking(final ByteBuffer data) throws IOException {
 		try {
 			send(data, false);
 		} catch (InterruptedException e) {
@@ -114,38 +106,49 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		}
 	}
 
-	void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
+	void sendBlocking(final ByteBuffer data) throws IOException, InterruptedException {
 		if (Thread.currentThread() == dispatcherThread) {
 			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
+		} else {
+			send(data, true);
 		}
-		send(data, true);
 	}
 
-	private void send(ByteBuffer data, boolean blocking) throws IOException, InterruptedException {
+	private void send(final ByteBuffer data, final boolean blocking) throws IOException, InterruptedException {
 		synchronized (writeBacklog) {
 			ByteBuffer pending = writeBacklog.pollNext(data);
-			while (pending != null && pending.remaining() > 0) {
-				send(pending);
-				if (pending.remaining() > 0) {
-					writeBacklog.addFront(pending);
-					registerForWrite();
-					if (blocking) {
-						// continue looping and waiting
-						writeBacklog.wait();
-					} else {
-						// the data is in the write-backlog
-						return;
+
+			Validation.isTrue( //
+					(writeBacklog.size() == 0 && data == null && pending == null) || //
+							(writeBacklog.size() == 0 && data != null && pending == data) || //
+							(pending != data));
+
+			while (pending != null) {
+				int rem = pending.remaining();
+				if (rem > 0) {
+					rem -= send(pending);
+					if (rem > 0) {
+						writeBacklog.addFront(pending);
+						registerForWrite();
+						if (blocking) {
+							// continue looping and waiting
+							writeBacklog.wait();
+						} else {
+							// the data is in the write-backlog
+							return;
+						}
 					}
-				} else {
-					pending = writeBacklog.poll();
 				}
+				pending = writeBacklog.poll();
 			}
+
+			Validation.isTrue(writeBacklog.isEmpty(), "writeBacklog.size==" + writeBacklog.size());
 			unregisterForWrite();
 			writeBacklog.notifyAll();
 		}
 	}
 
-	private int send(ByteBuffer data) throws IOException {
+	private int send(final ByteBuffer data) throws IOException {
 		int num;
 		if (doWriteTimings) {
 			long tStart = System.nanoTime();
@@ -234,7 +237,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		return context.getBufferCache().acquire();
 	}
 
-	private void releaseBuffer(ByteBuffer buf) {
+	private void releaseBuffer(final ByteBuffer buf) {
 		context.getBufferCache().release(buf);
 	}
 

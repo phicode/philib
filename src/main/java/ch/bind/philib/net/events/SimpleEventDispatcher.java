@@ -104,8 +104,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				if (selMs >= 10005) {
 					System.out.printf("select took %dms, num=%d%n", selMs, num);
 				}
-			}
-			else {
+			} else {
 				num = selector.select(10000L);
 			}
 		} while (num == 0);
@@ -168,8 +167,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				eventHandler.handleConnect();
 			}
 		} catch (Exception e) {
-			System.out.println("eventHandler.handle*() failed, closing: " + ExceptionUtil.buildMessageChain(e));
-			
+			System.err.println("eventHandler.handle*() failed, closing: " + ExceptionUtil.buildMessageChain(e));
+			e.printStackTrace(System.err);
 			closeHandler(eventHandler);
 		}
 	}
@@ -203,8 +202,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
-		}
-		else {
+		} else {
 			key.interestOps(ops);
 		}
 		if (asap) {
@@ -221,8 +219,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			key.attach(null);
 			wakeup();
 			System.out.println("unreg, keys: " + selector.keys().size());
-		}
-		else {
+		} else {
 			System.out.println("unreg failed, not registered");
 		}
 	}

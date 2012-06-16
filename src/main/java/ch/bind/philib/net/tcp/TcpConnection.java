@@ -107,7 +107,6 @@ public final class TcpConnection implements Connection {
 	@Override
 	public void close() throws IOException {
 		eventHandler.close();
-		session.closed();
 	}
 
 	@Override
@@ -120,6 +119,9 @@ public final class TcpConnection implements Connection {
 		return channel.isOpen();
 	}
 
+	void notifyClosed() {
+		session.closed();
+	}
 	void receive(ByteBuffer rbuf) throws IOException {
 		session.receive(rbuf);
 	}

@@ -37,6 +37,4 @@ public interface EventHandler extends Closeable {
 
 	void handleConnect() throws IOException;
 
-	void closed();
-
 }
