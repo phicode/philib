@@ -23,8 +23,6 @@ package ch.bind.philib.net;
 
 import java.io.Closeable;
 
-import ch.bind.philib.net.events.EventHandler;
-
 public interface NetServer extends Closeable {
 
 	int getActiveSessionCount();

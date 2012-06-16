@@ -27,7 +27,6 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 import ch.bind.philib.lang.ThreadUtil;
-import ch.bind.philib.net.PureSessionBase;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpConnection;
 

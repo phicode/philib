@@ -124,10 +124,12 @@ public final class TcpConnection implements Connection {
 		session.receive(rbuf);
 	}
 
+	@Override
 	public long getRx() {
 		return eventHandler.getRx();
 	}
 
+	@Override
 	public long getTx() {
 		return eventHandler.getTx();
 	}

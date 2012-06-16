@@ -24,9 +24,6 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicLong;
-
-import ch.bind.philib.io.Ring;
 import ch.bind.philib.net.PureSessionBase;
 import ch.bind.philib.validation.Validation;
 
