@@ -80,7 +80,7 @@ public class TcpEchoClient {
 			long rx = session.getRx();
 			long tx = session.getTx();
 			long rxDiff = rx - lastRx;
-			long txDiff = rx - lastTx;
+			long txDiff = tx - lastTx;
 			long now = System.currentTimeMillis();
 			long tDiff = now - lastT;
 			double rxMbPerSec = (rxDiff / (1024f * 1024f)) / (tDiff / 1000f);
