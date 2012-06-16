@@ -169,6 +169,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			}
 		} catch (Exception e) {
 			System.out.println("eventHandler.handle*() failed, closing: " + ExceptionUtil.buildMessageChain(e));
+			
 			closeHandler(eventHandler);
 		}
 	}

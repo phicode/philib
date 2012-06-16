@@ -24,17 +24,12 @@ package ch.bind.philib.net.tcp;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import ch.bind.philib.io.Ring;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.PureSession;
-import ch.bind.philib.net.events.EventHandlerBase;
-import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
 public final class TcpConnection implements Connection {
@@ -46,6 +41,8 @@ public final class TcpConnection implements Connection {
 	private final PureSession session;
 
 	private AtomicBoolean reading = new AtomicBoolean(false);
+
+	private TcpStreamEventHandler eventHandler;
 
 	private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
 		Validation.notNull(context);
@@ -64,10 +61,8 @@ public final class TcpConnection implements Connection {
 	static TcpConnection create(NetContext context, SocketChannel channel, PureSession session) throws IOException {
 		channel.configureBlocking(false);
 		TcpConnection connection = new TcpConnection(context, channel, session);
-		// TcpStreamEventHandler eventHandler =
-		TcpStreamEventHandler.create(context, connection, channel);
-
 		session.init(connection);
+		connection.eventHandler = TcpStreamEventHandler.create(context, connection, channel);
 		return connection;
 	}
 
@@ -100,9 +95,18 @@ public final class TcpConnection implements Connection {
 	}
 
 	@Override
+	public void send(ByteBuffer data) throws IOException {
+		eventHandler.sendNonBlocking(data);
+	}
+
+	@Override
+	public void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
+		eventHandler.sendBlocking(data);
+	}
+
+	@Override
 	public void close() throws IOException {
-		context.getNetSelector().unregister(this);
-		channel.close();
+		eventHandler.close();
 		session.closed();
 	}
 
@@ -116,11 +120,15 @@ public final class TcpConnection implements Connection {
 		return channel.isOpen();
 	}
 
-	void receive(ByteBuffer rbuf) {
-		try {
-			session.receive(rbuf);
-		} catch (Exception e) {
-clone();
-		}
+	void receive(ByteBuffer rbuf) throws IOException {
+		session.receive(rbuf);
+	}
+
+	public long getRx() {
+		return eventHandler.getRx();
+	}
+
+	public long getTx() {
+		return eventHandler.getTx();
 	}
 }

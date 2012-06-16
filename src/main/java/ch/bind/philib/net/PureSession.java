@@ -31,7 +31,7 @@ public interface PureSession extends Closeable {
 
 	NetContext getContext();
 
-	void receive(ByteBuffer data);
+	void receive(ByteBuffer data) throws IOException;
 
 	void send(ByteBuffer data) throws IOException;
 
@@ -48,4 +48,8 @@ public interface PureSession extends Closeable {
 	boolean isOpen();
 
 	void releaseBuffer(ByteBuffer buffer);
+
+	long getRx();
+
+	long getTx();
 }

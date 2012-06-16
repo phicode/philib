@@ -36,4 +36,8 @@ public interface Connection extends Closeable {
 	boolean isOpen();
 
 	NetContext getContext();
+
+	long getRx();
+
+	long getTx();
 }

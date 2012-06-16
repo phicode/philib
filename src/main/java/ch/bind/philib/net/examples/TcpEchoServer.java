@@ -57,7 +57,7 @@ public class TcpEchoServer implements SessionFactory {
 						if (lastInteractionNs < tooFarAgo) {
 							double lastSec = (now - lastInteractionNs) / 1000000000f;
 							System.out.printf("last interaction with a session: %.5fsec%n", lastSec);
-							s.forceWrite();
+							// s.forceWrite();
 						}
 						System.out.printf("rx=%d, tx=%d%n", s.getRx(), s.getTx());
 						s.printCacheStats();

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.Ring;
 import ch.bind.philib.net.NetContext;
@@ -36,9 +37,12 @@ import ch.bind.philib.validation.Validation;
 class TcpStreamEventHandler extends EventHandlerBase {
 
 	// private static final boolean doWriteTimings = false;
-	private static final boolean doWriteTimings = true;
+	private static final boolean doWriteTimings = false;
 
-	private static final boolean doReadTimings = true;
+	private static final boolean doReadTimings = false;
+
+	private final AtomicLong rx = new AtomicLong(0);
+	private final AtomicLong tx = new AtomicLong(0);
 
 	private final SocketChannel channel;
 
@@ -86,17 +90,62 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	@Override
-	public void handleWrite() {
+	public void handleWrite() throws IOException {
+		try {
+			send(null, false);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	@Override
 	public void close() throws IOException {
+		context.getNetSelector().unregister(this);
+		channel.close();
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO");
 	}
 
-	int sendNonBlocking(ByteBuffer data) throws IOException {
-		Validation.notNull(data);
+	void sendNonBlocking(ByteBuffer data) throws IOException {
+		try {
+			send(data, false);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
+		if (Thread.currentThread() == dispatcherThread) {
+			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
+		}
+		send(data, true);
+	}
+
+	private void send(ByteBuffer data, boolean blocking) throws IOException, InterruptedException {
+		synchronized (writeBacklog) {
+			ByteBuffer pending = writeBacklog.pollNext(data);
+			while (pending != null && pending.remaining() > 0) {
+				send(pending);
+				if (pending.remaining() > 0) {
+					writeBacklog.addFront(pending);
+					registerForWrite();
+					if (blocking) {
+						// continue looping and waiting
+						writeBacklog.wait();
+					} else {
+						// the data is in the write-backlog
+						return;
+					}
+				} else {
+					pending = writeBacklog.poll();
+				}
+			}
+			unregisterForWrite();
+			writeBacklog.notifyAll();
+		}
+	}
+
+	private int send(ByteBuffer data) throws IOException {
 		int num;
 		if (doWriteTimings) {
 			long tStart = System.nanoTime();
@@ -108,25 +157,8 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		} else {
 			num = channel.write(data);
 		}
+		tx.addAndGet(num);
 		return num;
-	}
-
-	void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
-		Validation.notNull(data);
-		if (Thread.currentThread() == dispatcherThread) {
-			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
-		}
-		synchronized (writeBacklog) {
-			ByteBuffer pending = writeBacklog.pollNext(data);
-			while (pending != null && pending.remaining() > 0) {
-				sendNonBlocking(pending);
-				if (pending.remaining() > 0) {
-					writeBacklog.addFront(pending);
-					registerForWrite();
-					writeBacklog.wait();
-				}
-			}
-		}
 	}
 
 	private void doRead() throws IOException {
@@ -157,41 +189,47 @@ class TcpStreamEventHandler extends EventHandlerBase {
 				rbuf.flip();
 				assert (num == rbuf.limit());
 				assert (num == rbuf.remaining());
-				connection.receive(rbuf);
-			}
-		}
-	}
-
-	private boolean doWrite() {
-		final long tStart = System.nanoTime();
-		synchronized (writeBacklog) {
-			final long tSync = System.nanoTime() - tStart;
-			ByteBuffer toWrite = writeBacklog.poll();
-			while (toWrite != null) {
+				rx.addAndGet(num);
 				try {
-					sendNonBlocking(toWrite);
-				} catch (IOException e) {
-					return true;
+					connection.receive(rbuf);
+				} catch (Exception e) {
+					close();
 				}
-				if (toWrite.remaining() > 0) {
-					writeBacklog.addFront(toWrite);
-					final long tAll = System.nanoTime() - tStart;
-					System.out.printf("doWrite-stillRegister tSync=%d, tAll=%d%n", tSync, tAll);
-					return false;
-				}
-				toWrite = writeBacklog.poll();
 			}
-			// TODO: notify client code that we can write more stuff
-
-			// the write queue is empty, unregister from write events
-			unregisterForWrite();
-			writeBacklog.notifyAll();
-			final long tAll = System.nanoTime() - tStart;
-			System.out.printf("doWrite-unregister tSync=%d, tAll=%d%n", tSync, tAll);
-			return false;
 		}
 	}
-	
+
+	// private boolean doWrite() {
+	// final long tStart = System.nanoTime();
+	// synchronized (writeBacklog) {
+	// final long tSync = System.nanoTime() - tStart;
+	// ByteBuffer toWrite = writeBacklog.poll();
+	// while (toWrite != null) {
+	// try {
+	// sendNonBlocking(toWrite);
+	// } catch (IOException e) {
+	// return true;
+	// }
+	// if (toWrite.remaining() > 0) {
+	// writeBacklog.addFront(toWrite);
+	// final long tAll = System.nanoTime() - tStart;
+	// System.out.printf("doWrite-stillRegister tSync=%d, tAll=%d%n", tSync,
+	// tAll);
+	// return false;
+	// }
+	// toWrite = writeBacklog.poll();
+	// }
+	// // TODO: notify client code that we can write more stuff
+	//
+	// // the write queue is empty, unregister from write events
+	// unregisterForWrite();
+	// writeBacklog.notifyAll();
+	// final long tAll = System.nanoTime() - tStart;
+	// System.out.printf("doWrite-unregister tSync=%d, tAll=%d%n", tSync, tAll);
+	// return false;
+	// }
+	// }
+
 	private ByteBuffer getBuffer() {
 		return context.getBufferCache().acquire();
 	}
@@ -218,5 +256,13 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		TcpStreamEventHandler rv = new TcpStreamEventHandler(context, connection, channel);
 		context.getNetSelector().register(rv, EventUtil.READ);
 		return rv;
+	}
+
+	long getRx() {
+		return rx.get();
+	}
+
+	long getTx() {
+		return tx.get();
 	}
 }
