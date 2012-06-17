@@ -27,111 +27,105 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.PureSession;
+import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.validation.Validation;
 
 public final class TcpConnection implements Connection {
 
-	private final SocketChannel channel;
+    private final SocketChannel channel;
 
-	private final NetContext context;
+    private final NetContext context;
 
-	private final PureSession session;
+    private final PureSession session;
 
-	private TcpStreamEventHandler eventHandler;
+    private TcpStreamEventHandler eventHandler;
 
-	private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
-		Validation.notNull(context);
-		Validation.notNull(channel);
-		Validation.notNull(session);
-		this.context = context;
-		this.channel = channel;
-		this.session = session;
-	}
+    private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
+        Validation.notNull(context);
+        Validation.notNull(channel);
+        Validation.notNull(session);
+        this.context = context;
+        this.channel = channel;
+        this.session = session;
+    }
 
-	@Override
-	public NetContext getContext() {
-		return context;
-	}
+    @Override
+    public NetContext getContext() {
+        return context;
+    }
 
-	static TcpConnection create(NetContext context, SocketChannel channel, PureSession session) throws IOException {
-		channel.configureBlocking(false);
-		TcpConnection connection = new TcpConnection(context, channel, session);
-		session.init(connection);
-		connection.eventHandler = TcpStreamEventHandler.create(context, connection, channel);
-		return connection;
-	}
+    static TcpConnection create(NetContext context, SocketChannel channel, PureSession session) throws IOException {
+        channel.configureBlocking(false);
+        TcpConnection connection = new TcpConnection(context, channel, session);
+        session.init(connection);
+        connection.eventHandler = TcpStreamEventHandler.create(context, connection, channel);
+        return connection;
+    }
 
-	public static TcpConnection open(SocketAddress endpoint, PureSession session) throws IOException {
-		SocketChannel channel = SocketChannel.open();
+    public static TcpConnection open(NetContext context, SocketAddress endpoint, PureSession session)
+            throws IOException {
+        SocketChannel channel = SocketChannel.open();
 
-		channel.configureBlocking(true);
-		if (!channel.connect(endpoint)) {
-			channel.finishConnect();
-		}
+        channel.configureBlocking(true);
+        if (!channel.connect(endpoint)) {
+            channel.finishConnect();
+        }
 
-		System.out.println("connected to: " + endpoint);
-		try {
-			// TODO: no implicit netcontext creation, the user has to do that!
-			NetContext context = NetContext.createSimple();
-			return create(context, channel, session);
-		} catch (IOException e) {
-			closeSafely(channel);
-			throw e;
-		}
-	}
+        System.out.println("connected to: " + endpoint);
+        return create(context, channel, session);
+    }
 
-	private static void closeSafely(SocketChannel c) {
-		try {
-			c.close();
-		} catch (IOException e) {
-			System.out.println("!!!!! TODO");
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    private static void closeSafely(SocketChannel c) {
+        try {
+            c.close();
+        } catch (IOException e) {
+            System.out.println("!!!!! TODO");
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public void send(ByteBuffer data) throws IOException {
-		eventHandler.sendNonBlocking(data);
-	}
+    @Override
+    public void send(ByteBuffer data) throws IOException {
+        eventHandler.sendNonBlocking(data);
+    }
 
-	@Override
-	public void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
-		eventHandler.sendBlocking(data);
-	}
+    @Override
+    public void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
+        eventHandler.sendBlocking(data);
+    }
 
-	@Override
-	public void close() throws IOException {
-		eventHandler.close();
-	}
+    @Override
+    public void close() throws IOException {
+        eventHandler.close();
+    }
 
-	@Override
-	public boolean isConnected() {
-		return channel.isConnected();
-	}
+    @Override
+    public boolean isConnected() {
+        return channel.isConnected();
+    }
 
-	@Override
-	public boolean isOpen() {
-		return channel.isOpen();
-	}
+    @Override
+    public boolean isOpen() {
+        return channel.isOpen();
+    }
 
-	void notifyClosed() {
-		session.closed();
-	}
+    void notifyClosed() {
+        session.closed();
+    }
 
-	void receive(ByteBuffer rbuf) throws IOException {
-		session.receive(rbuf);
-	}
+    void receive(ByteBuffer rbuf) throws IOException {
+        session.receive(rbuf);
+    }
 
-	@Override
-	public long getRx() {
-		return eventHandler.getRx();
-	}
+    @Override
+    public long getRx() {
+        return eventHandler.getRx();
+    }
 
-	@Override
-	public long getTx() {
-		return eventHandler.getTx();
-	}
+    @Override
+    public long getTx() {
+        return eventHandler.getTx();
+    }
 }

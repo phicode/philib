@@ -25,6 +25,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import ch.bind.philib.net.context.NetContext;
+
 public interface PureSession extends Closeable {
 
 	void init(Connection connection);

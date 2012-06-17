@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.Ring;
 import ch.bind.philib.lang.ExceptionUtil;
-import ch.bind.philib.net.NetContext;
+import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;

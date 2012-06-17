@@ -24,10 +24,12 @@ package ch.bind.philib.net;
 import java.io.IOException;
 import java.net.SocketAddress;
 
+import ch.bind.philib.net.context.NetContext;
+
 public interface NetFactory {
 
-	Connection openClient(SocketAddress endpoint) throws IOException;
+	Connection openClient(NetContext context,SocketAddress endpoint, PureSession session) throws IOException;
 
-	NetServer openServer(SocketAddress bindAddress, SessionFactory factory) throws IOException;
+	NetServer openServer(NetContext context,SocketAddress bindAddress, SessionFactory factory) throws IOException;
 
 }

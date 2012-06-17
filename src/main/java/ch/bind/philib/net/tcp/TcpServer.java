@@ -27,10 +27,10 @@ import java.net.SocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.PureSession;
 import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 

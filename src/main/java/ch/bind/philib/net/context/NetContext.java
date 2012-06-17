@@ -19,59 +19,14 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net;
+package ch.bind.philib.net.context;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import ch.bind.philib.cache.ByteBufferCache;
+import ch.bind.philib.net.events.EventDispatcher;
 
-import ch.bind.philib.net.context.NetContext;
+public interface NetContext {
 
-public abstract class PureSessionBase implements PureSession {
+    ByteBufferCache getBufferCache();
 
-	private Connection connection;
-
-	@Override
-	public final void init(Connection connection) {
-		this.connection = connection;
-	}
-
-	@Override
-	public final NetContext getContext() {
-		return connection.getContext();
-	}
-
-	@Override
-	public final void close() throws IOException {
-		connection.close();
-	}
-
-	@Override
-	public final void send(ByteBuffer data) throws IOException {
-		connection.send(data);
-	}
-
-	@Override
-	public final boolean isConnected() {
-		return connection.isConnected();
-	}
-
-	@Override
-	public final boolean isOpen() {
-		return connection.isOpen();
-	}
-
-	@Override
-	public final void releaseBuffer(ByteBuffer buffer) {
-		connection.getContext().getBufferCache().release(buffer);
-	}
-
-	@Override
-	public final long getRx() {
-		return connection.getRx();
-	}
-
-	@Override
-	public final long getTx() {
-		return connection.getTx();
-	}
+    EventDispatcher getNetSelector();
 }
