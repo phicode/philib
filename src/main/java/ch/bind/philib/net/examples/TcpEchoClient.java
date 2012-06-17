@@ -102,5 +102,7 @@ public class TcpEchoClient {
 			lastTx = tx;
 			lastT = now;
 		}
+		// TODO: save shutdown of clients
+		System.exit(0);
 	}
 }

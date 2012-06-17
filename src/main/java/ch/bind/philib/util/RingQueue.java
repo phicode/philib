@@ -74,7 +74,7 @@ public class RingQueue<E> {
 						Validation.notNull(null);
 					}
 				} while (true);
-				return true;
+//				return true;
 			}
 			// else: someone else already reserved this write-index, start anew
 		} while (true);

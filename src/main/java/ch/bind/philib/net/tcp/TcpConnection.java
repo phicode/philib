@@ -73,6 +73,7 @@ public final class TcpConnection implements Connection {
 
 		System.out.println("connected to: " + endpoint);
 		try {
+			// TODO: no implicit netcontext creation, the user has to do that!
 			NetContext context = NetContext.createSimple();
 			return create(context, channel, session);
 		} catch (IOException e) {
@@ -119,6 +120,7 @@ public final class TcpConnection implements Connection {
 	void notifyClosed() {
 		session.closed();
 	}
+
 	void receive(ByteBuffer rbuf) throws IOException {
 		session.receive(rbuf);
 	}
