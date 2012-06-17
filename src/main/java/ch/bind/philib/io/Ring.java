@@ -22,6 +22,8 @@
 
 package ch.bind.philib.io;
 
+import java.util.Arrays;
+
 import ch.bind.philib.validation.Validation;
 
 public class Ring<T> {
@@ -37,7 +39,7 @@ public class Ring<T> {
 	private Object[] ring;
 
 	public void addBack(final T value) {
-		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
+		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (value == null) {
 			return;
 		}
@@ -48,22 +50,20 @@ public class Ring<T> {
 	}
 
 	public void addFront(final T value) {
-		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
+		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (value == null) {
 			return;
 		}
 		ensureRingSpace();
-		off--;
-		if (off == -1) {
-			off = ring.length - 1;
-		}
+		off = off > 0 ? off - 1 : ring.length - 1;
+		Validation.isTrue(off >= 0 && off < ring.length);
 		ring[off] = value;
 		size++;
 	}
 
 	@SuppressWarnings("unchecked")
 	public T poll() {
-		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
+		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (size == 0) {
 			return null;
 		} else {
@@ -71,31 +71,32 @@ public class Ring<T> {
 			ring[off] = null;
 			off = (off + 1) % ring.length;
 			size--;
+			assert (value != null);
 			return (T) value;
 		}
 	}
 
 	public T pollNext(final T value) {
-		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
+		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (size == 0) {
 			return value;
 		} else {
 			final T rv = poll();
-			Validation.notNull(rv);
 			if (value != null) {
 				addBack(value);
 			}
+			assert (rv != null);
 			return rv;
 		}
 	}
 
 	public boolean isEmpty() {
-		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
+		assert (size >= 0 && (ring == null || size <= ring.length));
 		return size == 0;
 	}
 
 	public int size() {
-		Validation.isTrue(size >= 0 && (ring == null || size <= ring.length));
+		assert (size >= 0 && (ring == null || size <= ring.length));
 		return size;
 	}
 
@@ -109,15 +110,25 @@ public class Ring<T> {
 		if (ring == null) {
 			ring = new Object[INITIAL_RING_LEN];
 		} else {
-			if (size == ring.length) {
-				int newLen = ring.length * RING_LEN_ENHANCING_FACTOR;
+			final int l = ring.length;
+			if (size == l) {
+				int newLen = l * RING_LEN_ENHANCING_FACTOR;
 				if (newLen < 0) {
 					// TODO
 					System.err.println("overflow!");
 					newLen = Integer.MAX_VALUE;
 				}
 				Object[] newRing = new Object[newLen];
-				System.arraycopy(ring, 0, newRing, 0, ring.length);
+				if (off == 0) {
+					System.arraycopy(ring, 0, newRing, 0, l);
+				} else {
+					int numToEnd = l - off;
+					// from off to the end of the array
+					System.arraycopy(ring, off, newRing, 0, numToEnd);
+					// from the start of the array to before the off
+					System.arraycopy(ring, 0, newRing, numToEnd, off);
+					off = 0;
+				}
 				this.ring = newRing;
 			}
 		}

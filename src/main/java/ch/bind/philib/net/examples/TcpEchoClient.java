@@ -67,6 +67,7 @@ public class TcpEchoClient {
 			}
 		});
 
+		final long loopTime = 10000L;
 		long lastT = System.currentTimeMillis();
 		connection.sendBlocking(seedBuffer);
 		long seeded = seedBuffer.capacity();
@@ -74,7 +75,7 @@ public class TcpEchoClient {
 		long lastRx = 0, lastTx = 0;
 		final long start = System.currentTimeMillis();
 		while (connection.isConnected()) {
-			long sleepUntil = start + (loop * 30000L);
+			long sleepUntil = start + (loop * loopTime);
 			ThreadUtil.sleepUntilMs(sleepUntil);
 
 			long rx = session.getRx();

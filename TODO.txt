@@ -58,3 +58,5 @@ precise buffer management: release where?
 	- send must not hold on to the buffer's data but store it in its own internal structures so that the sender can use it again
 
 
+BUGS:
+	Session.closed is invoked 2 times!

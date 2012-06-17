@@ -29,6 +29,7 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.Ring;
+import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.net.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
@@ -116,22 +117,29 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	private void send(final ByteBuffer data, final boolean blocking) throws IOException, InterruptedException {
 		synchronized (writeBacklog) {
+			int blSizeBegin = writeBacklog.size();
 			ByteBuffer pending = writeBacklog.pollNext(data);
 
 			Validation.isTrue( //
 					(writeBacklog.size() == 0 && data == null && pending == null) || //
 							(writeBacklog.size() == 0 && data != null && pending == data) || //
 							(pending != data));
+			int numWritten = 0;
+			int numHalfWrite = 0;
+			int numWaits = 0;
 
 			while (pending != null) {
 				int rem = pending.remaining();
 				if (rem > 0) {
+					numWritten++;
 					rem -= send(pending);
 					if (rem > 0) {
+						numHalfWrite++;
 						writeBacklog.addFront(pending);
 						registerForWrite();
 						if (blocking) {
 							// continue looping and waiting
+							numWaits++;
 							writeBacklog.wait();
 						} else {
 							// the data is in the write-backlog
@@ -140,9 +148,14 @@ class TcpStreamEventHandler extends EventHandlerBase {
 					}
 				}
 				pending = writeBacklog.poll();
+				if (pending == null) {
+					Validation.isTrue(writeBacklog.size() == 0 && writeBacklog.isEmpty());
+				}
 			}
 
-			Validation.isTrue(writeBacklog.isEmpty(), "writeBacklog.size==" + writeBacklog.size());
+			String m = String.format("wbSize=%d, #write=%d, #1/2write=%d, #wait=%d, blSizeBegin=%d, inputData=%b", //
+					writeBacklog.size(), numWritten, numHalfWrite, numWaits, blSizeBegin, data != null);
+			Validation.isTrue(writeBacklog.isEmpty(), m);
 			unregisterForWrite();
 			writeBacklog.notifyAll();
 		}
@@ -196,6 +209,8 @@ class TcpStreamEventHandler extends EventHandlerBase {
 				try {
 					connection.receive(rbuf);
 				} catch (Exception e) {
+					System.err.println("TODO: " + ExceptionUtil.buildMessageChain(e));
+					e.printStackTrace(System.err);
 					close();
 				}
 			}

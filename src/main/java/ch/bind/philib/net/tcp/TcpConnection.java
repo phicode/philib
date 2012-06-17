@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetContext;
@@ -39,8 +38,6 @@ public final class TcpConnection implements Connection {
 	private final NetContext context;
 
 	private final PureSession session;
-
-	private AtomicBoolean reading = new AtomicBoolean(false);
 
 	private TcpStreamEventHandler eventHandler;
 
