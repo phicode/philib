@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.tcp.TcpNetFactory;
@@ -40,30 +41,31 @@ public class TcpEchoServer implements SessionFactory {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
 		SessionFactory sessionFactory = this;
 		// NetServer server =
-		TcpNetFactory.INSTANCE.openServer(bindAddress, sessionFactory);
+		NetServer server = TcpNetFactory.INSTANCE.openServer(bindAddress, sessionFactory);
 		while (true) {
-			Thread.sleep(10000);
+			Thread.sleep(20000);
 			synchronized (sessions) {
-				long now = System.nanoTime();
-				long tooFarAgo = now - 5000000L; // 5ms
-				Iterator<EchoSession> iter = sessions.iterator();
-				while (iter.hasNext()) {
-					EchoSession s = iter.next();
-					if (!s.isConnected()) {
-						System.out.println("removeing disconnected session: " + s);
-						iter.remove();
-					} else {
-						long lastInteractionNs = s.getLastInteractionNs();
-						if (lastInteractionNs < tooFarAgo) {
-							double lastSec = (now - lastInteractionNs) / 1000000000f;
-							System.out.printf("last interaction with a session: %.5fsec%n", lastSec);
-							// s.forceWrite();
+				if (sessions.size() > 0) {
+					long now = System.nanoTime();
+					long tooFarAgo = now - 5000000L; // 5ms
+					Iterator<EchoSession> iter = sessions.iterator();
+					System.out.println(server.getContext().getBufferCache().getCacheStats().toString());
+					System.out.println("sessions: " + sessions.size());
+					while (iter.hasNext()) {
+						EchoSession s = iter.next();
+						if (!s.isConnected()) {
+							System.out.println("removeing disconnected session: " + s);
+							iter.remove();
+						} else {
+							long lastInteractionNs = s.getLastInteractionNs();
+							if (lastInteractionNs < tooFarAgo) {
+								double lastSec = (now - lastInteractionNs) / 1000000000f;
+								System.out.printf("last interaction with a session: %.5fsec%n", lastSec);
+							}
+							System.out.printf("rx=%d, tx=%d%n", s.getRx(), s.getTx());
 						}
-						System.out.printf("rx=%d, tx=%d%n", s.getRx(), s.getTx());
-						s.printCacheStats();
 					}
 				}
-				System.out.println("sessions in our list: " + sessions.size());
 			}
 		}
 	}

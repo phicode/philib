@@ -72,35 +72,4 @@ public class EchoSession extends PureSessionBase {
 	public long getLastInteractionNs() {
 		return lastInteractionNs;
 	}
-
-	public void printCacheStats() {
-		System.out.println(getContext().getBufferCache().getCacheStats().toString());
-	}
-
-	// public void forceWrite() throws IOException {
-	// synchronized (pendingWrites) {
-	// ByteBuffer data = pendingWrites.poll();
-	// if (data == null) {
-	// System.out.println("tried to riveve a connection, but there is nothing in the write queue");
-	// return;
-	// }
-	// int total = 0;
-	// while (data != null) {
-	// int rem = data.remaining();
-	// int num = send(data);
-	// if (num > 0) {
-	// total += num;
-	// }
-	// if (rem != num) {
-	// pendingWrites.addFront(data);
-	// data = null;
-	// } else {
-	// data = pendingWrites.poll();
-	// }
-	// }
-	// if (total > 0) {
-	// System.out.println("reviced connection by writing: " + total);
-	// }
-	// }
-	// }
 }
