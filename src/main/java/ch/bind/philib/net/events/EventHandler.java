@@ -29,7 +29,7 @@ public interface EventHandler extends Closeable {
 
 	SelectableChannel getChannel();
 
-	void handleRead(Thread thread) throws IOException;
+	void handleRead() throws IOException;
 
 	void handleWrite() throws IOException;
 

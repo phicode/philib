@@ -84,14 +84,13 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	@Override
 	public void run() {
 		int lastKeys = 0;
-		final Thread t = Thread.currentThread();
 		try {
 			while (true) {
 				int num = doSelect();
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
 					for (SelectionKey key : selected) {
-						handleReadyKey(t, key);
+						handleReadyKey(key);
 					}
 					selected.clear();
 				}
@@ -162,7 +161,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		throw new UnsupportedOperationException("TODO: finish");
 	}
 
-	private void handleReadyKey(final Thread thread, final SelectionKey key) {
+	private void handleReadyKey(final SelectionKey key) {
 		EventHandler eventHandler = (EventHandler) key.attachment();
 		if (eventHandler == null) {
 			// canceled key
@@ -174,7 +173,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		int readyOps = key.readyOps();
 		try {
 			if (checkMask(readyOps, EventUtil.READ)) {
-				eventHandler.handleRead(thread);
+				eventHandler.handleRead();
 			}
 			if (checkMask(readyOps, EventUtil.WRITE)) {
 				eventHandler.handleWrite();

@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.Ring;
@@ -58,8 +57,8 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	private final TcpConnection connection;
 
 	private final Ring<ByteBuffer> writeBacklog = new Ring<ByteBuffer>();
+
 	private boolean registeredForWrite = false;
-	private Thread dispatcherThread;
 
 	private TcpStreamEventHandler(NetContext context, TcpConnection connection, SocketChannel channel) {
 		super();
@@ -77,15 +76,8 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	@Override
-	public void handleRead(final Thread thread) throws IOException {
-		// store the current dispatcher thread so that we can verify that the
-		// event-handler wont perform a blocking write operation
-		dispatcherThread = thread;
-		try {
-			doRead();
-		} finally {
-			dispatcherThread = null;
-		}
+	public void handleRead() throws IOException {
+		doRead();
 	}
 
 	@Override

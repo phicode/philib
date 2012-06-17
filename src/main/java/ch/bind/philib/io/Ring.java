@@ -22,8 +22,6 @@
 
 package ch.bind.philib.io;
 
-import java.util.Arrays;
-
 import ch.bind.philib.validation.Validation;
 
 public class Ring<T> {

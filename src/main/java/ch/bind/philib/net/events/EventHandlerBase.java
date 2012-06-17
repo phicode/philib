@@ -26,7 +26,7 @@ import java.io.IOException;
 public abstract class EventHandlerBase implements EventHandler {
 
 	@Override
-	public void handleRead(Thread thread) throws IOException {
+	public void handleRead() throws IOException {
 		throw new IllegalStateException("unsupported select operation: read");
 	}
 
