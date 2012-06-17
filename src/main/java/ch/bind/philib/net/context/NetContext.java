@@ -28,5 +28,5 @@ public interface NetContext {
 
     ByteBufferCache getBufferCache();
 
-    EventDispatcher getNetSelector();
+    EventDispatcher getEventDispatcher();
 }

@@ -31,4 +31,6 @@ public interface EventDispatcher extends Runnable, Closeable {
 
 	void unregister(EventHandler eventHandler);
 
+	boolean isEventDispatcherThread(Thread thread);
+
 }

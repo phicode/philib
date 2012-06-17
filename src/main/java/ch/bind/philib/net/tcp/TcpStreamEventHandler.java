@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.Ring;
@@ -43,9 +44,11 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	private static final boolean doReadTimings = false;
 
 	private static final int IO_READ_LIMIT_PER_ROUND = 16 * 1024;
+
 	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024;
 
 	private final AtomicLong rx = new AtomicLong(0);
+
 	private final AtomicLong tx = new AtomicLong(0);
 
 	private final SocketChannel channel;
@@ -101,7 +104,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	@Override
 	public void close() throws IOException {
-		context.getNetSelector().unregister(this);
+		context.getEventDispatcher().unregister(this);
 		channel.close();
 		writeBacklog.clear();
 		connection.notifyClosed();
@@ -116,7 +119,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	void sendBlocking(final ByteBuffer data) throws IOException, InterruptedException {
-		if (Thread.currentThread() == dispatcherThread) {
+		if (connection.getContext().getEventDispatcher().isEventDispatcherThread(Thread.currentThread())) {
 			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
 		} else {
 			// first the remaining data in the backlog has to be written (if
@@ -263,21 +266,21 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	private void registerForWrite() {
 		if (!registeredForWrite) {
-			context.getNetSelector().reRegister(this, EventUtil.READ_WRITE, true);
+			context.getEventDispatcher().reRegister(this, EventUtil.READ_WRITE, true);
 			registeredForWrite = true;
 		}
 	}
 
 	private void unregisterForWrite() {
 		if (registeredForWrite) {
-			context.getNetSelector().reRegister(this, EventUtil.READ, false);
+			context.getEventDispatcher().reRegister(this, EventUtil.READ, false);
 			registeredForWrite = false;
 		}
 	}
 
 	public static TcpStreamEventHandler create(NetContext context, TcpConnection connection, SocketChannel channel) {
 		TcpStreamEventHandler rv = new TcpStreamEventHandler(context, connection, channel);
-		context.getNetSelector().register(rv, EventUtil.READ);
+		context.getEventDispatcher().register(rv, EventUtil.READ);
 		return rv;
 	}
 

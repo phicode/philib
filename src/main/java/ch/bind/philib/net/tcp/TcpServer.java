@@ -57,7 +57,6 @@ public class TcpServer implements NetServer {
 
 	}
 
-	// TODO: open(SocketAddress) with default netselector
 	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress) throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
@@ -68,7 +67,7 @@ public class TcpServer implements NetServer {
 
 		TcpServer server = new TcpServer(context, sessionFactory, channel);
 		server.serverEventHandler = new TcpServerEventHandler(channel, server);
-		context.getNetSelector().register(server.serverEventHandler, EventUtil.ACCEPT);
+		context.getEventDispatcher().register(server.serverEventHandler, EventUtil.ACCEPT);
 		return server;
 	}
 
@@ -80,7 +79,7 @@ public class TcpServer implements NetServer {
 	@Override
 	public void close() throws IOException {
 		// TODO: client connections
-		context.getNetSelector().unregister(serverEventHandler);
+		context.getEventDispatcher().unregister(serverEventHandler);
 		channel.close();
 		throw new UnsupportedOperationException("TODO");
 	}

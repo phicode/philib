@@ -6,28 +6,28 @@ import ch.bind.philib.validation.Validation;
 
 public class NetContextImpl implements NetContext {
 
-    public static final int DEFAULT_BUFFER_SIZE = 8192;
+	public static final int DEFAULT_BUFFER_SIZE = 8192;
 
-    public static final int DEFAULT_NUM_BUFFERS = 128;
+	public static final int DEFAULT_NUM_BUFFERS = 128;
 
-    private final ByteBufferCache bufferCache;
+	private final ByteBufferCache bufferCache;
 
-    private final EventDispatcher netSelector;
+	private final EventDispatcher eventDispatcher;
 
-    public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher netSelector) {
-        Validation.notNull(bufferCache);
-        Validation.notNull(netSelector);
-        this.bufferCache = bufferCache;
-        this.netSelector = netSelector;
-    }
+	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
+		Validation.notNull(bufferCache);
+		Validation.notNull(eventDispatcher);
+		this.bufferCache = bufferCache;
+		this.eventDispatcher = eventDispatcher;
+	}
 
-    @Override
-    public final ByteBufferCache getBufferCache() {
-        return bufferCache;
-    }
+	@Override
+	public final ByteBufferCache getBufferCache() {
+		return bufferCache;
+	}
 
-    @Override
-    public final EventDispatcher getNetSelector() {
-        return netSelector;
-    }
+	@Override
+	public final EventDispatcher getEventDispatcher() {
+		return eventDispatcher;
+	}
 }
