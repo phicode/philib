@@ -42,6 +42,9 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	private static final boolean doReadTimings = false;
 
+	private static final int IO_READ_LIMIT_PER_ROUND = 16 * 1024;
+	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024;
+
 	private final AtomicLong rx = new AtomicLong(0);
 	private final AtomicLong tx = new AtomicLong(0);
 
@@ -85,7 +88,12 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	@Override
 	public void handleWrite() throws IOException {
 		try {
-			send(null, false);
+			long s = System.nanoTime();
+			send(null, false, IO_WRITE_LIMIT_PER_ROUND);
+			long t = System.nanoTime() - s;
+			if (t > 1000000L) { // 1ms
+				System.out.printf("handleWrite took %.6fms%n", (t / 1000000f));
+			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
@@ -101,7 +109,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	void sendNonBlocking(final ByteBuffer data) throws IOException {
 		try {
-			send(data, false);
+			send(data, false, IO_WRITE_LIMIT_PER_ROUND);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
@@ -111,35 +119,35 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		if (Thread.currentThread() == dispatcherThread) {
 			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
 		} else {
-			send(data, true);
+			// first the remaining data in the backlog has to be written (if
+			// any), then our buffer
+			// if in the meantime more data arrives we do not want to block
+			// longer
+			// TODO: iolimit
+			send(data, true, Integer.MAX_VALUE);
 		}
 	}
 
-	private void send(final ByteBuffer data, final boolean blocking) throws IOException, InterruptedException {
+	private void send(final ByteBuffer data, final boolean blocking, final int ioLimit) throws IOException, InterruptedException {
 		synchronized (writeBacklog) {
-			int blSizeBegin = writeBacklog.size();
+			int totalWrite = 0;
 			ByteBuffer pending = writeBacklog.pollNext(data);
-
-			Validation.isTrue( //
-					(writeBacklog.size() == 0 && data == null && pending == null) || //
-							(writeBacklog.size() == 0 && data != null && pending == data) || //
-							(pending != data));
-			int numWritten = 0;
-			int numHalfWrite = 0;
-			int numWaits = 0;
 
 			while (pending != null) {
 				int rem = pending.remaining();
 				if (rem > 0) {
-					numWritten++;
-					rem -= send(pending);
-					if (rem > 0) {
-						numHalfWrite++;
+					int n = send(pending);
+					totalWrite += n;
+					rem -= n;
+					if (rem == 0) {
+						if (!blocking && totalWrite >= ioLimit) {
+							return;
+						}
+					} else {
 						writeBacklog.addFront(pending);
 						registerForWrite();
 						if (blocking) {
 							// continue looping and waiting
-							numWaits++;
 							writeBacklog.wait();
 						} else {
 							// the data is in the write-backlog
@@ -148,14 +156,9 @@ class TcpStreamEventHandler extends EventHandlerBase {
 					}
 				}
 				pending = writeBacklog.poll();
-				if (pending == null) {
-					Validation.isTrue(writeBacklog.size() == 0 && writeBacklog.isEmpty());
-				}
 			}
 
-			String m = String.format("wbSize=%d, #write=%d, #1/2write=%d, #wait=%d, blSizeBegin=%d, inputData=%b", //
-					writeBacklog.size(), numWritten, numHalfWrite, numWaits, blSizeBegin, data != null);
-			Validation.isTrue(writeBacklog.isEmpty(), m);
+			Validation.isTrue(writeBacklog.isEmpty());
 			unregisterForWrite();
 			writeBacklog.notifyAll();
 		}
@@ -179,7 +182,8 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	private void doRead() throws IOException {
 		// read as much data as possible
-		while (true) {
+		int totalRead = 0;
+		while (totalRead < IO_READ_LIMIT_PER_ROUND) {
 			final ByteBuffer rbuf = getBuffer();
 			int num;
 			if (doReadTimings) {
@@ -205,6 +209,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 				rbuf.flip();
 				assert (num == rbuf.limit());
 				assert (num == rbuf.remaining());
+				totalRead += num;
 				rx.addAndGet(num);
 				try {
 					connection.receive(rbuf);
