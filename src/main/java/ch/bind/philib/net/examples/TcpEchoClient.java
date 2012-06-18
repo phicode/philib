@@ -70,27 +70,30 @@ public class TcpEchoClient {
 			}
 		});
 
-		final long loopTime = 10000L;
+		final int loopTimeSec = 10;
 		long lastT = System.currentTimeMillis();
 		connection.sendBlocking(seedBuffer);
 		long seeded = seedBuffer.capacity();
 		int loop = 1;
 		long lastRx = 0, lastTx = 0;
 		final long start = System.currentTimeMillis();
+
 		while (connection.isConnected()) {
-			long sleepUntil = start + (loop * loopTime);
+			long sleepUntil = start + (loop * loopTimeSec * 1000L);
 			ThreadUtil.sleepUntilMs(sleepUntil);
 
 			long rx = session.getRx();
 			long tx = session.getTx();
 			long rxDiff = rx - lastRx;
 			long txDiff = tx - lastTx;
+			long diff = rxDiff + txDiff;
 			long now = System.currentTimeMillis();
 			long tDiff = now - lastT;
-			double rxMbPerSec = (rxDiff / (1024f * 1024f)) / (tDiff / 1000f);
-			double txMbPerSec = (txDiff / (1024f * 1024f)) / (tDiff / 1000f);
-			System.out.printf("seeded=%d total=%d in %d ms; last 5sec rx=%d, tx=%d bytes => %.3f %.3f mb/sec%n", //
-					seeded, (rx + tx), (now - start), rxDiff, txDiff, rxMbPerSec, txMbPerSec);
+			double mbit = (diff * 8) / 10e6 / (tDiff / 1000f);
+			double rxMb = (rxDiff / (2e20));
+			double txMb = (txDiff / (2e20));
+			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec%n", //
+					seeded, loopTimeSec, rxMb, txMb, mbit);
 			if (seeded < 512 * 1024) {
 				System.out.println("seeding an additional " + seedBuffer.capacity() + " bytes into the echo chain");
 				seedBuffer.rewind();

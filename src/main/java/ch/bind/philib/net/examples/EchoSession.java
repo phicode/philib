@@ -32,40 +32,15 @@ public class EchoSession extends PureSessionBase {
 	private long lastInteractionNs;
 
 	@Override
-	public void receive(ByteBuffer data) {
+	public void receive(ByteBuffer data) throws IOException {
 		lastInteractionNs = System.nanoTime();
-		try {
-			int rem = data.remaining();
-			Validation.isTrue(rem > 0);
-			send(data);
-			// if (num != rem) {
-			// //
-			// System.out.printf("cant echo back! only %d out of %d was sent.%n",
-			// // num, rem);
-			// pendingWrites.addFront(pending);
-			// break;
-			// }
-			// numGoodSends++;
-			// releaseBuffer(pending);
-			// pending = pendingWrites.poll();
-			// }
-			// if (numGoodSends > 1) {
-			// System.out.println("good sends: " + numGoodSends);
-			// }
-		} catch (IOException e) {
-			e.printStackTrace();
-			try {
-				close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-		}
-		// }
+		int rem = data.remaining();
+		Validation.isTrue(rem > 0);
+		send(data);
 	}
 
 	@Override
 	public void closed() {
-		// this.closed = true;
 		System.out.printf("closed() rx=%d, tx=%d%n", getRx(), getTx());
 	}
 

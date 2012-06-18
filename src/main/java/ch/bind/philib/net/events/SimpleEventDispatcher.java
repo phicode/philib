@@ -86,7 +86,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		int lastKeys = 0;
 		try {
 			while (true) {
-				int num = doSelect();
+				int num = select();
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
 					for (SelectionKey key : selected) {
@@ -105,10 +105,12 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
+		} finally {
+			close();
 		}
 	}
 
-	private int doSelect() throws IOException, ClosedSelectorException {
+	private int select() throws IOException, ClosedSelectorException {
 		int num;
 		do {
 			updateRegistrations();
@@ -122,7 +124,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				if (selMs >= 10005) {
 					System.out.printf("select took %dms, num=%d%n", selMs, num);
 				}
-			} else {
+			}
+			else {
 				num = selector.select(10000L);
 			}
 		} while (num == 0);
@@ -150,15 +153,40 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		Thread t = dispatcherThread;
 		if (t != null) {
 			dispatcherThread = null;
 			ThreadUtil.interruptAndJoin(t);
-			selector.close();
+			try {
+				selector.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			for (SelectionKey key : selector.keys()) {
+				if (key.isValid()) {
+					Object att = key.attachment();
+					if (att instanceof EventHandler) {
+						EventHandler e = (EventHandler) att;
+						try {
+							e.close();
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+				}
+			}
+			for (NewRegistration newReg : newRegistrations) {
+				try {
+					newReg.eventHandler.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
-		// TODO all registered clients as well???
-		throw new UnsupportedOperationException("TODO: finish");
 	}
 
 	private void handleReadyKey(final SelectionKey key) {
@@ -220,7 +248,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
-		} else {
+		}
+		else {
 			key.interestOps(ops);
 		}
 		if (asap) {
@@ -237,7 +266,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			key.attach(null);
 			wakeup();
 			System.out.println("unreg, keys: " + selector.keys().size());
-		} else {
+		}
+		else {
 			System.out.println("unreg failed, not registered");
 		}
 	}

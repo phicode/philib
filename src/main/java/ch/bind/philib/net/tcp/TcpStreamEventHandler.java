@@ -38,14 +38,13 @@ import ch.bind.philib.validation.Validation;
 
 class TcpStreamEventHandler extends EventHandlerBase {
 
-	// private static final boolean doWriteTimings = false;
 	private static final boolean doWriteTimings = false;
 
 	private static final boolean doReadTimings = false;
 
-	private static final int IO_READ_LIMIT_PER_ROUND = 16 * 1024 * 1024;
+	private static final int IO_READ_LIMIT_PER_ROUND = 16 * 1024;
 
-	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024 * 1024;
+	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024;
 
 	private final AtomicLong rx = new AtomicLong(0);
 
@@ -57,7 +56,6 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	private final TcpConnection connection;
 
-	// private final Ring<ByteBuffer> writeBacklog = new Ring<ByteBuffer>();
 	private final Ring<Buf> writeBacklog = new RingImpl<Buf>();
 
 	private boolean registeredForWriteEvt = false;
@@ -171,45 +169,6 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		}
 	}
 
-	// if (writeBacklog.isEmpty()) {
-	//
-	// }
-	// int totalWrite = 0;
-	// ByteBuffer pending = writeBacklog.poll();
-	//
-	// while (pending != null) {
-	// final int rem = pending.remaining();
-	// if (rem > 0) {
-	// final int num = send(pending);
-	// totalWrite += num;
-	// if (rem == num) {
-	// if (!blocking && totalWrite >= ioLimit) {
-	// return;
-	// }
-	// }
-	// else {
-	// writeBacklog.addFront(pending);
-	// registerForWrite();
-	// if (blocking) {
-	// // continue looping and waiting
-	// writeBacklog.wait();
-	// }
-	// else {
-	// // the data is in the write-backlog
-	// return;
-	// }
-	// }
-	// }
-	// pending = writeBacklog.poll();
-	// }
-	//
-	// Validation.isTrue(writeBacklog.isEmpty());
-	// // writeBacklog.shrink();
-	// unregisterForWrite();
-	// writeBacklog.notifyAll();
-	// }
-	// }
-
 	private void s_copyIntoBacklog(final ByteBuffer src) {
 		if (src == null) {
 			return;
@@ -303,7 +262,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		else {
 			num = channel.read(rbuf);
 		}
-		if (num>0) {
+		if (num > 0) {
 			rx.addAndGet(num);
 		}
 		return num;
