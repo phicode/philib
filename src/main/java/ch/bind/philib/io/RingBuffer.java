@@ -52,6 +52,11 @@ public final class RingBuffer implements DoubleSidedBuffer {
 	public int available() {
 		return ringSize;
 	}
+	
+	@Override
+	public boolean isEmpty() {
+		return ringSize==0;
+	}
 
 	@Override
 	public int capacity() {

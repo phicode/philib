@@ -27,17 +27,31 @@ import ch.bind.philib.validation.Validation;
 
 public class RingQueue<E> {
 
-	private AtomicInteger nextWriteIdx = new AtomicInteger();
+	private final AtomicInteger nextWriteIdx = new AtomicInteger();
 
-	private AtomicInteger writeCommittedIdx = new AtomicInteger(-1);
+	private final AtomicInteger writeCommittedIdx = new AtomicInteger(-1);
 
-	private AtomicInteger readIdx = new AtomicInteger(-1);
+	private final AtomicInteger readIdx = new AtomicInteger(-1);
 
-	private E[] entries;
+	private final E[] entries;
+	
+	private final int mask;
 
 	@SuppressWarnings("unchecked")
 	public RingQueue(int numEntries) {
 		Validation.isTrue(numEntries > 0, "numEntries must be > 0");
+		if (Integer.bitCount(numEntries) != 1) {
+			// not a power of two
+			for (int i=0; i < 32; i++) {
+				int x = 1 << i;
+				if (x > numEntries) {
+					numEntries = x;
+					break;
+				}
+			}
+		}
+		
+		mask = numEntries-1;
 		this.entries = (E[]) new Object[numEntries];
 	}
 

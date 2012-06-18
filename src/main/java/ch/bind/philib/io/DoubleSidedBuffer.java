@@ -24,25 +24,28 @@ package ch.bind.philib.io;
 
 public interface DoubleSidedBuffer {
 
-    int available();
-    
-    int capacity();
+	int available();
 
-    void clear();
+	boolean isEmpty();
 
-    void read(byte[] data);
+	int capacity();
 
-    void read(byte[] data, int off, int len);
+	void clear();
 
-    void readBack(byte[] data);
+	void read(byte[] data);
 
-    void readBack(byte[] data, int off, int len);
+	void read(byte[] data, int off, int len);
 
-    void write(byte[] data);
+	void readBack(byte[] data);
 
-    void write(byte[] data, int off, int len);
+	void readBack(byte[] data, int off, int len);
 
-    void writeFront(byte[] data);
+	void write(byte[] data);
 
-    void writeFront(byte[] data, int off, int len);
+	void write(byte[] data, int off, int len);
+
+	void writeFront(byte[] data);
+
+	void writeFront(byte[] data, int off, int len);
+	
 }

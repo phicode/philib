@@ -33,79 +33,79 @@ import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.SimpleNetContext;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 
-//TODO: reply data validation
-//TODO: speed measurements
-//TODO: many threads
+// TODO: reply data validation
+// TODO: latency measurements
+// TODO: many threads
 public class TcpEchoClient {
 
-    private Connection connection;
+	private Connection connection;
 
-    public static void main(String[] args) throws Exception {
-        new TcpEchoClient().run();
-    }
+	public static void main(String[] args) throws Exception {
+		new TcpEchoClient().run();
+	}
 
-    private void run() throws IOException, InterruptedException {
-        InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.66", 1234);
-        // InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221",
-        // 1234);
-        // InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1",
-        // 1234);
+	private void run() throws IOException, InterruptedException {
+		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.66",
+		// 1234);
+		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221",
+		// 1234);
+		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 
-        byte[] buf = new byte[8 * 1024];
-        new Random().nextBytes(buf);
-        ByteBuffer seedBuffer = ByteBuffer.wrap(buf);
-        NetContext context = new SimpleNetContext();
-        EchoSession session = new EchoSession();
-        connection = TcpNetFactory.INSTANCE.openClient(context, endpoint, session);
+		byte[] buf = new byte[8 * 1024];
+		new Random().nextBytes(buf);
+		ByteBuffer seedBuffer = ByteBuffer.wrap(buf);
+		NetContext context = new SimpleNetContext();
+		EchoSession session = new EchoSession();
+		connection = TcpNetFactory.INSTANCE.openClient(context, endpoint, session);
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    connection.close();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        });
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				try {
+					connection.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 
-        final long loopTime = 10000L;
-        long lastT = System.currentTimeMillis();
-        connection.sendBlocking(seedBuffer);
-        long seeded = seedBuffer.capacity();
-        int loop = 1;
-        long lastRx = 0, lastTx = 0;
-        final long start = System.currentTimeMillis();
-        while (connection.isConnected()) {
-            long sleepUntil = start + (loop * loopTime);
-            ThreadUtil.sleepUntilMs(sleepUntil);
+		final long loopTime = 10000L;
+		long lastT = System.currentTimeMillis();
+		connection.sendBlocking(seedBuffer);
+		long seeded = seedBuffer.capacity();
+		int loop = 1;
+		long lastRx = 0, lastTx = 0;
+		final long start = System.currentTimeMillis();
+		while (connection.isConnected()) {
+			long sleepUntil = start + (loop * loopTime);
+			ThreadUtil.sleepUntilMs(sleepUntil);
 
-            long rx = session.getRx();
-            long tx = session.getTx();
-            long rxDiff = rx - lastRx;
-            long txDiff = tx - lastTx;
-            long now = System.currentTimeMillis();
-            long tDiff = now - lastT;
-            double rxMbPerSec = (rxDiff / (1024f * 1024f)) / (tDiff / 1000f);
-            double txMbPerSec = (txDiff / (1024f * 1024f)) / (tDiff / 1000f);
-            System.out.printf("seeded=%d total=%d in %d ms; last 5sec rx=%d, tx=%d bytes => %.3f %.3f mb/sec%n", //
-                    seeded, (rx + tx), (now - start), rxDiff, txDiff, rxMbPerSec, txMbPerSec);
-            if (seeded < 128 * 1024) {
-                System.out.println("seeding an additional " + seedBuffer.capacity() + " bytes into the echo chain");
-                seedBuffer.rewind();
-                connection.sendBlocking(seedBuffer);
-                seeded += seedBuffer.capacity();
-            }
-            // if (rxDiff == 0 || txDiff == 0) {
-            // session.forceWrite();
-            // }
-            loop++;
-            lastRx = rx;
-            lastTx = tx;
-            lastT = now;
-        }
-        // TODO: save shutdown of clients
-        System.exit(0);
-    }
+			long rx = session.getRx();
+			long tx = session.getTx();
+			long rxDiff = rx - lastRx;
+			long txDiff = tx - lastTx;
+			long now = System.currentTimeMillis();
+			long tDiff = now - lastT;
+			double rxMbPerSec = (rxDiff / (1024f * 1024f)) / (tDiff / 1000f);
+			double txMbPerSec = (txDiff / (1024f * 1024f)) / (tDiff / 1000f);
+			System.out.printf("seeded=%d total=%d in %d ms; last 5sec rx=%d, tx=%d bytes => %.3f %.3f mb/sec%n", //
+					seeded, (rx + tx), (now - start), rxDiff, txDiff, rxMbPerSec, txMbPerSec);
+			if (seeded < 512 * 1024) {
+				System.out.println("seeding an additional " + seedBuffer.capacity() + " bytes into the echo chain");
+				seedBuffer.rewind();
+				connection.sendBlocking(seedBuffer);
+				seeded += seedBuffer.capacity();
+			}
+			// if (rxDiff == 0 || txDiff == 0) {
+			// session.forceWrite();
+			// }
+			loop++;
+			lastRx = rx;
+			lastTx = tx;
+			lastT = now;
+		}
+		// TODO: save shutdown of clients
+		System.exit(0);
+	}
 }

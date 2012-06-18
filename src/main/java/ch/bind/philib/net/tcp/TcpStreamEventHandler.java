@@ -29,6 +29,7 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.Ring;
+import ch.bind.philib.io.RingImpl;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
@@ -42,9 +43,9 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	private static final boolean doReadTimings = false;
 
-	private static final int IO_READ_LIMIT_PER_ROUND = 16 * 1024;
+	private static final int IO_READ_LIMIT_PER_ROUND = 16 * 1024 * 1024;
 
-	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024;
+	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024 * 1024;
 
 	private final AtomicLong rx = new AtomicLong(0);
 
@@ -56,9 +57,10 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	private final TcpConnection connection;
 
-	private final Ring<ByteBuffer> writeBacklog = new Ring<ByteBuffer>();
+	// private final Ring<ByteBuffer> writeBacklog = new Ring<ByteBuffer>();
+	private final Ring<Buf> writeBacklog = new RingImpl<Buf>();
 
-	private boolean registeredForWrite = false;
+	private boolean registeredForWriteEvt = false;
 
 	private TcpStreamEventHandler(NetContext context, TcpConnection connection, SocketChannel channel) {
 		super();
@@ -82,15 +84,11 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	@Override
 	public void handleWrite() throws IOException {
-		try {
-			long s = System.nanoTime();
-			send(null, false, IO_WRITE_LIMIT_PER_ROUND);
-			long t = System.nanoTime() - s;
-			if (t > 1000000L) { // 1ms
-				System.out.printf("handleWrite took %.6fms%n", (t / 1000000f));
-			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+		long s = System.nanoTime();
+		sendNonBlocking(null);
+		long t = System.nanoTime() - s;
+		if (t > 1000000L) { // 1ms
+			System.out.printf("handleWrite took %.6fms%n", (t / 1000000f));
 		}
 	}
 
@@ -103,63 +101,179 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	void sendNonBlocking(final ByteBuffer data) throws IOException {
-		try {
-			send(data, false, IO_WRITE_LIMIT_PER_ROUND);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+		synchronized (writeBacklog) {
+			// write as much as possible until the os-buffers are full or the
+			// write-per-round limit is reached
+			boolean finished = s_sendPendingNonBlock();
+
+			if (!finished) {
+				s_copyIntoBacklog(data);
+				registerForWriteEvents();
+				return;
+			}
+
+			// all data in the backlog has been written
+			// this means that the write backlog is empty
+			Validation.isTrue(writeBacklog.isEmpty());
+
+			if (data != null) {
+				_channelWrite(data);
+
+				if (data.hasRemaining()) {
+					s_copyIntoBacklog(data);
+					registerForWriteEvents();
+					return;
+				}
+			}
+
+			// backlog and input buffer written
+
+			unregisterFromWriteEvents();
+			// notify blocking writes
+			writeBacklog.notifyAll();
 		}
 	}
 
 	void sendBlocking(final ByteBuffer data) throws IOException, InterruptedException {
 		if (connection.getContext().getEventDispatcher().isEventDispatcherThread(Thread.currentThread())) {
 			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
-		} else {
-			// first the remaining data in the backlog has to be written (if
-			// any), then our buffer
-			// if in the meantime more data arrives we do not want to block
-			// longer
-			// TODO: iolimit
-			send(data, true, Integer.MAX_VALUE);
 		}
-	}
 
-	private void send(final ByteBuffer data, final boolean blocking, final int ioLimit) throws IOException, InterruptedException {
+		// first the remaining data in the backlog has to be written (if
+		// any), then our buffer
+		// if in the meantime more data arrives we do not want to block
+		// longer
+		final Buf externBuf = new ExternBuf(data);
 		synchronized (writeBacklog) {
-			int totalWrite = 0;
-			ByteBuffer pending = writeBacklog.pollNext(data);
+			writeBacklog.addBack(externBuf);
+			do {
+				boolean finished = s_sendPendingNonBlock();
 
-			while (pending != null) {
-				int rem = pending.remaining();
-				if (rem > 0) {
-					int n = send(pending);
-					totalWrite += n;
-					rem -= n;
-					if (rem == 0) {
-						if (!blocking && totalWrite >= ioLimit) {
-							return;
-						}
-					} else {
-						writeBacklog.addFront(pending);
-						registerForWrite();
-						if (blocking) {
-							// continue looping and waiting
-							writeBacklog.wait();
-						} else {
-							// the data is in the write-backlog
-							return;
-						}
+				if (finished) {
+					Validation.isFalse(externBuf.isPending());
+					// all data writes from the backlog have been written
+					// unregisterFromWriteEvents();
+
+					// notify other blocking writes
+					writeBacklog.notifyAll();
+					return;
+				}
+				else {
+					if (externBuf.isPending()) {
+						writeBacklog.wait();
+					}
+					else {
+						writeBacklog.notifyAll();
+						return;
 					}
 				}
-				pending = writeBacklog.poll();
-			}
-
-			Validation.isTrue(writeBacklog.isEmpty());
-			unregisterForWrite();
-			writeBacklog.notifyAll();
+			} while (true);
 		}
 	}
 
-	private int send(final ByteBuffer data) throws IOException {
+	// if (writeBacklog.isEmpty()) {
+	//
+	// }
+	// int totalWrite = 0;
+	// ByteBuffer pending = writeBacklog.poll();
+	//
+	// while (pending != null) {
+	// final int rem = pending.remaining();
+	// if (rem > 0) {
+	// final int num = send(pending);
+	// totalWrite += num;
+	// if (rem == num) {
+	// if (!blocking && totalWrite >= ioLimit) {
+	// return;
+	// }
+	// }
+	// else {
+	// writeBacklog.addFront(pending);
+	// registerForWrite();
+	// if (blocking) {
+	// // continue looping and waiting
+	// writeBacklog.wait();
+	// }
+	// else {
+	// // the data is in the write-backlog
+	// return;
+	// }
+	// }
+	// }
+	// pending = writeBacklog.poll();
+	// }
+	//
+	// Validation.isTrue(writeBacklog.isEmpty());
+	// // writeBacklog.shrink();
+	// unregisterForWrite();
+	// writeBacklog.notifyAll();
+	// }
+	// }
+
+	private void s_copyIntoBacklog(final ByteBuffer src) {
+		if (src == null) {
+			return;
+		}
+		int srcRem = src.remaining();
+		while (srcRem > 0) {
+			ByteBuffer dst = acquireBuffer();
+			Buf buf = new InternBuf(dst);
+			int dstCap = dst.capacity();
+			if (dstCap >= srcRem) {
+				dst.put(src);
+				writeBacklog.addBack(buf);
+				return;
+			}
+			else {
+				int realLimit = src.limit();
+				int pos = src.position();
+				src.limit(pos + dstCap);
+
+				// remaining = limit - position
+				// remaining = (position + dstCap) - position;
+				// remaining = dstCap
+				Validation.isTrue(src.remaining() == dstCap);
+				dst.put(src);
+				writeBacklog.addBack(buf);
+				src.limit(realLimit);
+				srcRem -= dstCap;
+			}
+		}
+	}
+
+	// rv: true = all writes finished, false=blocked
+	private boolean s_sendPendingNonBlock() throws IOException {
+		int totalWrite = 0;
+		do {
+			final Buf pending = writeBacklog.poll();
+			if (pending == null) {
+				// finished
+				unregisterFromWriteEvents();
+				return true;
+			}
+			final ByteBuffer bb = pending.bb;
+			final int rem = bb.remaining();
+			if (rem == 0) {
+				releaseBuffer(pending);
+			}
+			else {
+				final int num = _channelWrite(bb);
+				totalWrite += num;
+				if (num == rem) {
+					releaseBuffer(pending);
+				}
+				else {
+					// write channel is blocked
+					writeBacklog.addFront(pending);
+					break;
+				}
+			}
+		} while (totalWrite < IO_WRITE_LIMIT_PER_ROUND);
+		registerForWriteEvents();
+		return false;
+	}
+
+	private int _channelWrite(final ByteBuffer data) throws IOException {
 		int num;
 		if (doWriteTimings) {
 			long tStart = System.nanoTime();
@@ -168,87 +282,68 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000L) {
 				System.out.printf("write took %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			num = channel.write(data);
 		}
 		tx.addAndGet(num);
 		return num;
 	}
 
+	private int _channelRead(final ByteBuffer rbuf) throws IOException {
+		int num;
+		if (doReadTimings) {
+			long tStart = System.nanoTime();
+			num = channel.read(rbuf);
+			long t = System.nanoTime() - tStart;
+			if (t > 2000000) {
+				System.out.printf("read took: %.6fms%n", (t / 1000000f));
+			}
+		}
+		else {
+			num = channel.read(rbuf);
+		}
+		if (num>0) {
+			rx.addAndGet(num);
+		}
+		return num;
+	}
+
 	private void doRead() throws IOException {
-		// read as much data as possible
-		int totalRead = 0;
-		while (totalRead < IO_READ_LIMIT_PER_ROUND) {
-			final ByteBuffer rbuf = getBuffer();
-			int num;
-			if (doReadTimings) {
-				long tStart = System.nanoTime();
-				num = channel.read(rbuf);
-				long t = System.nanoTime() - tStart;
-				if (t > 2000000) {
-					System.out.printf("read took: %.6fms%n", (t / 1000000f));
-				}
-			} else {
-				num = channel.read(rbuf);
-			}
-			if (num == -1) {
-				// connection closed
-				releaseBuffer(rbuf);
-				close();
-				return;
-			} else if (num == 0) {
-				// no more data to read
-				releaseBuffer(rbuf);
-				return;
-			} else {
-				rbuf.flip();
-				assert (num == rbuf.limit());
-				assert (num == rbuf.remaining());
-				totalRead += num;
-				rx.addAndGet(num);
-				try {
-					connection.receive(rbuf);
-				} catch (Exception e) {
-					System.err.println("TODO: " + ExceptionUtil.buildMessageChain(e));
-					e.printStackTrace(System.err);
+		final ByteBuffer rbuf = acquireBuffer();
+		try {
+			int totalRead = 0;
+			while (totalRead < IO_READ_LIMIT_PER_ROUND) {
+				int num = _channelRead(rbuf);
+				if (num == -1) {
+					// connection closed
 					close();
+					return;
+				}
+				else if (num == 0) {
+					// no more data to read
+					return;
+				}
+				else {
+					rbuf.flip();
+					assert (num == rbuf.limit());
+					assert (num == rbuf.remaining());
+					totalRead += num;
+					try {
+						connection.receive(rbuf);
+					} catch (Exception e) {
+						System.err.println("TODO: " + ExceptionUtil.buildMessageChain(e));
+						e.printStackTrace(System.err);
+						close();
+					}
 				}
 			}
+		} finally {
+			releaseBuffer(rbuf);
 		}
 	}
 
-	// private boolean doWrite() {
-	// final long tStart = System.nanoTime();
-	// synchronized (writeBacklog) {
-	// final long tSync = System.nanoTime() - tStart;
-	// ByteBuffer toWrite = writeBacklog.poll();
-	// while (toWrite != null) {
-	// try {
-	// sendNonBlocking(toWrite);
-	// } catch (IOException e) {
-	// return true;
-	// }
-	// if (toWrite.remaining() > 0) {
-	// writeBacklog.addFront(toWrite);
-	// final long tAll = System.nanoTime() - tStart;
-	// System.out.printf("doWrite-stillRegister tSync=%d, tAll=%d%n", tSync,
-	// tAll);
-	// return false;
-	// }
-	// toWrite = writeBacklog.poll();
-	// }
-	// // TODO: notify client code that we can write more stuff
-	//
-	// // the write queue is empty, unregister from write events
-	// unregisterForWrite();
-	// writeBacklog.notifyAll();
-	// final long tAll = System.nanoTime() - tStart;
-	// System.out.printf("doWrite-unregister tSync=%d, tAll=%d%n", tSync, tAll);
-	// return false;
-	// }
-	// }
-
-	private ByteBuffer getBuffer() {
+	private ByteBuffer acquireBuffer() {
 		return context.getBufferCache().acquire();
 	}
 
@@ -256,17 +351,24 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		context.getBufferCache().release(buf);
 	}
 
-	private void registerForWrite() {
-		if (!registeredForWrite) {
-			context.getEventDispatcher().reRegister(this, EventUtil.READ_WRITE, true);
-			registeredForWrite = true;
+	private void releaseBuffer(final Buf buf) {
+		buf.finished();
+		if (buf.isIntern()) {
+			context.getBufferCache().release(buf.bb);
 		}
 	}
 
-	private void unregisterForWrite() {
-		if (registeredForWrite) {
+	private void registerForWriteEvents() {
+		if (!registeredForWriteEvt) {
+			context.getEventDispatcher().reRegister(this, EventUtil.READ_WRITE, true);
+			registeredForWriteEvt = true;
+		}
+	}
+
+	private void unregisterFromWriteEvents() {
+		if (registeredForWriteEvt) {
 			context.getEventDispatcher().reRegister(this, EventUtil.READ, false);
-			registeredForWrite = false;
+			registeredForWriteEvt = false;
 		}
 	}
 
@@ -282,5 +384,47 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	long getTx() {
 		return tx.get();
+	}
+
+	private static abstract class Buf {
+		private final ByteBuffer bb;
+
+		private boolean pending = true;
+
+		abstract boolean isIntern();
+
+		Buf(ByteBuffer bb) {
+			this.bb = bb;
+		}
+
+		final void finished() {
+			pending = false;
+		}
+
+		final boolean isPending() {
+			return pending;
+		}
+	}
+
+	private static final class InternBuf extends Buf {
+		InternBuf(ByteBuffer bb) {
+			super(bb);
+		}
+
+		@Override
+		boolean isIntern() {
+			return true;
+		}
+	}
+
+	private static final class ExternBuf extends Buf {
+		ExternBuf(ByteBuffer bb) {
+			super(bb);
+		}
+
+		@Override
+		boolean isIntern() {
+			return false;
+		}
 	}
 }
