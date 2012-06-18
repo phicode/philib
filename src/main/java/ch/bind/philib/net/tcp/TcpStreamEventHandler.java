@@ -189,7 +189,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 				writeBacklog.addBack(buf);
 				return;
 			} else {
-				int realLimit = src.limit();
+				final int limit = src.limit();
 				int pos = src.position();
 				src.limit(pos + dstCap);
 
@@ -201,7 +201,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 				dst.flip();
 				assert (dst.remaining() == dstCap);
 				writeBacklog.addBack(buf);
-				src.limit(realLimit);
+				src.limit(limit);
 				srcRem -= dstCap;
 			}
 		}
