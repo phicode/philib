@@ -91,9 +91,15 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		context.getEventDispatcher().unregister(this);
-		channel.close();
+		try {
+			if (channel.isOpen()) {
+				channel.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		writeBacklog.clear();
 		connection.notifyClosed();
 	}
@@ -155,12 +161,10 @@ class TcpStreamEventHandler extends EventHandlerBase {
 					// notify other blocking writes
 					writeBacklog.notifyAll();
 					return;
-				}
-				else {
+				} else {
 					if (externBuf.isPending()) {
 						writeBacklog.wait();
-					}
-					else {
+					} else {
 						writeBacklog.notifyAll();
 						return;
 					}
@@ -180,10 +184,11 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			int dstCap = dst.capacity();
 			if (dstCap >= srcRem) {
 				dst.put(src);
+				dst.flip();
+				assert (dst.remaining() == srcRem);
 				writeBacklog.addBack(buf);
 				return;
-			}
-			else {
+			} else {
 				int realLimit = src.limit();
 				int pos = src.position();
 				src.limit(pos + dstCap);
@@ -193,6 +198,8 @@ class TcpStreamEventHandler extends EventHandlerBase {
 				// remaining = dstCap
 				Validation.isTrue(src.remaining() == dstCap);
 				dst.put(src);
+				dst.flip();
+				assert (dst.remaining() == dstCap);
 				writeBacklog.addBack(buf);
 				src.limit(realLimit);
 				srcRem -= dstCap;
@@ -214,14 +221,12 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			final int rem = bb.remaining();
 			if (rem == 0) {
 				releaseBuffer(pending);
-			}
-			else {
+			} else {
 				final int num = _channelWrite(bb);
 				totalWrite += num;
 				if (num == rem) {
 					releaseBuffer(pending);
-				}
-				else {
+				} else {
 					// write channel is blocked
 					writeBacklog.addFront(pending);
 					break;
@@ -241,8 +246,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000L) {
 				System.out.printf("write took %.6fms%n", (t / 1000000f));
 			}
-		}
-		else {
+		} else {
 			num = channel.write(data);
 		}
 		tx.addAndGet(num);
@@ -258,8 +262,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000) {
 				System.out.printf("read took: %.6fms%n", (t / 1000000f));
 			}
-		}
-		else {
+		} else {
 			num = channel.read(rbuf);
 		}
 		if (num > 0) {
@@ -278,12 +281,10 @@ class TcpStreamEventHandler extends EventHandlerBase {
 					// connection closed
 					close();
 					return;
-				}
-				else if (num == 0) {
+				} else if (num == 0) {
 					// no more data to read
 					return;
-				}
-				else {
+				} else {
 					rbuf.flip();
 					assert (num == rbuf.limit());
 					assert (num == rbuf.remaining());
