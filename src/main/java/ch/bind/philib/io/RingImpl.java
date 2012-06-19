@@ -33,6 +33,7 @@ public final class RingImpl<T> implements Ring<T> {
 
 	private Object[] ring;
 
+	@Override
 	public void addBack(final T value) {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (value == null) {
@@ -44,6 +45,7 @@ public final class RingImpl<T> implements Ring<T> {
 		size++;
 	}
 
+	@Override
 	public void addFront(final T value) {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (value == null) {
@@ -55,6 +57,7 @@ public final class RingImpl<T> implements Ring<T> {
 		size++;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public T poll() {
 		assert (size >= 0 && (ring == null || size <= ring.length));
@@ -71,6 +74,7 @@ public final class RingImpl<T> implements Ring<T> {
 		}
 	}
 
+	@Override
 	public T pollNext(final T value) {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (size == 0) {
@@ -86,16 +90,19 @@ public final class RingImpl<T> implements Ring<T> {
 		}
 	}
 
+	@Override
 	public boolean isEmpty() {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		return size == 0;
 	}
 
+	@Override
 	public int size() {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		return size;
 	}
 
+	@Override
 	public void clear() {
 		off = 0;
 		size = 0;
