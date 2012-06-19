@@ -21,8 +21,6 @@
  */
 package ch.bind.philib.io;
 
-import ch.bind.philib.validation.Validation;
-
 public final class RingImpl<T> implements Ring<T> {
 
 	private static final int INITIAL_RING_LEN = 4;
