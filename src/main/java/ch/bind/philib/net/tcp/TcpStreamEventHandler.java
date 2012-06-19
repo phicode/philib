@@ -43,6 +43,10 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	private static final boolean doReadTimings = false;
 
+	private static final boolean doHandleReadTimings = true;
+
+	private static final boolean doHandleWriteTimings = true;
+
 	private static final int IO_READ_LIMIT_PER_ROUND = 16 * 1024;
 
 	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024;
@@ -79,16 +83,29 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	@Override
 	public void handleRead() throws IOException {
-		doRead();
+		if (doHandleReadTimings) {
+			long s = System.nanoTime();
+			doRead();
+			long t = System.nanoTime() - s;
+			if (t > 5000000L) { // 5ms
+				System.out.printf("handleWrite took %.6fms%n", (t / 1000000f));
+			}
+		} else {
+			doRead();
+		}
 	}
 
 	@Override
 	public void handleWrite() throws IOException {
-		long s = System.nanoTime();
-		sendNonBlocking(null);
-		long t = System.nanoTime() - s;
-		if (t > 1000000L) { // 1ms
-			System.out.printf("handleWrite took %.6fms%n", (t / 1000000f));
+		if (doHandleWriteTimings) {
+			long s = System.nanoTime();
+			sendNonBlocking(null);
+			long t = System.nanoTime() - s;
+			if (t > 5000000L) { // 5ms
+				System.out.printf("handleWrite took %.6fms%n", (t / 1000000f));
+			}
+		} else {
+			sendNonBlocking(null);
 		}
 	}
 
@@ -120,7 +137,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 			// all data in the backlog has been written
 			// this means that the write backlog is empty
-			Validation.isTrue(writeBacklog.isEmpty());
+			assert(writeBacklog.isEmpty());
 
 			if (data != null) {
 				_channelWrite(data);
@@ -198,7 +215,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				// remaining = limit - position
 				// remaining = (position + dstCap) - position;
 				// remaining = dstCap
-				Validation.isTrue(src.remaining() == dstCap);
+				assert(src.remaining() == dstCap);
 				dst.put(src);
 				dst.flip();
 				assert (dst.remaining() == dstCap);

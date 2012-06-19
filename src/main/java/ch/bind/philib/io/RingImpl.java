@@ -53,7 +53,6 @@ public final class RingImpl<T> implements Ring<T> {
 		}
 		ensureRingSpace();
 		off = off > 0 ? off - 1 : ring.length - 1;
-		Validation.isTrue(off >= 0 && off < ring.length);
 		ring[off] = value;
 		size++;
 	}

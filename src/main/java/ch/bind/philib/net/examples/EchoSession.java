@@ -24,8 +24,8 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
 import ch.bind.philib.net.PureSessionBase;
-import ch.bind.philib.validation.Validation;
 
 public class EchoSession extends PureSessionBase {
 
@@ -35,7 +35,7 @@ public class EchoSession extends PureSessionBase {
 	public void receive(ByteBuffer data) throws IOException {
 		lastInteractionNs = System.nanoTime();
 		int rem = data.remaining();
-		Validation.isTrue(rem > 0);
+		assert (rem > 0);
 		send(data);
 	}
 

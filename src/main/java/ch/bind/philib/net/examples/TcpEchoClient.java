@@ -90,10 +90,10 @@ public class TcpEchoClient {
 			long now = System.currentTimeMillis();
 			long tDiff = now - lastT;
 			double mbit = (diff * 8) / 1e6 / (tDiff / 1000f);
-			double rxMb = rxDiff / (1024*1024f);
-			double txMb = txDiff / (1024*1024f);
-			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec%n", //
-					seeded, loopTimeSec, rxMb, txMb, mbit);
+			double rxMb = rxDiff / ((double) (1024 * 1024f));
+			double txMb = txDiff / ((double) (1024 * 1024f));
+			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec  %d%n", //
+					seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff));
 			if (seeded < 512 * 1024) {
 				System.out.println("seeding an additional " + seedBuffer.capacity() + " bytes into the echo chain");
 				seedBuffer.rewind();

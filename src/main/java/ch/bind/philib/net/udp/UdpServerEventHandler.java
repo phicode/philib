@@ -80,10 +80,9 @@ final class UdpServerEventHandler extends EventHandlerBase {
 				SocketAddress addr = channel.receive(rbuf);
 				if (addr == null) {
 					// no more data to read
-					Validation.isTrue(rbuf.position() == 0);
+					assert (rbuf.position() == 0 && rbuf.remaining() == 0);
 					return;
-				}
-				else {
+				} else {
 					rbuf.flip();
 					// assert (num == rbuf.limit());
 					// assert (num == rbuf.remaining());
