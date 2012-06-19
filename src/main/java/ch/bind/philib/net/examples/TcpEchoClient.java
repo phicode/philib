@@ -92,17 +92,14 @@ public class TcpEchoClient {
 			double mbit = (diff * 8) / 1e6 / (tDiff / 1000f);
 			double rxMb = rxDiff / ((double) (1024 * 1024f));
 			double txMb = txDiff / ((double) (1024 * 1024f));
-			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec  %d%n", //
-					seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff));
+			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d tDiff=%d%n", //
+					seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff), tDiff);
 			if (seeded < 512 * 1024) {
 				System.out.println("seeding an additional " + seedBuffer.capacity() + " bytes into the echo chain");
 				seedBuffer.rewind();
 				connection.sendBlocking(seedBuffer);
 				seeded += seedBuffer.capacity();
 			}
-			// if (rxDiff == 0 || txDiff == 0) {
-			// session.forceWrite();
-			// }
 			loop++;
 			lastRx = rx;
 			lastTx = tx;

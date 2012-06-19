@@ -137,7 +137,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 			// all data in the backlog has been written
 			// this means that the write backlog is empty
-			assert(writeBacklog.isEmpty());
+			assert (writeBacklog.isEmpty());
 
 			if (data != null) {
 				_channelWrite(data);
@@ -215,7 +215,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				// remaining = limit - position
 				// remaining = (position + dstCap) - position;
 				// remaining = dstCap
-				assert(src.remaining() == dstCap);
+				assert (src.remaining() == dstCap);
 				dst.put(src);
 				dst.flip();
 				assert (dst.remaining() == dstCap);
@@ -239,7 +239,10 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			final ByteBuffer bb = pending.getBuffer();
 			final int rem = bb.remaining();
 			if (rem == 0) {
-				releaseBuffer(pending);
+				boolean externBufReleased = releaseBuffer(pending);
+				if (externBufReleased) {
+					writeBacklog.notifyAll();
+				}
 			} else {
 				final int num = _channelWrite(bb);
 				totalWrite += num;

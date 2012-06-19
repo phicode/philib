@@ -65,10 +65,13 @@ public abstract class EventHandlerBase implements EventHandler {
 		context.getBufferCache().release(buf);
 	}
 
-	protected final void releaseBuffer(final NetBuf buf) {
+	protected final boolean releaseBuffer(final NetBuf buf) {
 		buf.finished();
 		if (buf.isIntern()) {
 			context.getBufferCache().release(buf.getBuffer());
+			return false;
+		} else {
+			return true;
 		}
 	}
 }
