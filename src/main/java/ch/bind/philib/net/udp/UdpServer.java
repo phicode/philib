@@ -83,6 +83,6 @@ public final class UdpServer implements NetServer {
 	void receive(SocketAddress addr, ByteBuffer rbuf) {
 		session.receive(addr, rbuf);
 		// TODO Auto-generated method stub
-		
+
 	}
 }

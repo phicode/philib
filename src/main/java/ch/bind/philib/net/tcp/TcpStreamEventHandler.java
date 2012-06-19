@@ -34,6 +34,7 @@ import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
+import ch.bind.philib.net.events.NetBuf;
 import ch.bind.philib.validation.Validation;
 
 final class TcpStreamEventHandler extends EventHandlerBase {
@@ -52,20 +53,16 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	private final SocketChannel channel;
 
-	private final NetContext context;
-
 	private final TcpConnection connection;
 
-	private final Ring<Buf> writeBacklog = new RingImpl<Buf>();
+	private final Ring<NetBuf> writeBacklog = new RingImpl<NetBuf>();
 
 	private boolean registeredForWriteEvt = false;
 
 	TcpStreamEventHandler(NetContext context, TcpConnection connection, SocketChannel channel) {
-		super();
-		Validation.notNull(context);
+		super(context);
 		Validation.notNull(connection);
 		Validation.notNull(channel);
-		this.context = context;
 		this.connection = connection;
 		this.channel = channel;
 	}
@@ -152,7 +149,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		// any), then our buffer
 		// if in the meantime more data arrives we do not want to block
 		// longer
-		final Buf externBuf = new ExternBuf(data);
+		final NetBuf externBuf = NetBuf.createExtern(data);
 		synchronized (writeBacklog) {
 			writeBacklog.addBack(externBuf);
 			do {
@@ -166,12 +163,10 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 					// notify other blocking writes
 					writeBacklog.notifyAll();
 					return;
-				}
-				else {
+				} else {
 					if (externBuf.isPending()) {
 						writeBacklog.wait();
-					}
-					else {
+					} else {
 						writeBacklog.notifyAll();
 						return;
 					}
@@ -187,7 +182,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		int srcRem = src.remaining();
 		while (srcRem > 0) {
 			ByteBuffer dst = acquireBuffer();
-			Buf buf = new InternBuf(dst);
+			NetBuf buf = NetBuf.createIntern(dst);
 			int dstCap = dst.capacity();
 			if (dstCap >= srcRem) {
 				dst.put(src);
@@ -195,8 +190,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				assert (dst.remaining() == srcRem);
 				writeBacklog.addBack(buf);
 				return;
-			}
-			else {
+			} else {
 				final int limit = src.limit();
 				int pos = src.position();
 				src.limit(pos + dstCap);
@@ -219,24 +213,22 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	private boolean s_sendPendingNonBlock() throws IOException {
 		int totalWrite = 0;
 		do {
-			final Buf pending = writeBacklog.poll();
+			final NetBuf pending = writeBacklog.poll();
 			if (pending == null) {
 				// finished
 				unregisterFromWriteEvents();
 				return true;
 			}
-			final ByteBuffer bb = pending.bb;
+			final ByteBuffer bb = pending.getBuffer();
 			final int rem = bb.remaining();
 			if (rem == 0) {
 				releaseBuffer(pending);
-			}
-			else {
+			} else {
 				final int num = _channelWrite(bb);
 				totalWrite += num;
 				if (num == rem) {
 					releaseBuffer(pending);
-				}
-				else {
+				} else {
 					// write channel is blocked
 					writeBacklog.addFront(pending);
 					break;
@@ -256,8 +248,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000L) {
 				System.out.printf("write took %.6fms%n", (t / 1000000f));
 			}
-		}
-		else {
+		} else {
 			num = channel.write(data);
 		}
 		tx.addAndGet(num);
@@ -274,8 +265,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000) {
 				System.out.printf("read took: %.6fms%n", (t / 1000000f));
 			}
-		}
-		else {
+		} else {
 			num = channel.read(rbuf);
 		}
 		if (num > 0) {
@@ -294,12 +284,10 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 					// connection closed
 					close();
 					return;
-				}
-				else if (num == 0) {
+				} else if (num == 0) {
 					// no more data to read
 					return;
-				}
-				else {
+				} else {
 					rbuf.flip();
 					assert (num == rbuf.limit());
 					assert (num == rbuf.remaining());
@@ -315,21 +303,6 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			}
 		} finally {
 			releaseBuffer(rbuf);
-		}
-	}
-
-	private ByteBuffer acquireBuffer() {
-		return context.getBufferCache().acquire();
-	}
-
-	private void releaseBuffer(final ByteBuffer buf) {
-		context.getBufferCache().release(buf);
-	}
-
-	private void releaseBuffer(final Buf buf) {
-		buf.finished();
-		if (buf.isIntern()) {
-			context.getBufferCache().release(buf.bb);
 		}
 	}
 
@@ -353,47 +326,5 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	long getTx() {
 		return tx.get();
-	}
-
-	private static abstract class Buf {
-		private final ByteBuffer bb;
-
-		private boolean pending = true;
-
-		abstract boolean isIntern();
-
-		Buf(ByteBuffer bb) {
-			this.bb = bb;
-		}
-
-		final void finished() {
-			pending = false;
-		}
-
-		final boolean isPending() {
-			return pending;
-		}
-	}
-
-	private static final class InternBuf extends Buf {
-		InternBuf(ByteBuffer bb) {
-			super(bb);
-		}
-
-		@Override
-		boolean isIntern() {
-			return true;
-		}
-	}
-
-	private static final class ExternBuf extends Buf {
-		ExternBuf(ByteBuffer bb) {
-			super(bb);
-		}
-
-		@Override
-		boolean isIntern() {
-			return false;
-		}
 	}
 }

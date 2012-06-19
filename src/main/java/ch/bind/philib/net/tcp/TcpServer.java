@@ -64,7 +64,7 @@ public final class TcpServer implements NetServer {
 		System.out.println("TCP listening on: " + bindAddress);
 
 		TcpServer server = new TcpServer(context, sessionFactory, channel);
-		server.serverEventHandler = new TcpServerEventHandler(channel, server);
+		server.serverEventHandler = new TcpServerEventHandler(context, channel, server);
 		server.serverEventHandler.start(context);
 		return server;
 	}

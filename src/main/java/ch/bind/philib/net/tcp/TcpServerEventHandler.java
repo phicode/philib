@@ -37,8 +37,8 @@ final class TcpServerEventHandler extends EventHandlerBase {
 
 	private final TcpServer server;
 
-	TcpServerEventHandler(ServerSocketChannel channel, TcpServer server) {
-		super();
+	TcpServerEventHandler(NetContext context, ServerSocketChannel channel, TcpServer server) {
+		super(context);
 		Validation.notNull(channel);
 		Validation.notNull(server);
 		this.channel = channel;

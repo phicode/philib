@@ -56,12 +56,19 @@ public abstract class EventHandlerBase implements EventHandler {
 	public void handleAccept() throws IOException {
 		throw new IllegalStateException("unsupported select operation: accept");
 	}
-	
-	protected ByteBuffer acquireBuffer() {
+
+	protected final ByteBuffer acquireBuffer() {
 		return context.getBufferCache().acquire();
 	}
 
-	protected void releaseBuffer(final ByteBuffer buf) {
+	protected final void releaseBuffer(final ByteBuffer buf) {
 		context.getBufferCache().release(buf);
+	}
+
+	protected final void releaseBuffer(final NetBuf buf) {
+		buf.finished();
+		if (buf.isIntern()) {
+			context.getBufferCache().release(buf.getBuffer());
+		}
 	}
 }
