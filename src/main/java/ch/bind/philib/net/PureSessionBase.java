@@ -61,11 +61,6 @@ public abstract class PureSessionBase implements PureSession {
 	}
 
 	@Override
-	public final void releaseBuffer(ByteBuffer buffer) {
-		connection.getContext().getBufferCache().release(buffer);
-	}
-
-	@Override
 	public final long getRx() {
 		return connection.getRx();
 	}

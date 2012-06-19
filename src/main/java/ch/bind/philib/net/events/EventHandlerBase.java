@@ -22,8 +22,20 @@
 package ch.bind.philib.net.events;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.validation.Validation;
 
 public abstract class EventHandlerBase implements EventHandler {
+
+	protected final NetContext context;
+
+	protected EventHandlerBase(NetContext context) {
+		super();
+		Validation.notNull(context);
+		this.context = context;
+	}
 
 	@Override
 	public void handleRead() throws IOException {
@@ -43,5 +55,13 @@ public abstract class EventHandlerBase implements EventHandler {
 	@Override
 	public void handleAccept() throws IOException {
 		throw new IllegalStateException("unsupported select operation: accept");
+	}
+	
+	protected ByteBuffer acquireBuffer() {
+		return context.getBufferCache().acquire();
+	}
+
+	protected void releaseBuffer(final ByteBuffer buf) {
+		context.getBufferCache().release(buf);
 	}
 }

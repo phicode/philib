@@ -31,10 +31,9 @@ import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.PureSession;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
-public class TcpServer implements NetServer {
+public final class TcpServer implements NetServer {
 
 	// TODO: configurable
 	private static final int DEFAULT_BACKLOG = 25;
@@ -61,13 +60,12 @@ public class TcpServer implements NetServer {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		socket.bind(bindAddress, DEFAULT_BACKLOG);
-		channel.configureBlocking(false);
 		// TODO: log bridge
-		System.out.println("listening on: " + bindAddress);
+		System.out.println("TCP listening on: " + bindAddress);
 
 		TcpServer server = new TcpServer(context, sessionFactory, channel);
 		server.serverEventHandler = new TcpServerEventHandler(channel, server);
-		context.getEventDispatcher().register(server.serverEventHandler, EventUtil.ACCEPT);
+		server.serverEventHandler.start(context);
 		return server;
 	}
 

@@ -36,7 +36,7 @@ import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
-class TcpStreamEventHandler extends EventHandlerBase {
+final class TcpStreamEventHandler extends EventHandlerBase {
 
 	private static final boolean doWriteTimings = false;
 
@@ -60,7 +60,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 
 	private boolean registeredForWriteEvt = false;
 
-	private TcpStreamEventHandler(NetContext context, TcpConnection connection, SocketChannel channel) {
+	TcpStreamEventHandler(NetContext context, TcpConnection connection, SocketChannel channel) {
 		super();
 		Validation.notNull(context);
 		Validation.notNull(connection);
@@ -68,6 +68,11 @@ class TcpStreamEventHandler extends EventHandlerBase {
 		this.context = context;
 		this.connection = connection;
 		this.channel = channel;
+	}
+
+	void start() throws IOException {
+		channel.configureBlocking(false);
+		context.getEventDispatcher().register(this, EventUtil.READ);
 	}
 
 	@Override
@@ -161,10 +166,12 @@ class TcpStreamEventHandler extends EventHandlerBase {
 					// notify other blocking writes
 					writeBacklog.notifyAll();
 					return;
-				} else {
+				}
+				else {
 					if (externBuf.isPending()) {
 						writeBacklog.wait();
-					} else {
+					}
+					else {
 						writeBacklog.notifyAll();
 						return;
 					}
@@ -188,7 +195,8 @@ class TcpStreamEventHandler extends EventHandlerBase {
 				assert (dst.remaining() == srcRem);
 				writeBacklog.addBack(buf);
 				return;
-			} else {
+			}
+			else {
 				final int limit = src.limit();
 				int pos = src.position();
 				src.limit(pos + dstCap);
@@ -221,12 +229,14 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			final int rem = bb.remaining();
 			if (rem == 0) {
 				releaseBuffer(pending);
-			} else {
+			}
+			else {
 				final int num = _channelWrite(bb);
 				totalWrite += num;
 				if (num == rem) {
 					releaseBuffer(pending);
-				} else {
+				}
+				else {
 					// write channel is blocked
 					writeBacklog.addFront(pending);
 					break;
@@ -246,7 +256,8 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000L) {
 				System.out.printf("write took %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			num = channel.write(data);
 		}
 		tx.addAndGet(num);
@@ -254,6 +265,7 @@ class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	private int _channelRead(final ByteBuffer rbuf) throws IOException {
+		rbuf.clear();
 		int num;
 		if (doReadTimings) {
 			long tStart = System.nanoTime();
@@ -262,7 +274,8 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000) {
 				System.out.printf("read took: %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			num = channel.read(rbuf);
 		}
 		if (num > 0) {
@@ -281,10 +294,12 @@ class TcpStreamEventHandler extends EventHandlerBase {
 					// connection closed
 					close();
 					return;
-				} else if (num == 0) {
+				}
+				else if (num == 0) {
 					// no more data to read
 					return;
-				} else {
+				}
+				else {
 					rbuf.flip();
 					assert (num == rbuf.limit());
 					assert (num == rbuf.remaining());
@@ -330,12 +345,6 @@ class TcpStreamEventHandler extends EventHandlerBase {
 			context.getEventDispatcher().reRegister(this, EventUtil.READ, false);
 			registeredForWriteEvt = false;
 		}
-	}
-
-	public static TcpStreamEventHandler create(NetContext context, TcpConnection connection, SocketChannel channel) {
-		TcpStreamEventHandler rv = new TcpStreamEventHandler(context, connection, channel);
-		context.getEventDispatcher().register(rv, EventUtil.READ);
-		return rv;
 	}
 
 	long getRx() {

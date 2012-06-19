@@ -56,10 +56,10 @@ public final class TcpConnection implements Connection {
 	}
 
 	static TcpConnection create(NetContext context, SocketChannel channel, PureSession session) throws IOException {
-		channel.configureBlocking(false);
 		TcpConnection connection = new TcpConnection(context, channel, session);
 		session.init(connection);
-		connection.eventHandler = TcpStreamEventHandler.create(context, connection, channel);
+		connection.eventHandler = new TcpStreamEventHandler(context, connection, channel);
+		connection.eventHandler.start();
 		return connection;
 	}
 

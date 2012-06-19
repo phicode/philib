@@ -49,8 +49,6 @@ public interface PureSession extends Closeable {
 
 	boolean isOpen();
 
-	void releaseBuffer(ByteBuffer buffer);
-
 	long getRx();
 
 	long getTx();
