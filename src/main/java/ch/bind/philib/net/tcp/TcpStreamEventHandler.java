@@ -90,7 +90,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 5000000L) { // 5ms
 				System.out.printf("handleWrite took %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			doRead();
 		}
 	}
@@ -104,7 +105,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 5000000L) { // 5ms
 				System.out.printf("handleWrite took %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			sendNonBlocking(null);
 		}
 	}
@@ -119,7 +121,9 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		writeBacklog.clear();
+		synchronized (writeBacklog) {
+			writeBacklog.clear();
+		}
 		connection.notifyClosed();
 	}
 
@@ -150,7 +154,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			}
 
 			// backlog and input buffer written
-
+			writeBacklog.shrink();
 			unregisterFromWriteEvents();
 			// notify blocking writes
 			writeBacklog.notifyAll();
@@ -174,16 +178,23 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 				if (finished) {
 					Validation.isFalse(externBuf.isPending());
-					// all data writes from the backlog have been written
-					// unregisterFromWriteEvents();
+					
+					// all data from the backlog has been written
+					writeBacklog.shrink();
+					unregisterFromWriteEvents();
 
 					// notify other blocking writes
 					writeBacklog.notifyAll();
 					return;
-				} else {
+				}
+				else {
+					// not all data has been written
 					if (externBuf.isPending()) {
+						// our data is among those who are waiting to be written
 						writeBacklog.wait();
-					} else {
+					}
+					else {
+						// our data has been written
 						writeBacklog.notifyAll();
 						return;
 					}
@@ -207,7 +218,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				assert (dst.remaining() == srcRem);
 				writeBacklog.addBack(buf);
 				return;
-			} else {
+			}
+			else {
 				final int limit = src.limit();
 				int pos = src.position();
 				src.limit(pos + dstCap);
@@ -243,12 +255,14 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				if (externBufReleased) {
 					writeBacklog.notifyAll();
 				}
-			} else {
+			}
+			else {
 				final int num = _channelWrite(bb);
 				totalWrite += num;
 				if (num == rem) {
 					releaseBuffer(pending);
-				} else {
+				}
+				else {
 					// write channel is blocked
 					writeBacklog.addFront(pending);
 					break;
@@ -268,7 +282,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000L) {
 				System.out.printf("write took %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			num = channel.write(data);
 		}
 		tx.addAndGet(num);
@@ -285,7 +300,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000) {
 				System.out.printf("read took: %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			num = channel.read(rbuf);
 		}
 		if (num > 0) {
@@ -304,10 +320,12 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 					// connection closed
 					close();
 					return;
-				} else if (num == 0) {
+				}
+				else if (num == 0) {
 					// no more data to read
 					return;
-				} else {
+				}
+				else {
 					rbuf.flip();
 					assert (num == rbuf.limit());
 					assert (num == rbuf.remaining());

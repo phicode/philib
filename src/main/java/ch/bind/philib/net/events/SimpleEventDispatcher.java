@@ -146,6 +146,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				System.out.printf("register took: %dns => %.5fms%n", t, (t / 1000000f));
 			} catch (ClosedChannelException e) {
 				System.out.println("cant register an already closed channel");
+				eventHandler.close();
 			}
 
 			reg = newRegistrations.poll();

@@ -129,11 +129,8 @@ public final class RingImpl<T> implements Ring<T> {
 
 	@Override
 	public void shrink() {
-		if (ring == null || ring.length == size) {
-			// no ring allocated or ring full
-			return;
-		}
-		else {
+		if (ring != null && ring.length > size) {
+			// the ring is allocated and not full
 			int optimalLen = INITIAL_RING_LEN;
 			while (optimalLen < size) {
 				optimalLen *= RING_LEN_ENHANCING_FACTOR;
