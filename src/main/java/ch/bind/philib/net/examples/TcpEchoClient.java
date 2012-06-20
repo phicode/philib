@@ -69,6 +69,7 @@ public class TcpEchoClient {
 		// 1234);
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 
+		int numRunning = 0;
 		long rampUpMs = 1000;
 		long startNext = System.currentTimeMillis();
 		
