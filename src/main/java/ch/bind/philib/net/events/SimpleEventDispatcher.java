@@ -215,7 +215,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			if (checkMask(readyOps, EventUtil.CONNECT)) {
 				eventHandler.handleConnect();
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			System.err.println("eventHandler.handle*() failed, closing: " + ExceptionUtil.buildMessageChain(e));
 			e.printStackTrace(System.err);
 			closeHandler(eventHandler);

@@ -51,9 +51,13 @@ public class EchoSession extends PureSessionBase {
 	public void receive(ByteBuffer data) throws IOException {
 		lastInteractionNs = System.nanoTime();
 		assert (data.position() == 0);
-		verifyReceived(data);
-		assert (data.position() == data.limit());
 
+		if (server) {
+			send(data);
+		} else {
+			verifyReceived(data);
+			assert (data.position() == data.limit());
+		}
 		// send(data);
 	}
 
@@ -68,8 +72,7 @@ public class EchoSession extends PureSessionBase {
 				partialSize += rem;
 				assert (partialSize < 8);
 				return;
-			}
-			else {
+			} else {
 				data.get(partial, partialSize, partialRem);
 				verify();
 			}
@@ -82,8 +85,7 @@ public class EchoSession extends PureSessionBase {
 		if (rem > 0) {
 			data.get(partial, 0, rem);
 			partialSize = rem;
-		}
-		else {
+		} else {
 			partialSize = 0;
 		}
 	}

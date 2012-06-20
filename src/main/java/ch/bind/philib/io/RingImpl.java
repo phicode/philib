@@ -21,6 +21,11 @@
  */
 package ch.bind.philib.io;
 
+import java.nio.ByteBuffer;
+
+import ch.bind.philib.net.events.NetBuf;
+import ch.bind.philib.validation.Validation;
+
 public final class RingImpl<T> implements Ring<T> {
 
 	private static final int INITIAL_RING_LEN = 4;
@@ -43,6 +48,7 @@ public final class RingImpl<T> implements Ring<T> {
 		int addPos = (off + size) % ring.length;
 		ring[addPos] = value;
 		size++;
+		checkUsage();
 	}
 
 	@Override
@@ -55,6 +61,7 @@ public final class RingImpl<T> implements Ring<T> {
 		off = off > 0 ? off - 1 : ring.length - 1;
 		ring[off] = value;
 		size++;
+		checkUsage();
 	}
 
 	@Override
@@ -63,8 +70,7 @@ public final class RingImpl<T> implements Ring<T> {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (size == 0) {
 			return null;
-		}
-		else {
+		} else {
 			Object value = ring[off];
 			ring[off] = null;
 			off = (off + 1) % ring.length;
@@ -79,14 +85,32 @@ public final class RingImpl<T> implements Ring<T> {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (size == 0) {
 			return value;
-		}
-		else {
+		} else {
 			final T rv = poll();
 			if (value != null) {
 				addBack(value);
 			}
 			assert (rv != null);
 			return rv;
+		}
+	}
+
+	private void checkUsage() {
+		if (size > 0 && (ring[off] instanceof NetBuf)) {
+			int allocated = 0;
+			int used = 0;
+			for (int i = 0; i < size; i++) {
+				int idx = (off + i) % ring.length;
+				Validation.isTrue(ring[idx] instanceof NetBuf);
+				NetBuf nb = (NetBuf) ring[idx];
+				ByteBuffer bb = nb.getBuffer();
+				allocated += bb.capacity();
+				used += bb.remaining();
+			}
+			double percentage = used / (double) allocated;
+			if (percentage < 0.5f || allocated > 2 * 1024 * 1024) {
+				System.out.printf("allocated=%d, used=%d%n", allocated, used);
+			}
 		}
 	}
 
@@ -112,8 +136,7 @@ public final class RingImpl<T> implements Ring<T> {
 	private void ensureRingSpace() {
 		if (ring == null) {
 			ring = new Object[INITIAL_RING_LEN];
-		}
-		else {
+		} else {
 			final int l = ring.length;
 			if (size == l) {
 				int newLen = l * RING_LEN_ENHANCING_FACTOR;
@@ -155,8 +178,7 @@ public final class RingImpl<T> implements Ring<T> {
 
 		if (off == 0) {
 			System.arraycopy(oldRing, 0, newRing, 0, used);
-		}
-		else {
+		} else {
 			int numToEnd = used - off;
 			// from off to the end of the array
 			System.arraycopy(oldRing, off, newRing, 0, numToEnd);
