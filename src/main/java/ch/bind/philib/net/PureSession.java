@@ -25,23 +25,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import ch.bind.philib.net.context.NetContext;
-
 public interface PureSession extends Closeable {
 
 	void init(Connection connection);
 
-	NetContext getContext();
-
 	void receive(ByteBuffer data) throws IOException;
 
 	void send(ByteBuffer data) throws IOException;
-
-	// int send(byte[] data) throws IOException;
-
-	// void sendAll(ByteBuffer data) throws IOException;
-
-	// void sendAll(byte[] data) throws IOException;;
 
 	void closed();
 

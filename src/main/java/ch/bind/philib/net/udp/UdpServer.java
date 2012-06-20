@@ -27,23 +27,22 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
+import ch.bind.philib.net.DatagramSession;
 import ch.bind.philib.net.NetServer;
-import ch.bind.philib.net.PureSession;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
 public final class UdpServer implements NetServer {
 
 	private final NetContext context;
 
-	private final PureSession session;
+	private final DatagramSession session;
 
 	private final DatagramChannel channel;
 
 	private UdpServerEventHandler serverEventHandler;
 
-	UdpServer(NetContext context, PureSession session, DatagramChannel channel) {
+	UdpServer(NetContext context, DatagramSession session, DatagramChannel channel) {
 		Validation.notNull(context);
 		Validation.notNull(session);
 		Validation.notNull(channel);
@@ -52,7 +51,7 @@ public final class UdpServer implements NetServer {
 		this.channel = channel;
 	}
 
-	static UdpServer open(NetContext context, PureSession session, SocketAddress bindAddress) throws IOException {
+	static UdpServer open(NetContext context, DatagramSession session, SocketAddress bindAddress) throws IOException {
 		DatagramChannel channel = DatagramChannel.open();
 		DatagramSocket socket = channel.socket();
 		socket.bind(bindAddress);
@@ -81,8 +80,11 @@ public final class UdpServer implements NetServer {
 	}
 
 	void receive(SocketAddress addr, ByteBuffer rbuf) {
-		session.receive(addr, rbuf);
-		// TODO Auto-generated method stub
-
+		try {
+			session.receive(addr, rbuf);
+		} catch (IOException e) {
+			// TODO Auto-generated method stub
+			e.printStackTrace(System.err);
+		}
 	}
 }

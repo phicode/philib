@@ -106,9 +106,9 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
-//		finally {
-//			close();
-//		}
+		// finally {
+		// close();
+		// }
 	}
 
 	private int select() throws IOException, ClosedSelectorException {
@@ -125,7 +125,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				if (selMs >= 10005) {
 					System.out.printf("select took %dms, num=%d%n", selMs, num);
 				}
-			} else {
+			}
+			else {
 				num = selector.select(10000L);
 			}
 		} while (num == 0);
@@ -136,17 +137,18 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		NewRegistration reg = newRegistrations.poll();
 		while (reg != null) {
 			EventHandler eventHandler = reg.getEventHandler();
-			SelectableChannel channel = eventHandler.getChannel();
-			int ops = reg.getOps();
 			try {
-				long ts = System.nanoTime();
+				SelectableChannel channel = eventHandler.getChannel();
+				int ops = reg.getOps();
 				channel.register(selector, ops, eventHandler);
-				long te = System.nanoTime();
-				long t = te - ts;
-				System.out.printf("register took: %dns => %.5fms%n", t, (t / 1000000f));
 			} catch (ClosedChannelException e) {
 				System.out.println("cant register an already closed channel");
-				eventHandler.close();
+				try {
+					eventHandler.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 
 			reg = newRegistrations.poll();
@@ -249,7 +251,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
-		} else {
+		}
+		else {
 			key.interestOps(ops);
 		}
 		if (asap) {
@@ -266,7 +269,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			key.attach(null);
 			wakeup();
 			System.out.println("unreg, keys: " + selector.keys().size());
-		} else {
+		}
+		else {
 			System.out.println("unreg failed, not registered");
 		}
 	}

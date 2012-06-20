@@ -39,17 +39,14 @@ final class UdpServerEventHandler extends EventHandlerBase {
 
 	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024;
 
-	private final NetContext context;
-
 	private final DatagramChannel channel;
 
 	private final UdpServer server;
 
 	UdpServerEventHandler(NetContext context, DatagramChannel channel, UdpServer server) {
-		Validation.notNull(context);
+		super(context);
 		Validation.notNull(channel);
 		Validation.notNull(server);
-		this.context = context;
 		this.channel = channel;
 		this.server = server;
 	}
@@ -82,7 +79,8 @@ final class UdpServerEventHandler extends EventHandlerBase {
 					// no more data to read
 					assert (rbuf.position() == 0 && rbuf.remaining() == 0);
 					return;
-				} else {
+				}
+				else {
 					rbuf.flip();
 					// assert (num == rbuf.limit());
 					// assert (num == rbuf.remaining());
@@ -104,6 +102,14 @@ final class UdpServerEventHandler extends EventHandlerBase {
 	@Override
 	public void handleWrite() throws IOException {
 		// TODO Auto-generated method stub
+
+	}
+
+	void sendNonBlocking(SocketAddress addr, ByteBuffer data) {
+
+	}
+
+	void sendBlocking(SocketAddress addr, ByteBuffer data) {
 
 	}
 }

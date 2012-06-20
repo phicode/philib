@@ -41,16 +41,37 @@ public class TcpEchoClient {
 	private Connection connection;
 
 	public static void main(String[] args) throws Exception {
-		new TcpEchoClient().run();
+		int numClients = 1;
+//		int rampUp = 
+		if (args.length > 1) {
+			System.out.println("only one parameter may be specified");
+			System.exit(1);
+		}
+		else if (args.length == 1) {
+			try {
+				numClients = Integer.parseInt(args[0]);
+			} catch (NumberFormatException e) {
+				System.out.println("not a number: " + args[0]);
+				System.exit(1);
+			}
+			if (numClients < 1) {
+				System.out.println("number of clients cant be less then 1");
+				System.exit(1);
+			}
+		}
+		new TcpEchoClient().run(numClients);
 	}
 
-	private void run() throws IOException, InterruptedException {
+	private void run(int numClients) throws IOException, InterruptedException {
 		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.66",
 		// 1234);
 		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221",
 		// 1234);
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 
+		long rampUpMs = 1000;
+		long startNext = System.currentTimeMillis();
+		
 		byte[] buf = new byte[8 * 1024];
 		new Random().nextBytes(buf);
 		ByteBuffer seedBuffer = ByteBuffer.wrap(buf);

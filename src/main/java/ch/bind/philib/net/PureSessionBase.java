@@ -24,8 +24,6 @@ package ch.bind.philib.net;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import ch.bind.philib.net.context.NetContext;
-
 public abstract class PureSessionBase implements PureSession {
 
 	private Connection connection;
@@ -33,11 +31,6 @@ public abstract class PureSessionBase implements PureSession {
 	@Override
 	public final void init(Connection connection) {
 		this.connection = connection;
-	}
-
-	@Override
-	public final NetContext getContext() {
-		return connection.getContext();
 	}
 
 	@Override
