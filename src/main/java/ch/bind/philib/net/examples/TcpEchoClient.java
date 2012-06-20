@@ -77,7 +77,7 @@ public class TcpEchoClient {
 		new Random().nextBytes(buf);
 		ByteBuffer seedBuffer = ByteBuffer.wrap(buf);
 		NetContext context = new SimpleNetContext();
-		EchoSession session = new EchoSession();
+		EchoSession session = new EchoSession(false);
 		connection = TcpNetFactory.INSTANCE.openClient(context, endpoint, session);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {

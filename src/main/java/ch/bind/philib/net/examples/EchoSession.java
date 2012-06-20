@@ -35,10 +35,13 @@ public class EchoSession extends PureSessionBase {
 
 	private final boolean server;
 
-	private long nextValue;
-	
+	private long nextValueRead;
+
+	private long nextValueWrite;
+
 	private byte[] partial = new byte[8];
-	private int partialSize ;
+
+	private int partialSize;
 
 	EchoSession(boolean server) {
 		this.server = server;
@@ -47,11 +50,11 @@ public class EchoSession extends PureSessionBase {
 	@Override
 	public void receive(ByteBuffer data) throws IOException {
 		lastInteractionNs = System.nanoTime();
-assert(data.position() == 0);
-verifyReceived(data);
-assert(data.position() == data.limit());
-		
-//		send(data);
+		assert (data.position() == 0);
+		verifyReceived(data);
+		assert (data.position() == data.limit());
+
+		// send(data);
 	}
 
 	private void verifyReceived(ByteBuffer data) {
@@ -59,13 +62,14 @@ assert(data.position() == data.limit());
 		assert (rem > 0);
 		if (partialSize > 0) {
 			// partial data to be processed
-			int partialRem = 8-partialSize;
+			int partialRem = 8 - partialSize;
 			if (rem < partialRem) {
 				data.get(partial, partialSize, rem);
 				partialSize += rem;
-				assert(partialSize < 8);
+				assert (partialSize < 8);
 				return;
-			} else {
+			}
+			else {
 				data.get(partial, partialSize, partialRem);
 				verify();
 			}
@@ -73,27 +77,26 @@ assert(data.position() == data.limit());
 		while (rem >= 8) {
 			data.get(partial);
 			verify();
-			rem-=8;
+			rem -= 8;
 		}
 		if (rem > 0) {
-			data.get(partial,0,rem);
+			data.get(partial, 0, rem);
 			partialSize = rem;
-		} else {
+		}
+		else {
 			partialSize = 0;
 		}
 	}
 
 	private void verify() {
 		long v = EndianConverter.decodeInt64LE(partial);
-		Validation.isTrue(v == nextValue);
-		nextValue++;
+		Validation.isTrue(v == nextValueRead);
+		nextValueRead++;
 	}
 
 	public void send(int numBytes) {
 		assert (numBytes % 8 == 0);
-		
-		
-		
+
 	}
 
 	@Override
