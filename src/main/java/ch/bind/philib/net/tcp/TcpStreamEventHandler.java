@@ -59,6 +59,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	private final TcpConnection connection;
 
 	private final B b = new B();
+	
+	private final B r = new B();
 
 	private boolean registeredForWriteEvt = false;
 
@@ -341,18 +343,19 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	private void doRead() throws IOException {
-		final ByteBuffer rbuf = acquireBuffer();
-		try {
+			final ByteBuffer rbuf = acquireBuffer();
 			int totalRead = 0;
-			while (totalRead < IO_READ_LIMIT_PER_ROUND) {
+			while (r.pending == null && totalRead < IO_READ_LIMIT_PER_ROUND) {
 				int num = _channelRead(rbuf);
 				if (num == -1) {
 					// connection closed
+					releaseBuffer(rbuf);
 					close();
 					return;
 				}
 				else if (num == 0) {
 					// no more data to read
+					releaseBuffer(rbuf);
 					return;
 				}
 				else {
@@ -362,6 +365,10 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 					totalRead += num;
 					try {
 						connection.receive(rbuf);
+						if (rbuf.hasRemaining()) {
+							r.setInternal(rbuf);
+							return;
+						}
 					} catch (Exception e) {
 						System.err.println("TODO: " + ExceptionUtil.buildMessageChain(e));
 						e.printStackTrace(System.err);
@@ -369,9 +376,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 					}
 				}
 			}
-		} finally {
-			releaseBuffer(rbuf);
 		}
+		releaseBuffer(rbuf);
 	}
 
 	private void registerForWriteEvents() {
