@@ -62,7 +62,8 @@ final class TcpServerEventHandler extends EventHandlerBase {
 	}
 
 	@Override
-	public void handleAccept() throws IOException {
+	public void handle(int ops) throws IOException {
+		assert (ops == EventUtil.ACCEPT);
 		while (true) {
 			SocketChannel clientChannel = channel.accept();
 			if (clientChannel == null) {
@@ -72,5 +73,4 @@ final class TcpServerEventHandler extends EventHandlerBase {
 			server.createSession(clientChannel);
 		}
 	}
-
 }

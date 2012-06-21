@@ -21,7 +21,6 @@
  */
 package ch.bind.philib.net.events;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import ch.bind.philib.net.context.NetContext;
@@ -37,26 +36,6 @@ public abstract class EventHandlerBase implements EventHandler {
 		this.context = context;
 	}
 
-	@Override
-	public void handleRead() throws IOException {
-		throw new IllegalStateException("unsupported select operation: read");
-	}
-
-	@Override
-	public void handleWrite() throws IOException {
-		throw new IllegalStateException("unsupported select operation: write");
-	}
-
-	@Override
-	public void handleConnect() throws IOException {
-		throw new IllegalStateException("unsupported select operation: connect");
-	}
-
-	@Override
-	public void handleAccept() throws IOException {
-		throw new IllegalStateException("unsupported select operation: accept");
-	}
-
 	protected final ByteBuffer acquireBuffer() {
 		return context.getBufferCache().acquire();
 	}
@@ -70,7 +49,8 @@ public abstract class EventHandlerBase implements EventHandler {
 		if (buf.isIntern()) {
 			context.getBufferCache().release(buf.getBuffer());
 			return false;
-		} else {
+		}
+		else {
 			return true;
 		}
 	}

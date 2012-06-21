@@ -21,8 +21,6 @@
  */
 package ch.bind.philib.net.events;
 
-import static ch.bind.philib.io.BitOps.checkMask;
-
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ClosedSelectorException;
@@ -193,7 +191,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	private void handleReadyKey(final SelectionKey key) {
-		EventHandler eventHandler = (EventHandler) key.attachment();
+		final EventHandler eventHandler = (EventHandler) key.attachment();
 		if (eventHandler == null) {
 			// cancelled key
 			return;
@@ -201,21 +199,10 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		if (!key.isValid()) {
 			closeHandler(eventHandler);
 		}
-		int readyOps = key.readyOps();
 		try {
-			if (checkMask(readyOps, EventUtil.READ)) {
-				eventHandler.handleRead();
-			}
-			if (checkMask(readyOps, EventUtil.WRITE)) {
-				eventHandler.handleWrite();
-			}
-			if (checkMask(readyOps, EventUtil.ACCEPT)) {
-				eventHandler.handleAccept();
-			}
-			if (checkMask(readyOps, EventUtil.CONNECT)) {
-				eventHandler.handleConnect();
-			}
-		} catch (Throwable e) {
+			int readyOps = key.readyOps();
+			eventHandler.handle(readyOps);
+		} catch (Exception e) {
 			System.err.println("eventHandler.handle*() failed, closing: " + ExceptionUtil.buildMessageChain(e));
 			e.printStackTrace(System.err);
 			closeHandler(eventHandler);

@@ -28,6 +28,7 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicLong;
 
+import ch.bind.philib.io.BitOps;
 import ch.bind.philib.io.Ring;
 import ch.bind.philib.io.RingImpl;
 import ch.bind.philib.lang.ExceptionUtil;
@@ -43,13 +44,11 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	private static final boolean doReadTimings = false;
 
-	private static final boolean doHandleReadTimings = true;
+	private static final boolean doHandleTimings = true;
 
-	private static final boolean doHandleWriteTimings = true;
+	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
 
-	private static final int IO_READ_LIMIT_PER_ROUND = 16 * 1024;
-
-	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024;
+	private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
 
 	private final AtomicLong rx = new AtomicLong(0);
 
@@ -59,7 +58,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	private final TcpConnection connection;
 
-	private final Ring<NetBuf> writeBacklog = new RingImpl<NetBuf>();
+	private final B b = new B();
 
 	private boolean registeredForWriteEvt = false;
 
@@ -82,17 +81,47 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	@Override
-	public void handleRead() throws IOException {
-		if (doHandleReadTimings) {
+	public void handle(int ops) throws IOException {
+		// only the read and/or write flags may be set
+		assert ((ops & EventUtil.READ_WRITE) != 0 && (ops & ~EventUtil.READ_WRITE) == 0);
+
+		if (doHandleTimings) {
 			long s = System.nanoTime();
-			doRead();
+			doHandle(ops);
 			long t = System.nanoTime() - s;
 			if (t > 5000000L) { // 5ms
-				System.out.printf("handleWrite took %.6fms%n", (t / 1000000f));
+				System.out.printf("handle took %.6fms%n", (t / 1000000f));
 			}
 		}
 		else {
+			doHandle(ops);
+		}
+	}
+
+	public void doHandle(int ops) throws IOException {
+		if (BitOps.checkMask(ops, EventUtil.READ)) {
 			doRead();
+		}
+		if (BitOps.checkMask(ops, EventUtil.WRITE)) {
+			doWrite();
+		}
+	}
+
+	private void doWrite() throws IOException {
+		synchronized (b) {
+			int numWrite = 0;
+			ByteBuffer pending = b.pendingWrite;
+			if (pending != null) {
+				numWrite += _channelWrite(pending);
+				if (!pending.hasRemaining()) {
+					if (b.internalBuffer) {
+						releaseBuffer(pending);
+					}
+					b.unset();
+				}
+			}if (numWrite < IO_WRITE_LIMIT_PER_ROUND) {
+				connection.doWrite
+			}
 		}
 	}
 
@@ -121,14 +150,15 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		synchronized (writeBacklog) {
-			writeBacklog.clear();
+		synchronized (b) {
+			b.unset();
+			b.notifyAll();
 		}
 		connection.notifyClosed();
 	}
 
 	void sendNonBlocking(final ByteBuffer data) throws IOException {
-		synchronized (writeBacklog) {
+		synchronized (b) {
 			// write as much as possible until the os-buffers are full or the
 			// write-per-round limit is reached
 			boolean finished = s_sendPendingNonBlock();
@@ -141,7 +171,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 			// all data in the backlog has been written
 			// this means that the write backlog is empty
-			assert (writeBacklog.isEmpty());
+			assert (b.pendingWrite == null);
 
 			if (data != null) {
 				_channelWrite(data);
@@ -178,7 +208,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 				if (finished) {
 					Validation.isFalse(externBuf.isPending());
-					
+
 					// all data from the backlog has been written
 					writeBacklog.shrink();
 					unregisterFromWriteEvents();
@@ -364,5 +394,28 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	long getTx() {
 		return tx.get();
+	}
+
+	private static final class B {
+
+		ByteBuffer pendingWrite;
+
+		boolean internalBuffer;
+
+		void setInternal(ByteBuffer bb) {
+			Validation.isTrue(pendingWrite == null);
+			pendingWrite = bb;
+			internalBuffer = true;
+		}
+
+		public void unset() {
+			pendingWrite = null;
+		}
+
+		void setExternal(ByteBuffer bb) {
+			Validation.isTrue(pendingWrite == null);
+			pendingWrite = bb;
+			internalBuffer = false;
+		}
 	}
 }

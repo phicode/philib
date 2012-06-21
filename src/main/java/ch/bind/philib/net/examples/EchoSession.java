@@ -35,6 +35,9 @@ public class EchoSession extends PureSessionBase {
 
 	private final boolean server;
 
+	private long numRead;
+	private long numWrite;
+	
 	private long nextValueRead;
 
 	private long nextValueWrite;
@@ -53,7 +56,11 @@ public class EchoSession extends PureSessionBase {
 		assert (data.position() == 0);
 
 		if (server) {
+			// the server only performs data echoing
 			send(data);
+			if (data.hasRemaining()) {
+				
+			}
 		} else {
 			verifyReceived(data);
 			assert (data.position() == data.limit());
