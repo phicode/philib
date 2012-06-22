@@ -29,9 +29,9 @@ import ch.bind.philib.net.context.NetContext;
 
 public interface Connection extends Closeable {
 
-	void send(ByteBuffer data) throws IOException;
+	int sendAsync(ByteBuffer data) throws IOException;
 
-	void sendBlocking(ByteBuffer data) throws IOException, InterruptedException;
+	void sendSync(ByteBuffer data) throws IOException, InterruptedException;
 
 	boolean isConnected();
 

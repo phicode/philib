@@ -76,13 +76,13 @@ public final class TcpConnection implements Connection {
 	}
 
 	@Override
-	public void send(ByteBuffer data) throws IOException {
-		eventHandler.sendNonBlocking(data);
+	public int sendAsync(ByteBuffer data) throws IOException {
+		return eventHandler.sendAsync(data);
 	}
 
 	@Override
-	public void sendBlocking(ByteBuffer data) throws IOException, InterruptedException {
-		eventHandler.sendBlocking(data);
+	public void sendSync(ByteBuffer data) throws IOException, InterruptedException {
+		eventHandler.sendSync(data);
 	}
 
 	@Override

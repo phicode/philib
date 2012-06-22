@@ -36,15 +36,24 @@ public class EchoSession extends PureSessionBase {
 	private final boolean server;
 
 	private long numRead;
+
 	private long numWrite;
-	
+
+	private long transitBytes;
+
 	private long nextValueRead;
 
 	private long nextValueWrite;
 
-	private byte[] partial = new byte[8];
+	private final byte[] readBuf = new byte[8];
 
-	private int partialSize;
+	private final byte[] writeBuf = new byte[8192];
+
+	private final ByteBuffer writeBb = ByteBuffer.wrap(writeBuf);
+
+	byte[] enc = new byte[8];
+
+	// private int partialSize;
 
 	EchoSession(boolean server) {
 		this.server = server;
@@ -57,55 +66,43 @@ public class EchoSession extends PureSessionBase {
 
 		if (server) {
 			// the server only performs data echoing
-			send(data);
-			if (data.hasRemaining()) {
-				
-			}
-		} else {
-			verifyReceived(data);
-			assert (data.position() == data.limit());
+			sendAsync(data);
 		}
-		// send(data);
+		else {
+			verifyReceived(data);
+			send();
+		}
+	}
+
+	private void send() throws IOException {
+		if (writeBb.hasRemaining()) {
+			sendAsync(writeBb);
+		}
+		writeBb.compact();
+		int pos = writeBb.position();
+		int canWriteNums = writeBb.remaining() / 8;
+
+		long inTransit = nextValueWrite - nextValueRead;
+		assert (inTransit >= 0);
+
+		// TODO Auto-generated method stub
+
 	}
 
 	private void verifyReceived(ByteBuffer data) {
 		int rem = data.remaining();
 		assert (rem > 0);
-		if (partialSize > 0) {
-			// partial data to be processed
-			int partialRem = 8 - partialSize;
-			if (rem < partialRem) {
-				data.get(partial, partialSize, rem);
-				partialSize += rem;
-				assert (partialSize < 8);
-				return;
-			} else {
-				data.get(partial, partialSize, partialRem);
-				verify();
-			}
-		}
 		while (rem >= 8) {
-			data.get(partial);
+			data.get(readBuf);
 			verify();
 			rem -= 8;
-		}
-		if (rem > 0) {
-			data.get(partial, 0, rem);
-			partialSize = rem;
-		} else {
-			partialSize = 0;
 		}
 	}
 
 	private void verify() {
-		long v = EndianConverter.decodeInt64LE(partial);
+		long v = EndianConverter.decodeInt64LE(readBuf);
 		Validation.isTrue(v == nextValueRead);
 		nextValueRead++;
-	}
-
-	public void send(int numBytes) {
-		assert (numBytes % 8 == 0);
-
 	}
 
 	@Override

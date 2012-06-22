@@ -47,10 +47,12 @@ public abstract class NetBuf {
 		return pending;
 	}
 
+	// TODO: not public accessible, only through the eventhandlerbase
 	public static NetBuf createIntern(final ByteBuffer bb) {
 		return new InternBuf(bb);
 	}
 
+	// TODO: not public accessible, only through the eventhandlerbase
 	public static NetBuf createExtern(final ByteBuffer bb) {
 		return new ExternBuf(bb);
 	}

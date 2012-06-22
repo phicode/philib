@@ -39,8 +39,8 @@ public abstract class PureSessionBase implements PureSession {
 	}
 
 	@Override
-	public final void send(ByteBuffer data) throws IOException {
-		connection.send(data);
+	public final int sendAsync(ByteBuffer data) throws IOException {
+		return connection.sendAsync(data);
 	}
 
 	@Override

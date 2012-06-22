@@ -31,7 +31,7 @@ public interface PureSession extends Closeable {
 
 	void receive(ByteBuffer data) throws IOException;
 
-	void send(ByteBuffer data) throws IOException;
+	int sendAsync(ByteBuffer data) throws IOException;
 
 	void closed();
 

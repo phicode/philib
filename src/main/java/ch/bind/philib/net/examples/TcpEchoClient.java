@@ -94,7 +94,7 @@ public class TcpEchoClient {
 
 		final int loopTimeSec = 10;
 		long lastT = System.currentTimeMillis();
-		connection.sendBlocking(seedBuffer);
+		connection.sendSync(seedBuffer);
 		long seeded = seedBuffer.capacity();
 		int loop = 1;
 		long lastRx = 0, lastTx = 0;
@@ -119,7 +119,7 @@ public class TcpEchoClient {
 			if (seeded < 512 * 1024) {
 				System.out.println("seeding an additional " + seedBuffer.capacity() + " bytes into the echo chain");
 				seedBuffer.rewind();
-				connection.sendBlocking(seedBuffer);
+				connection.sendSync(seedBuffer);
 				seeded += seedBuffer.capacity();
 			}
 			loop++;
