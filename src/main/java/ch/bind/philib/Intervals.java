@@ -24,43 +24,43 @@ package ch.bind.philib;
 
 public final class Intervals {
 
-    private Intervals() {
-    }
+	private Intervals() {
+	}
 
-    private static final double[] COEFFS = { 1.0, 2.5, 5.0 };
+	private static final double[] COEFFS = { 1.0, 2.5, 5.0 };
 
-    public static int chooseInterval(int maxValue, int maxSegments) {
-        // try to bring maxSegments or less lines on to the chart
-        int interval = 1;
-        int segments = maxValue;
+	public static int chooseInterval(int maxValue, int maxSegments) {
+		// try to bring maxSegments or less lines on to the chart
+		int interval = 1;
+		int segments = maxValue;
 
-        // use these intervals:
-        // 1, 2, 5,
-        // 10, 25, 50
-        // 100, 250, 500
-        // ... and so on
-        int intervalNum = 0;
-        while (segments > maxSegments) {
-            intervalNum++;
+		// use these intervals:
+		// 1, 2, 5,
+		// 10, 25, 50
+		// 100, 250, 500
+		// ... and so on
+		int intervalNum = 0;
+		while (segments > maxSegments) {
+			intervalNum++;
 
-            // 0 for 1, 2, 5
-            // 1 for 10, 25, 50
-            // 2 for 100, 250, 500
-            int power = (intervalNum / 3);
-            double multiply = Math.pow(10, power);
-            int num = intervalNum % 3;
-            double coeff = COEFFS[num];
+			// 0 for 1, 2, 5
+			// 1 for 10, 25, 50
+			// 2 for 100, 250, 500
+			int power = (intervalNum / 3);
+			double multiply = Math.pow(10, power);
+			int num = intervalNum % 3;
+			double coeff = COEFFS[num];
 
-            // for num=0: 1, 10, 100, 100, ...
-            // for num=1: 2, 25, 250, 2500, ...
-            // for num=2: 5, 50, 500, 5000, ...
-            interval = (int) (coeff * multiply);
+			// for num=0: 1, 10, 100, 100, ...
+			// for num=1: 2, 25, 250, 2500, ...
+			// for num=2: 5, 50, 500, 5000, ...
+			interval = (int) (coeff * multiply);
 
-            segments = maxValue / interval;
-            if (segments * interval < maxValue)
-                segments++;
-        }
+			segments = maxValue / interval;
+			if (segments * interval < maxValue)
+				segments++;
+		}
 
-        return interval;
-    }
+		return interval;
+	}
 }

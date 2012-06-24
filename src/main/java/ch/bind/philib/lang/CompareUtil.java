@@ -43,8 +43,10 @@ public final class CompareUtil {
 	 *     b  | false | a.equals(b) |
 	 * </pre>
 	 * 
-	 * @param a -
-	 * @param b -
+	 * @param a
+	 *            -
+	 * @param b
+	 *            -
 	 * @return see above
 	 */
 	public static boolean equals(final Object a, final Object b) {
@@ -53,16 +55,14 @@ public final class CompareUtil {
 		if (a == null) {
 			// b is not null -> not equal
 			return false;
-		}
-		else {
+		} else {
 			// this check could be simplified by only invoking a.equals(b) and
 			// leaving it up to the specific equals implementation to check for
 			// nulls. on the other hand, here we are with the power to find out
 			// right here and now
 			if (b == null) {
 				return false;
-			}
-			else {
+			} else {
 				return a.equals(b);
 			}
 		}
@@ -74,12 +74,10 @@ public final class CompareUtil {
 		if (a == null) {
 			// b is not null
 			return -1; // a < b
-		}
-		else {
+		} else {
 			if (b == null) {
 				return 1; // a > b
-			}
-			else {
+			} else {
 				return a.compareTo(b);
 			}
 		}

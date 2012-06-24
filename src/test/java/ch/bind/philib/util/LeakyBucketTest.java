@@ -102,8 +102,7 @@ public class LeakyBucketTest {
 				assertEquals(nextAvail, 0); // available now
 				bc.acquire(a, time);
 				moreAcquired += a;
-			}
-			else {
+			} else {
 				assertTrue(nextAvail > 0);
 			}
 		}

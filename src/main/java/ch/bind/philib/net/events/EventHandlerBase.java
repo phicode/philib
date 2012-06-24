@@ -29,7 +29,7 @@ import ch.bind.philib.validation.Validation;
 public abstract class EventHandlerBase implements EventHandler {
 
 	protected final NetContext context;
-	
+
 	protected final long eventHandlerId = EventHandlerIdSeq.nextEventHandlerId();
 
 	protected EventHandlerBase(NetContext context) {

@@ -69,7 +69,7 @@ public class EchoSession extends PureSessionBase {
 
 	@Override
 	public void receive(ByteBuffer data) throws IOException {
-//		System.out.println("received: " + ArrayUtil.formatShortHex(data));
+		// System.out.println("received: " + ArrayUtil.formatShortHex(data));
 		lastInteractionNs = System.nanoTime();
 		assert (data.position() == 0);
 

@@ -35,51 +35,51 @@ import ch.bind.philib.net.tcp.TcpNetFactory;
 
 public class TcpEchoServer implements SessionFactory {
 
-    public static void main(String[] args) throws Exception {
-        new TcpEchoServer().foo();
-    }
+	public static void main(String[] args) throws Exception {
+		new TcpEchoServer().foo();
+	}
 
-    private void foo() throws Exception {
-        InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
-        SessionFactory sessionFactory = this;
-        NetContext context = new SimpleNetContext();
-        NetServer server = TcpNetFactory.INSTANCE.openServer(context, bindAddress, sessionFactory);
-        while (true) {
-            Thread.sleep(20000);
-            synchronized (sessions) {
-                if (sessions.size() > 0) {
-                    long now = System.nanoTime();
-                    long tooFarAgo = now - 5000000L; // 5ms
-                    Iterator<EchoSession> iter = sessions.iterator();
-                    System.out.println(server.getContext().getBufferCache().getCacheStats().toString());
-                    System.out.println("sessions: " + sessions.size());
-                    while (iter.hasNext()) {
-                        EchoSession s = iter.next();
-                        if (!s.isConnected()) {
-                            System.out.println("removeing disconnected session: " + s);
-                            iter.remove();
-                        } else {
-                            long lastInteractionNs = s.getLastInteractionNs();
-                            if (lastInteractionNs < tooFarAgo) {
-                                double lastSec = (now - lastInteractionNs) / 1000000000f;
-                                System.out.printf("last interaction with a session: %.5fsec%n", lastSec);
-                            }
-                            System.out.printf("rx=%d, tx=%d%n", s.getRx(), s.getTx());
-                        }
-                    }
-                }
-            }
-        }
-    }
+	private void foo() throws Exception {
+		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
+		SessionFactory sessionFactory = this;
+		NetContext context = new SimpleNetContext();
+		NetServer server = TcpNetFactory.INSTANCE.openServer(context, bindAddress, sessionFactory);
+		while (true) {
+			Thread.sleep(20000);
+			synchronized (sessions) {
+				if (sessions.size() > 0) {
+					long now = System.nanoTime();
+					long tooFarAgo = now - 5000000L; // 5ms
+					Iterator<EchoSession> iter = sessions.iterator();
+					System.out.println(server.getContext().getBufferCache().getCacheStats().toString());
+					System.out.println("sessions: " + sessions.size());
+					while (iter.hasNext()) {
+						EchoSession s = iter.next();
+						if (!s.isConnected()) {
+							System.out.println("removeing disconnected session: " + s);
+							iter.remove();
+						} else {
+							long lastInteractionNs = s.getLastInteractionNs();
+							if (lastInteractionNs < tooFarAgo) {
+								double lastSec = (now - lastInteractionNs) / 1000000000f;
+								System.out.printf("last interaction with a session: %.5fsec%n", lastSec);
+							}
+							System.out.printf("rx=%d, tx=%d%n", s.getRx(), s.getTx());
+						}
+					}
+				}
+			}
+		}
+	}
 
-    private List<EchoSession> sessions = new ArrayList<EchoSession>();
+	private List<EchoSession> sessions = new ArrayList<EchoSession>();
 
-    @Override
-    public synchronized EchoSession createSession() {
-        EchoSession session = new EchoSession(true);
-        synchronized (sessions) {
-            sessions.add(session);
-        }
-        return session;
-    }
+	@Override
+	public synchronized EchoSession createSession() {
+		EchoSession session = new EchoSession(true);
+		synchronized (sessions) {
+			sessions.add(session);
+		}
+		return session;
+	}
 }

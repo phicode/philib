@@ -28,6 +28,6 @@ import ch.bind.philib.net.context.NetContext;
 public interface NetServer extends Closeable {
 
 	int getActiveSessionCount();
-	
+
 	NetContext getContext();
 }

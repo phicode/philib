@@ -26,7 +26,7 @@ public interface ObjectCache<E> {
 	E acquire();
 
 	boolean release(E e);
-	
+
 	CacheStats getCacheStats();
-	
+
 }

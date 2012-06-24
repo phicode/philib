@@ -79,8 +79,7 @@ final class UdpServerEventHandler extends EventHandlerBase {
 					// no more data to read
 					assert (rbuf.position() == 0 && rbuf.remaining() == 0);
 					return;
-				}
-				else {
+				} else {
 					rbuf.flip();
 					// assert (num == rbuf.limit());
 					// assert (num == rbuf.remaining());

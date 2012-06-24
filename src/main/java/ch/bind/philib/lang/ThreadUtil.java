@@ -38,8 +38,7 @@ public final class ThreadUtil {
 		long diff = time - System.currentTimeMillis();
 		if (diff <= 0) {
 			return;
-		}
-		else {
+		} else {
 			Thread.sleep(diff);
 		}
 	}
@@ -63,8 +62,7 @@ public final class ThreadUtil {
 		if (t.isAlive()) {
 			LOG.warn("thread is still alive: " + t.getName());
 			return false;
-		}
-		else {
+		} else {
 			return true;
 		}
 	}
@@ -124,8 +122,7 @@ public final class ThreadUtil {
 					if (e instanceof InterruptedException) {
 						// externally requested shutdown
 						return;
-					}
-					else {
+					} else {
 						LOG.info("runnable crashed, restarting it. thread-name=" + threadName, e);
 					}
 				}

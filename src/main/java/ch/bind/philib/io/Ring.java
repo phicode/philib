@@ -36,6 +36,6 @@ public interface Ring<T> {
 	int size();
 
 	void clear();
-	
+
 	void shrink();
 }

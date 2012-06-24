@@ -33,19 +33,18 @@ import ch.bind.philib.net.context.NetContext;
 
 public final class TcpNetFactory implements NetFactory {
 
-    public static final TcpNetFactory INSTANCE = new TcpNetFactory();
+	public static final TcpNetFactory INSTANCE = new TcpNetFactory();
 
-    private TcpNetFactory() {
-    }
+	private TcpNetFactory() {
+	}
 
-    @Override
-    public Connection openClient(NetContext context, SocketAddress endpoint, PureSession session) throws IOException {
-        return TcpConnection.open(context, endpoint, session);
-    }
+	@Override
+	public Connection openClient(NetContext context, SocketAddress endpoint, PureSession session) throws IOException {
+		return TcpConnection.open(context, endpoint, session);
+	}
 
-    @Override
-    public NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory consumerFactory)
-            throws IOException {
-        return TcpServer.open(context, consumerFactory, bindAddress);
-    }
+	@Override
+	public NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory consumerFactory) throws IOException {
+		return TcpServer.open(context, consumerFactory, bindAddress);
+	}
 }

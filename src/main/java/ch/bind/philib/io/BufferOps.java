@@ -20,7 +20,6 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 package ch.bind.philib.io;
 
 public final class BufferOps {

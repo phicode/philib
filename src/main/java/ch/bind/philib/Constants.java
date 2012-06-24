@@ -29,14 +29,13 @@ package ch.bind.philib;
  */
 public final class Constants {
 
-    private Constants() {
-    }
+	private Constants() {
+	}
 
-    public static final int PHILIB_VERSION_MAJOR = 0;
-    public static final int PHILIB_VERSION_MINOR = 2;
-    public static final int PHILIB_VERSION_PATCH = 0;
+	public static final int PHILIB_VERSION_MAJOR = 0;
+	public static final int PHILIB_VERSION_MINOR = 2;
+	public static final int PHILIB_VERSION_PATCH = 0;
 
-    public static final String PHILIB_VERSION = PHILIB_VERSION_MAJOR + "." + PHILIB_VERSION_MINOR + "."
-            + PHILIB_VERSION_PATCH;
+	public static final String PHILIB_VERSION = PHILIB_VERSION_MAJOR + "." + PHILIB_VERSION_MINOR + "." + PHILIB_VERSION_PATCH;
 
 }

@@ -34,7 +34,7 @@ public class RingQueue<E> {
 	private final AtomicInteger readIdx = new AtomicInteger(-1);
 
 	private final E[] entries;
-	
+
 	private final int mask;
 
 	@SuppressWarnings("unchecked")
@@ -42,7 +42,7 @@ public class RingQueue<E> {
 		Validation.isTrue(numEntries > 0, "numEntries must be > 0");
 		if (Integer.bitCount(numEntries) != 1) {
 			// not a power of two
-			for (int i=0; i < 32; i++) {
+			for (int i = 0; i < 32; i++) {
 				int x = 1 << i;
 				if (x > numEntries) {
 					numEntries = x;
@@ -50,8 +50,8 @@ public class RingQueue<E> {
 				}
 			}
 		}
-		
-		mask = numEntries-1;
+
+		mask = numEntries - 1;
 		this.entries = (E[]) new Object[numEntries];
 	}
 
@@ -74,8 +74,7 @@ public class RingQueue<E> {
 						// someone else is writing with an index lower then our
 						// and has not commited
 						return true;
-					}
-					else if (commitIdx == expectCidx) {
+					} else if (commitIdx == expectCidx) {
 						// commit directly
 						boolean commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
 
@@ -83,12 +82,11 @@ public class RingQueue<E> {
 						if (entries[additionalCommitIdx] != null) {
 							commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
 						}
-					}
-					else {
+					} else {
 						Validation.notNull(null);
 					}
 				} while (true);
-//				return true;
+				// return true;
 			}
 			// else: someone else already reserved this write-index, start anew
 		} while (true);

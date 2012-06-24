@@ -26,7 +26,7 @@ import ch.bind.philib.net.events.EventDispatcher;
 
 public interface NetContext {
 
-    ByteBufferCache getBufferCache();
+	ByteBufferCache getBufferCache();
 
-    EventDispatcher getEventDispatcher();
+	EventDispatcher getEventDispatcher();
 }

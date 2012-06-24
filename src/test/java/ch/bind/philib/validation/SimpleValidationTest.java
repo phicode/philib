@@ -28,100 +28,100 @@ import org.junit.Test;
 
 public class SimpleValidationTest {
 
-    @Test
-    public void isFalse() {
-        try {
-            Validation.isFalse(false);
-            Validation.isFalse(false, "foo");
-        } catch (IllegalArgumentException e) {
-            fail("should not throw");
-        }
-        try {
-            Validation.isFalse(true);
-            fail("should throw");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-        try {
-            Validation.isFalse(true, "foo");
-            fail("should throw");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-    }
+	@Test
+	public void isFalse() {
+		try {
+			Validation.isFalse(false);
+			Validation.isFalse(false, "foo");
+		} catch (IllegalArgumentException e) {
+			fail("should not throw");
+		}
+		try {
+			Validation.isFalse(true);
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+		try {
+			Validation.isFalse(true, "foo");
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+	}
 
-    @Test
-    public void isTrue() {
-        try {
-            Validation.isTrue(true);
-            Validation.isTrue(true, "foo");
-        } catch (IllegalArgumentException e) {
-            fail("should not throw");
-        }
-        try {
-            Validation.isTrue(false);
-            fail("should throw");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-        try {
-            Validation.isTrue(false, "foo");
-            fail("should throw");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-    }
+	@Test
+	public void isTrue() {
+		try {
+			Validation.isTrue(true);
+			Validation.isTrue(true, "foo");
+		} catch (IllegalArgumentException e) {
+			fail("should not throw");
+		}
+		try {
+			Validation.isTrue(false);
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+		try {
+			Validation.isTrue(false, "foo");
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+	}
 
-    @Test
-    public void notNegative() {
-        try {
-            Validation.notNegative(0);
-            Validation.notNegative(0, "foo");
+	@Test
+	public void notNegative() {
+		try {
+			Validation.notNegative(0);
+			Validation.notNegative(0, "foo");
 
-            Validation.notNegative(0L);
-            Validation.notNegative(0L, "foo");
+			Validation.notNegative(0L);
+			Validation.notNegative(0L, "foo");
 
-            Validation.notNegative(Integer.MAX_VALUE);
-            Validation.notNegative(Integer.MAX_VALUE, "foo");
+			Validation.notNegative(Integer.MAX_VALUE);
+			Validation.notNegative(Integer.MAX_VALUE, "foo");
 
-            Validation.notNegative(Long.MAX_VALUE);
-            Validation.notNegative(Long.MAX_VALUE, "foo");
-        } catch (IllegalArgumentException e) {
-            fail("should not throw");
-        }
-        try {
-            Validation.notNegative(-1);
-            fail("should throw");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-        try {
-            Validation.notNegative(-1, "foo");
-            fail("should throw");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-    }
+			Validation.notNegative(Long.MAX_VALUE);
+			Validation.notNegative(Long.MAX_VALUE, "foo");
+		} catch (IllegalArgumentException e) {
+			fail("should not throw");
+		}
+		try {
+			Validation.notNegative(-1);
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+		try {
+			Validation.notNegative(-1, "foo");
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+	}
 
-    @Test
-    public void notNull() {
-        try {
-            Validation.notNull("");
-            Validation.notNull("", "foo");
-        } catch (IllegalArgumentException e) {
-            fail("should not throw");
-        }
-        try {
-            Validation.notNull(null);
-            fail("should throw");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-        try {
-            Validation.notNull(null, "foo");
-            fail("should throw");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-    }
+	@Test
+	public void notNull() {
+		try {
+			Validation.notNull("");
+			Validation.notNull("", "foo");
+		} catch (IllegalArgumentException e) {
+			fail("should not throw");
+		}
+		try {
+			Validation.notNull(null);
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+		try {
+			Validation.notNull(null, "foo");
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+	}
 }

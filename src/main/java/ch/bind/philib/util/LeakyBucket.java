@@ -87,8 +87,7 @@ public final class LeakyBucket {
 		if (numLeases > 0) {
 			// available immediately
 			return 0;
-		}
-		else {
+		} else {
 			long nextAvailNano = lastReleaseNs + releaseIntervalNs;
 			return nextAvailNano - timeNs;
 		}
@@ -108,8 +107,7 @@ public final class LeakyBucket {
 		if (timeNs < lastReleaseNs) {
 			// it seems that someone adjusted his clock backwards
 			lastReleaseNs = timeNs;
-		}
-		else {
+		} else {
 			long elapsedNs = timeNs - lastReleaseNs;
 			long numRelease = elapsedNs / releaseIntervalNs;
 			long newLeases = numLeases + numRelease;
@@ -118,8 +116,7 @@ public final class LeakyBucket {
 			if (newLeases > capacity) {
 				numLeases = capacity;
 				lastReleaseNs = timeNs;
-			}
-			else {
+			} else {
 				numLeases = newLeases;
 				lastReleaseNs += (numRelease * releaseIntervalNs);
 			}

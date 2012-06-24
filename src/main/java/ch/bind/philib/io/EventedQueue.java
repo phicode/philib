@@ -61,10 +61,10 @@ public final class EventedQueue<E> {
 		return queue.isEmpty();
 	}
 
-//	public void clear() {
+	// public void clear() {
 	// sem.drainPermits();
-//		queue.clear();
-//	}
+	// queue.clear();
+	// }
 
 	public E poll() {
 		if (sem.tryAcquire()) {

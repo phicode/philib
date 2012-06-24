@@ -30,41 +30,41 @@ import ch.bind.philib.lang.CompareUtil;
 
 public final class LockGroup {
 
-    private static final LockableComparator lockableComparator = new LockableComparator();
+	private static final LockableComparator lockableComparator = new LockableComparator();
 
-    private final Lockable[] objects;
+	private final Lockable[] objects;
 
-    public LockGroup(final Lockable[] objects) {
-        if (objects == null || objects.length == 0)
-            throw new IllegalArgumentException("No lockables supplied");
-        final int n = objects.length;
-        this.objects = new Lockable[n];
-        System.arraycopy(objects, 0, this.objects, 0, n);
-        // FIXME: the array could contain the same lock twice! remove it? handle
-        // it in lock/unlock?
-        Arrays.sort(this.objects, lockableComparator);
-    }
+	public LockGroup(final Lockable[] objects) {
+		if (objects == null || objects.length == 0)
+			throw new IllegalArgumentException("No lockables supplied");
+		final int n = objects.length;
+		this.objects = new Lockable[n];
+		System.arraycopy(objects, 0, this.objects, 0, n);
+		// FIXME: the array could contain the same lock twice! remove it? handle
+		// it in lock/unlock?
+		Arrays.sort(this.objects, lockableComparator);
+	}
 
-    public void lock() {
-        for (Lockable l : objects) {
-            l.lock();
-        }
-    }
+	public void lock() {
+		for (Lockable l : objects) {
+			l.lock();
+		}
+	}
 
-    public void unlock() {
-        for (Lockable l : objects) {
-            l.unlock();
-        }
-    }
+	public void unlock() {
+		for (Lockable l : objects) {
+			l.unlock();
+		}
+	}
 
-    private static final class LockableComparator implements Comparator<Lockable>, Serializable {
+	private static final class LockableComparator implements Comparator<Lockable>, Serializable {
 
-        private static final long serialVersionUID = 157755479046748535L;
+		private static final long serialVersionUID = 157755479046748535L;
 
-        @Override
-        public int compare(final Lockable o1, final Lockable o2) {
-            final long diff = o1.getLockId() - o2.getLockId();
-            return CompareUtil.normalize(diff);
-        }
-    }
+		@Override
+		public int compare(final Lockable o1, final Lockable o2) {
+			final long diff = o1.getLockId() - o2.getLockId();
+			return CompareUtil.normalize(diff);
+		}
+	}
 }

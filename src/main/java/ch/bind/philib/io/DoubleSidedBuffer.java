@@ -47,5 +47,5 @@ public interface DoubleSidedBuffer {
 	void writeFront(byte[] data);
 
 	void writeFront(byte[] data, int off, int len);
-	
+
 }

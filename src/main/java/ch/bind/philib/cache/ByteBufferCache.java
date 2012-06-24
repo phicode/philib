@@ -65,8 +65,8 @@ public final class ByteBufferCache extends SpecificObjectCache<ByteBuffer> {
 
 		@Override
 		public ByteBuffer create() {
-			 return ByteBuffer.allocateDirect(bufferSize);
-//			return ByteBuffer.allocate(bufferSize);
+			return ByteBuffer.allocateDirect(bufferSize);
+			// return ByteBuffer.allocate(bufferSize);
 		}
 
 		@Override
