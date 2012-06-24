@@ -23,8 +23,6 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.Random;
 
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.net.Connection;
@@ -42,12 +40,11 @@ public class TcpEchoClient {
 
 	public static void main(String[] args) throws Exception {
 		int numClients = 1;
-//		int rampUp = 
+		// int rampUp =
 		if (args.length > 1) {
 			System.out.println("only one parameter may be specified");
 			System.exit(1);
-		}
-		else if (args.length == 1) {
+		} else if (args.length == 1) {
 			try {
 				numClients = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -72,10 +69,10 @@ public class TcpEchoClient {
 		int numRunning = 0;
 		long rampUpMs = 1000;
 		long startNext = System.currentTimeMillis();
-		
-		byte[] buf = new byte[8 * 1024];
-		new Random().nextBytes(buf);
-		ByteBuffer seedBuffer = ByteBuffer.wrap(buf);
+
+		// byte[] buf = new byte[8 * 1024];
+		// new Random().nextBytes(buf);
+		// ByteBuffer seedBuffer = ByteBuffer.wrap(buf);
 		NetContext context = new SimpleNetContext();
 		EchoSession session = new EchoSession(false);
 		connection = TcpNetFactory.INSTANCE.openClient(context, endpoint, session);
@@ -94,12 +91,14 @@ public class TcpEchoClient {
 
 		final int loopTimeSec = 10;
 		long lastT = System.currentTimeMillis();
-		connection.sendSync(seedBuffer);
-		long seeded = seedBuffer.capacity();
+		// connection.sendSync(seedBuffer);
+		// long seeded = seedBuffer.capacity();
 		int loop = 1;
 		long lastRx = 0, lastTx = 0;
 		final long start = System.currentTimeMillis();
-
+		session.incInTransitBytes(8192);
+		int seeded = 8192;
+		session.send();
 		while (connection.isConnected()) {
 			long sleepUntil = start + (loop * loopTimeSec * 1000L);
 			ThreadUtil.sleepUntilMs(sleepUntil);
@@ -117,10 +116,8 @@ public class TcpEchoClient {
 			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d tDiff=%d%n", //
 					seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff), tDiff);
 			if (seeded < 512 * 1024) {
-				System.out.println("seeding an additional " + seedBuffer.capacity() + " bytes into the echo chain");
-				seedBuffer.rewind();
-				connection.sendSync(seedBuffer);
-				seeded += seedBuffer.capacity();
+				System.out.println("seeding an additional " + 8192 + " bytes into the echo chain");
+				session.incInTransitBytes(8192);
 			}
 			loop++;
 			lastRx = rx;

@@ -31,4 +31,6 @@ public interface EventHandler extends Closeable {
 
 	void handle(int ops) throws IOException;
 
+	long getEventHandlerId();
+
 }

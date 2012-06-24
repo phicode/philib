@@ -33,4 +33,8 @@ public interface EventDispatcher extends Runnable, Closeable {
 
 	boolean isEventDispatcherThread(Thread thread);
 
+	void registerForRedeliverPartialReads(EventHandler eventHandler);
+
+	void unregisterFromRedeliverPartialReads(EventHandler eventHandler);
+
 }

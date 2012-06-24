@@ -27,8 +27,10 @@ import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -40,8 +42,6 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	private static final AtomicLong NAME_SEQ = new AtomicLong(0);
 
-	private static final boolean doSelectTimings = false;
-
 	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<NewRegistration>();
 
 	private final Selector selector;
@@ -50,6 +50,9 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	private long dispatcherThreadId;
 
+	// TODO: use a long->object map
+	private final Map<Long, EventHandler> handlersWithUndeliveredData = new ConcurrentHashMap<Long, EventHandler>();
+
 	private SimpleEventDispatcher(Selector selector) throws IOException {
 		this.selector = selector;
 	}
@@ -57,11 +60,11 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	public static EventDispatcher open() throws IOException {
 		Selector selector = Selector.open();
 		try {
-			SimpleEventDispatcher rv = new SimpleEventDispatcher(selector);
+			SimpleEventDispatcher disp = new SimpleEventDispatcher(selector);
 			String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
-			Thread dispatcherThread = ThreadUtil.runForever(rv, threadName);
-			rv.initDispatcherThreads(dispatcherThread);
-			return rv;
+			Thread dispatcherThread = ThreadUtil.runForever(disp, threadName);
+			disp.initDispatcherThreads(dispatcherThread);
+			return disp;
 		} catch (IOException e) {
 			try {
 				selector.close();
@@ -97,6 +100,12 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 					System.out.printf("keys now=%d, last=%d%n", keys, lastKeys);
 					lastKeys = keys;
 				}
+				if (!handlersWithUndeliveredData.isEmpty()) {
+					// TODO: more efficient traversal
+					for (EventHandler eh : handlersWithUndeliveredData.values()) {
+						eh.handle(EventUtil.READ);
+					}
+				}
 			}
 		} catch (ClosedSelectorException e) {
 			System.out.println("shutting down");
@@ -111,23 +120,17 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	private int select() throws IOException, ClosedSelectorException {
 		int num;
+		boolean longSelect = true;
 		do {
 			updateRegistrations();
 
-			if (doSelectTimings) {
-				long selStart = System.nanoTime();
+			longSelect = handlersWithUndeliveredData.isEmpty();
+			if (longSelect) {
 				num = selector.select(10000L);
-				long selEnd = System.nanoTime();
-				long selTime = selEnd - selStart;
-				long selMs = selTime / (10L * 1000L * 1000L);
-				if (selMs >= 10005) {
-					System.out.printf("select took %dms, num=%d%n", selMs, num);
-				}
+			} else {
+				num = selector.selectNow();
 			}
-			else {
-				num = selector.select(10000L);
-			}
-		} while (num == 0);
+		} while (num == 0 && longSelect);
 		return num;
 	}
 
@@ -203,7 +206,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			int readyOps = key.readyOps();
 			eventHandler.handle(readyOps);
 		} catch (Exception e) {
-			System.err.println("eventHandler.handle*() failed, closing: " + ExceptionUtil.buildMessageChain(e));
+			System.err.println("eventHandler.handle() failed, closing: " + ExceptionUtil.buildMessageChain(e));
 			e.printStackTrace(System.err);
 			closeHandler(eventHandler);
 		}
@@ -238,8 +241,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
-		}
-		else {
+		} else {
 			key.interestOps(ops);
 		}
 		if (asap) {
@@ -256,10 +258,24 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			key.attach(null);
 			wakeup();
 			System.out.println("unreg, keys: " + selector.keys().size());
-		}
-		else {
+		} else {
 			System.out.println("unreg failed, not registered");
 		}
+	}
+
+	@Override
+	public void registerForRedeliverPartialReads(EventHandler eventHandler) {
+		handlersWithUndeliveredData.put(eventHandler.getEventHandlerId(), eventHandler);
+	}
+
+	@Override
+	public void unregisterFromRedeliverPartialReads(EventHandler eventHandler) {
+		handlersWithUndeliveredData.remove(eventHandler.getEventHandlerId());
+	}
+
+	@Override
+	public boolean isEventDispatcherThread(Thread thread) {
+		return (thread != null) && (thread.getId() == dispatcherThreadId);
 	}
 
 	private static final class NewRegistration {
@@ -282,8 +298,4 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		}
 	}
 
-	@Override
-	public boolean isEventDispatcherThread(Thread thread) {
-		return (thread != null) && (thread.getId() == dispatcherThreadId);
-	}
 }

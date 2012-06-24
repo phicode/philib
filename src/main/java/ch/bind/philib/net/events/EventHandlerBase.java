@@ -29,11 +29,18 @@ import ch.bind.philib.validation.Validation;
 public abstract class EventHandlerBase implements EventHandler {
 
 	protected final NetContext context;
+	
+	protected final long eventHandlerId = EventHandlerIdSeq.nextEventHandlerId();
 
 	protected EventHandlerBase(NetContext context) {
 		super();
 		Validation.notNull(context);
 		this.context = context;
+	}
+
+	@Override
+	public final long getEventHandlerId() {
+		return eventHandlerId;
 	}
 
 	protected final ByteBuffer acquireBuffer() {
@@ -49,8 +56,7 @@ public abstract class EventHandlerBase implements EventHandler {
 		if (buf.isIntern()) {
 			context.getBufferCache().release(buf.getBuffer());
 			return false;
-		}
-		else {
+		} else {
 			return true;
 		}
 	}
