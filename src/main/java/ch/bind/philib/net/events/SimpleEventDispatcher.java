@@ -86,8 +86,18 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	public void run() {
 		int lastKeys = 0;
 		try {
-			while (true) {
-				int num = select();
+			int selectIoeInArow = 0;
+			while (selectIoeInArow < 5) {
+				int num;
+				try {
+					num = select();
+					selectIoeInArow = 0;
+				} catch (IOException e) {
+					selectIoeInArow++;
+					System.out.println(e.getMessage());
+					e.printStackTrace();
+					continue;
+				}
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
 					for (SelectionKey key : selected) {
@@ -103,15 +113,17 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				if (!handlersWithUndeliveredData.isEmpty()) {
 					// TODO: more efficient traversal
 					for (EventHandler eh : handlersWithUndeliveredData.values()) {
-						eh.handle(EventUtil.READ);
+						try {
+							eh.handle(EventUtil.READ);
+						} catch (IOException e) {
+							System.out.println(e.getMessage());
+							e.printStackTrace();
+						}
 					}
 				}
 			}
 		} catch (ClosedSelectorException e) {
 			System.out.println("shutting down");
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
 		}
 		// finally {
 		// close();
