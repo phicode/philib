@@ -88,6 +88,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		try {
 			int selectIoeInArow = 0;
 			while (selectIoeInArow < 5) {
+				// TODO: start to sleep with an exponentianl backoff when select
+				// fails ... why can it fail?
 				int num;
 				try {
 					num = select();
