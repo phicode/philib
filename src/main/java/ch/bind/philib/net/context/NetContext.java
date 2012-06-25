@@ -29,4 +29,6 @@ public interface NetContext {
 	ByteBufferCache getBufferCache();
 
 	EventDispatcher getEventDispatcher();
+
+	boolean getTcpNoDelay();
 }

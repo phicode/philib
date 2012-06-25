@@ -74,19 +74,19 @@ public class EchoSession extends PureSessionBase {
 
 	@Override
 	public void receive(ByteBuffer data) throws IOException {
-		lastInteractionNs = System.nanoTime();
 		assert (data.position() == 0);
 
 		if (server) {
 			// the server only performs data echoing
-			sendAsync(data);
-		}
-		else {
+			if (sendAsync(data) > 0) {
+				lastInteractionNs = System.nanoTime();
+			}
+		} else {
+			lastInteractionNs = System.nanoTime();
 			synchronized (lock) {
 				if (performVerification) {
 					verifyReceived(data);
-				}
-				else {
+				} else {
 					int rem = data.remaining();
 					int consume = (rem / 8);
 					numSendable += consume;
@@ -111,8 +111,7 @@ public class EchoSession extends PureSessionBase {
 			sendAsync(writeBb);
 			if (writeBb.hasRemaining()) {
 				return;
-			}
-			else {
+			} else {
 				sendPending = false;
 			}
 		}
@@ -186,5 +185,15 @@ public class EchoSession extends PureSessionBase {
 		synchronized (lock) {
 			numSendable += num / 8;
 		}
+	}
+
+	@Override
+	public void writable() {
+		// TODO Auto-generated method stub
+		// TODO
+	}
+
+	public String getDebugInformations() {
+		return connection.getDebugInformations();
 	}
 }

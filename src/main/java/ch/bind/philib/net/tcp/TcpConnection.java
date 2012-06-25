@@ -104,6 +104,10 @@ public final class TcpConnection implements Connection {
 		session.closed();
 	}
 
+	void notifyWritable() {
+		session.writable();
+	}
+
 	void receive(ByteBuffer rbuf) throws IOException {
 		session.receive(rbuf);
 	}
@@ -116,5 +120,10 @@ public final class TcpConnection implements Connection {
 	@Override
 	public long getTx() {
 		return eventHandler.getTx();
+	}
+
+	@Override
+	public String getDebugInformations() {
+	return eventHandler.getDebugInformations();
 	}
 }

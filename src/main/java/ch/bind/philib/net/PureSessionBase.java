@@ -26,7 +26,8 @@ import java.nio.ByteBuffer;
 
 public abstract class PureSessionBase implements PureSession {
 
-	private Connection connection;
+	// TODO: make private
+	protected Connection connection;
 
 	@Override
 	public final void init(Connection connection) {

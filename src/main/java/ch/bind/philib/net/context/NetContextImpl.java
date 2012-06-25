@@ -35,11 +35,15 @@ public class NetContextImpl implements NetContext {
 
 	private final EventDispatcher eventDispatcher;
 
+	private final boolean tcpNoDelay;
+
 	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
 		Validation.notNull(bufferCache);
 		Validation.notNull(eventDispatcher);
 		this.bufferCache = bufferCache;
 		this.eventDispatcher = eventDispatcher;
+		// TODO: expose this to clients
+		this.tcpNoDelay = true;
 	}
 
 	@Override
@@ -50,5 +54,10 @@ public class NetContextImpl implements NetContext {
 	@Override
 	public final EventDispatcher getEventDispatcher() {
 		return eventDispatcher;
+	}
+
+	@Override
+	public boolean getTcpNoDelay() {
+		return tcpNoDelay;
 	}
 }

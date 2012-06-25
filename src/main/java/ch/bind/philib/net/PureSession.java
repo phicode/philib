@@ -42,4 +42,6 @@ public interface PureSession extends Closeable {
 	long getRx();
 
 	long getTx();
+
+	void writable();
 }

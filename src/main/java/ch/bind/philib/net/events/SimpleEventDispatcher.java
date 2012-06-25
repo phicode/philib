@@ -84,7 +84,6 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	@Override
 	public void run() {
-		int lastKeys = 0;
 		try {
 			int selectIoeInArow = 0;
 			while (selectIoeInArow < 5) {
@@ -106,11 +105,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 						handleReadyKey(key);
 					}
 					selected.clear();
-				}
-				int keys = selector.keys().size();
-				if (keys != lastKeys) {
-					System.out.printf("keys now=%d, last=%d%n", keys, lastKeys);
-					lastKeys = keys;
+				} else {
+					assert (selector.selectedKeys().isEmpty());
 				}
 				if (!handlersWithUndeliveredData.isEmpty()) {
 					// TODO: more efficient traversal

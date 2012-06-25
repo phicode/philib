@@ -74,7 +74,7 @@ public class TcpEchoClient {
 		// new Random().nextBytes(buf);
 		// ByteBuffer seedBuffer = ByteBuffer.wrap(buf);
 		NetContext context = new SimpleNetContext();
-		EchoSession session = new EchoSession(false,false);
+		EchoSession session = new EchoSession(false, true);
 		connection = TcpNetFactory.INSTANCE.openClient(context, endpoint, session);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -118,6 +118,7 @@ public class TcpEchoClient {
 			if (seeded < 512 * 1024) {
 				System.out.println("seeding an additional " + 8192 + " bytes into the echo chain");
 				session.incInTransitBytes(8192);
+				seeded += 8192;
 			}
 			loop++;
 			lastRx = rx;

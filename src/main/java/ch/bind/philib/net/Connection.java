@@ -42,4 +42,6 @@ public interface Connection extends Closeable {
 	long getRx();
 
 	long getTx();
+
+	String getDebugInformations();
 }
