@@ -76,7 +76,7 @@ public class TcpEchoServer implements SessionFactory {
 
 	@Override
 	public synchronized EchoSession createSession() {
-		EchoSession session = new EchoSession(true);
+		EchoSession session = new EchoSession(true,false);
 		synchronized (sessions) {
 			sessions.add(session);
 		}

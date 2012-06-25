@@ -50,6 +50,8 @@ public class EchoSession extends PureSessionBase {
 
 	private final ByteBuffer writeBb = ByteBuffer.wrap(new byte[8192]);
 
+	private boolean sendPending = false;
+
 	private final byte[] sendEnc = new byte[8];
 
 	// private AtomicInteger maxInTransit = new AtomicInteger();
@@ -58,27 +60,40 @@ public class EchoSession extends PureSessionBase {
 
 	private int numSendable;
 
+	private final boolean performVerification;
+
 	// private int partialSize;
 
-	EchoSession(boolean server) {
+	EchoSession(boolean server, boolean performVerification) {
 		this.server = server;
+		this.performVerification = performVerification;
 		// the write buffer starts in write mode, but there is nothing to write,
 		// so tell it that there is nothing to write
-		writeBb.limit(0);
+		// writeBb.limit(0);
 	}
 
 	@Override
 	public void receive(ByteBuffer data) throws IOException {
-		// System.out.println("received: " + ArrayUtil.formatShortHex(data));
 		lastInteractionNs = System.nanoTime();
 		assert (data.position() == 0);
 
 		if (server) {
 			// the server only performs data echoing
 			sendAsync(data);
-		} else {
+		}
+		else {
 			synchronized (lock) {
-				verifyReceived(data);
+				if (performVerification) {
+					verifyReceived(data);
+				}
+				else {
+					int rem = data.remaining();
+					int consume = (rem / 8);
+					numSendable += consume;
+					int newPos = data.position() + (consume * 8);
+					data.position(newPos);
+				}
+				// TODO: send nulled packets if we are not in verification mode
 				_send();
 			}
 		}
@@ -91,16 +106,18 @@ public class EchoSession extends PureSessionBase {
 	}
 
 	void _send() throws IOException {
-		// writeBb is in read mode
-		if (writeBb.hasRemaining()) {
-			System.out.println("aaa\nsending: " + ArrayUtil.formatShortHex(writeBb));
+		if (sendPending) {
+			// writeBb is in read mode
 			sendAsync(writeBb);
 			if (writeBb.hasRemaining()) {
 				return;
 			}
+			else {
+				sendPending = false;
+			}
 		}
 		long loops = 0;
-		do {
+		while (!sendPending) {// loop if all data has been written
 			// switch writeBb to write mode
 			writeBb.clear();
 			int canWriteNums = writeBb.capacity() / 8;
@@ -113,16 +130,18 @@ public class EchoSession extends PureSessionBase {
 			// switch writeBb to read mode
 			writeBb.flip();
 			Validation.isTrue(writeBb.position() == 0 && writeBb.limit() == sendNums * 8, "" + writeBb.limit());
-			System.out.println("bbb\nsending: " + ArrayUtil.formatShortHex(writeBb));
 			sendAsync(writeBb);
+			sendPending = writeBb.hasRemaining();
 			loops++;
 			if (loops > 10 && !writeBb.hasRemaining()) {
 				System.out.println("wrote " + (writeBb.capacity() * loops) + " in one go!");
 			}
-		} while (!writeBb.hasRemaining()); // loop if all data has been written
+		}
 	}
 
 	private void enc(int num) {
+		// System.out.println("sending:  " + nextValueSend + "-" +
+		// (nextValueSend + num - 1));
 		for (int i = 0; i < num; i++) {
 			EndianConverter.encodeInt64LE(nextValueSend, sendEnc);
 			writeBb.put(sendEnc);
@@ -134,11 +153,14 @@ public class EchoSession extends PureSessionBase {
 	private void verifyReceived(ByteBuffer data) {
 		int rem = data.remaining();
 		assert (rem > 0);
+		// long verifyStart = nextValueRead;
 		while (rem >= 8) {
 			data.get(readBuf);
 			verify();
 			rem -= 8;
 		}
+		// long verifyEnd = nextValueRead - 1;
+		// System.out.println("verified: " + verifyStart + " - " + verifyEnd);
 	}
 
 	private void verify() {

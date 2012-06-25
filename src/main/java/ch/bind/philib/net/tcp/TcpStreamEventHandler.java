@@ -53,9 +53,6 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	private final AtomicLong tx = new AtomicLong(0);
 
-	// private final AtomicLong readOps = new AtomicLong(0);
-	// private final AtomicLong sendOps = new AtomicLong(0);
-
 	private final SocketChannel channel;
 
 	private final TcpConnection connection;
@@ -97,7 +94,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 5000000L) { // 5ms
 				System.out.printf("handle took %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			doHandle(ops);
 		}
 	}
@@ -120,7 +118,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			boolean finished = sl_sendPendingAsync();
 			if (finished) {
 				unregisterFromWriteEvents();
-			} else {
+			}
+			else {
 				registerForWriteEvents();
 			}
 		}
@@ -199,14 +198,16 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 					assert (!externBuf.isPending() && !data.hasRemaining());
 					unregisterFromWriteEvents();
 					return;
-				} else {
+				}
+				else {
 					registerForWriteEvents();
 
 					// not all data in the backlog has been written
 					if (externBuf.isPending()) {
 						// our data is among those who are waiting to be written
 						w_writeBacklog.wait();
-					} else {
+					}
+					else {
 						// our data has been written
 						assert (!data.hasRemaining());
 						return;
@@ -233,7 +234,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				if (externBufReleased) {
 					w_writeBacklog.notifyAll();
 				}
-			} else {
+			}
+			else {
 				final int num = sl_channelWrite(bb);
 				totalWrite += num;
 				if (num == rem) {
@@ -241,7 +243,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 					if (externBufReleased) {
 						w_writeBacklog.notifyAll();
 					}
-				} else {
+				}
+				else {
 					// write channel is blocked
 					w_writeBacklog.addFront(pending);
 					break;
@@ -261,7 +264,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000) {
 				System.out.printf("write took %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			num = channel.write(data);
 		}
 		// long s = sendOps.incrementAndGet();
@@ -285,7 +289,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t > 2000000) {
 				System.out.printf("read took: %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			num = channel.read(rbuf);
 		}
 		// long r = readOps.incrementAndGet();
@@ -327,10 +332,12 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			}
 			if (numChanRead == 0) {
 				break;
-			} else {
+			}
+			else {
 				if (bb.hasRemaining()) {
 					totalRead += numChanRead;
-				} else {
+				}
+				else {
 					// if the read buffer is full we cant continue reading until
 					// the client has consumed its pending data.
 					break;
@@ -346,7 +353,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				registerForDeliverPartialReads();
 			}
 			r_partialConsume = bb;
-		} else {
+		}
+		else {
 			if (r_partialConsume != null) {
 				// registered for partial consume events
 				unregisterFromDeliverPartialReads();
@@ -360,12 +368,12 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		if (bb.position() > 0) {
 			// switch from write mode to read
 			bb.flip();
-			int available = bb.remaining();
 			connection.receive(bb);
 			// switch back to write mode
 			if (bb.hasRemaining()) {
 				bb.compact();
-			} else {
+			}
+			else {
 				bb.clear();
 			}
 		}
