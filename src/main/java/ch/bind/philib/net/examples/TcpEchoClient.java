@@ -116,7 +116,7 @@ public class TcpEchoClient {
 			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d tDiff=%d%n", //
 					seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff), tDiff);
 			if (seeded < 512 * 1024) {
-				System.out.println("seeding an additional " + 8192 + " bytes into the echo chain");
+//				System.out.println("seeding an additional " + 8192 + " bytes into the echo chain");
 				session.incInTransitBytes(8192);
 				seeded += 8192;
 			}
