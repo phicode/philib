@@ -65,7 +65,7 @@ public final class TcpServer implements NetServer {
 
 		TcpServer server = new TcpServer(context, sessionFactory, channel);
 		server.serverEventHandler = new TcpServerEventHandler(context, channel, server);
-		server.serverEventHandler.start(context);
+		server.serverEventHandler.setup(context);
 		return server;
 	}
 

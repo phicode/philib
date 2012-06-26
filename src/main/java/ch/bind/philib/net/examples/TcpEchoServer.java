@@ -43,6 +43,9 @@ public class TcpEchoServer implements SessionFactory {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
 		SessionFactory sessionFactory = this;
 		NetContext context = new SimpleNetContext();
+		context.setTcpNoDelay(false);
+		context.setSndBufSize(64 * 1024);
+		context.setRcvBufSize(64 * 1024);
 		NetServer server = TcpNetFactory.INSTANCE.openServer(context, bindAddress, sessionFactory);
 		while (true) {
 			Thread.sleep(20000);
@@ -58,7 +61,8 @@ public class TcpEchoServer implements SessionFactory {
 						if (!s.isConnected()) {
 							System.out.println("removeing disconnected session: " + s);
 							iter.remove();
-						} else {
+						}
+						else {
 							long lastInteractionNs = s.getLastInteractionNs();
 							if (lastInteractionNs < tooFarAgo) {
 								double lastSec = (now - lastInteractionNs) / 1000000000f;
@@ -76,7 +80,7 @@ public class TcpEchoServer implements SessionFactory {
 
 	@Override
 	public synchronized EchoSession createSession() {
-		EchoSession session = new EchoSession(true,false);
+		EchoSession session = new EchoSession(true, false);
 		synchronized (sessions) {
 			sessions.add(session);
 		}

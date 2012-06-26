@@ -44,7 +44,8 @@ public class TcpEchoClient {
 		if (args.length > 1) {
 			System.out.println("only one parameter may be specified");
 			System.exit(1);
-		} else if (args.length == 1) {
+		}
+		else if (args.length == 1) {
 			try {
 				numClients = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -74,6 +75,9 @@ public class TcpEchoClient {
 		// new Random().nextBytes(buf);
 		// ByteBuffer seedBuffer = ByteBuffer.wrap(buf);
 		NetContext context = new SimpleNetContext();
+		context.setTcpNoDelay(true);
+		context.setSndBufSize(64 * 1024);
+		context.setRcvBufSize(64 * 1024);
 		EchoSession session = new EchoSession(false, true);
 		connection = TcpNetFactory.INSTANCE.openClient(context, endpoint, session);
 
@@ -116,7 +120,8 @@ public class TcpEchoClient {
 			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d tDiff=%d%n", //
 					seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff), tDiff);
 			if (seeded < 512 * 1024) {
-//				System.out.println("seeding an additional " + 8192 + " bytes into the echo chain");
+				// System.out.println("seeding an additional " + 8192 +
+				// " bytes into the echo chain");
 				session.incInTransitBytes(8192);
 				seeded += 8192;
 			}

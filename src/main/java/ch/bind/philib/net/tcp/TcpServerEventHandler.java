@@ -45,8 +45,11 @@ final class TcpServerEventHandler extends EventHandlerBase {
 		this.server = server;
 	}
 
-	void start(NetContext context) throws IOException {
+	void setup(NetContext context) throws IOException {
 		channel.configureBlocking(false);
+		if (context.hasCustomRcvBufSize()) {
+			channel.socket().setReceiveBufferSize(context.getRcvBufSize());
+		}
 		context.getEventDispatcher().register(this, EventUtil.ACCEPT);
 	}
 

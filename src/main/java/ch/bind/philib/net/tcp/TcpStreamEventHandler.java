@@ -23,18 +23,16 @@
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.naming.PartialResultException;
-
 import ch.bind.philib.io.BitOps;
 import ch.bind.philib.io.Ring;
 import ch.bind.philib.io.RingImpl;
-import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
@@ -44,8 +42,11 @@ import ch.bind.philib.validation.Validation;
 final class TcpStreamEventHandler extends EventHandlerBase {
 
 	private static final boolean debugMode = true;
+
 	private static final long LOG_HANDLE_TIME_THRESHOLD_NS = 10000000L;
+
 	private static final long LOG_READ_TIME_THRESHOLD_NS = 5000000L;
+
 	private static final long LOG_WRITE_TIME_THRESHOLD_NS = 5000000L;
 
 	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
@@ -65,13 +66,18 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	// TODO: remove, or only in debug mode
 	private final Object rlock = new Object();
+
 	// TODO: remove volatile once only the event-handler touches this var
 	private volatile ByteBuffer r_partialConsume;
 
 	private volatile boolean registeredForWriteEvt = false;
+
 	private long readOps;
+
 	private long sendOps;
+
 	private long numHandles;
+
 	private boolean lastHandleSendable;
 
 	TcpStreamEventHandler(NetContext context, TcpConnection connection, SocketChannel channel) {
@@ -82,10 +88,18 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		this.channel = channel;
 	}
 
-	void start() throws IOException {
+	void setup() throws IOException {
 		channel.configureBlocking(false);
-		channel.socket().setTcpNoDelay(context.getTcpNoDelay());
-		// TODO: socket keep-alive options and others
+		Socket socket = channel.socket();
+		if (context.hasCustomTcpNoDelay()) {
+			socket.setTcpNoDelay(context.getTcpNoDelay());
+		}
+		if (context.hasCustomSndBufSize()) {
+			socket.setSendBufferSize(context.getSndBufSize());
+		}
+		if (context.hasCustomRcvBufSize()) {
+			socket.setReceiveBufferSize(context.getRcvBufSize());
+		}
 		context.getEventDispatcher().register(this, EventUtil.READ);
 	}
 
@@ -112,7 +126,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				System.out.printf("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
 						(t / 1000000f), rdiff, sdiff, getRx(), getTx());
 			}
-		} else {
+		}
+		else {
 			doHandle(ops);
 		}
 	}
@@ -140,7 +155,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			boolean finished = sl_sendPendingAsync();
 			if (finished) {
 				unregisterFromWriteEvents();
-			} else {
+			}
+			else {
 				registerForWriteEvents();
 			}
 			return finished;
@@ -191,7 +207,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 			if (data.hasRemaining()) {
 				registerForWriteEvents();
-			} else {
+			}
+			else {
 				// backlog and input buffer written
 				unregisterFromWriteEvents();
 			}
@@ -222,14 +239,16 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 					assert (!externBuf.isPending() && !data.hasRemaining());
 					unregisterFromWriteEvents();
 					return;
-				} else {
+				}
+				else {
 					registerForWriteEvents();
 
 					// not all data in the backlog has been written
 					if (externBuf.isPending()) {
 						// our data is among those who are waiting to be written
 						w_writeBacklog.wait();
-					} else {
+					}
+					else {
 						// our data has been written
 						assert (!data.hasRemaining());
 						return;
@@ -262,7 +281,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				if (externBufReleased) {
 					w_writeBacklog.notifyAll();
 				}
-			} else {
+			}
+			else {
 				// write channel is blocked
 				w_writeBacklog.addFront(pending);
 				break;
@@ -283,7 +303,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t >= LOG_WRITE_TIME_THRESHOLD_NS) {
 				System.out.printf("write took %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			num = channel.write(data);
 		}
 		// long s = sendOps.incrementAndGet();
@@ -309,7 +330,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			if (t >= LOG_READ_TIME_THRESHOLD_NS) {
 				System.out.printf("read took: %.6fms%n", (t / 1000000f));
 			}
-		} else {
+		}
+		else {
 			num = channel.read(rbuf);
 		}
 		// long r = readOps.incrementAndGet();
@@ -351,10 +373,12 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			}
 			if (numChanRead == 0) {
 				break;
-			} else {
+			}
+			else {
 				if (bb.hasRemaining()) {
 					totalRead += numChanRead;
-				} else {
+				}
+				else {
 					// if the read buffer is full we cant continue reading until
 					// the client has consumed its pending data.
 					break;
@@ -370,7 +394,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				registerForDeliverPartialReads();
 			}
 			r_partialConsume = bb;
-		} else {
+		}
+		else {
 			if (r_partialConsume != null) {
 				// registered for partial consume events
 				unregisterFromDeliverPartialReads();
@@ -389,7 +414,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			// switch back to write mode
 			if (bb.hasRemaining()) {
 				bb.compact();
-			} else {
+			}
+			else {
 				bb.clear();
 			}
 		}
@@ -432,13 +458,15 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				ByteBuffer r = r_partialConsume;
 				if (r != null) {
 					s = "read: " + r.position();
-				} else {
+				}
+				else {
 					s = "read-ready=0";
 				}
 			}
 			if (w_writeBacklog.isEmpty()) {
 				s += ", write-available=0";
-			} else {
+			}
+			else {
 				s += ", write-available=" + w_writeBacklog.size();
 			}
 			try {

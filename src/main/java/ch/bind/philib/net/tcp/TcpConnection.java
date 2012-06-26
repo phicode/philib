@@ -59,7 +59,7 @@ public final class TcpConnection implements Connection {
 		TcpConnection connection = new TcpConnection(context, channel, session);
 		session.init(connection);
 		connection.eventHandler = new TcpStreamEventHandler(context, connection, channel);
-		connection.eventHandler.start();
+		connection.eventHandler.setup();
 		return connection;
 	}
 

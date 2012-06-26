@@ -35,15 +35,17 @@ public class NetContextImpl implements NetContext {
 
 	private final EventDispatcher eventDispatcher;
 
-	private final boolean tcpNoDelay;
+	private Boolean tcpNoDelay;
+
+	private Integer sndBufSize;
+
+	private Integer rcvBufSize;
 
 	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
 		Validation.notNull(bufferCache);
 		Validation.notNull(eventDispatcher);
 		this.bufferCache = bufferCache;
 		this.eventDispatcher = eventDispatcher;
-		// TODO: expose this to clients
-		this.tcpNoDelay = true;
 	}
 
 	@Override
@@ -57,7 +59,59 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
+	public boolean hasCustomTcpNoDelay() {
+		return tcpNoDelay != null;
+	}
+
+	@Override
+	public void setTcpNoDelay(boolean tcpNoDelay) {
+		this.tcpNoDelay = tcpNoDelay;
+	}
+
+	@Override
 	public boolean getTcpNoDelay() {
-		return tcpNoDelay;
+		Boolean v = this.tcpNoDelay;
+		if (v == null) {
+			throw new IllegalStateException("no custom tcp-no-delay has been set");
+		}
+		return v.booleanValue();
+	}
+
+	@Override
+	public boolean hasCustomSndBufSize() {
+		return sndBufSize != null;
+	}
+
+	@Override
+	public void setSndBufSize(int size) {
+		this.sndBufSize = size;
+	}
+
+	@Override
+	public int getSndBufSize() {
+		Integer v = this.sndBufSize;
+		if (v == null) {
+			throw new IllegalStateException("no custom snd-buf-size has been set");
+		}
+		return v.intValue();
+	}
+
+	@Override
+	public boolean hasCustomRcvBufSize() {
+		return rcvBufSize != null;
+	}
+
+	@Override
+	public void setRcvBufSize(int size) {
+		this.rcvBufSize = size;
+	}
+
+	@Override
+	public int getRcvBufSize() {
+		Integer v = this.rcvBufSize;
+		if (v == null) {
+			throw new IllegalStateException("no custom rcv-buf-size has been set");
+		}
+		return v.intValue();
 	}
 }

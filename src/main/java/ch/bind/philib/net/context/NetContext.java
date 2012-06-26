@@ -30,5 +30,23 @@ public interface NetContext {
 
 	EventDispatcher getEventDispatcher();
 
+	boolean hasCustomTcpNoDelay();
+	
 	boolean getTcpNoDelay();
+
+	void setTcpNoDelay(boolean tcpNoDelay);
+
+	boolean hasCustomSndBufSize();
+	
+	int getSndBufSize();
+
+	void setSndBufSize(int size);
+	
+	boolean hasCustomRcvBufSize();
+
+	int getRcvBufSize();
+
+	void setRcvBufSize(int size);
+	
+	// TODO: socket keep-alive options and others
 }
