@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import ch.bind.philib.io.EndianConverter;
-import ch.bind.philib.lang.ArrayUtil;
 import ch.bind.philib.net.PureSessionBase;
 import ch.bind.philib.validation.Validation;
 
@@ -189,8 +188,12 @@ public class EchoSession extends PureSessionBase {
 
 	@Override
 	public void writable() {
-		// TODO Auto-generated method stub
 		// TODO
+		try {
+			send();
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+		}
 	}
 
 	public String getDebugInformations() {
