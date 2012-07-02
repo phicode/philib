@@ -61,10 +61,8 @@ public class TcpEchoClient {
 	}
 
 	private void run(int numClients) throws IOException, InterruptedException {
-		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.66",
-		// 1234);
-		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221",
-		// 1234);
+		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.66", 1234);
+		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 
 		int numRunning = 0;
@@ -78,7 +76,7 @@ public class TcpEchoClient {
 		context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
-		EchoSession session = new EchoSession(false, false);
+		EchoSession session = new EchoSession(false, true);
 		connection = TcpNetFactory.INSTANCE.openClient(context, endpoint, session);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {

@@ -53,6 +53,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
 
+	private static final int IO_LIMIT_NONE = -1;
+
 	private final AtomicLong rx = new AtomicLong(0);
 
 	private final AtomicLong tx = new AtomicLong(0);
@@ -71,6 +73,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	private volatile ByteBuffer r_partialConsume;
 
 	private volatile boolean registeredForWriteEvt = false;
+
+	private long writeCapacity = IO_LIMIT_NONE; // endless
 
 	private long readOps;
 
@@ -142,11 +146,13 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		// TODO: synchronize
 		// we can try to write more data if the writable flag is set or if we
 		// did not request the writable flag to be set => last write didnt block
+		boolean finishedWrite = true;
 		if (BitOps.checkMask(ops, EventUtil.WRITE) || !registeredForWriteEvt) {
 			lastHandleSendable = BitOps.checkMask(ops, EventUtil.WRITE);
-			if (w_write()) {
-				connection.notifyWritable();
-			}
+			finishedWrite = w_write();
+		}
+		if (finishedWrite) {
+			connection.notifyWritable();
 		}
 	}
 
@@ -273,8 +279,9 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			}
 			final ByteBuffer bb = pending.getBuffer();
 			final int rem = bb.remaining();
-			Validation.isTrue(rem > 0);
+			assert (rem > 0);
 			final int num = sl_channelWrite(bb);
+			assert (num <= rem);
 			totalWrite += num;
 			if (num == rem) {
 				boolean externBufReleased = releaseBuffer(pending);
