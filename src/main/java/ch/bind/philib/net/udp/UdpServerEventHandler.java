@@ -22,6 +22,7 @@
 package ch.bind.philib.net.udp;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
@@ -53,22 +54,28 @@ final class UdpServerEventHandler extends EventHandlerBase {
 
 	void start() throws IOException {
 		channel.configureBlocking(false);
+		DatagramSocket socket = channel.socket();
+		socket.setBroadcast(on);
+		socket.setReceiveBufferSize(size);
+		socket.setSendBufferSize(size);
 		context.getEventDispatcher().register(this, EventUtil.READ);
 	}
 
 	@Override
 	public void close() throws IOException {
 		// TODO Auto-generated method stub
-
+throw new UnsupportedOperationException("TODO");
 	}
 
 	@Override
 	public SelectableChannel getChannel() {
 		return channel;
 	}
-
+	
 	@Override
-	public void handleRead() throws IOException {
+	public void handle(int ops) throws IOException {
+		// TODO Auto-generated method stub
+		
 		final ByteBuffer rbuf = acquireBuffer();
 		try {
 			int totalRead = 0;

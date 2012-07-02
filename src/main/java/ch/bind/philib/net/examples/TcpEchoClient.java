@@ -78,7 +78,7 @@ public class TcpEchoClient {
 		context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
-		EchoSession session = new EchoSession(false, true);
+		EchoSession session = new EchoSession(false, false);
 		connection = TcpNetFactory.INSTANCE.openClient(context, endpoint, session);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {

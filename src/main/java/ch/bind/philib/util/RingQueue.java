@@ -67,28 +67,31 @@ public class RingQueue<E> {
 				// we can now write to this index
 				entries[wIdx] = e;
 
-				int expectCidx = wIdx - 1;
-				do {
-					int commitIdx = writeCommittedIdx.get();
-					if (commitIdx < expectCidx) {
-						// someone else is writing with an index lower then our
-						// and has not commited
-						return true;
-					} else if (commitIdx == expectCidx) {
-						// commit directly
-						boolean commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
-
-						int additionalCommitIdx = commitIdx + 1;
-						if (entries[additionalCommitIdx] != null) {
-							commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
-						}
-					} else {
-						Validation.notNull(null);
-					}
-				} while (true);
-				// return true;
+				commitWrite(wIdx);
 			}
 			// else: someone else already reserved this write-index, start anew
+		} while (true);
+	}
+
+	private void commitWrite(int wIdx) {
+		int expectCidx = wIdx - 1;
+		do {
+			int commitIdx = writeCommittedIdx.get();
+			if (commitIdx < expectCidx) {
+				// someone else is writing with an index lower then our
+				// and has not commited
+				return true;
+			} else if (commitIdx == expectCidx) {
+				// commit directly
+				boolean commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
+
+				int additionalCommitIdx = commitIdx + 1;
+				if (entries[additionalCommitIdx] != null) {
+					commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
+				}
+			} else {
+				Validation.notNull(null);
+			}
 		} while (true);
 	}
 }

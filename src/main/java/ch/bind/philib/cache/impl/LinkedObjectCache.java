@@ -95,7 +95,6 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 					final Node<E> tail = head.getTail();
 					boolean ok = rootRef.compareAndSet(LOCK_DUMMY, tail);
 					assert (ok);
-					head.unsetTail();
 					return head;
 				}
 			}
@@ -114,10 +113,6 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 
 		Node<E> getTail() {
 			return tail;
-		}
-
-		void unsetTail() {
-			tail = null;
 		}
 
 		void setEntry(E e) {

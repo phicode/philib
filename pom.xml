@@ -58,12 +58,6 @@
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency> -->
-		<!-- <artifactId>org.slf</artifactId> -->
-		<!-- <groupId></groupId> -->
-		<!-- <version></version> -->
-		<!-- <scope></scope> -->
-		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -73,6 +67,7 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.0.6</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -106,6 +101,7 @@
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<version>2.9</version>
 				<configuration>
+				
 				</configuration>
 			</plugin>
 		</plugins>
