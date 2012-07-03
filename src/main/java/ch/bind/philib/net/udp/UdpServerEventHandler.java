@@ -55,9 +55,9 @@ final class UdpServerEventHandler extends EventHandlerBase {
 	void start() throws IOException {
 		channel.configureBlocking(false);
 		DatagramSocket socket = channel.socket();
-		socket.setBroadcast(on);
-		socket.setReceiveBufferSize(size);
-		socket.setSendBufferSize(size);
+//		socket.setBroadcast(on);
+//		socket.setReceiveBufferSize(size);
+//		socket.setSendBufferSize(size);
 		context.getEventDispatcher().register(this, EventUtil.READ);
 	}
 
@@ -105,11 +105,11 @@ throw new UnsupportedOperationException("TODO");
 		}
 	}
 
-	@Override
-	public void handleWrite() throws IOException {
-		// TODO Auto-generated method stub
-
-	}
+//	@Override
+//	public void handleWrite() throws IOException {
+//		// TODO Auto-generated method stub
+//
+//	}
 
 	void sendNonBlocking(SocketAddress addr, ByteBuffer data) {
 

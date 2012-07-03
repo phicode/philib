@@ -124,6 +124,6 @@ public final class TcpConnection implements Connection {
 
 	@Override
 	public String getDebugInformations() {
-	return eventHandler.getDebugInformations();
+		return eventHandler.getDebugInformations();
 	}
 }
