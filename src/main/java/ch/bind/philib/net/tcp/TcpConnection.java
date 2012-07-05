@@ -106,15 +106,21 @@ public final class TcpConnection implements Connection {
 	}
 
 	void notifyClosed() {
-		session.closed();
+		if (session != null) {
+			session.closed();
+		}
 	}
 
 	void notifyWritable() {
-		session.writable();
+		if (session != null) {
+			session.writable();
+		}
 	}
 
-	void receive(ByteBuffer rbuf) throws IOException {
-		session.receive(rbuf);
+	void notifyReceive(ByteBuffer rbuf) throws IOException {
+		if (session != null) {
+			session.receive(rbuf);
+		}
 	}
 
 	@Override

@@ -427,7 +427,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		if (bb.position() > 0) {
 			// switch from write mode to read
 			bb.flip();
-			connection.receive(bb);
+			connection.notifyReceive(bb);
 			// switch back to write mode
 			if (bb.hasRemaining()) {
 				bb.compact();
@@ -497,7 +497,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	public boolean isWritableNow() {
-		//TODO
+		// TODO
 		throw new UnsupportedOperationException("TODO");
 	}
 }
