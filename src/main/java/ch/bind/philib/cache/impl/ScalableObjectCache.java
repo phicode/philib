@@ -72,7 +72,7 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 		return stats;
 	}
 
-	private LinkedObjectCache<E> bind() {
+	LinkedObjectCache<E> bind() {
 		// round robin distribution in the order the threads first access the
 		// cache
 		long v = usageCount.getAndIncrement();
@@ -84,7 +84,7 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 
 		@Override
 		protected LinkedObjectCache<E> initialValue() {
-			return bind();
+			return ScalableObjectCache.this.bind();
 		}
 	}
 }

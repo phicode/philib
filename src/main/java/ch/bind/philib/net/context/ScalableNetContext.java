@@ -21,7 +21,7 @@
  */
 package ch.bind.philib.net.context;
 
-public class ScalableNetContext extends NetContextImpl implements NetContext {
+public class ScalableNetContext extends NetContextImpl {
 
 	public ScalableNetContext() {
 		super(null, null);

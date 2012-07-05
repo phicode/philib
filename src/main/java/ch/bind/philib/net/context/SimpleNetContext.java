@@ -26,7 +26,7 @@ import java.io.IOException;
 import ch.bind.philib.cache.ByteBufferCache;
 import ch.bind.philib.net.events.SimpleEventDispatcher;
 
-public final class SimpleNetContext extends NetContextImpl implements NetContext {
+public final class SimpleNetContext extends NetContextImpl {
 
 	public SimpleNetContext() throws IOException {
 		// single threaded net selector and buffer cache
