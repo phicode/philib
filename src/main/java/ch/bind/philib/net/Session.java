@@ -21,27 +21,14 @@
  */
 package ch.bind.philib.net;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public interface PureSession extends Closeable {
-
-	void init(Connection connection);
+public interface Session {
 
 	void receive(ByteBuffer data) throws IOException;
 
-	int sendAsync(ByteBuffer data) throws IOException;
-
 	void closed();
-
-	boolean isConnected();
-
-	boolean isOpen();
-
-	long getRx();
-
-	long getTx();
 
 	void writable();
 }

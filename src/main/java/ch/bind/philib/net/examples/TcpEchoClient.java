@@ -26,6 +26,8 @@ import java.net.InetSocketAddress;
 
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.Session;
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.SimpleNetContext;
@@ -35,8 +37,6 @@ import ch.bind.philib.net.tcp.TcpNetFactory;
 // TODO: latency measurements
 // TODO: many threads
 public class TcpEchoClient {
-
-	private Connection connection;
 
 	public static void main(String[] args) throws Exception {
 		int numClients = 1;
@@ -76,20 +76,13 @@ public class TcpEchoClient {
 		context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
-		EchoSession session = new EchoSession(false, true);
-		connection = TcpNetFactory.INSTANCE.openClient(context, endpoint, session);
-
-		Runtime.getRuntime().addShutdownHook(new Thread() {
+		SessionFactory factory = new SessionFactory() {
 			@Override
-			public void run() {
-				try {
-					connection.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			public Session createSession(Connection connection) {
+				return new EchoSession(connection, false	, true);
 			}
-		});
+		};
+		EchoSession session =(EchoSession) TcpNetFactory.INSTANCE.openClient(context, endpoint, factory);
 
 		final int loopTimeSec = 10;
 		long lastT = System.currentTimeMillis();
@@ -101,12 +94,12 @@ public class TcpEchoClient {
 		session.incInTransitBytes(8192);
 		int seeded = 8192;
 		session.send();
-		while (connection.isConnected()) {
+		while (session.connection.isConnected()) {
 			long sleepUntil = start + (loop * loopTimeSec * 1000L);
 			ThreadUtil.sleepUntilMs(sleepUntil);
 
-			long rx = session.getRx();
-			long tx = session.getTx();
+			long rx = session.connection.getRx();
+			long tx = session.connection.getTx();
 			long rxDiff = rx - lastRx;
 			long txDiff = tx - lastTx;
 			long diff = rxDiff + txDiff;

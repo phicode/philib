@@ -28,7 +28,7 @@ import ch.bind.philib.net.context.NetContext;
 
 public interface NetFactory {
 
-	Connection openClient(NetContext context, SocketAddress endpoint, PureSession session) throws IOException;
+	Session openClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException;
 
 	NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory factory) throws IOException;
 

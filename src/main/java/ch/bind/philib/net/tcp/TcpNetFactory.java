@@ -24,10 +24,9 @@ package ch.bind.philib.net.tcp;
 import java.io.IOException;
 import java.net.SocketAddress;
 
-import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetFactory;
 import ch.bind.philib.net.NetServer;
-import ch.bind.philib.net.PureSession;
+import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 
@@ -39,8 +38,8 @@ public final class TcpNetFactory implements NetFactory {
 	}
 
 	@Override
-	public Connection openClient(NetContext context, SocketAddress endpoint, PureSession session) throws IOException {
-		return TcpConnection.open(context, endpoint, session);
+	public Session openClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
+		return TcpConnection.open(context, endpoint, sessionFactory);
 	}
 
 	@Override

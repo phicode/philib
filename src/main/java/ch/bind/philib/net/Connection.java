@@ -23,6 +23,7 @@ package ch.bind.philib.net;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import ch.bind.philib.net.context.NetContext;
@@ -44,4 +45,8 @@ public interface Connection extends Closeable {
 	long getTx();
 
 	String getDebugInformations();
+
+	SocketAddress getRemoteAddress() throws IOException;
+
+	boolean isWritableNow();
 }

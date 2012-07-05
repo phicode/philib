@@ -27,7 +27,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.PureSession;
+import ch.bind.philib.net.Session;
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.validation.Validation;
 
@@ -37,17 +38,15 @@ public final class TcpConnection implements Connection {
 
 	private final NetContext context;
 
-	private final PureSession session;
+	private Session session;
 
 	private TcpStreamEventHandler eventHandler;
 
-	private TcpConnection(NetContext context, SocketChannel channel, PureSession session) throws IOException {
+	private TcpConnection(NetContext context, SocketChannel channel) throws IOException {
 		Validation.notNull(context);
 		Validation.notNull(channel);
-		Validation.notNull(session);
 		this.context = context;
 		this.channel = channel;
-		this.session = session;
 	}
 
 	@Override
@@ -55,15 +54,21 @@ public final class TcpConnection implements Connection {
 		return context;
 	}
 
-	static TcpConnection create(NetContext context, SocketChannel channel, PureSession session) throws IOException {
-		TcpConnection connection = new TcpConnection(context, channel, session);
-		session.init(connection);
+	private static TcpConnection create(NetContext context, SocketChannel channel) throws IOException {
+		TcpConnection connection = new TcpConnection(context, channel);
 		connection.eventHandler = new TcpStreamEventHandler(context, connection, channel);
-		connection.eventHandler.setup();
 		return connection;
 	}
 
-	public static TcpConnection open(NetContext context, SocketAddress endpoint, PureSession session) throws IOException {
+	static Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
+		TcpConnection connection = create(context, channel);
+		// TODO: handle factory exception by connection.close or something
+		connection.session = sessionFactory.createSession(connection);
+		connection.eventHandler.setup();
+		return connection.session;
+	}
+
+	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
@@ -72,7 +77,7 @@ public final class TcpConnection implements Connection {
 		}
 
 		System.out.println("connected to: " + endpoint);
-		return create(context, channel, session);
+		return create(context, channel, sessionFactory);
 	}
 
 	@Override
@@ -125,5 +130,16 @@ public final class TcpConnection implements Connection {
 	@Override
 	public String getDebugInformations() {
 		return eventHandler.getDebugInformations();
+	}
+
+	@Override
+	public boolean isWritableNow() {
+		return eventHandler.isWritableNow();
+	}
+
+	@Override
+	public SocketAddress getRemoteAddress() throws IOException {
+		return channel.socket().getRemoteSocketAddress();
+		// return channel.getRemoteAddress(); // JDK7
 	}
 }

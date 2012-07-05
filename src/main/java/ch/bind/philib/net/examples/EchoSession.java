@@ -26,10 +26,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import ch.bind.philib.io.EndianConverter;
-import ch.bind.philib.net.PureSessionBase;
+import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.Session;
 import ch.bind.philib.validation.Validation;
 
-public class EchoSession extends PureSessionBase {
+public class EchoSession implements Session {
 
 	private long lastInteractionNs;
 
@@ -61,9 +62,12 @@ public class EchoSession extends PureSessionBase {
 
 	private final boolean performVerification;
 
+	final Connection connection;
+
 	// private int partialSize;
 
-	EchoSession(boolean server, boolean performVerification) {
+	EchoSession(Connection connection, boolean server, boolean performVerification) {
+		this.connection = connection;
 		this.server = server;
 		this.performVerification = performVerification;
 		// the write buffer starts in write mode, but there is nothing to write,
@@ -77,7 +81,7 @@ public class EchoSession extends PureSessionBase {
 
 		if (server) {
 			// the server only performs data echoing
-			if (sendAsync(data) > 0) {
+			if (connection.sendAsync(data) > 0) {
 				lastInteractionNs = System.nanoTime();
 			}
 		} else {
@@ -107,7 +111,7 @@ public class EchoSession extends PureSessionBase {
 	void _send() throws IOException {
 		if (sendPending) {
 			// writeBb is in read mode
-			sendAsync(writeBb);
+			connection.sendAsync(writeBb);
 			if (writeBb.hasRemaining()) {
 				return;
 			} else {
@@ -128,7 +132,7 @@ public class EchoSession extends PureSessionBase {
 			// switch writeBb to read mode
 			writeBb.flip();
 			Validation.isTrue(writeBb.position() == 0 && writeBb.limit() == sendNums * 8, "" + writeBb.limit());
-			sendAsync(writeBb);
+			connection.sendAsync(writeBb);
 			sendPending = writeBb.hasRemaining();
 			loops++;
 			if (loops > 10 && !writeBb.hasRemaining()) {
@@ -172,7 +176,7 @@ public class EchoSession extends PureSessionBase {
 
 	@Override
 	public void closed() {
-		System.out.printf("closed() rx=%d, tx=%d%n", getRx(), getTx());
+		System.out.printf("closed() rx=%d, tx=%d%n", connection.getRx(), connection.getTx());
 	}
 
 	public long getLastInteractionNs() {

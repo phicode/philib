@@ -28,7 +28,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.net.NetServer;
-import ch.bind.philib.net.PureSession;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.validation.Validation;
@@ -89,17 +88,17 @@ public final class TcpServer implements NetServer {
 	}
 
 	void createSession(SocketChannel clientChannel) {
-		PureSession session = null;
+//		PureSession session = null;
+//		try {
+//			session = sessionFactory.createSession();
+//		} catch (Exception e) {
+//			// TODO: logging
+//			System.err.println(e.getMessage());
+//			e.printStackTrace(System.err);
+//			return;
+//		}
 		try {
-			session = sessionFactory.createSession();
-		} catch (Exception e) {
-			// TODO: logging
-			System.err.println(e.getMessage());
-			e.printStackTrace(System.err);
-			return;
-		}
-		try {
-			TcpConnection.create(context, clientChannel, session);
+			TcpConnection.create(context, clientChannel, sessionFactory);
 		} catch (IOException e) {
 			// TODO: notify an error handler
 			System.err.println("faild to create a tcp connection: " + e.getMessage());
