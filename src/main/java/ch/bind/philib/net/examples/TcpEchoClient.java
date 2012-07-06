@@ -61,7 +61,7 @@ public class TcpEchoClient {
 	}
 
 	private void run(int numClients) throws IOException, InterruptedException {
-		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.66", 1234);
+		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.71", 1234);
 		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
 		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 
