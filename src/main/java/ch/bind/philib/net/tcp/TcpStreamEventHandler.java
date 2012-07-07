@@ -28,7 +28,6 @@ import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.BitOps;
@@ -42,7 +41,7 @@ import ch.bind.philib.validation.Validation;
 
 final class TcpStreamEventHandler extends EventHandlerBase {
 
-	private static final boolean debugMode = true;
+	private static final boolean debugMode = false;
 
 	private static final long LOG_HANDLE_TIME_THRESHOLD_NS = 10000000L;
 
@@ -53,8 +52,6 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
 
 	private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
-
-	private static final int IO_LIMIT_NONE = -1;
 
 	private final AtomicLong rx = new AtomicLong(0);
 
@@ -70,21 +67,15 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	// TODO: remove, or only in debug mode
 	private final Object rlock = new Object();
 
-	// TODO: remove volatile once only the event-handler touches this var
-	private volatile ByteBuffer r_partialConsume;
+	private ByteBuffer r_partialConsume;
 
 	private volatile boolean registeredForWriteEvt = false;
-
-	private long writeCapacity = IO_LIMIT_NONE; // endless
 
 	private long readOps;
 
 	private long sendOps;
 
 	private long numHandles;
-
-	private final AtomicBoolean arlock = new AtomicBoolean(false);
-	private final AtomicBoolean awlock = new AtomicBoolean(false);
 
 	private boolean lastHandleSendable;
 
@@ -120,7 +111,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	public void handle(int ops) throws IOException {
 		// only the read and/or write flags may be set
 		assert ((ops & EventUtil.READ_WRITE) != 0 && (ops & ~EventUtil.READ_WRITE) == 0);
-
+		// writeMode.set(WRITE_MODE_LIMITED);
+		// try {
 		if (debugMode) {
 			numHandles++;
 			long r = readOps;
@@ -137,22 +129,25 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		} else {
 			doHandle(ops);
 		}
+		// } finally {
+		// writeMode.set(WRITE_MODE_UNLIMITED);
+		// }
 	}
 
 	public void doHandle(int ops) throws IOException {
-		if (arlock.compareAndSet(false, true)) {
-			try {
-				synchronized (rlock) {
-					if (BitOps.checkMask(ops, EventUtil.READ) || r_partialConsume != null) {
-						r_read();
-					}
-				}
-			} finally {
-				arlock.set(false);
+		// if (arlock.compareAndSet(false, true)) {
+		// try {
+		synchronized (rlock) {
+			if (BitOps.checkMask(ops, EventUtil.READ) || r_partialConsume != null) {
+				r_read();
 			}
-		} else {
-			System.out.println("could not acquire atomic read-lock, whyyyy????");
 		}
+		// } finally {
+		// arlock.set(false);
+		// }
+		// } else {
+		// System.out.println("could not acquire atomic read-lock, whyyyy????");
+		// }
 
 		// TODO: synchronize
 		// we can try to write more data if the writable flag is set or if we
@@ -168,24 +163,24 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	private boolean w_write() throws IOException {
-		if (awlock.compareAndSet(false, true)) {
-			try {
-				synchronized (w_writeBacklog) {
-					boolean finished = sl_sendPendingAsync();
-					if (finished) {
-						unregisterFromWriteEvents();
-					} else {
-						registerForWriteEvents();
-					}
-					return finished;
-				}
-			} finally {
-				awlock.set(false);
+		// if (awlock.compareAndSet(false, true)) {
+		// try {
+		synchronized (w_writeBacklog) {
+			boolean finished = sl_sendPendingAsync();
+			if (finished) {
+				unregisterFromWriteEvents();
+			} else {
+				registerForWriteEvents();
 			}
-		} else {
-			System.out.println("could not get atomic write lock");
-			return false;
+			return finished;
 		}
+		// } finally {
+		// awlock.set(false);
+		// }
+		// } else {
+		// System.out.println("could not get atomic write lock");
+		// return false;
+		// }
 	}
 
 	@Override
@@ -215,6 +210,8 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 			return 0;
 		}
 		synchronized (w_writeBacklog) {
+			// final int cap = writeCapacity;
+
 			// write as much as possible until the os-buffers are full or the
 			// write-per-round limit is reached
 			boolean finished = sl_sendPendingAsync();
@@ -309,6 +306,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 				w_writeBacklog.addFront(pending);
 				break;
 			}
+			// } while (true);
 		} while (totalWrite < IO_WRITE_LIMIT_PER_ROUND);
 		return false;
 	}
