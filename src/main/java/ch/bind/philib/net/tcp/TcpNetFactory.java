@@ -37,6 +37,7 @@ public final class TcpNetFactory implements NetFactory {
 	private TcpNetFactory() {
 	}
 
+	// TODO: supply session directly!
 	@Override
 	public Session openClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		return TcpConnection.open(context, endpoint, sessionFactory);

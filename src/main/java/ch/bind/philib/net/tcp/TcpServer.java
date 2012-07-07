@@ -24,48 +24,32 @@ package ch.bind.philib.net.tcp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.net.events.EventHandlerBase;
+import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
-public final class TcpServer implements NetServer {
+public final class TcpServer extends EventHandlerBase implements NetServer {
 
 	// TODO: configurable
 	private static final int DEFAULT_BACKLOG = 25;
-
-	private final NetContext context;
 
 	private final SessionFactory sessionFactory;
 
 	private final ServerSocketChannel channel;
 
-	private TcpServerEventHandler serverEventHandler;
-
-	TcpServer(NetContext context, SessionFactory sessionFactory, ServerSocketChannel channel) {
-		Validation.notNull(context);
+	private TcpServer(NetContext context, SessionFactory sessionFactory, ServerSocketChannel channel) {
+		super(context);
 		Validation.notNull(sessionFactory);
 		Validation.notNull(channel);
-		this.context = context;
 		this.sessionFactory = sessionFactory;
 		this.channel = channel;
-
-	}
-
-	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress) throws IOException {
-		ServerSocketChannel channel = ServerSocketChannel.open();
-		ServerSocket socket = channel.socket();
-		socket.bind(bindAddress, DEFAULT_BACKLOG);
-		// TODO: log bridge
-		System.out.println("TCP listening on: " + bindAddress);
-
-		TcpServer server = new TcpServer(context, sessionFactory, channel);
-		server.serverEventHandler = new TcpServerEventHandler(context, channel, server);
-		server.serverEventHandler.setup(context);
-		return server;
 	}
 
 	@Override
@@ -76,7 +60,7 @@ public final class TcpServer implements NetServer {
 	@Override
 	public void close() throws IOException {
 		// TODO: client connections
-		context.getEventDispatcher().unregister(serverEventHandler);
+		context.getEventDispatcher().unregister(this);
 		channel.close();
 		throw new UnsupportedOperationException("TODO");
 	}
@@ -87,16 +71,44 @@ public final class TcpServer implements NetServer {
 		throw new UnsupportedOperationException("TODO");
 	}
 
-	void createSession(SocketChannel clientChannel) {
-//		PureSession session = null;
-//		try {
-//			session = sessionFactory.createSession();
-//		} catch (Exception e) {
-//			// TODO: logging
-//			System.err.println(e.getMessage());
-//			e.printStackTrace(System.err);
-//			return;
-//		}
+	@Override
+	public SelectableChannel getChannel() {
+		return channel;
+	}
+
+	@Override
+	public void handle(int ops) throws IOException {
+		assert (ops == EventUtil.ACCEPT);
+		while (true) {
+			SocketChannel clientChannel = channel.accept();
+			if (clientChannel == null) {
+				// no more connections to accept
+				return;
+			}
+			createSession(clientChannel);
+		}
+	}
+	
+	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress) throws IOException {
+		ServerSocketChannel channel = ServerSocketChannel.open();
+		ServerSocket socket = channel.socket();
+		socket.bind(bindAddress, DEFAULT_BACKLOG);
+		// TODO: log bridge
+		System.out.println("TCP listening on: " + bindAddress);
+
+		TcpServer server = new TcpServer(context, sessionFactory, channel);
+		server.setup(context);
+		return server;
+	}
+	
+	private void setup(NetContext context) throws IOException {
+		channel.configureBlocking(false);
+		if (context.hasCustomRcvBufSize()) {
+			channel.socket().setReceiveBufferSize(context.getRcvBufSize());
+		}
+		context.getEventDispatcher().register(this, EventUtil.ACCEPT);
+	}
+	private void createSession(SocketChannel clientChannel) {
 		try {
 			TcpConnection.create(context, clientChannel, sessionFactory);
 		} catch (IOException e) {
