@@ -59,8 +59,11 @@ public final class ByteBufferCache extends SpecificObjectCache<ByteBuffer> {
 
 		private final int bufferSize;
 
+		private final byte[] nullFiller;
+
 		ByteBufferFactory(int bufferSize) {
 			this.bufferSize = bufferSize;
+			this.nullFiller = new byte[bufferSize];
 		}
 
 		@Override
@@ -76,6 +79,8 @@ public final class ByteBufferCache extends SpecificObjectCache<ByteBuffer> {
 		@Override
 		public boolean release(ByteBuffer e) {
 			if (e.capacity() == bufferSize) {
+				e.clear();
+				e.put(nullFiller);
 				e.clear();
 				return true;
 			}
