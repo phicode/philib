@@ -32,7 +32,7 @@ import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.validation.Validation;
 
-public final class TcpConnection implements Connection {
+public abstract class TcpConnection implements Connection {
 
 	private final SocketChannel channel;
 
