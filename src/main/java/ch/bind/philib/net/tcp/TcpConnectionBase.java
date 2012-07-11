@@ -43,7 +43,24 @@ import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.net.events.NetBuf;
 import ch.bind.philib.validation.Validation;
 
-class TcpConnectionBase extends EventHandlerBase implements Connection {
+abstract class TcpConnectionBase extends EventHandlerBase implements Connection {
+
+	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
+
+	private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
+
+	private final AtomicLong rx = new AtomicLong(0);
+
+	private final AtomicLong tx = new AtomicLong(0);
+
+	private final SocketChannel channel;
+
+	// this object also provides the sendLock
+	private final Ring<NetBuf> w_writeBacklog = new RingImpl<NetBuf>();
+
+	private ByteBuffer r_partialConsume;
+
+	private volatile boolean registeredForWriteEvt = false;
 
 	private Session session;
 
@@ -92,42 +109,6 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 		// return channel.getRemoteAddress(); // JDK7
 	}
 
-	/**
-	 * <pre>
-	 * from
-	 *  tcp
-	 *   stream
-	 *    event
-	 *     handler
-	 * </pre>
-	 */
-
-	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
-
-	private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
-
-	private final AtomicLong rx = new AtomicLong(0);
-
-	private final AtomicLong tx = new AtomicLong(0);
-
-	private final SocketChannel channel;
-
-	// this object also provides the sendLock
-	private final Ring<NetBuf> w_writeBacklog = new RingImpl<NetBuf>();
-
-	private ByteBuffer r_partialConsume;
-
-	private volatile boolean registeredForWriteEvt = false;
-
-	// TcpStreamEventHandler(NetContext context, TcpConnection connection,
-	// SocketChannel channel) {
-	// super(context);
-	// Validation.notNull(connection);
-	// Validation.notNull(channel);
-	// this.connection = connection;
-	// this.channel = channel;
-	// }
-
 	void setup() throws IOException {
 		channel.configureBlocking(false);
 		Socket socket = channel.socket();
@@ -153,15 +134,13 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 		// only the read and/or write flags may be set
 		assert ((ops & EventUtil.READ_WRITE) != 0 && (ops & ~EventUtil.READ_WRITE) == 0);
 
-		synchronized (rlock) {
-			if (BitOps.checkMask(ops, EventUtil.READ) || r_partialConsume != null) {
-				r_read();
-			}
+		if (BitOps.checkMask(ops, EventUtil.READ) || r_partialConsume != null) {
+			handleRead();
 		}
 
 		// TODO: synchronize
 		// we can try to write more data if the writable flag is set or if we
-		// did not request the writable flag to be set => last write didnt block
+		// did not request the writable flag to be set => last write didn't block
 		boolean finishedWrite = true;
 		if (BitOps.checkMask(ops, EventUtil.WRITE) || !registeredForWriteEvt) {
 			finishedWrite = w_write();
@@ -175,7 +154,7 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 		// if (awlock.compareAndSet(false, true)) {
 		// try {
 		synchronized (w_writeBacklog) {
-			boolean finished = sl_sendPendingAsync();
+			boolean finished = sendPendingAsync();
 			if (finished) {
 				unregisterFromWriteEvents();
 			} else {
@@ -211,10 +190,11 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 			r_partialConsume = null;
 			unregisterFromDeliverPartialReads();
 		}
-		connection.notifyClosed();
+		notifyClosed();
 	}
 
-	int sendAsync(final ByteBuffer data) throws IOException {
+	@Override
+	public int sendAsync(final ByteBuffer data) throws IOException {
 		if (data == null || !data.hasRemaining()) {
 			return 0;
 		}
@@ -223,7 +203,7 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 
 			// write as much as possible until the os-buffers are full or the
 			// write-per-round limit is reached
-			boolean finished = sl_sendPendingAsync();
+			boolean finished = sendPendingAsync();
 
 			if (!finished) {
 				registerForWriteEvents();
@@ -234,7 +214,7 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 			// this means that the write backlog is empty
 			assert (w_writeBacklog.isEmpty());
 
-			int numWritten = sl_channelWrite(data);
+			int numWritten = channelWrite(data);
 
 			if (data.hasRemaining()) {
 				registerForWriteEvents();
@@ -246,7 +226,8 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 		}
 	}
 
-	void sendSync(final ByteBuffer data) throws IOException, InterruptedException {
+	@Override
+	public void sendSync(final ByteBuffer data) throws IOException, InterruptedException {
 		if (data == null || !data.hasRemaining()) {
 			return;
 		}
@@ -262,7 +243,7 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 		synchronized (w_writeBacklog) {
 			w_writeBacklog.addBack(externBuf);
 			while (true) {
-				boolean finished = sl_sendPendingAsync();
+				boolean finished = sendPendingAsync();
 
 				if (finished) {
 					// all data from the backlog has been written
@@ -288,7 +269,7 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 
 	// rv: true = all writes finished, false=blocked
 	// holding the sendLock is required
-	private boolean sl_sendPendingAsync() throws IOException {
+	private boolean sendPendingAsync() throws IOException {
 		int totalWrite = 0;
 		if (w_writeBacklog.isEmpty()) {
 			return true;
@@ -302,7 +283,7 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 			final ByteBuffer bb = pending.getBuffer();
 			final int rem = bb.remaining();
 			assert (rem > 0);
-			final int num = sl_channelWrite(bb);
+			final int num = channelWrite(bb);
 			assert (num <= rem);
 			totalWrite += num;
 			if (num == rem) {
@@ -337,8 +318,7 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 		return num;
 	}
 
-	// holding the readLock is required
-	private void r_read() throws IOException {
+	private void handleRead() throws IOException {
 		ByteBuffer bb = r_partialConsume;
 		if (bb == null) {
 			bb = acquireBuffer();
@@ -349,7 +329,7 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 			int numChanRead = 0;
 			if (bb.hasRemaining()) {
 				// lets try to fill this buffer
-				numChanRead = rl_channelRead(bb);
+				numChanRead = channelRead(bb);
 			}
 			// deliver data regardless of whether the channel is closed or not
 			deliverReadData(bb);
@@ -399,7 +379,7 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 		if (bb.position() > 0) {
 			// switch from write mode to read
 			bb.flip();
-			connection.notifyReceive(bb);
+			notifyReceive(bb);
 			// switch back to write mode
 			if (bb.hasRemaining()) {
 				bb.compact();
@@ -431,11 +411,11 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 		context.getEventDispatcher().unregisterFromRedeliverPartialReads(this);
 	}
 
-	long getRx() {
+	public long getRx() {
 		return rx.get();
 	}
 
-	long getTx() {
+	public long getTx() {
 		return tx.get();
 	}
 
@@ -443,5 +423,4 @@ class TcpConnectionBase extends EventHandlerBase implements Connection {
 		// TODO
 		throw new UnsupportedOperationException("TODO");
 	}
-
 }

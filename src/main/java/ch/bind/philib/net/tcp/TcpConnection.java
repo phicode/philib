@@ -41,7 +41,7 @@ public final class TcpConnection extends TcpConnectionBase {
 		connection.eventHandler = new TcpStreamEventHandler(context, connection, channel);
 		return connection;
 	}
-	
+
 	static Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
 		TcpConnectionBase connection = create(context, channel);
 		// TODO: handle factory exception by connection.close or something
@@ -49,7 +49,7 @@ public final class TcpConnection extends TcpConnectionBase {
 		connection.eventHandler.setup();
 		return connection.session;
 	}
-	
+
 	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
@@ -61,6 +61,9 @@ public final class TcpConnection extends TcpConnectionBase {
 		System.out.println("connected to: " + endpoint);
 		return create(context, channel, sessionFactory);
 	}
-	
-	getdebuginformations
+
+	@Override
+	public String getDebugInformations() {
+		return "none";
+	}
 }
