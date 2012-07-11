@@ -19,11 +19,11 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
@@ -33,21 +33,74 @@ import java.util.concurrent.atomic.AtomicLong;
 import ch.bind.philib.io.BitOps;
 import ch.bind.philib.io.Ring;
 import ch.bind.philib.io.RingImpl;
+import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.Session;
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.net.events.EventHandler;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.net.events.NetBuf;
 import ch.bind.philib.validation.Validation;
 
-final class TcpStreamEventHandler extends EventHandlerBase {
+class TcpConnectionBase extends EventHandlerBase implements Connection {
 
-	private static final boolean debugMode = false;
+	private Session session;
 
-	private static final long LOG_HANDLE_TIME_THRESHOLD_NS = 10000000L;
+	TcpConnectionBase(NetContext context, SocketChannel channel) {
+		super(context);
+		Validation.notNull(channel);
+		this.channel = channel;
+	}
 
-	private static final long LOG_READ_TIME_THRESHOLD_NS = 5000000L;
+	@Override
+	public NetContext getContext() {
+		return context;
+	}
 
-	private static final long LOG_WRITE_TIME_THRESHOLD_NS = 5000000L;
+	@Override
+	public boolean isConnected() {
+		return channel.isConnected();
+	}
+
+	@Override
+	public boolean isOpen() {
+		return channel.isOpen();
+	}
+
+	private void notifyClosed() {
+		if (session != null) {
+			session.closed();
+		}
+	}
+
+	private void notifyWritable() {
+		if (session != null) {
+			session.writable();
+		}
+	}
+
+	private void notifyReceive(ByteBuffer rbuf) throws IOException {
+		if (session != null) {
+			session.receive(rbuf);
+		}
+	}
+
+	@Override
+	public SocketAddress getRemoteAddress() throws IOException {
+		return channel.socket().getRemoteSocketAddress();
+		// return channel.getRemoteAddress(); // JDK7
+	}
+
+	/**
+	 * <pre>
+	 * from
+	 *  tcp
+	 *   stream
+	 *    event
+	 *     handler
+	 * </pre>
+	 */
 
 	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
 
@@ -59,33 +112,21 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 
 	private final SocketChannel channel;
 
-	private final TcpConnection connection;
-
 	// this object also provides the sendLock
 	private final Ring<NetBuf> w_writeBacklog = new RingImpl<NetBuf>();
-
-	// TODO: remove, or only in debug mode
-	private final Object rlock = new Object();
 
 	private ByteBuffer r_partialConsume;
 
 	private volatile boolean registeredForWriteEvt = false;
 
-	private long readOps;
-
-	private long sendOps;
-
-	private long numHandles;
-
-	private boolean lastHandleSendable;
-
-	TcpStreamEventHandler(NetContext context, TcpConnection connection, SocketChannel channel) {
-		super(context);
-		Validation.notNull(connection);
-		Validation.notNull(channel);
-		this.connection = connection;
-		this.channel = channel;
-	}
+	// TcpStreamEventHandler(NetContext context, TcpConnection connection,
+	// SocketChannel channel) {
+	// super(context);
+	// Validation.notNull(connection);
+	// Validation.notNull(channel);
+	// this.connection = connection;
+	// this.channel = channel;
+	// }
 
 	void setup() throws IOException {
 		channel.configureBlocking(false);
@@ -111,54 +152,22 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	public void handle(int ops) throws IOException {
 		// only the read and/or write flags may be set
 		assert ((ops & EventUtil.READ_WRITE) != 0 && (ops & ~EventUtil.READ_WRITE) == 0);
-		// writeMode.set(WRITE_MODE_LIMITED);
-		// try {
-		if (debugMode) {
-			numHandles++;
-			long r = readOps;
-			long s = sendOps;
-			long start = System.nanoTime();
-			doHandle(ops);
-			long t = System.nanoTime() - start;
-			if (t > LOG_HANDLE_TIME_THRESHOLD_NS) {
-				long rdiff = readOps - r;
-				long sdiff = sendOps - s;
-				System.out.printf("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-						(t / 1000000f), rdiff, sdiff, getRx(), getTx());
-			}
-		} else {
-			doHandle(ops);
-		}
-		// } finally {
-		// writeMode.set(WRITE_MODE_UNLIMITED);
-		// }
-	}
 
-	public void doHandle(int ops) throws IOException {
-		// if (arlock.compareAndSet(false, true)) {
-		// try {
 		synchronized (rlock) {
 			if (BitOps.checkMask(ops, EventUtil.READ) || r_partialConsume != null) {
 				r_read();
 			}
 		}
-		// } finally {
-		// arlock.set(false);
-		// }
-		// } else {
-		// System.out.println("could not acquire atomic read-lock, whyyyy????");
-		// }
 
 		// TODO: synchronize
 		// we can try to write more data if the writable flag is set or if we
 		// did not request the writable flag to be set => last write didnt block
 		boolean finishedWrite = true;
 		if (BitOps.checkMask(ops, EventUtil.WRITE) || !registeredForWriteEvt) {
-			lastHandleSendable = BitOps.checkMask(ops, EventUtil.WRITE);
 			finishedWrite = w_write();
 		}
 		if (finishedWrite) {
-			connection.notifyWritable();
+			notifyWritable();
 		}
 	}
 
@@ -241,7 +250,7 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		if (data == null || !data.hasRemaining()) {
 			return;
 		}
-		if (connection.getContext().getEventDispatcher().isEventDispatcherThread(Thread.currentThread())) {
+		if (getContext().getEventDispatcher().isEventDispatcherThread(Thread.currentThread())) {
 			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
 		}
 
@@ -312,53 +321,18 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 	}
 
 	// holding the sendLock is required
-	private int sl_channelWrite(final ByteBuffer data) throws IOException {
-		int num;
-		if (debugMode) {
-			sendOps++;
-			Validation.isFalse(channel.isBlocking());
-			long tStart = System.nanoTime();
-			num = channel.write(data);
-			long t = System.nanoTime() - tStart;
-			if (t >= LOG_WRITE_TIME_THRESHOLD_NS) {
-				System.out.printf("write took %.6fms%n", (t / 1000000f));
-			}
-		} else {
-			num = channel.write(data);
-		}
-		// long s = sendOps.incrementAndGet();
+	int channelWrite(final ByteBuffer data) throws IOException {
+		int num = channel.write(data);
 		if (num > 0) {
 			tx.addAndGet(num);
-			// long t = tx.addAndGet(num);
-			// if ((t / s) < 6 * 1024) {
-			// System.out.println("average send/op: " + (t / s));
-			// }
 		}
 		return num;
 	}
 
-	// holding the readLock is required
-	private int rl_channelRead(final ByteBuffer rbuf) throws IOException {
-		int num;
-		if (debugMode) {
-			readOps++;
-			Validation.isFalse(channel.isBlocking());
-			long tStart = System.nanoTime();
-			num = channel.read(rbuf);
-			long t = System.nanoTime() - tStart;
-			if (t >= LOG_READ_TIME_THRESHOLD_NS) {
-				System.out.printf("read took: %.6fms%n", (t / 1000000f));
-			}
-		} else {
-			num = channel.read(rbuf);
-		}
-		// long r = readOps.incrementAndGet();
+	int channelRead(final ByteBuffer rbuf) throws IOException {
+		int num = channel.read(rbuf);
 		if (num > 0) {
 			rx.addAndGet(num);
-			// long t = rx.addAndGet(num);
-			// if ((t / r) < 6 * 1024) {
-			// System.out.println("average read/op: " + (t / r));
-			// }
 		}
 		return num;
 	}
@@ -465,37 +439,9 @@ final class TcpStreamEventHandler extends EventHandlerBase {
 		return tx.get();
 	}
 
-	public String getDebugInformations() {
-		String s;
-		synchronized (rlock) {
-			synchronized (w_writeBacklog) {
-				ByteBuffer r = r_partialConsume;
-				if (r != null) {
-					s = "read: " + r.position();
-				} else {
-					s = "read-ready=0";
-				}
-			}
-			if (w_writeBacklog.isEmpty()) {
-				s += ", write-available=0";
-			} else {
-				s += ", write-available=" + w_writeBacklog.size();
-			}
-			try {
-				s += ", readOps=" + readOps + ", sendOps=" + sendOps + ", reg4send=" + registeredForWriteEvt + ", lasthandle-send="
-						+ lastHandleSendable + ", numHandles=" + numHandles + ", rx=" + rx.get() + ", tx=" + tx.get() + ", no-delay="
-						+ channel.socket().getTcpNoDelay() + ", rcvBuf=" + channel.socket().getReceiveBufferSize() + ", sndBuf="
-						+ channel.socket().getSendBufferSize();
-			} catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return s;
-	}
-
 	public boolean isWritableNow() {
 		// TODO
 		throw new UnsupportedOperationException("TODO");
 	}
+
 }

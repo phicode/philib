@@ -110,7 +110,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	}
 	private void createSession(SocketChannel clientChannel) {
 		try {
-			TcpConnection.create(context, clientChannel, sessionFactory);
+			TcpConnectionBase.create(context, clientChannel, sessionFactory);
 		} catch (IOException e) {
 			// TODO: notify an error handler
 			System.err.println("faild to create a tcp connection: " + e.getMessage());

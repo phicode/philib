@@ -19,55 +19,37 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.validation.Validation;
 
-public abstract class TcpConnection implements Connection {
+public final class TcpConnection extends TcpConnectionBase {
 
-	private final SocketChannel channel;
-
-	private final NetContext context;
-
-	private Session session;
-
-	private TcpStreamEventHandler eventHandler;
-
-	private TcpConnection(NetContext context, SocketChannel channel) throws IOException {
-		Validation.notNull(context);
-		Validation.notNull(channel);
-		this.context = context;
-		this.channel = channel;
+	public TcpConnection(NetContext context, SocketChannel channel) {
+		// TODO Auto-generated constructor stub
 	}
 
-	@Override
-	public NetContext getContext() {
-		return context;
-	}
-
-	private static TcpConnection create(NetContext context, SocketChannel channel) throws IOException {
-		TcpConnection connection = new TcpConnection(context, channel);
+	private static TcpConnectionBase create(NetContext context, SocketChannel channel) throws IOException {
+		TcpConnectionBase connection = new TcpConnection(context, channel);
 		connection.eventHandler = new TcpStreamEventHandler(context, connection, channel);
 		return connection;
 	}
-
+	
 	static Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
-		TcpConnection connection = create(context, channel);
+		TcpConnectionBase connection = create(context, channel);
 		// TODO: handle factory exception by connection.close or something
 		connection.session = sessionFactory.createSession(connection);
 		connection.eventHandler.setup();
 		return connection.session;
 	}
-
+	
 	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
@@ -79,73 +61,6 @@ public abstract class TcpConnection implements Connection {
 		System.out.println("connected to: " + endpoint);
 		return create(context, channel, sessionFactory);
 	}
-
-	@Override
-	public int sendAsync(ByteBuffer data) throws IOException {
-		return eventHandler.sendAsync(data);
-	}
-
-	@Override
-	public void sendSync(ByteBuffer data) throws IOException, InterruptedException {
-		eventHandler.sendSync(data);
-	}
-
-	@Override
-	public void close() throws IOException {
-		eventHandler.close();
-	}
-
-	@Override
-	public boolean isConnected() {
-		return channel.isConnected();
-	}
-
-	@Override
-	public boolean isOpen() {
-		return channel.isOpen();
-	}
-
-	void notifyClosed() {
-		if (session != null) {
-			session.closed();
-		}
-	}
-
-	void notifyWritable() {
-		if (session != null) {
-			session.writable();
-		}
-	}
-
-	void notifyReceive(ByteBuffer rbuf) throws IOException {
-		if (session != null) {
-			session.receive(rbuf);
-		}
-	}
-
-	@Override
-	public long getRx() {
-		return eventHandler.getRx();
-	}
-
-	@Override
-	public long getTx() {
-		return eventHandler.getTx();
-	}
-
-	@Override
-	public String getDebugInformations() {
-		return eventHandler.getDebugInformations();
-	}
-
-	@Override
-	public boolean isWritableNow() {
-		return eventHandler.isWritableNow();
-	}
-
-	@Override
-	public SocketAddress getRemoteAddress() throws IOException {
-		return channel.socket().getRemoteSocketAddress();
-		// return channel.getRemoteAddress(); // JDK7
-	}
+	
+	getdebuginformations
 }
