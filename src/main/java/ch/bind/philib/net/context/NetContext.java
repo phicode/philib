@@ -22,6 +22,10 @@
 
 package ch.bind.philib.net.context;
 
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+
 import ch.bind.philib.cache.ByteBufferCache;
 import ch.bind.philib.net.events.EventDispatcher;
 
@@ -31,23 +35,34 @@ public interface NetContext {
 
 	EventDispatcher getEventDispatcher();
 
-	boolean hasCustomTcpNoDelay();
-	
-	boolean getTcpNoDelay();
+	/**
+	 * @return {@code null} if not set.
+	 */
+	Boolean getTcpNoDelay();
 
 	void setTcpNoDelay(boolean tcpNoDelay);
 
-	boolean hasCustomSndBufSize();
-	
-	int getSndBufSize();
+	/**
+	 * @return {@code null} if not set.
+	 */
+	Integer getSndBufSize();
 
 	void setSndBufSize(int size);
-	
-	boolean hasCustomRcvBufSize();
 
-	int getRcvBufSize();
+	/**
+	 * @return {@code null} if not set.
+	 */
+	Integer getRcvBufSize();
 
 	void setRcvBufSize(int size);
-	
+
+	void setSocketOptions(Socket socket) throws SocketException;
+
+	void setSocketOptions(ServerSocket socket) throws SocketException;
+
+	boolean isDebugMode();
+
+	void setDebugMode(boolean debugMode);
+
 	// TODO: socket keep-alive options and others
 }

@@ -88,7 +88,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 			createSession(clientChannel);
 		}
 	}
-	
+
 	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress) throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
@@ -100,17 +100,21 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 		server.setup(context);
 		return server;
 	}
-	
+
 	private void setup(NetContext context) throws IOException {
 		channel.configureBlocking(false);
-		if (context.hasCustomRcvBufSize()) {
-			channel.socket().setReceiveBufferSize(context.getRcvBufSize());
-		}
+		context.setSocketOptions(channel.socket());
 		context.getEventDispatcher().register(this, EventUtil.ACCEPT);
 	}
+
 	private void createSession(SocketChannel clientChannel) {
 		try {
-			TcpConnectionBase.create(context, clientChannel, sessionFactory);
+			if (context.isDebugMode()) {
+				DebugTcpConnection.create(context, clientChannel, sessionFactory);
+			}
+			else {
+				TcpConnection.create(context, clientChannel, sessionFactory);
+			}
 		} catch (IOException e) {
 			// TODO: notify an error handler
 			System.err.println("faild to create a tcp connection: " + e.getMessage());

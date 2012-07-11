@@ -36,17 +36,17 @@ public final class TcpConnection extends TcpConnectionBase {
 		// TODO Auto-generated constructor stub
 	}
 
-	private static TcpConnectionBase create(NetContext context, SocketChannel channel) throws IOException {
-		TcpConnectionBase connection = new TcpConnection(context, channel);
-		connection.eventHandler = new TcpStreamEventHandler(context, connection, channel);
-		return connection;
-	}
-
 	static Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
-		TcpConnectionBase connection = create(context, channel);
+		TcpConnection connection = new TcpConnection(context, channel);
 		// TODO: handle factory exception by connection.close or something
+		try {
 		connection.session = sessionFactory.createSession(connection);
-		connection.eventHandler.setup();
+		} catch (Exception e ) {
+			//TODO: logging
+			connection.close();
+			throw e;
+		}
+		connection.setup();
 		return connection.session;
 	}
 

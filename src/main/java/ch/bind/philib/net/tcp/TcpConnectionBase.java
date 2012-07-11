@@ -111,16 +111,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 	void setup() throws IOException {
 		channel.configureBlocking(false);
-		Socket socket = channel.socket();
-		if (context.hasCustomTcpNoDelay()) {
-			socket.setTcpNoDelay(context.getTcpNoDelay());
-		}
-		if (context.hasCustomSndBufSize()) {
-			socket.setSendBufferSize(context.getSndBufSize());
-		}
-		if (context.hasCustomRcvBufSize()) {
-			socket.setReceiveBufferSize(context.getRcvBufSize());
-		}
+		context.setSocketOptions(channel.socket());
 		context.getEventDispatcher().register(this, EventUtil.READ);
 	}
 
@@ -140,7 +131,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 		// TODO: synchronize
 		// we can try to write more data if the writable flag is set or if we
-		// did not request the writable flag to be set => last write didn't block
+		// did not request the writable flag to be set => last write didn't
+		// block
 		boolean finishedWrite = true;
 		if (BitOps.checkMask(ops, EventUtil.WRITE) || !registeredForWriteEvt) {
 			finishedWrite = w_write();
@@ -157,7 +149,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			boolean finished = sendPendingAsync();
 			if (finished) {
 				unregisterFromWriteEvents();
-			} else {
+			}
+			else {
 				registerForWriteEvents();
 			}
 			return finished;
@@ -218,7 +211,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 			if (data.hasRemaining()) {
 				registerForWriteEvents();
-			} else {
+			}
+			else {
 				// backlog and input buffer written
 				unregisterFromWriteEvents();
 			}
@@ -250,14 +244,16 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 					assert (!externBuf.isPending() && !data.hasRemaining());
 					unregisterFromWriteEvents();
 					return;
-				} else {
+				}
+				else {
 					registerForWriteEvents();
 
 					// not all data in the backlog has been written
 					if (externBuf.isPending()) {
 						// our data is among those who are waiting to be written
 						w_writeBacklog.wait();
-					} else {
+					}
+					else {
 						// our data has been written
 						assert (!data.hasRemaining());
 						return;
@@ -291,7 +287,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				if (externBufReleased) {
 					w_writeBacklog.notifyAll();
 				}
-			} else {
+			}
+			else {
 				// write channel is blocked
 				w_writeBacklog.addFront(pending);
 				break;
@@ -345,10 +342,12 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			}
 			if (numChanRead == 0) {
 				break;
-			} else {
+			}
+			else {
 				if (bb.hasRemaining()) {
 					totalRead += numChanRead;
-				} else {
+				}
+				else {
 					// if the read buffer is full we cant continue reading until
 					// the client has consumed its pending data.
 					break;
@@ -364,7 +363,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				registerForDeliverPartialReads();
 			}
 			r_partialConsume = bb;
-		} else {
+		}
+		else {
 			if (r_partialConsume != null) {
 				// registered for partial consume events
 				unregisterFromDeliverPartialReads();
@@ -383,7 +383,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			// switch back to write mode
 			if (bb.hasRemaining()) {
 				bb.compact();
-			} else {
+			}
+			else {
 				bb.clear();
 			}
 		}

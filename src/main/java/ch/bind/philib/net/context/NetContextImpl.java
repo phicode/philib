@@ -22,6 +22,10 @@
 
 package ch.bind.philib.net.context;
 
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+
 import ch.bind.philib.cache.ByteBufferCache;
 import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.validation.Validation;
@@ -42,6 +46,8 @@ public class NetContextImpl implements NetContext {
 
 	private Integer rcvBufSize;
 
+	private boolean debugMode;
+
 	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
 		Validation.notNull(bufferCache);
 		Validation.notNull(eventDispatcher);
@@ -60,27 +66,13 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
-	public boolean hasCustomTcpNoDelay() {
-		return tcpNoDelay != null;
-	}
-
-	@Override
 	public void setTcpNoDelay(boolean tcpNoDelay) {
 		this.tcpNoDelay = tcpNoDelay;
 	}
 
 	@Override
-	public boolean getTcpNoDelay() {
-		Boolean v = this.tcpNoDelay;
-		if (v == null) {
-			throw new IllegalStateException("no custom tcp-no-delay has been set");
-		}
-		return v.booleanValue();
-	}
-
-	@Override
-	public boolean hasCustomSndBufSize() {
-		return sndBufSize != null;
+	public Boolean getTcpNoDelay() {
+		return tcpNoDelay;
 	}
 
 	@Override
@@ -89,17 +81,8 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
-	public int getSndBufSize() {
-		Integer v = this.sndBufSize;
-		if (v == null) {
-			throw new IllegalStateException("no custom snd-buf-size has been set");
-		}
-		return v.intValue();
-	}
-
-	@Override
-	public boolean hasCustomRcvBufSize() {
-		return rcvBufSize != null;
+	public Integer getSndBufSize() {
+		return sndBufSize;
 	}
 
 	@Override
@@ -108,11 +91,39 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
-	public int getRcvBufSize() {
-		Integer v = this.rcvBufSize;
-		if (v == null) {
-			throw new IllegalStateException("no custom rcv-buf-size has been set");
+	public Integer getRcvBufSize() {
+		return rcvBufSize;
+	}
+
+	@Override
+	public void setSocketOptions(Socket socket) throws SocketException {
+		Validation.notNull(socket);
+		if (tcpNoDelay != null) {
+			socket.setTcpNoDelay(tcpNoDelay);
 		}
-		return v.intValue();
+		if (sndBufSize != null) {
+			socket.setSendBufferSize(sndBufSize);
+		}
+		if (rcvBufSize != null) {
+			socket.setReceiveBufferSize(rcvBufSize);
+		}
+	}
+
+	@Override
+	public void setSocketOptions(ServerSocket socket) throws SocketException {
+		Validation.notNull(socket);
+		if (rcvBufSize != null) {
+			socket.setReceiveBufferSize(rcvBufSize);
+		}
+	}
+
+	@Override
+	public boolean isDebugMode() {
+		return debugMode;
+	}
+
+	@Override
+	public void setDebugMode(boolean debugMode) {
+		this.debugMode = debugMode;
 	}
 }
