@@ -76,5 +76,4 @@ public final class PhiMath {
 	// throw new ArithmeticException("start is bigger then end");
 	// if (start % increment)
 	// }
-
 }

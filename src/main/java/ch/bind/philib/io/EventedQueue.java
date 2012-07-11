@@ -77,5 +77,4 @@ public final class EventedQueue<E> {
 	public E peek() {
 		return queue.peek();
 	}
-
 }

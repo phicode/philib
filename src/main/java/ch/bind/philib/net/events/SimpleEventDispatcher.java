@@ -307,5 +307,4 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			return ops;
 		}
 	}
-
 }
