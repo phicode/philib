@@ -86,7 +86,7 @@ public final class ThreadUtil {
 	// TODO: documentation
 	public static Thread runForever(ThreadGroup group, Runnable runnable, String threadName) {
 		// stackSize of 0 stands for: ignore this parameter
-		return runForever(null, runnable, threadName, 0);
+		return runForever(group, runnable, threadName, 0);
 	}
 
 	// TODO: documentation
