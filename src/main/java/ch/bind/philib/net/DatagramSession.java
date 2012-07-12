@@ -39,12 +39,4 @@ public interface DatagramSession {
 	void sendSync(SocketAddress address, ByteBuffer data) throws IOException;
 
 	void closed();
-
-	// boolean isConnected();
-	//
-	// boolean isOpen();
-	//
-	// long getRx();
-	//
-	// long getTx();
 }
