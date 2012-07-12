@@ -22,7 +22,9 @@
 
 package ch.bind.philib.lang;
 
+
 /**
+ * TODO
  * 
  * @author Philipp Meinen
  */

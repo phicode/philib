@@ -26,6 +26,11 @@ import java.net.SocketAddress;
 
 import ch.bind.philib.net.context.NetContext;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface NetFactory {
 
 	Session openClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException;

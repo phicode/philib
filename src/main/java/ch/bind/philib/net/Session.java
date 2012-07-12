@@ -24,6 +24,11 @@ package ch.bind.philib.net;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface Session {
 
 	void receive(ByteBuffer data) throws IOException;

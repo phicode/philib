@@ -25,6 +25,11 @@ import ch.bind.philib.cache.CacheStats;
 import ch.bind.philib.cache.ObjectCache;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public abstract class ObjectCacheBase<E> implements ObjectCache<E> {
 
 	private final ObjectFactory<E> factory;

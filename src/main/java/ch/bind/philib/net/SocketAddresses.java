@@ -25,6 +25,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class SocketAddresses {
 
 	private SocketAddresses() {}

@@ -21,6 +21,11 @@
  */
 package ch.bind.philib.cache.impl;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class NoopObjectCache<E> extends ObjectCacheBase<E> {
 
 	public NoopObjectCache(ObjectFactory<E> factory) {

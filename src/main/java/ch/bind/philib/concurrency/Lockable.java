@@ -22,6 +22,11 @@
 
 package ch.bind.philib.concurrency;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface Lockable {
 
 	public long getLockId();

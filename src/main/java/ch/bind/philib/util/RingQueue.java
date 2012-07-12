@@ -25,6 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public class RingQueue<E> {
 
 	private final AtomicInteger nextWriteIdx = new AtomicInteger();

@@ -21,6 +21,11 @@
  */
 package ch.bind.philib.net;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface SessionFactory {
 
 	Session createSession(Connection connection);

@@ -25,6 +25,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface EventHandler extends Closeable {
 
 	SelectableChannel getChannel();

@@ -23,6 +23,11 @@ package ch.bind.philib.net.events;
 
 import java.io.Closeable;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface EventDispatcher extends Runnable, Closeable {
 
 	void register(EventHandler eventHandler, int ops);

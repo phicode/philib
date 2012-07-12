@@ -22,6 +22,11 @@
 
 package ch.bind.philib.io;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public class BitStreamEncoder {
 
 	private static final int DEFAULT_INITIAL_SIZE = 16;

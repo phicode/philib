@@ -28,6 +28,11 @@ import ch.bind.philib.cache.impl.LinkedObjectCache;
 import ch.bind.philib.cache.impl.ObjectFactory;
 import ch.bind.philib.cache.impl.ScalableObjectCache;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class ByteBufferCache extends SpecificObjectCache<ByteBuffer> {
 
 	private ByteBufferCache(ObjectCache<ByteBuffer> cache) {

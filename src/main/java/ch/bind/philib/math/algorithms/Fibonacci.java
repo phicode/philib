@@ -22,6 +22,11 @@
 
 package ch.bind.philib.math.algorithms;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class Fibonacci {
 
 	private long lastFib = 0;

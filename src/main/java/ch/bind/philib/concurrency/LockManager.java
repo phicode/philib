@@ -24,6 +24,11 @@ package ch.bind.philib.concurrency;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class LockManager {
 
 	private LockManager() {}

@@ -22,6 +22,11 @@
 
 package ch.bind.philib.lang;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class ExceptionUtil {
 
 	private ExceptionUtil() {}

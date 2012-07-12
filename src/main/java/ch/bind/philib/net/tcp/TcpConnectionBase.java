@@ -39,6 +39,11 @@ import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.net.events.NetBuf;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 abstract class TcpConnectionBase extends EventHandlerBase implements Connection {
 
 	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;

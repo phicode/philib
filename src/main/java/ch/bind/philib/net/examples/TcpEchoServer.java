@@ -34,6 +34,11 @@ import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.SimpleNetContext;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public class TcpEchoServer implements SessionFactory {
 
 	public static void main(String[] args) throws Exception {

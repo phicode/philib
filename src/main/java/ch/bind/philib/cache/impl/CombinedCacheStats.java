@@ -23,6 +23,11 @@ package ch.bind.philib.cache.impl;
 
 import ch.bind.philib.cache.CacheStats;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class CombinedCacheStats implements CacheStats {
 
 	private CacheStats[] stats;

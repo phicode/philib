@@ -28,6 +28,11 @@ import java.nio.ByteBuffer;
 
 import ch.bind.philib.net.context.NetContext;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface DatagramSession {
 
 	NetContext getContext();

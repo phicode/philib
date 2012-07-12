@@ -21,6 +21,11 @@
  */
 package ch.bind.philib.cache.impl;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface ObjectFactory<E> {
 
 	E create();

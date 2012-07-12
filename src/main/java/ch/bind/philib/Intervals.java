@@ -22,6 +22,11 @@
 
 package ch.bind.philib;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class Intervals {
 
 	private Intervals() {}

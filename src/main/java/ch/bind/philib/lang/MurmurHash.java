@@ -25,6 +25,11 @@ package ch.bind.philib.lang;
 import ch.bind.philib.io.BitOps;
 import ch.bind.philib.io.EndianConverter;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class MurmurHash {
 
 	private MurmurHash() {}

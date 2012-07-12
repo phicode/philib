@@ -22,6 +22,11 @@
 
 package ch.bind.philib.io;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class BufferOps {
 
 	private BufferOps() {}

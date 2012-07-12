@@ -31,6 +31,11 @@ import ch.bind.philib.cache.ByteBufferCache;
 import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public class NetContextImpl implements NetContext {
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;

@@ -30,6 +30,11 @@ import java.net.SocketException;
 import ch.bind.philib.cache.ByteBufferCache;
 import ch.bind.philib.net.events.EventDispatcher;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 // TODO: socket keep-alive options and others
 public interface NetContext {
 

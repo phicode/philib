@@ -21,6 +21,11 @@
  */
 package ch.bind.philib.cache;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface CacheStats {
 
 	long getCreates();

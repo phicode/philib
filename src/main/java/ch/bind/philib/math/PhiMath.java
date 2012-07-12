@@ -22,6 +22,11 @@
 
 package ch.bind.philib.math;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class PhiMath {
 
 	private PhiMath() {}

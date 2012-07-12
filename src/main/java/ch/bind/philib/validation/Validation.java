@@ -22,6 +22,11 @@
 
 package ch.bind.philib.validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class Validation {
 
 	private Validation() {}

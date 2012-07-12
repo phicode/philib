@@ -28,6 +28,11 @@ import ch.bind.philib.cache.CacheStats;
 import ch.bind.philib.cache.ObjectCache;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class ScalableObjectCache<E> implements ObjectCache<E> {
 
 	private final CacheThreadLocal cacheByThread = new CacheThreadLocal();

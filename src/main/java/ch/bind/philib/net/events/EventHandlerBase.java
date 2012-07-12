@@ -27,6 +27,11 @@ import java.nio.ByteBuffer;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public abstract class EventHandlerBase implements EventHandler {
 
 	protected final NetContext context;

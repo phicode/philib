@@ -25,6 +25,11 @@ import java.io.Closeable;
 
 import ch.bind.philib.net.context.NetContext;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface NetServer extends Closeable {
 
 	int getActiveSessionCount();

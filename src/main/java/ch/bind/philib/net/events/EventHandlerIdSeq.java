@@ -23,6 +23,11 @@ package ch.bind.philib.net.events;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class EventHandlerIdSeq {
 
 	private static final AtomicLong SEQ = new AtomicLong(0);

@@ -24,6 +24,11 @@ package ch.bind.philib.net.events;
 
 import java.nio.channels.SelectionKey;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class EventUtil {
 
 	private EventUtil() {}

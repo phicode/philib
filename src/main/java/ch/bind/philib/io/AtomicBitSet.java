@@ -24,6 +24,11 @@ package ch.bind.philib.io;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class AtomicBitSet {
 
 	private final AtomicLong[] bs;
@@ -86,16 +91,6 @@ public final class AtomicBitSet {
 		}
 		return -1;
 	}
-
-	// public boolean get(int idx) {
-	// rangeCheck(idx);
-	// int chunk = idx / 64;
-	// int bit = idx & 63; // mod 64
-	// long mask = 1 << bit;
-	// AtomicLong b = bs[chunk];
-	// long v = b.get();
-	// return ((v & mask) == mask);
-	// }
 
 	public boolean compareTrueAndSwitch(int idx) {
 		rangeCheck(idx);

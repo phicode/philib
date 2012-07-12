@@ -22,6 +22,11 @@
 
 package ch.bind.philib.io;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface Ring<T> {
 
 	void addBack(final T value);

@@ -33,6 +33,11 @@ import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class UdpServer implements NetServer {
 
 	private final NetContext context;

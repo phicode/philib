@@ -22,6 +22,11 @@
 
 package ch.bind.philib.validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public interface Validatable {
 
 	public void validate(ValidationResults results);

@@ -22,6 +22,11 @@
 
 package ch.bind.philib.net.context;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public class ScalableNetContext extends NetContextImpl {
 
 	public ScalableNetContext() {

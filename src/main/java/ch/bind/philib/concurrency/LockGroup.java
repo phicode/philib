@@ -28,6 +28,11 @@ import java.util.Comparator;
 
 import ch.bind.philib.lang.CompareUtil;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class LockGroup {
 
 	private static final LockableComparator lockableComparator = new LockableComparator();

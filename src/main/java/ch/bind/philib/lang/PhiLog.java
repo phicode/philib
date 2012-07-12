@@ -24,6 +24,11 @@ package ch.bind.philib.lang;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class PhiLog {
 
 	private final Logger logger;

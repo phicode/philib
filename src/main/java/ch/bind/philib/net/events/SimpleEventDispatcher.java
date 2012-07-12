@@ -37,6 +37,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 // TODO: thread safe
 public final class SimpleEventDispatcher implements EventDispatcher {
 

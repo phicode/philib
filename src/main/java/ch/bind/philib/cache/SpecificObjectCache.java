@@ -24,6 +24,11 @@ package ch.bind.philib.cache;
 
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public class SpecificObjectCache<E> implements ObjectCache<E> {
 
 	private final ObjectCache<E> cache;

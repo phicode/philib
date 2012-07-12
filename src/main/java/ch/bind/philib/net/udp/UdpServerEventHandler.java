@@ -35,6 +35,11 @@ import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 final class UdpServerEventHandler extends EventHandlerBase {
 
 	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;

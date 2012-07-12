@@ -30,6 +30,11 @@ import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class TcpConnection extends TcpConnectionBase {
 
 	public TcpConnection(NetContext context, SocketChannel channel) {

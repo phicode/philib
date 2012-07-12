@@ -33,6 +33,11 @@ import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.SimpleNetContext;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 // TODO: reply data validation
 // TODO: latency measurements
 // TODO: many threads

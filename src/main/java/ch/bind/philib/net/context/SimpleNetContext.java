@@ -27,6 +27,11 @@ import java.io.IOException;
 import ch.bind.philib.cache.ByteBufferCache;
 import ch.bind.philib.net.events.SimpleEventDispatcher;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class SimpleNetContext extends NetContextImpl {
 
 	public SimpleNetContext() throws IOException {

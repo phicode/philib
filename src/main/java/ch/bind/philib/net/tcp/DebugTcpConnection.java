@@ -32,6 +32,11 @@ import ch.bind.philib.io.BitOps;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class DebugTcpConnection extends TcpConnectionBase {
 
 	private static final long LOG_HANDLE_TIME_THRESHOLD_NS = 10000000L;

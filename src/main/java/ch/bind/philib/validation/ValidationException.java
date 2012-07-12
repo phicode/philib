@@ -22,6 +22,11 @@
 
 package ch.bind.philib.validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public class ValidationException extends Exception {
 
 	private static final long serialVersionUID = -4093437375262230866L;

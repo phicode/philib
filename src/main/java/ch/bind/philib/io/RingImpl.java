@@ -27,6 +27,11 @@ import java.nio.ByteBuffer;
 import ch.bind.philib.net.events.NetBuf;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class RingImpl<T> implements Ring<T> {
 
 	private static final int INITIAL_RING_LEN = 4;

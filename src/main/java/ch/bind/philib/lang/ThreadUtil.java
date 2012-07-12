@@ -25,6 +25,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class ThreadUtil {
 
 	static final PhiLog LOG = PhiLog.getLogger(ThreadUtil.class);

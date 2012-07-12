@@ -25,6 +25,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.cache.CacheStats;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class SimpleCacheStats implements CacheStats {
 
 	private final AtomicLong acquires = new AtomicLong(0);

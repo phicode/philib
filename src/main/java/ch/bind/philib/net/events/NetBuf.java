@@ -23,6 +23,11 @@ package ch.bind.philib.net.events;
 
 import java.nio.ByteBuffer;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public abstract class NetBuf {
 
 	private final ByteBuffer bb;

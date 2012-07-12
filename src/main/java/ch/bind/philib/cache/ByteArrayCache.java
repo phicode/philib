@@ -29,6 +29,11 @@ import ch.bind.philib.cache.impl.NoopObjectCache;
 import ch.bind.philib.cache.impl.ObjectFactory;
 import ch.bind.philib.cache.impl.ScalableObjectCache;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class ByteArrayCache extends SpecificObjectCache<byte[]> {
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;

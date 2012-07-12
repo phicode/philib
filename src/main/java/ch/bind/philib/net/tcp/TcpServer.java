@@ -35,6 +35,11 @@ import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class TcpServer extends EventHandlerBase implements NetServer {
 
 	// TODO: configurable

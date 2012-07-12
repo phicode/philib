@@ -30,6 +30,11 @@ import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public class EchoSession implements Session {
 
 	private long lastInteractionNs;

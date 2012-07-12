@@ -22,6 +22,11 @@
 
 package ch.bind.philib.io;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class BitOps {
 
 	private BitOps() {}

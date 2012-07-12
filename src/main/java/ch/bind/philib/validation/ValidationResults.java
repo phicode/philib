@@ -25,6 +25,11 @@ package ch.bind.philib.validation;
 import java.io.Serializable;
 import java.util.LinkedList;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class ValidationResults implements Serializable {
 
 	private static final long serialVersionUID = 8465822377127857280L;

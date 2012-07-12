@@ -26,6 +26,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 
 	private final AtomicReference<Node<E>> freeList;

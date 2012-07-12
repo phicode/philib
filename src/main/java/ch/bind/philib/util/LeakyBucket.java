@@ -23,6 +23,11 @@ package ch.bind.philib.util;
 
 import ch.bind.philib.validation.Validation;
 
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
 public final class LeakyBucket {
 
 	private final long capacity;
