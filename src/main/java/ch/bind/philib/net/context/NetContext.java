@@ -22,6 +22,7 @@
 
 package ch.bind.philib.net.context;
 
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -29,6 +30,7 @@ import java.net.SocketException;
 import ch.bind.philib.cache.ByteBufferCache;
 import ch.bind.philib.net.events.EventDispatcher;
 
+// TODO: socket keep-alive options and others
 public interface NetContext {
 
 	ByteBufferCache getBufferCache();
@@ -56,13 +58,17 @@ public interface NetContext {
 
 	void setRcvBufSize(int size);
 
+	void setBroadcastDatagram(boolean broadcastDatagram);
+
+	Boolean isBroadcastDatagram();
+
 	void setSocketOptions(Socket socket) throws SocketException;
 
 	void setSocketOptions(ServerSocket socket) throws SocketException;
 
+	void setSocketOptions(DatagramSocket socket);
+
 	boolean isDebugMode();
 
 	void setDebugMode(boolean debugMode);
-
-	// TODO: socket keep-alive options and others
 }

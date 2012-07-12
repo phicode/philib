@@ -22,6 +22,7 @@
 
 package ch.bind.philib.net.context;
 
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -46,6 +47,8 @@ public class NetContextImpl implements NetContext {
 
 	private Integer rcvBufSize;
 
+	private Boolean broadcastDatagram; 
+	
 	private boolean debugMode;
 
 	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
@@ -96,6 +99,16 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
+	public Boolean isBroadcastDatagram() {
+		return broadcastDatagram;
+	}
+	
+	@Override
+	public void setBroadcastDatagram(boolean broadcastDatagram) {
+		this.broadcastDatagram = broadcastDatagram;
+	}
+	
+	@Override
 	public void setSocketOptions(Socket socket) throws SocketException {
 		Validation.notNull(socket);
 		if (tcpNoDelay != null) {
@@ -118,6 +131,19 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
+	public void setSocketOptions(DatagramSocket socket) {
+		if (broadcastDatagram != null) {
+			socket.setBroadcast(broadcastDatagram);
+		}
+		if (sndBufSize != null) {
+			socket.setSendBufferSize(rcvBufSize);
+		}
+		if (rcvBufSize != null) {
+			socket.setReceiveBufferSize(sndBufSize);
+		}
+	}
+	
+	@Override
 	public boolean isDebugMode() {
 		return debugMode;
 	}
@@ -126,4 +152,5 @@ public class NetContextImpl implements NetContext {
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
 	}
+	
 }

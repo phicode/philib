@@ -34,7 +34,9 @@ public interface DatagramSession {
 
 	void receive(SocketAddress address, ByteBuffer data) throws IOException;
 
-	void send(SocketAddress address, ByteBuffer data) throws IOException;
+	void sendASync(SocketAddress address, ByteBuffer data) throws IOException;
+
+	void sendSync(SocketAddress address, ByteBuffer data) throws IOException;
 
 	void closed();
 

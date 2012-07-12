@@ -37,9 +37,9 @@ import ch.bind.philib.validation.Validation;
 
 final class UdpServerEventHandler extends EventHandlerBase {
 
-	private static final int IO_READ_LIMIT_PER_ROUND = 16 * 1024;
+	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
 
-	private static final int IO_WRITE_LIMIT_PER_ROUND = 16 * 1024;
+	private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
 
 	private final DatagramChannel channel;
 
@@ -56,9 +56,7 @@ final class UdpServerEventHandler extends EventHandlerBase {
 	void start() throws IOException {
 		channel.configureBlocking(false);
 		DatagramSocket socket = channel.socket();
-		//		socket.setBroadcast(on);
-		//		socket.setReceiveBufferSize(size);
-		//		socket.setSendBufferSize(size);
+		context.setSocketOptions(channel.socket());
 		context.getEventDispatcher().register(this, EventUtil.READ);
 	}
 
@@ -74,7 +72,7 @@ final class UdpServerEventHandler extends EventHandlerBase {
 	}
 
 	@Override
-	public void handle(int ops) throws IOException {
+	public int handle(int ops) throws IOException {
 		// TODO Auto-generated method stub
 
 		final ByteBuffer rbuf = acquireBuffer();
@@ -112,11 +110,11 @@ final class UdpServerEventHandler extends EventHandlerBase {
 	//
 	//	}
 
-	void sendNonBlocking(SocketAddress addr, ByteBuffer data) {
+	void sendAsync(SocketAddress addr, ByteBuffer data) {
 
 	}
 
-	void sendBlocking(SocketAddress addr, ByteBuffer data) {
+	void sendSync(SocketAddress addr, ByteBuffer data) {
 
 	}
 }
