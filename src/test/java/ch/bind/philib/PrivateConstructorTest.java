@@ -75,7 +75,7 @@ public class PrivateConstructorTest {
 
 	private static String TEST_FILE_SUFFIX = "Test.class";
 
-	private void maybeTestFile(String packageName, File subPath) throws Exception {
+	private static void maybeTestFile(String packageName, File subPath) throws Exception {
 		// System.out.println("file: " +subFile);
 		String name = subPath.getName();
 		boolean doCheck = name.endsWith(".class") && !name.endsWith(TEST_FILE_SUFFIX);
@@ -90,7 +90,7 @@ public class PrivateConstructorTest {
 		}
 	}
 
-	private void maybeCheckClass(Class<?> clazz) throws Exception {
+	private static void maybeCheckClass(Class<?> clazz) throws Exception {
 		if (clazz.isInterface()) {
 			// System.out.println("ignoring because interface");
 			return;
@@ -139,7 +139,7 @@ public class PrivateConstructorTest {
 		}
 	}
 
-	private void testCtor(Constructor<?> ctor) throws Exception {
+	private static void testCtor(Constructor<?> ctor) throws Exception {
 		Object o;
 		if (!ctor.isAccessible()) {
 			ctor.setAccessible(true);

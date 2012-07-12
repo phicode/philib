@@ -1,5 +1,6 @@
 rename all "selectable" to "event-handler" specific names
 
+100% RingBuffer test coverage
 
 PRIO TASK
   2  ThreadUtil unit-tests
@@ -25,10 +26,10 @@ journal file
 	long commit(byte[][] data);
 	  ^
 	  |
-	  +---- corellation-id
+	  +---- correlation-id
 	on listener:
-	commited(long correlationId)
-	commited(long startCid, long endCid)
+	committed(long correlationId)
+	committed(long startCid, long endCid)
 	
 
 EventHandler
@@ -54,7 +55,7 @@ connection
 - isWriteableNow() -> we can write non-blocking without further filling up the writeBacklog
 
 precise buffer management: release where?
-	- receive must consume a passed on buffer wholely, the event-handler can use the same buffer for every read
+	- receive must consume a passed on buffer whole, the event-handler can use the same buffer for every read
 	- send must not hold on to the buffer's data but store it in its own internal structures so that the sender can use it again
 
 

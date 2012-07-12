@@ -58,28 +58,17 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	// TODO: use a long->object map
 	private final Map<Long, EventHandler> handlersWithUndeliveredData = new ConcurrentHashMap<Long, EventHandler>();
 
-	private SimpleEventDispatcher(Selector selector) throws IOException {
+	private SimpleEventDispatcher(Selector selector) {
 		this.selector = selector;
 	}
 
 	public static EventDispatcher open() throws IOException {
 		Selector selector = Selector.open();
-		try {
-			SimpleEventDispatcher disp = new SimpleEventDispatcher(selector);
-			String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
-			Thread dispatcherThread = ThreadUtil.runForever(disp, threadName);
-			disp.initDispatcherThreads(dispatcherThread);
-			return disp;
-		} catch (IOException e) {
-			try {
-				selector.close();
-			} catch (Exception e2) {
-				// TODO: logging
-				System.err.println("failed to close an unused selector: " + e2.getMessage());
-				e2.printStackTrace(System.err);
-			}
-			throw new IOException("failed to create an event dispatcher", e);
-		}
+		SimpleEventDispatcher disp = new SimpleEventDispatcher(selector);
+		String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
+		Thread dispatcherThread = ThreadUtil.runForever(disp, threadName);
+		disp.initDispatcherThreads(dispatcherThread);
+		return disp;
 	}
 
 	private synchronized void initDispatcherThreads(Thread dispatcherThread) {

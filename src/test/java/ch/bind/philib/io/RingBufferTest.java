@@ -154,7 +154,7 @@ public class RingBufferTest {
 				getClass().getSimpleName(), performed / MB, time, mbPerSec);
 	}
 
-	private void verifyReadBack(byte[] bs, LinkedList<Byte> bufExp) {
+	private static void verifyReadBack(byte[] bs, LinkedList<Byte> bufExp) {
 		for (int i = bs.length - 1; i >= 0; i--) {
 			byte b = bs[i];
 			byte e = bufExp.removeLast();
@@ -162,20 +162,20 @@ public class RingBufferTest {
 		}
 	}
 
-	private void verifyRead(byte[] bs, LinkedList<Byte> bufExp) {
+	private static void verifyRead(byte[] bs, LinkedList<Byte> bufExp) {
 		for (byte b : bs) {
 			byte e = bufExp.removeFirst();
 			assertEquals(e, b);
 		}
 	}
 
-	private void prepend(byte[] bs, LinkedList<Byte> bufExp) {
+	private static void prepend(byte[] bs, LinkedList<Byte> bufExp) {
 		for (int i = bs.length - 1; i >= 0; i--) {
 			bufExp.addFirst(bs[i]);
 		}
 	}
 
-	private void append(byte[] bs, LinkedList<Byte> bufExp) {
+	private static  void append(byte[] bs, LinkedList<Byte> bufExp) {
 		for (byte b : bs) {
 			bufExp.add(b);
 		}
@@ -250,7 +250,7 @@ public class RingBufferTest {
 		assertEquals(0, buf.available());
 	}
 
-	private void verifyBuf(List<byte[]> expected, RingBuffer buf) {
+	private static void verifyBuf(List<byte[]> expected, RingBuffer buf) {
 		byte[] a = null;
 		int expSize = buf.available();
 		for (byte[] e : expected) {

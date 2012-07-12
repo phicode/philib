@@ -127,7 +127,7 @@ public final class RingBuffer implements DoubleSidedBuffer {
 			return;
 		}
 		_readLenCheck(len);
-		_copyFromRingBufFront(data, 0, len);
+		_copyFromRingBufFront(data, off, len);
 		_consumed(len);
 	}
 
@@ -136,7 +136,7 @@ public final class RingBuffer implements DoubleSidedBuffer {
 			return;
 		}
 		_readLenCheck(len);
-		_copyFromRingBufBack(data, 0, len);
+		_copyFromRingBufBack(data, off, len);
 		_consumedBack(len);
 	}
 
@@ -262,13 +262,13 @@ public final class RingBuffer implements DoubleSidedBuffer {
 		return offset;
 	}
 
-	private void _checkParam(byte[] data) {
+	private static void _checkParam(byte[] data) {
 		if (data == null) {
 			throw new IllegalArgumentException("data-buffer must not be null");
 		}
 	}
 
-	private void _checkParam(byte[] data, int off, int len) {
+	private static void _checkParam(byte[] data, int off, int len) {
 		_checkParam(data);
 		if (off < 0) {
 			throw new IllegalArgumentException("offset must not be negative");
