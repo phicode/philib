@@ -97,16 +97,13 @@ public final class ArrayUtil {
 		return rv;
 	}
 
-	public static String formatHex(byte[] data) {
-		throw new UnsupportedOperationException("TODO");
-	}
-
-	public static String formatHex(ByteBuffer data) {
-		throw new UnsupportedOperationException("TODO");
-	}
-
-	public static String formatShortHex(byte[] data) {
-		throw new UnsupportedOperationException("TODO");
+	public static String formatShortHex(byte[] data, int off, int len) {
+		StringBuilder sb = new StringBuilder(len * 2);
+		for (int i = 0; i < len; i++) {
+			int v = data[off + i] & 0xFF;
+			toShortHex(sb, v);
+		}
+		return sb.toString();
 	}
 
 	public static String formatShortHex(ByteBuffer data) {
@@ -116,6 +113,9 @@ public final class ArrayUtil {
 		final int len = data.remaining();
 		if (len == 0) {
 			return "";
+		}
+		if (data.hasArray()) {
+			return formatShortHex(data.array(), data.position(), len);
 		}
 		StringBuilder sb = new StringBuilder(len * 2);
 		final int initialPos = data.position();
