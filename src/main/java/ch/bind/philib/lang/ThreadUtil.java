@@ -27,7 +27,7 @@ import ch.bind.philib.validation.Validation;
 
 public final class ThreadUtil {
 
-	private static final PhiLog LOG = PhiLog.getLogger(ThreadUtil.class);
+	static final PhiLog LOG = PhiLog.getLogger(ThreadUtil.class);
 
 	public static final long DEFAULT_JOIN_TIMEOUT_MS = 1000L;
 
