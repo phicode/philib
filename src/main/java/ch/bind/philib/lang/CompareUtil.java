@@ -52,17 +52,15 @@ public final class CompareUtil {
 		if (a == null) {
 			// b is not null -> not equal
 			return false;
-		} else {
-			// this check could be simplified by only invoking a.equals(b) and
-			// leaving it up to the specific equals implementation to check for
-			// nulls. on the other hand, here we are with the power to find out
-			// right here and now
-			if (b == null) {
-				return false;
-			} else {
-				return a.equals(b);
-			}
 		}
+		// this check could be simplified by only invoking a.equals(b) and
+		// leaving it up to the specific equals implementation to check for
+		// nulls. on the other hand, here we are with the power to find out
+		// right here and now
+		if (b == null) {
+			return false;
+		}
+		return a.equals(b);
 	}
 
 	public static <T> int compare(final Comparable<T> a, final T b) {
@@ -71,13 +69,11 @@ public final class CompareUtil {
 		if (a == null) {
 			// b is not null
 			return -1; // a < b
-		} else {
-			if (b == null) {
-				return 1; // a > b
-			} else {
-				return a.compareTo(b);
-			}
 		}
+		if (b == null) {
+			return 1; // a > b
+		}
+		return a.compareTo(b);
 	}
 
 	public static int compareBool(boolean a, boolean b) {

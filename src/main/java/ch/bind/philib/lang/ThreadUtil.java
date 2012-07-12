@@ -37,9 +37,8 @@ public final class ThreadUtil {
 		long diff = time - System.currentTimeMillis();
 		if (diff <= 0) {
 			return;
-		} else {
-			Thread.sleep(diff);
 		}
+		Thread.sleep(diff);
 	}
 
 	public static boolean interruptAndJoin(Thread t) {
@@ -61,9 +60,8 @@ public final class ThreadUtil {
 		if (t.isAlive()) {
 			LOG.warn("thread is still alive: " + t.getName());
 			return false;
-		} else {
-			return true;
 		}
+		return true;
 	}
 
 	private static final AtomicLong FOREVER_RUNNER_SEQ = new AtomicLong(1);

@@ -87,10 +87,9 @@ public final class LeakyBucket {
 		if (numLeases > 0) {
 			// available immediately
 			return 0;
-		} else {
-			long nextAvailNano = lastReleaseNs + releaseIntervalNs;
-			return nextAvailNano - timeNs;
 		}
+		long nextAvailNano = lastReleaseNs + releaseIntervalNs;
+		return nextAvailNano - timeNs;
 	}
 
 	public void sleepWhileNoneAvailable() throws InterruptedException {

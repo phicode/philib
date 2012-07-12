@@ -44,14 +44,12 @@ public abstract class ObjectCacheBase<E> implements ObjectCache<E> {
 			if (e == null) {
 				stats.incrementCreates();
 				return factory.create();
-			} else {
-				if (factory.canReuse(e)) {
-					return e;
-				} else {
-					stats.incrementDestroyed();
-					factory.destroy(e);
-				}
 			}
+			if (factory.canReuse(e)) {
+				return e;
+			}
+			stats.incrementDestroyed();
+			factory.destroy(e);
 		} while (true);
 	}
 
@@ -61,10 +59,9 @@ public abstract class ObjectCacheBase<E> implements ObjectCache<E> {
 			if (tryRelease(e)) {
 				stats.incrementReleases();
 				return true;
-			} else {
-				stats.incrementDestroyed();
-				factory.destroy(e);
 			}
+			stats.incrementDestroyed();
+			factory.destroy(e);
 		}
 		return false;
 	}

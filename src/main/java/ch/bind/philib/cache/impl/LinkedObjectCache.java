@@ -50,12 +50,11 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 		final Node<E> node = take(objList);
 		if (node == null) {
 			return null;
-		} else {
-			final E e = node.unsetEntry();
-			assert (e != null);
-			put(freeList, node);
-			return e;
 		}
+		final E e = node.unsetEntry();
+		assert (e != null);
+		put(freeList, node);
+		return e;
 	}
 
 	@Override
@@ -91,13 +90,12 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 			final Node<E> head = rootRef.get();
 			if (head == null || head == LOCK_DUMMY) { // empty or locked
 				return null;
-			} else {
-				if (rootRef.compareAndSet(head, LOCK_DUMMY)) {
-					final Node<E> tail = head.getTail();
-					boolean ok = rootRef.compareAndSet(LOCK_DUMMY, tail);
-					assert (ok);
-					return head;
-				}
+			}
+			if (rootRef.compareAndSet(head, LOCK_DUMMY)) {
+				final Node<E> tail = head.getTail();
+				boolean ok = rootRef.compareAndSet(LOCK_DUMMY, tail);
+				assert (ok);
+				return head;
 			}
 		} while (true);
 	}

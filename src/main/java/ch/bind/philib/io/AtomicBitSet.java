@@ -81,9 +81,8 @@ public final class AtomicBitSet {
 			final long newV = v ^ mask;
 			if (b.compareAndSet(v, newV)) {
 				return (bucketIdx * 64) + bitIdx;
-			} else {
-				v = b.get();
 			}
+			v = b.get();
 		}
 		return -1;
 	}
@@ -131,11 +130,10 @@ public final class AtomicBitSet {
 			if (set) {
 				// bit is set, cant switch
 				return false;
-			} else {
-				long newV = v | mask;
-				if (b.compareAndSet(v, newV)) {
-					return true;
-				}
+			}
+			long newV = v | mask;
+			if (b.compareAndSet(v, newV)) {
+				return true;
 			}
 		}
 	}

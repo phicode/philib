@@ -71,14 +71,13 @@ public final class RingImpl<T> implements Ring<T> {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (size == 0) {
 			return null;
-		} else {
-			Object value = ring[off];
-			ring[off] = null;
-			off = (off + 1) % ring.length;
-			size--;
-			assert (value != null);
-			return (T) value;
 		}
+		Object value = ring[off];
+		ring[off] = null;
+		off = (off + 1) % ring.length;
+		size--;
+		assert (value != null);
+		return (T) value;
 	}
 
 	@Override
@@ -86,14 +85,13 @@ public final class RingImpl<T> implements Ring<T> {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		if (size == 0) {
 			return value;
-		} else {
-			final T rv = poll();
-			if (value != null) {
-				addBack(value);
-			}
-			assert (rv != null);
-			return rv;
 		}
+		final T rv = poll();
+		if (value != null) {
+			addBack(value);
+		}
+		assert (rv != null);
+		return rv;
 	}
 
 	private void checkUsage() {

@@ -57,8 +57,7 @@ public abstract class EventHandlerBase implements EventHandler {
 		if (buf.isIntern()) {
 			context.getBufferCache().release(buf.getBuffer());
 			return false;
-		} else {
-			return true;
 		}
+		return true;
 	}
 }

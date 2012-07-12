@@ -114,9 +114,8 @@ public class EchoSession implements Session {
 			connection.sendAsync(writeBb);
 			if (writeBb.hasRemaining()) {
 				return;
-			} else {
-				sendPending = false;
 			}
+			sendPending = false;
 		}
 		long loops = 0;
 		while (!sendPending) {// loop if all data has been written

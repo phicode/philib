@@ -238,18 +238,17 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 					assert (!externBuf.isPending() && !data.hasRemaining());
 					unregisterFromWriteEvents();
 					return;
-				} else {
-					registerForWriteEvents();
+				}
+				registerForWriteEvents();
 
-					// not all data in the backlog has been written
-					if (externBuf.isPending()) {
-						// our data is among those who are waiting to be written
-						w_writeBacklog.wait();
-					} else {
-						// our data has been written
-						assert (!data.hasRemaining());
-						return;
-					}
+				// not all data in the backlog has been written
+				if (externBuf.isPending()) {
+					// our data is among those who are waiting to be written
+					w_writeBacklog.wait();
+				} else {
+					// our data has been written
+					assert (!data.hasRemaining());
+					return;
 				}
 			}
 		}
@@ -333,14 +332,13 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			}
 			if (numChanRead == 0) {
 				break;
+			}
+			if (bb.hasRemaining()) {
+				totalRead += numChanRead;
 			} else {
-				if (bb.hasRemaining()) {
-					totalRead += numChanRead;
-				} else {
-					// if the read buffer is full we cant continue reading until
-					// the client has consumed its pending data.
-					break;
-				}
+				// if the read buffer is full we cant continue reading until
+				// the client has consumed its pending data.
+				break;
 			}
 		}
 		if (bb.position() > 0) {
