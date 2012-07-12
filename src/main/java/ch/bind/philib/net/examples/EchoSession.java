@@ -36,12 +36,6 @@ public class EchoSession implements Session {
 
 	private final boolean server;
 
-	// private long numRead;
-	//
-	// private long numWrite;
-	//
-	// private long transitNums;
-
 	private long nextValueRead;
 
 	private long nextValueSend;
@@ -54,8 +48,6 @@ public class EchoSession implements Session {
 
 	private final byte[] sendEnc = new byte[8];
 
-	// private AtomicInteger maxInTransit = new AtomicInteger();
-
 	private final Object lock = new Object();
 
 	private int numSendable;
@@ -64,15 +56,10 @@ public class EchoSession implements Session {
 
 	final Connection connection;
 
-	// private int partialSize;
-
 	EchoSession(Connection connection, boolean server, boolean performVerification) {
 		this.connection = connection;
 		this.server = server;
 		this.performVerification = performVerification;
-		// the write buffer starts in write mode, but there is nothing to write,
-		// so tell it that there is nothing to write
-		// writeBb.limit(0);
 	}
 
 	@Override
@@ -154,14 +141,11 @@ public class EchoSession implements Session {
 	private void verifyReceived(ByteBuffer data) {
 		int rem = data.remaining();
 		assert (rem > 0);
-		// long verifyStart = nextValueRead;
 		while (rem >= 8) {
 			data.get(readBuf);
 			verify();
 			rem -= 8;
 		}
-		// long verifyEnd = nextValueRead - 1;
-		// System.out.println("verified: " + verifyStart + " - " + verifyEnd);
 	}
 
 	private void verify() {

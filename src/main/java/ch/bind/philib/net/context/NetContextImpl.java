@@ -131,7 +131,7 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
-	public void setSocketOptions(DatagramSocket socket) {
+	public void setSocketOptions(DatagramSocket socket) throws SocketException {
 		if (broadcastDatagram != null) {
 			socket.setBroadcast(broadcastDatagram);
 		}

@@ -66,7 +66,7 @@ public interface NetContext {
 
 	void setSocketOptions(ServerSocket socket) throws SocketException;
 
-	void setSocketOptions(DatagramSocket socket);
+	void setSocketOptions(DatagramSocket socket) throws SocketException;
 
 	boolean isDebugMode();
 
