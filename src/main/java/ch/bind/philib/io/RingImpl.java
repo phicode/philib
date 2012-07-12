@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -174,8 +174,8 @@ public final class RingImpl<T> implements Ring<T> {
 
 	private static final void copyRingData(Object[] oldRing, int off, int used, Object[] newRing) {
 		assert (oldRing != null && newRing != null && //
-				off >= 0 && off < oldRing.length && //
-				used >= 0 && used <= oldRing.length && newRing.length >= used);
+		        off >= 0 && off < oldRing.length && //
+		        used >= 0 && used <= oldRing.length && newRing.length >= used);
 
 		if (off == 0) {
 			System.arraycopy(oldRing, 0, newRing, 0, used);

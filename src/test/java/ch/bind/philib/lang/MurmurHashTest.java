@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -78,8 +78,8 @@ public class MurmurHashTest {
 		long time = System.nanoTime() - tStart;
 		double mbPerSec = total / (time / 1000000000f) / (1024f * 1024f);
 		double nsPerByte = ((double) time) / ((double) total);
-		System.out.printf("murmur2 size=%5d total=%6d sum=%20d %5.3fms %3.3fmb/sec %.3fns/byte%n", size, total, sum, (time / 1000000f), mbPerSec,
-				nsPerByte);
+		System.out.printf("murmur2 size=%5d total=%6d sum=%20d %5.3fms %3.3fmb/sec %.3fns/byte%n", size, total, sum,
+		        (time / 1000000f), mbPerSec, nsPerByte);
 	}
 
 	private static void testSpeed3(final int size) {
@@ -108,7 +108,7 @@ public class MurmurHashTest {
 		long time = System.nanoTime() - tStart;
 		double mbPerSec = total / (time / 1000000000f) / (1024f * 1024f);
 		double nsPerByte = ((double) time) / ((double) total);
-		System.out.printf("murmur3 size=%5d total=%6d sum=%20d %5.3fms %3.3fmb/sec %.3fns/byte%n", size, total, sum, (time / 1000000f), mbPerSec,
-				nsPerByte);
+		System.out.printf("murmur3 size=%5d total=%6d sum=%20d %5.3fms %3.3fmb/sec %.3fns/byte%n", size, total, sum,
+		        (time / 1000000f), mbPerSec, nsPerByte);
 	}
 }

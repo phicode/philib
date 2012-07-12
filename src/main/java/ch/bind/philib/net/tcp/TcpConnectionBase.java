@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -149,8 +149,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			boolean finished = sendPendingAsync();
 			if (finished) {
 				unregisterFromWriteEvents();
-			}
-			else {
+			} else {
 				registerForWriteEvents();
 			}
 			return finished;
@@ -211,8 +210,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 			if (data.hasRemaining()) {
 				registerForWriteEvents();
-			}
-			else {
+			} else {
 				// backlog and input buffer written
 				unregisterFromWriteEvents();
 			}
@@ -244,16 +242,14 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 					assert (!externBuf.isPending() && !data.hasRemaining());
 					unregisterFromWriteEvents();
 					return;
-				}
-				else {
+				} else {
 					registerForWriteEvents();
 
 					// not all data in the backlog has been written
 					if (externBuf.isPending()) {
 						// our data is among those who are waiting to be written
 						w_writeBacklog.wait();
-					}
-					else {
+					} else {
 						// our data has been written
 						assert (!data.hasRemaining());
 						return;
@@ -287,8 +283,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				if (externBufReleased) {
 					w_writeBacklog.notifyAll();
 				}
-			}
-			else {
+			} else {
 				// write channel is blocked
 				w_writeBacklog.addFront(pending);
 				break;
@@ -332,7 +327,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			deliverReadData(bb);
 			if (numChanRead == -1) {
 				if (bb.position() > 0) {
-					System.err.println("connection was closed and the corresponding session did not consume all read data");
+					System.err
+					        .println("connection was closed and the corresponding session did not consume all read data");
 				}
 				// connection closed
 				r_partialConsume = null;
@@ -342,12 +338,10 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			}
 			if (numChanRead == 0) {
 				break;
-			}
-			else {
+			} else {
 				if (bb.hasRemaining()) {
 					totalRead += numChanRead;
-				}
-				else {
+				} else {
 					// if the read buffer is full we cant continue reading until
 					// the client has consumed its pending data.
 					break;
@@ -363,8 +357,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				registerForDeliverPartialReads();
 			}
 			r_partialConsume = bb;
-		}
-		else {
+		} else {
 			if (r_partialConsume != null) {
 				// registered for partial consume events
 				unregisterFromDeliverPartialReads();
@@ -383,8 +376,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			// switch back to write mode
 			if (bb.hasRemaining()) {
 				bb.compact();
-			}
-			else {
+			} else {
 				bb.clear();
 			}
 		}

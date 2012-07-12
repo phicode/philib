@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -123,7 +123,8 @@ public class ByteArrayCacheTest {
 		}
 	}
 
-	public long stressTest(int type, boolean firstRun, int numThreads, long numOps, int getOps, int putOps) throws Exception {
+	public long stressTest(int type, boolean firstRun, int numThreads, long numOps, int getOps, int putOps)
+	        throws Exception {
 		TestUtil.gcAndSleep();
 
 		int totalbufferSize = 32 * 1024 * 1024;
@@ -207,7 +208,8 @@ public class ByteArrayCacheTest {
 
 		private final int putOps;
 
-		public StressTester(Semaphore ready, Semaphore go, Semaphore end, ByteArrayCache bp, long numOps, int getOps, int putOps) {
+		public StressTester(Semaphore ready, Semaphore go, Semaphore end, ByteArrayCache bp, long numOps, int getOps,
+		        int putOps) {
 			Validation.isTrue(getOps >= putOps);
 			this.ready = ready;
 			this.go = go;

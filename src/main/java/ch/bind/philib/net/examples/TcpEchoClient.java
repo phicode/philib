@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -44,8 +44,7 @@ public class TcpEchoClient {
 		if (args.length > 1) {
 			System.out.println("only one parameter may be specified");
 			System.exit(1);
-		}
-		else if (args.length == 1) {
+		} else if (args.length == 1) {
 			try {
 				numClients = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -79,7 +78,7 @@ public class TcpEchoClient {
 		SessionFactory factory = new SessionFactory() {
 			@Override
 			public Session createSession(Connection connection) {
-				return new EchoSession(connection, false	, true);
+				return new EchoSession(connection, false, true);
 			}
 		};
 		EchoSession session = (EchoSession) TcpNetFactory.INSTANCE.openClient(context, endpoint, factory);
@@ -109,7 +108,7 @@ public class TcpEchoClient {
 			double rxMb = rxDiff / ((double) (1024 * 1024f));
 			double txMb = txDiff / ((double) (1024 * 1024f));
 			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d tDiff=%d%n", //
-					seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff), tDiff);
+			        seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff), tDiff);
 			if (seeded < 512 * 1024) {
 				// System.out.println("seeding an additional " + 8192 +
 				// " bytes into the echo chain");

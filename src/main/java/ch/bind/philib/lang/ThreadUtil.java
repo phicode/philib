@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2011 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -38,8 +38,7 @@ public final class ThreadUtil {
 		long diff = time - System.currentTimeMillis();
 		if (diff <= 0) {
 			return;
-		}
-		else {
+		} else {
 			Thread.sleep(diff);
 		}
 	}
@@ -63,8 +62,7 @@ public final class ThreadUtil {
 		if (t.isAlive()) {
 			LOG.warn("thread is still alive: " + t.getName());
 			return false;
-		}
-		else {
+		} else {
 			return true;
 		}
 	}
@@ -76,8 +74,10 @@ public final class ThreadUtil {
 	// TODO: documentation
 	public static Thread runForever(Runnable runnable) {
 		Validation.notNull(runnable);
-		String threadName = String.format(FOREVER_RUNNER_NAME_FMT, //
-				ForeverRunner.class.getSimpleName(), runnable.getClass().getSimpleName(), FOREVER_RUNNER_SEQ.getAndIncrement());
+		String threadName = String.format(
+		        FOREVER_RUNNER_NAME_FMT, //
+		        ForeverRunner.class.getSimpleName(), runnable.getClass().getSimpleName(),
+		        FOREVER_RUNNER_SEQ.getAndIncrement());
 		return runForever(runnable, threadName);
 	}
 

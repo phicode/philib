@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -66,7 +66,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
 			System.out.printf("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-					(t / 1000000f), rdiff, sdiff, getRx(), getTx());
+			        (t / 1000000f), rdiff, sdiff, getRx(), getTx());
 		}
 	}
 
@@ -112,9 +112,10 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			s += ", write-available=" + w_writeBacklog.size();
 		}
 		try {
-			s += ", readOps=" + readOps + ", sendOps=" + sendOps + ", reg4send=" + registeredForWriteEvt + ", lasthandle-send=" + lastHandleSendable
-					+ ", numHandles=" + numHandles + ", rx=" + rx.get() + ", tx=" + tx.get() + ", no-delay=" + channel.socket().getTcpNoDelay()
-					+ ", rcvBuf=" + channel.socket().getReceiveBufferSize() + ", sndBuf=" + channel.socket().getSendBufferSize();
+			s += ", readOps=" + readOps + ", sendOps=" + sendOps + ", reg4send=" + registeredForWriteEvt
+			        + ", lasthandle-send=" + lastHandleSendable + ", numHandles=" + numHandles + ", rx=" + rx.get()
+			        + ", tx=" + tx.get() + ", no-delay=" + channel.socket().getTcpNoDelay() + ", rcvBuf="
+			        + channel.socket().getReceiveBufferSize() + ", sndBuf=" + channel.socket().getSendBufferSize();
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -66,7 +66,8 @@ public class TcpEchoServer implements SessionFactory {
 							long lastInteractionNs = s.getLastInteractionNs();
 							if (lastInteractionNs < tooFarAgo) {
 								double lastSec = (now - lastInteractionNs) / 1000000000f;
-								System.out.printf("last interaction: %.5fsec => %s%n", lastSec, s.getDebugInformations());
+								System.out.printf("last interaction: %.5fsec => %s%n", lastSec,
+								        s.getDebugInformations());
 							}
 							System.out.printf("rx=%d, tx=%d%n", s.connection.getRx(), s.connection.getTx());
 						}

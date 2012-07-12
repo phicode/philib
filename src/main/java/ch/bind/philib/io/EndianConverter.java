@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2006-2011 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -74,24 +74,24 @@ public final class EndianConverter {
 
 	public static long decodeInt64BE(byte[] input, int offset) {
 		return ((long) (input[offset + 0] & 0xFF) << 56) | //
-				((long) (input[offset + 1] & 0xFF) << 48) | //
-				((long) (input[offset + 2] & 0xFF) << 40) | //
-				((long) (input[offset + 3] & 0xFF) << 32) | //
-				((long) (input[offset + 4] & 0xFF) << 24) | //
-				((long) (input[offset + 5] & 0xFF) << 16) | //
-				((long) (input[offset + 6] & 0xFF) << 8) | //
-				(input[offset + 7] & 0xFF);
+		        ((long) (input[offset + 1] & 0xFF) << 48) | //
+		        ((long) (input[offset + 2] & 0xFF) << 40) | //
+		        ((long) (input[offset + 3] & 0xFF) << 32) | //
+		        ((long) (input[offset + 4] & 0xFF) << 24) | //
+		        ((long) (input[offset + 5] & 0xFF) << 16) | //
+		        ((long) (input[offset + 6] & 0xFF) << 8) | //
+		        (input[offset + 7] & 0xFF);
 	}
 
 	public static long decodeInt64LE(byte[] input, int offset) {
 		return ((long) input[offset + 0] & 0xFF) | //
-				((long) (input[offset + 1] & 0xFF) << 8) | //
-				((long) (input[offset + 2] & 0xFF) << 16) | //
-				((long) (input[offset + 3] & 0xFF) << 24) | //
-				((long) (input[offset + 4] & 0xFF) << 32) | //
-				((long) (input[offset + 5] & 0xFF) << 40) | //
-				((long) (input[offset + 6] & 0xFF) << 48) | //
-				((long) (input[offset + 7] & 0xFF)) << 56;
+		        ((long) (input[offset + 1] & 0xFF) << 8) | //
+		        ((long) (input[offset + 2] & 0xFF) << 16) | //
+		        ((long) (input[offset + 3] & 0xFF) << 24) | //
+		        ((long) (input[offset + 4] & 0xFF) << 32) | //
+		        ((long) (input[offset + 5] & 0xFF) << 40) | //
+		        ((long) (input[offset + 6] & 0xFF) << 48) | //
+		        ((long) (input[offset + 7] & 0xFF)) << 56;
 	}
 
 	// #################
@@ -133,16 +133,16 @@ public final class EndianConverter {
 
 	public static int decodeInt32BE(byte[] input, int offset) {
 		return ((input[offset + 0] & 0xFF) << 24) | //
-				((input[offset + 1] & 0xFF) << 16) | //
-				((input[offset + 2] & 0xFF) << 8) | //
-				(input[offset + 3] & 0xFF);
+		        ((input[offset + 1] & 0xFF) << 16) | //
+		        ((input[offset + 2] & 0xFF) << 8) | //
+		        (input[offset + 3] & 0xFF);
 	}
 
 	public static int decodeInt32LE(byte[] input, int offset) {
 		return (input[offset + 0] & 0xFF) | //
-				((input[offset + 1] & 0xFF) << 8) | //
-				((input[offset + 2] & 0xFF) << 16) | //
-				((input[offset + 3] & 0xFF)) << 24;
+		        ((input[offset + 1] & 0xFF) << 8) | //
+		        ((input[offset + 2] & 0xFF) << 16) | //
+		        ((input[offset + 3] & 0xFF)) << 24;
 	}
 
 	// #################
@@ -180,12 +180,12 @@ public final class EndianConverter {
 
 	public static int decodeInt16BE(byte[] input, int offset) {
 		return ((input[offset + 0] & 0xFF) << 8) | //
-				(input[offset + 1] & 0xFF);
+		        (input[offset + 1] & 0xFF);
 	}
 
 	public static int decodeInt16LE(byte[] input, int offset) {
 		return (input[offset + 0] & 0xFF) | //
-				((input[offset + 1] & 0xFF) << 8);
+		        ((input[offset + 1] & 0xFF) << 8);
 	}
 
 	// ################

@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2006-2011 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -55,8 +55,8 @@ public final class ArrayUtil {
 	 * @throws NullPointerException
 	 *             If either of the two parameters is null.
 	 * @throws IllegalArgumentException
-	 *             If the <code>source</code>-array is smaller then the
-	 *             <code>destination</code>-array.
+	 *             If the <code>source</code>-array is smaller then the <code>destination</code>
+	 *             -array.
 	 */
 	public static <T> void pickRandom(final T[] source, final T[] destination) {
 		if (source == null)
@@ -66,7 +66,8 @@ public final class ArrayUtil {
 		final int nSrc = source.length;
 		final int nDst = destination.length;
 		if (nSrc < nDst)
-			throw new IllegalArgumentException("the source arrays length must be greater or equal to the destination arrays length");
+			throw new IllegalArgumentException(
+			        "the source arrays length must be greater or equal to the destination arrays length");
 		final boolean[] taken = new boolean[nSrc];
 
 		for (int i = 0; i < nDst; i++) {
@@ -144,5 +145,6 @@ public final class ArrayUtil {
 		sb.append(TO_HEX[v & 15]);
 	}
 
-	private static final char[] TO_HEX = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	private static final char[] TO_HEX = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E',
+	        'F' };
 }

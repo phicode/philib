@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -56,27 +56,27 @@ final class UdpServerEventHandler extends EventHandlerBase {
 	void start() throws IOException {
 		channel.configureBlocking(false);
 		DatagramSocket socket = channel.socket();
-//		socket.setBroadcast(on);
-//		socket.setReceiveBufferSize(size);
-//		socket.setSendBufferSize(size);
+		//		socket.setBroadcast(on);
+		//		socket.setReceiveBufferSize(size);
+		//		socket.setSendBufferSize(size);
 		context.getEventDispatcher().register(this, EventUtil.READ);
 	}
 
 	@Override
 	public void close() throws IOException {
 		// TODO Auto-generated method stub
-throw new UnsupportedOperationException("TODO");
+		throw new UnsupportedOperationException("TODO");
 	}
 
 	@Override
 	public SelectableChannel getChannel() {
 		return channel;
 	}
-	
+
 	@Override
 	public void handle(int ops) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 		final ByteBuffer rbuf = acquireBuffer();
 		try {
 			int totalRead = 0;
@@ -106,11 +106,11 @@ throw new UnsupportedOperationException("TODO");
 		}
 	}
 
-//	@Override
-//	public void handleWrite() throws IOException {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//	@Override
+	//	public void handleWrite() throws IOException {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
 	void sendNonBlocking(SocketAddress addr, ByteBuffer data) {
 
