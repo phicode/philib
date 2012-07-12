@@ -27,8 +27,8 @@ public final class PhiMath {
 	private PhiMath() {}
 
 	/**
-	 * Calculate the sum of all values from 1 to <code>end</code>, including.
-	 * That is: <code>sum = 1 + 2 + 3 + ... + (end-1) + end</code> <br/>
+	 * Calculate the sum of all values from 1 to <code>end</code>, including. That is:
+	 * <code>sum = 1 + 2 + 3 + ... + (end-1) + end</code> <br/>
 	 * Examples:<br/>
 	 * <code>
 	 * f(0) = 0<br/>
@@ -51,13 +51,11 @@ public final class PhiMath {
 	}
 
 	/**
-	 * Calculates the sum of all values from <code>start</code> to
-	 * <code>end</code>, including.
+	 * Calculates the sum of all values from <code>start</code> to <code>end</code>, including.
 	 * 
 	 * @param start The start value of the sum-range.
 	 * @param end The end value of the sum-range.
-	 * @return The sum of all values from <code>start</code> to <code>end</code>
-	 *         , including.
+	 * @return The sum of all values from <code>start</code> to <code>end</code> , including.
 	 */
 
 	public static long sumOfRange(long start, long end) {

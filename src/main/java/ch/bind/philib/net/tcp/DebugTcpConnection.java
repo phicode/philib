@@ -98,6 +98,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 		return num;
 	}
 
+	@Override
 	public String getDebugInformations() {
 		String s;
 		synchronized (w_writeBacklog) {

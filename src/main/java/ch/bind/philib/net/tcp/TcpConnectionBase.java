@@ -22,9 +22,7 @@
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
@@ -35,9 +33,7 @@ import ch.bind.philib.io.Ring;
 import ch.bind.philib.io.RingImpl;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
-import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.events.EventHandler;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.net.events.NetBuf;
@@ -403,14 +399,17 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		context.getEventDispatcher().unregisterFromRedeliverPartialReads(this);
 	}
 
+	@Override
 	public long getRx() {
 		return rx.get();
 	}
 
+	@Override
 	public long getTx() {
 		return tx.get();
 	}
 
+	@Override
 	public boolean isWritableNow() {
 		// TODO
 		throw new UnsupportedOperationException("TODO");

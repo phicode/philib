@@ -22,6 +22,9 @@
 
 package ch.bind.philib;
 
+import static ch.bind.philib.io.BitOps.checkMask;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -29,13 +32,11 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
-import static ch.bind.philib.io.BitOps.*;
-// this is here to satisfy the code-coverage tool emma
-// by invoking the private constructors.
-// This helps to identify classes which do not yet have 100%
-// test coverage, even utility classes.
 
+//this is here to satisfy the code-coverage tool emma
+//by invoking the private constructors.
+//This helps to identify classes which do not yet have 100%
+//test coverage, even utility classes.
 public class PrivateConstructorTest {
 
 	@Test

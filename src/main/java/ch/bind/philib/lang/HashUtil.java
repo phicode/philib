@@ -24,8 +24,7 @@ package ch.bind.philib.lang;
 
 /**
  * Provides helper methods for hash-code generation.<br/>
- * Hash methods for handling all primitive types as well as <code>Object</code>s
- * are provided.<br/>
+ * Hash methods for handling all primitive types as well as <code>Object</code>s are provided.<br/>
  * 
  * <b>Usage:</b>
  * 
