@@ -35,8 +35,6 @@ public final class MurmurHash {
 
 	private static final int MURMUR2_32_SEED = 0x9747b28c;
 
-	// private static final int MURMUR3_32_SEED = ;
-
 	private static final int MURMUR3_32_C1 = 0xcc9e2d51;
 
 	private static final int MURMUR3_32_C2 = 0x1b873593;
