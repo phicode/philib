@@ -26,8 +26,7 @@ import java.util.Collection;
 
 public final class ValidationUtil {
 
-	private ValidationUtil() {
-	}
+	private ValidationUtil() {}
 
 	public static final ValidationResults validate(final Validatable validatable) {
 		final ValidationResults results = new ValidationResults();

@@ -41,7 +41,9 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 	private static final long LOG_WRITE_TIME_THRESHOLD_NS = 5000000L;
 
 	private AtomicLong readOps = new AtomicLong();
+
 	private AtomicLong sendOps = new AtomicLong();
+
 	private AtomicLong numHandles = new AtomicLong();
 
 	private volatile boolean lastHandleSendable;
@@ -66,7 +68,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
 			System.out.printf("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-			        (t / 1000000f), rdiff, sdiff, getRx(), getTx());
+					(t / 1000000f), rdiff, sdiff, getRx(), getTx());
 		}
 	}
 
@@ -112,10 +114,9 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			s += ", write-available=" + w_writeBacklog.size();
 		}
 		try {
-			s += ", readOps=" + readOps + ", sendOps=" + sendOps + ", reg4send=" + registeredForWriteEvt
-			        + ", lasthandle-send=" + lastHandleSendable + ", numHandles=" + numHandles + ", rx=" + rx.get()
-			        + ", tx=" + tx.get() + ", no-delay=" + channel.socket().getTcpNoDelay() + ", rcvBuf="
-			        + channel.socket().getReceiveBufferSize() + ", sndBuf=" + channel.socket().getSendBufferSize();
+			s += ", readOps=" + readOps + ", sendOps=" + sendOps + ", reg4send=" + registeredForWriteEvt + ", lasthandle-send=" + lastHandleSendable
+					+ ", numHandles=" + numHandles + ", rx=" + rx.get() + ", tx=" + tx.get() + ", no-delay=" + channel.socket().getTcpNoDelay()
+					+ ", rcvBuf=" + channel.socket().getReceiveBufferSize() + ", sndBuf=" + channel.socket().getSendBufferSize();
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -47,8 +47,8 @@ public class NetContextImpl implements NetContext {
 
 	private Integer rcvBufSize;
 
-	private Boolean broadcastDatagram; 
-	
+	private Boolean broadcastDatagram;
+
 	private boolean debugMode;
 
 	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
@@ -102,12 +102,12 @@ public class NetContextImpl implements NetContext {
 	public Boolean isBroadcastDatagram() {
 		return broadcastDatagram;
 	}
-	
+
 	@Override
 	public void setBroadcastDatagram(boolean broadcastDatagram) {
 		this.broadcastDatagram = broadcastDatagram;
 	}
-	
+
 	@Override
 	public void setSocketOptions(Socket socket) throws SocketException {
 		Validation.notNull(socket);
@@ -142,7 +142,7 @@ public class NetContextImpl implements NetContext {
 			socket.setReceiveBufferSize(sndBufSize);
 		}
 	}
-	
+
 	@Override
 	public boolean isDebugMode() {
 		return debugMode;
@@ -152,5 +152,5 @@ public class NetContextImpl implements NetContext {
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
 	}
-	
+
 }

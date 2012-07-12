@@ -104,11 +104,11 @@ final class UdpServerEventHandler extends EventHandlerBase {
 		}
 	}
 
-	//	@Override
-	//	public void handleWrite() throws IOException {
-	//		// TODO Auto-generated method stub
+	// @Override
+	// public void handleWrite() throws IOException {
+	// // TODO Auto-generated method stub
 	//
-	//	}
+	// }
 
 	void sendAsync(SocketAddress addr, ByteBuffer data) {
 

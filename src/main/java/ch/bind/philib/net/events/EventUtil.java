@@ -26,8 +26,7 @@ import java.nio.channels.SelectionKey;
 
 public final class EventUtil {
 
-	private EventUtil() {
-	}
+	private EventUtil() {}
 
 	public static final int READ = SelectionKey.OP_READ;
 

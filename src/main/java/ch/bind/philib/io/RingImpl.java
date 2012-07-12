@@ -174,8 +174,8 @@ public final class RingImpl<T> implements Ring<T> {
 
 	private static final void copyRingData(Object[] oldRing, int off, int used, Object[] newRing) {
 		assert (oldRing != null && newRing != null && //
-		        off >= 0 && off < oldRing.length && //
-		        used >= 0 && used <= oldRing.length && newRing.length >= used);
+				off >= 0 && off < oldRing.length && //
+				used >= 0 && used <= oldRing.length && newRing.length >= used);
 
 		if (off == 0) {
 			System.arraycopy(oldRing, 0, newRing, 0, used);

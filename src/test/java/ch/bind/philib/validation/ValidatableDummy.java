@@ -25,6 +25,7 @@ package ch.bind.philib.validation;
 public class ValidatableDummy implements Validatable {
 
 	private boolean generateError;
+
 	private int counter;
 
 	public boolean isGenerateError() {

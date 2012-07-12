@@ -83,8 +83,7 @@ public final class ByteArrayCache extends SpecificObjectCache<byte[]> {
 		}
 
 		@Override
-		public void destroy(byte[] e) {
-		}
+		public void destroy(byte[] e) {}
 
 		@Override
 		public byte[] create() {

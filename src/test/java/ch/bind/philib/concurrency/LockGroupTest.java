@@ -33,13 +33,19 @@ import ch.bind.philib.lang.ArrayUtil;
 public class LockGroupTest {
 
 	private static final int NUM_LOCKABLES = 1000;
+
 	private static final int NUM_LOCKGROUPS = 25;
+
 	private static final int NUM_LOCKABLE_PER_GROUP = 20;
+
 	private static final int NUM_THREADS = 8;
+
 	private static final int NUM_ITERATIONS_PER_THREAD = 10000;
 
 	private Thread[] threads;
+
 	private Lockable[] lockables;
+
 	private LockGroup[] lockgroups;
 
 	@Test(timeout = 15000)
@@ -74,6 +80,7 @@ public class LockGroupTest {
 	private static class LockableStub implements Lockable {
 
 		private final long lockId = LockManager.getNextLockId();
+
 		private final Lock lock = new ReentrantLock();
 
 		@Override

@@ -80,7 +80,7 @@ public class RingQueue<E> {
 			if (commitIdx < expectCidx) {
 				// someone else is writing with an index lower then our
 				// and has not commited
-				//				return true;
+				// return true;
 			} else if (commitIdx == expectCidx) {
 				// commit directly
 				boolean commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
@@ -90,7 +90,7 @@ public class RingQueue<E> {
 					commited = writeCommittedIdx.compareAndSet(commitIdx, wIdx);
 				}
 			} else {
-				//				Validation.notNull(null);
+				// Validation.notNull(null);
 			}
 		} while (true);
 	}

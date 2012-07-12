@@ -34,19 +34,16 @@ public final class TcpNetFactory implements NetFactory {
 
 	public static final TcpNetFactory INSTANCE = new TcpNetFactory();
 
-	private TcpNetFactory() {
-	}
+	private TcpNetFactory() {}
 
 	// TODO: supply session directly!
 	@Override
-	public Session openClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
-	        throws IOException {
+	public Session openClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		return TcpConnectionBase.open(context, endpoint, sessionFactory);
 	}
 
 	@Override
-	public NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory consumerFactory)
-	        throws IOException {
+	public NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory consumerFactory) throws IOException {
 		return TcpServer.open(context, consumerFactory, bindAddress);
 	}
 }

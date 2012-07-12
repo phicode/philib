@@ -74,8 +74,7 @@ public final class ByteBufferCache extends SpecificObjectCache<ByteBuffer> {
 		}
 
 		@Override
-		public void destroy(ByteBuffer e) {
-		}
+		public void destroy(ByteBuffer e) {}
 
 		@Override
 		public boolean release(ByteBuffer e) {

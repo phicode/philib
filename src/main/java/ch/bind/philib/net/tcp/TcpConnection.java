@@ -42,7 +42,7 @@ public final class TcpConnection extends TcpConnectionBase {
 		try {
 			connection.session = sessionFactory.createSession(connection);
 		} catch (Exception e) {
-			//TODO: logging
+			// TODO: logging
 			connection.close();
 			throw e;
 		}
@@ -50,8 +50,7 @@ public final class TcpConnection extends TcpConnectionBase {
 		return connection.session;
 	}
 
-	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
-	        throws IOException {
+	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);

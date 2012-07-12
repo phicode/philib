@@ -24,8 +24,7 @@ package ch.bind.philib.math;
 
 public final class PhiMath {
 
-	private PhiMath() {
-	}
+	private PhiMath() {}
 
 	/**
 	 * Calculate the sum of all values from 1 to <code>end</code>, including.
@@ -40,8 +39,7 @@ public final class PhiMath {
 	 * f(100) = 5050<br/>
 	 * </code>
 	 * 
-	 * @param end
-	 *            The end value of the sum-range.
+	 * @param end The end value of the sum-range.
 	 * @return The sum of all values from 1 to <code>end</code>, including.
 	 */
 	public static long sumOfRange(long end) {
@@ -53,13 +51,13 @@ public final class PhiMath {
 	}
 
 	/**
-	 * Calculates the sum of all values from <code>start</code> to <code>end</code>, including.
+	 * Calculates the sum of all values from <code>start</code> to
+	 * <code>end</code>, including.
 	 * 
-	 * @param start
-	 *            The start value of the sum-range.
-	 * @param end
-	 *            The end value of the sum-range.
-	 * @return The sum of all values from <code>start</code> to <code>end</code> , including.
+	 * @param start The start value of the sum-range.
+	 * @param end The end value of the sum-range.
+	 * @return The sum of all values from <code>start</code> to <code>end</code>
+	 *         , including.
 	 */
 
 	public static long sumOfRange(long start, long end) {

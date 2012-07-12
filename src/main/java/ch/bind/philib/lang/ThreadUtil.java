@@ -31,8 +31,7 @@ public final class ThreadUtil {
 
 	public static final long DEFAULT_JOIN_TIMEOUT_MS = 1000L;
 
-	private ThreadUtil() {
-	}
+	private ThreadUtil() {}
 
 	public static void sleepUntilMs(long time) throws InterruptedException {
 		long diff = time - System.currentTimeMillis();
@@ -74,10 +73,10 @@ public final class ThreadUtil {
 	// TODO: documentation
 	public static Thread runForever(Runnable runnable) {
 		Validation.notNull(runnable);
-		String threadName = String.format(
-		        FOREVER_RUNNER_NAME_FMT, //
-		        ForeverRunner.class.getSimpleName(), runnable.getClass().getSimpleName(),
-		        FOREVER_RUNNER_SEQ.getAndIncrement());
+		String threadName = String.format(FOREVER_RUNNER_NAME_FMT, //
+				ForeverRunner.class.getSimpleName(), //
+				runnable.getClass().getSimpleName(), //
+				FOREVER_RUNNER_SEQ.getAndIncrement());
 		return runForever(runnable, threadName);
 	}
 
