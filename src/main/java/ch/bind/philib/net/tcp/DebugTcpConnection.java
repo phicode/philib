@@ -30,6 +30,7 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.BitOps;
+import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
@@ -94,7 +95,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
 			System.out.printf("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-					(t / 1000000f), rdiff, sdiff, getRx(), getTx());
+			        (t / 1000000f), rdiff, sdiff, getRx(), getTx());
 		}
 		return rv;
 	}
@@ -127,28 +128,29 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 
 	@Override
 	public String getDebugInformations() {
-		String s;
-		synchronized (w_writeBacklog) {
-			ByteBuffer r = r_partialConsume;
-			if (r != null) {
-				s = "read: " + r.position();
-			} else {
-				s = "read-ready=0";
-			}
-		}
-		if (w_writeBacklog.isEmpty()) {
-			s += ", write-available=0";
-		} else {
-			s += ", write-available=" + w_writeBacklog.size();
-		}
+		//		synchronized (w_writeBacklog) {
+		//			ByteBuffer r = r_partialConsume;
+		//			if (r != null) {
+		//				s = "read: " + r.position();
+		//			} else {
+		//				s = "read-ready=0";
+		//			}
+		//		}
+		//		if (w_writeBacklog.isEmpty()) {
+		//			s += ", write-available=0";
+		//		} else {
+		//			s += ", write-available=" + w_writeBacklog.size();
+		//		}
 		try {
-			s += ", readOps=" + readOps + ", sendOps=" + sendOps + ", reg4send=" + registeredForWriteEvt + ", lasthandle-send=" + lastHandleSendable
-					+ ", numHandles=" + numHandles + ", rx=" + rx.get() + ", tx=" + tx.get() + ", no-delay=" + channel.socket().getTcpNoDelay()
-					+ ", rcvBuf=" + channel.socket().getReceiveBufferSize() + ", sndBuf=" + channel.socket().getSendBufferSize();
+			String s = ", readOps=" + readOps + ", sendOps=" + sendOps /* + ", reg4send=" + registeredForWriteEvt */
+			        + ", lasthandle-send=" + lastHandleSendable + ", numHandles=" + numHandles + ", rx=" + getRx()
+			        + ", tx=" + getTx() + ", no-delay=" + channel.socket().getTcpNoDelay() + ", rcvBuf="
+			        + channel.socket().getReceiveBufferSize() + ", sndBuf=" + channel.socket().getSendBufferSize();
+			return s;
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return "error: " + ExceptionUtil.buildMessageChain(e);
 		}
-		return s;
 	}
 }
