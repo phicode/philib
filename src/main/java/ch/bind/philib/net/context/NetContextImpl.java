@@ -42,6 +42,8 @@ public class NetContextImpl implements NetContext {
 
 	public static final int DEFAULT_NUM_BUFFERS = 128;
 
+	public static final int DEFAULT_TCP_SERVER_SOCKET_BACKLOG = 25;
+
 	private final ByteBufferCache bufferCache;
 
 	private final EventDispatcher eventDispatcher;
@@ -55,6 +57,8 @@ public class NetContextImpl implements NetContext {
 	private Boolean broadcastDatagram;
 
 	private boolean debugMode;
+
+	private int tcpServerSocketBacklog = DEFAULT_TCP_SERVER_SOCKET_BACKLOG;
 
 	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
 		Validation.notNull(bufferCache);
@@ -114,6 +118,20 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
+	public int getTcpServerSocketBacklog() {
+		return tcpServerSocketBacklog;
+	}
+
+	@Override
+	public void getTcpServerSocketBacklog(int tcpServerSocketBacklog) {
+		if (tcpServerSocketBacklog < 1) {
+			this.tcpServerSocketBacklog = 1;
+		} else {
+			this.tcpServerSocketBacklog = tcpServerSocketBacklog;
+		}
+	}
+
+	@Override
 	public void setSocketOptions(Socket socket) throws SocketException {
 		Validation.notNull(socket);
 		if (tcpNoDelay != null) {
@@ -157,5 +175,4 @@ public class NetContextImpl implements NetContext {
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
 	}
-
 }

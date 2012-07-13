@@ -37,22 +37,13 @@ import ch.bind.philib.net.context.NetContext;
  */
 public final class TcpConnection extends TcpConnectionBase {
 
-	public TcpConnection(NetContext context, SocketChannel channel) {
-		// TODO Auto-generated constructor stub
+	private TcpConnection(NetContext context, SocketChannel channel) {
+		super(context, channel);
 	}
 
 	static Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
 		TcpConnection connection = new TcpConnection(context, channel);
-		// TODO: handle factory exception by connection.close or something
-		try {
-			connection.session = sessionFactory.createSession(connection);
-		} catch (Exception e) {
-			// TODO: logging
-			connection.close();
-			throw e;
-		}
-		connection.setup();
-		return connection.session;
+		return connection.setup(sessionFactory);
 	}
 
 	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {

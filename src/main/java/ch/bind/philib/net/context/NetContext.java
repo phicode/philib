@@ -67,6 +67,10 @@ public interface NetContext {
 
 	Boolean isBroadcastDatagram();
 
+	int getTcpServerSocketBacklog();
+
+	void getTcpServerSocketBacklog(int tcpServerSocketBacklog);
+
 	void setSocketOptions(Socket socket) throws SocketException;
 
 	void setSocketOptions(ServerSocket socket) throws SocketException;

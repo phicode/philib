@@ -42,9 +42,6 @@ import ch.bind.philib.validation.Validation;
  */
 public final class TcpServer extends EventHandlerBase implements NetServer {
 
-	// TODO: configurable
-	private static final int DEFAULT_BACKLOG = 25;
-
 	private final SessionFactory sessionFactory;
 
 	private final ServerSocketChannel channel;
@@ -82,22 +79,24 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	}
 
 	@Override
-	public void handle(int ops) throws IOException {
+	public int handle(int ops) throws IOException {
 		assert (ops == EventUtil.ACCEPT);
 		while (true) {
 			SocketChannel clientChannel = channel.accept();
 			if (clientChannel == null) {
 				// no more connections to accept
-				return;
+				break;
 			}
 			createSession(clientChannel);
 		}
+		return EventUtil.ACCEPT;
 	}
 
 	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress) throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
-		socket.bind(bindAddress, DEFAULT_BACKLOG);
+		int backlog = context.getTcpServerSocketBacklog();
+		socket.bind(bindAddress, backlog);
 		// TODO: log bridge
 		System.out.println("TCP listening on: " + bindAddress);
 

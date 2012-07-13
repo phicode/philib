@@ -23,12 +23,16 @@
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.BitOps;
+import ch.bind.philib.net.Session;
+import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
@@ -55,19 +59,36 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 
 	private final Object statslock = new Object();
 
-	public DebugTcpConnection() {
-		super()
-		// TODO Auto-generated constructor stub
+	private DebugTcpConnection(NetContext context, SocketChannel channel) {
+		super(context, channel);
+	}
+
+	static Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
+		DebugTcpConnection connection = new DebugTcpConnection(context, channel);
+		return connection.setup(sessionFactory);
+	}
+
+	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
+	        throws IOException {
+		SocketChannel channel = SocketChannel.open();
+
+		channel.configureBlocking(true);
+		if (!channel.connect(endpoint)) {
+			channel.finishConnect();
+		}
+
+		System.out.println("connected to: " + endpoint);
+		return create(context, channel, sessionFactory);
 	}
 
 	@Override
-	public void handle(int ops) throws IOException {
+	public int handle(int ops) throws IOException {
 		lastHandleSendable = BitOps.checkMask(ops, EventUtil.WRITE);
 		numHandles.incrementAndGet();
 		long r = readOps.get();
 		long s = sendOps.get();
 		long start = System.nanoTime();
-		super.handle(ops);
+		int rv = super.handle(ops);
 		long t = System.nanoTime() - start;
 		if (t > LOG_HANDLE_TIME_THRESHOLD_NS) {
 			long rdiff = readOps.get() - r;
@@ -75,6 +96,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			System.out.printf("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
 					(t / 1000000f), rdiff, sdiff, getRx(), getTx());
 		}
+		return rv;
 	}
 
 	@Override
@@ -82,7 +104,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 		sendOps.incrementAndGet();
 		Validation.isFalse(channel.isBlocking());
 		long tStart = System.nanoTime();
-		int num = super.sl_channelWrite(data);
+		int num = super.channelWrite(data);
 		long t = System.nanoTime() - tStart;
 		if (t >= LOG_WRITE_TIME_THRESHOLD_NS) {
 			System.out.printf("write took %.6fms%n", (t / 1000000f));

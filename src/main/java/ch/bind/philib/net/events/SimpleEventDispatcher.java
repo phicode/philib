@@ -208,7 +208,11 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		}
 		try {
 			int readyOps = key.readyOps();
-			eventHandler.handle(readyOps);
+			int interestedOps = key.interestOps();
+			int newInterestedOps = eventHandler.handle(readyOps);
+			if (newInterestedOps != interestedOps) {
+				key.interestOps(newInterestedOps);
+			}
 		} catch (Exception e) {
 			System.err.println("eventHandler.handle() failed, closing: " + ExceptionUtil.buildMessageChain(e));
 			e.printStackTrace(System.err);
@@ -278,7 +282,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public boolean isEventDispatcherThread(Thread thread) {
+	public boolean isEventDispatcherThread(final Thread thread) {
 		return (thread != null) && (thread.getId() == dispatcherThreadId);
 	}
 

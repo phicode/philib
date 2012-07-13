@@ -60,7 +60,6 @@ final class UdpServerEventHandler extends EventHandlerBase {
 
 	void start() throws IOException {
 		channel.configureBlocking(false);
-		DatagramSocket socket = channel.socket();
 		context.setSocketOptions(channel.socket());
 		context.getEventDispatcher().register(this, EventUtil.READ);
 	}

@@ -84,7 +84,7 @@ public class TcpEchoClient {
 
 			@Override
 			public Session createSession(Connection connection) {
-				return new EchoSession(connection, false, true);
+				return new EchoSession(connection, false, false);
 			}
 		};
 		EchoSession session = (EchoSession) TcpNetFactory.INSTANCE.openClient(context, endpoint, factory);

@@ -33,6 +33,7 @@ import ch.bind.philib.io.Ring;
 import ch.bind.philib.io.RingImpl;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
@@ -54,7 +55,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 	private final AtomicLong tx = new AtomicLong(0);
 
-	private final SocketChannel channel;
+	final SocketChannel channel;
 
 	// this object also provides the sendLock
 	private final Ring<NetBuf> w_writeBacklog = new RingImpl<NetBuf>();
@@ -62,6 +63,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	private ByteBuffer r_partialConsume;
 
 	private volatile boolean registeredForWriteEvt = false;
+
+	private boolean lastWriteBlocked = false;
 
 	private Session session;
 
@@ -86,34 +89,27 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		return channel.isOpen();
 	}
 
-	private void notifyClosed() {
-		if (session != null) {
-			session.closed();
-		}
-	}
-
-	private void notifyWritable() {
-		if (session != null) {
-			session.writable();
-		}
-	}
-
-	private void notifyReceive(ByteBuffer rbuf) throws IOException {
-		if (session != null) {
-			session.receive(rbuf);
-		}
-	}
-
 	@Override
 	public SocketAddress getRemoteAddress() throws IOException {
 		return channel.socket().getRemoteSocketAddress();
 		// return channel.getRemoteAddress(); // JDK7
 	}
 
-	void setup() throws IOException {
+	Session setup(SessionFactory sessionFactory) throws IOException {
+		// make the socket ready for the session to write to
 		channel.configureBlocking(false);
 		context.setSocketOptions(channel.socket());
+		try {
+			synchronized (w_writeBacklog) {
+				session = sessionFactory.createSession(this);
+			}
+		} catch (Exception e) {
+			//TODO: logging
+			close();
+			throw new IOException("session-creation failed", e);
+		}
 		context.getEventDispatcher().register(this, EventUtil.READ);
+		return session;
 	}
 
 	@Override
@@ -122,7 +118,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	}
 
 	@Override
-	public void handle(int ops) throws IOException {
+	public int handle(int ops) throws IOException {
 		// only the read and/or write flags may be set
 		assert ((ops & EventUtil.READ_WRITE) != 0 && (ops & ~EventUtil.READ_WRITE) == 0);
 
@@ -130,38 +126,23 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			handleRead();
 		}
 
-		// TODO: synchronize
+		// TODO: synchronize the "registeredForWriteEvt" access
 		// we can try to write more data if the writable flag is set or if we
 		// did not request the writable flag to be set => last write didn't
 		// block
 		boolean finishedWrite = true;
 		if (BitOps.checkMask(ops, EventUtil.WRITE) || !registeredForWriteEvt) {
-			finishedWrite = w_write();
+			synchronized (w_writeBacklog) {
+				finishedWrite = sendPendingAsync();
+			}
 		}
 		if (finishedWrite) {
+			lastWriteBlocked = false;
 			notifyWritable();
+			return lastWriteBlocked ? EventUtil.READ_WRITE : EventUtil.READ;
+		} else {
+			return EventUtil.READ_WRITE;
 		}
-	}
-
-	private boolean w_write() throws IOException {
-		// if (awlock.compareAndSet(false, true)) {
-		// try {
-		synchronized (w_writeBacklog) {
-			boolean finished = sendPendingAsync();
-			if (finished) {
-				unregisterFromWriteEvents();
-			} else {
-				registerForWriteEvents();
-			}
-			return finished;
-		}
-		// } finally {
-		// awlock.set(false);
-		// }
-		// } else {
-		// System.out.println("could not get atomic write lock");
-		// return false;
-		// }
 	}
 
 	@Override
@@ -183,7 +164,9 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			r_partialConsume = null;
 			unregisterFromDeliverPartialReads();
 		}
-		notifyClosed();
+		if (session != null) {
+			session.closed();
+		}
 	}
 
 	@Override
@@ -259,6 +242,32 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		}
 	}
 
+	@Override
+	public boolean isWritableNow() {
+		// TODO
+		throw new UnsupportedOperationException("TODO");
+	}
+
+	// package private so that the DebugTcpConnection subclass can override this method and gather additional information
+	// holding the sendLock is required
+	int channelWrite(final ByteBuffer data) throws IOException {
+		int num = channel.write(data);
+		if (num > 0) {
+			tx.addAndGet(num);
+		}
+		lastWriteBlocked = data.hasRemaining();
+		return num;
+	}
+
+	// package private so that the DebugTcpConnection subclass can override this method and gather additional information
+	int channelRead(final ByteBuffer rbuf) throws IOException {
+		int num = channel.read(rbuf);
+		if (num > 0) {
+			rx.addAndGet(num);
+		}
+		return num;
+	}
+
 	// rv: true = all writes finished, false=blocked
 	// holding the sendLock is required
 	private boolean sendPendingAsync() throws IOException {
@@ -293,23 +302,6 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		return false;
 	}
 
-	// holding the sendLock is required
-	int channelWrite(final ByteBuffer data) throws IOException {
-		int num = channel.write(data);
-		if (num > 0) {
-			tx.addAndGet(num);
-		}
-		return num;
-	}
-
-	int channelRead(final ByteBuffer rbuf) throws IOException {
-		int num = channel.read(rbuf);
-		if (num > 0) {
-			rx.addAndGet(num);
-		}
-		return num;
-	}
-
 	private void handleRead() throws IOException {
 		ByteBuffer bb = r_partialConsume;
 		if (bb == null) {
@@ -327,7 +319,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			deliverReadData(bb);
 			if (numChanRead == -1) {
 				if (bb.position() > 0) {
-					System.err.println("connection was closed and the corresponding session did not consume all read data");
+					System.err
+					        .println("connection was closed and the corresponding session did not consume all read data");
 				}
 				// connection closed
 				r_partialConsume = null;
@@ -412,9 +405,15 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		return tx.get();
 	}
 
-	@Override
-	public boolean isWritableNow() {
-		// TODO
-		throw new UnsupportedOperationException("TODO");
+	private void notifyWritable() {
+		if (session != null) {
+			session.writable();
+		}
+	}
+
+	private void notifyReceive(ByteBuffer rbuf) throws IOException {
+		if (session != null) {
+			session.receive(rbuf);
+		}
 	}
 }

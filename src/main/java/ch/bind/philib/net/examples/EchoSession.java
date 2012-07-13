@@ -45,7 +45,7 @@ public class EchoSession implements Session {
 
 	private long nextValueSend;
 
-	private final byte[] readBuf = new byte[8];
+	private final byte[] readBuf = new byte[8192];
 
 	private final ByteBuffer writeBb = ByteBuffer.wrap(new byte[8192]);
 
@@ -146,6 +146,9 @@ public class EchoSession implements Session {
 	private void verifyReceived(ByteBuffer data) {
 		int rem = data.remaining();
 		assert (rem > 0);
+		int numVerifiable = rem / 8;
+		int numVerify = Math.min(readBuf.length / 8, numVerifiable);
+		// long verifyStart = nextValueRead;
 		while (rem >= 8) {
 			data.get(readBuf);
 			verify();
