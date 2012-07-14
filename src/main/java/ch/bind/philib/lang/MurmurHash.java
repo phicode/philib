@@ -34,15 +34,15 @@ public final class MurmurHash {
 
 	private MurmurHash() {}
 
-	private static final int MURMUR2_32_M = 0x5bd1e995;
+	private static final int MURMUR2_32_M = 0x5BD1E995;
 
 	private static final int MURMUR2_32_R = 24;
 
-	private static final int MURMUR2_32_SEED = 0x9747b28c;
+	private static final int MURMUR2_32_SEED = 0x9747B28C;
 
-	private static final int MURMUR3_32_C1 = 0xcc9e2d51;
+	private static final int MURMUR3_32_C1 = 0xCC9E2D51;
 
-	private static final int MURMUR3_32_C2 = 0x1b873593;
+	private static final int MURMUR3_32_C2 = 0x1B873593;
 
 	public static final int murmur2(byte[] key) {
 		final int len = key.length;
@@ -101,7 +101,7 @@ public final class MurmurHash {
 
 			hash ^= murmur3_round32(k);
 			hash = BitOps.rotl32(hash, 13);
-			hash = (hash * 5) + 0xe6546b64;
+			hash = (hash * 5) + 0xE6546B64;
 		}
 
 		int k = 0;
@@ -130,9 +130,9 @@ public final class MurmurHash {
 
 	private static final int murmur3_fmix32(int hash) {
 		hash ^= hash >>> 16;
-		hash *= 0x85ebca6b;
+		hash *= 0x85EBCA6B;
 		hash ^= hash >>> 13;
-		hash *= 0xc2b2ae35;
+		hash *= 0xC2B2AE35;
 		hash ^= hash >>> 16;
 		return hash;
 	}
