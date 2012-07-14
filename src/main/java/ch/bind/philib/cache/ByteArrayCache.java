@@ -88,7 +88,7 @@ public final class ByteArrayCache extends SpecificObjectCache<byte[]> {
 		}
 
 		@Override
-		public void destroy(byte[] e) {}
+		public void destroy(byte[] e) { /* the GC takes care of cleaning up */ }
 
 		@Override
 		public byte[] create() {
@@ -106,6 +106,7 @@ public final class ByteArrayCache extends SpecificObjectCache<byte[]> {
 
 		@Override
 		public boolean canReuse(byte[] e) {
+			// this is a buffer, not a connection that might have timed out, so it can always be reused
 			return true;
 		}
 	}

@@ -79,7 +79,7 @@ public final class ByteBufferCache extends SpecificObjectCache<ByteBuffer> {
 		}
 
 		@Override
-		public void destroy(ByteBuffer e) {}
+		public void destroy(ByteBuffer e) { /* the GC takes care of cleaning up */}
 
 		@Override
 		public boolean release(ByteBuffer e) {
@@ -94,6 +94,7 @@ public final class ByteBufferCache extends SpecificObjectCache<ByteBuffer> {
 
 		@Override
 		public boolean canReuse(ByteBuffer e) {
+			// this is a buffer, not a connection that might have timed out, so it can always be reused
 			return true;
 		}
 	}
