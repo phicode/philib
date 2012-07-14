@@ -175,7 +175,7 @@ public class RingBufferTest {
 		}
 	}
 
-	private static  void append(byte[] bs, LinkedList<Byte> bufExp) {
+	private static void append(byte[] bs, LinkedList<Byte> bufExp) {
 		for (byte b : bs) {
 			bufExp.add(b);
 		}
