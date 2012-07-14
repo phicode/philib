@@ -22,7 +22,6 @@
 
 package ch.bind.philib.lang;
 
-
 /**
  * TODO
  * 
