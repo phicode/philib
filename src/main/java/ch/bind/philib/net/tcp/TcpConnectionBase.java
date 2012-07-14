@@ -104,7 +104,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				session = sessionFactory.createSession(this);
 			}
 		} catch (Exception e) {
-			//TODO: logging
+			// TODO: logging
 			close();
 			throw new IOException("session-creation failed", e);
 		}
@@ -140,9 +140,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			lastWriteBlocked = false;
 			notifyWritable();
 			return lastWriteBlocked ? EventUtil.READ_WRITE : EventUtil.READ;
-		} else {
-			return EventUtil.READ_WRITE;
 		}
+		return EventUtil.READ_WRITE;
 	}
 
 	@Override
@@ -248,7 +247,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		throw new UnsupportedOperationException("TODO");
 	}
 
-	// package private so that the DebugTcpConnection subclass can override this method and gather additional information
+	// package private so that the DebugTcpConnection subclass can override this method and gather additional
+	// information
 	// holding the sendLock is required
 	int channelWrite(final ByteBuffer data) throws IOException {
 		int num = channel.write(data);
@@ -259,7 +259,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		return num;
 	}
 
-	// package private so that the DebugTcpConnection subclass can override this method and gather additional information
+	// package private so that the DebugTcpConnection subclass can override this method and gather additional
+	// information
 	int channelRead(final ByteBuffer rbuf) throws IOException {
 		int num = channel.read(rbuf);
 		if (num > 0) {
@@ -272,9 +273,6 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	// holding the sendLock is required
 	private boolean sendPendingAsync() throws IOException {
 		int totalWrite = 0;
-		if (w_writeBacklog.isEmpty()) {
-			return true;
-		}
 		do {
 			final NetBuf pending = w_writeBacklog.poll();
 			if (pending == null) {
@@ -320,7 +318,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			if (numChanRead == -1) {
 				if (bb.position() > 0) {
 					System.err
-					        .println("connection was closed and the corresponding session did not consume all read data");
+							.println("connection was closed and the corresponding session did not consume all read data");
 				}
 				// connection closed
 				r_partialConsume = null;

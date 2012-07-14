@@ -70,7 +70,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 	}
 
 	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
-	        throws IOException {
+			throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
@@ -95,7 +95,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
 			System.out.printf("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-			        (t / 1000000f), rdiff, sdiff, getRx(), getTx());
+					(t / 1000000f), rdiff, sdiff, getRx(), getTx());
 		}
 		return rv;
 	}
@@ -128,24 +128,24 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 
 	@Override
 	public String getDebugInformations() {
-		//		synchronized (w_writeBacklog) {
-		//			ByteBuffer r = r_partialConsume;
-		//			if (r != null) {
-		//				s = "read: " + r.position();
-		//			} else {
-		//				s = "read-ready=0";
-		//			}
-		//		}
-		//		if (w_writeBacklog.isEmpty()) {
-		//			s += ", write-available=0";
-		//		} else {
-		//			s += ", write-available=" + w_writeBacklog.size();
-		//		}
+		// synchronized (w_writeBacklog) {
+		// ByteBuffer r = r_partialConsume;
+		// if (r != null) {
+		// s = "read: " + r.position();
+		// } else {
+		// s = "read-ready=0";
+		// }
+		// }
+		// if (w_writeBacklog.isEmpty()) {
+		// s += ", write-available=0";
+		// } else {
+		// s += ", write-available=" + w_writeBacklog.size();
+		// }
 		try {
 			String s = ", readOps=" + readOps + ", sendOps=" + sendOps /* + ", reg4send=" + registeredForWriteEvt */
-			        + ", lasthandle-send=" + lastHandleSendable + ", numHandles=" + numHandles + ", rx=" + getRx()
-			        + ", tx=" + getTx() + ", no-delay=" + channel.socket().getTcpNoDelay() + ", rcvBuf="
-			        + channel.socket().getReceiveBufferSize() + ", sndBuf=" + channel.socket().getSendBufferSize();
+					+ ", lasthandle-send=" + lastHandleSendable + ", numHandles=" + numHandles + ", rx=" + getRx()
+					+ ", tx=" + getTx() + ", no-delay=" + channel.socket().getTcpNoDelay() + ", rcvBuf="
+					+ channel.socket().getReceiveBufferSize() + ", sndBuf=" + channel.socket().getSendBufferSize();
 			return s;
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
