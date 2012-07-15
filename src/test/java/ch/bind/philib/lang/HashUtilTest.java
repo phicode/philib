@@ -29,7 +29,7 @@ import org.junit.Test;
 public class HashUtilTest {
 
 	@Test
-	public void testObjectHashes() {
+	public void objectHashes() {
 		Integer value = 0;
 		int expected = 17 * 31;
 
@@ -58,7 +58,7 @@ public class HashUtilTest {
 	}
 
 	@Test
-	public void testBooleanHashes() {
+	public void booleanHashes() {
 		boolean value = false;
 		int expected = 17 * 31;
 
@@ -87,7 +87,7 @@ public class HashUtilTest {
 	}
 
 	@Test
-	public void testByteHashes() {
+	public void byteHashes() {
 		byte value = 0;
 		int expected = 17 * 31;
 
@@ -118,7 +118,7 @@ public class HashUtilTest {
 	}
 
 	@Test
-	public void testShortHashes() {
+	public void shortHashes() {
 		short value = 0;
 		int expected = 17 * 31;
 
@@ -149,7 +149,7 @@ public class HashUtilTest {
 	}
 
 	@Test
-	public void testCharHashes() {
+	public void charHashes() {
 		char value = 0;
 		int expected = 17 * 31;
 
@@ -180,7 +180,7 @@ public class HashUtilTest {
 	}
 
 	@Test
-	public void testIntHashes() {
+	public void intHashes() {
 		int value = 0;
 		int expected = 17 * 31;
 
@@ -204,7 +204,7 @@ public class HashUtilTest {
 	}
 
 	@Test
-	public void testLongHashes() {
+	public void longHashes() {
 		long value = 0;
 		int expected = 17 * 31;
 
@@ -225,7 +225,7 @@ public class HashUtilTest {
 	}
 
 	@Test
-	public void testFloatHashes() {
+	public void tloatHashes() {
 		float value = 0;
 		int expected = HashUtil.startHash(Float.floatToIntBits(value));
 
@@ -244,7 +244,7 @@ public class HashUtilTest {
 	}
 
 	@Test
-	public void testDoubleHashes() {
+	public void doubleHashes() {
 		double value = 0;
 		int expected = HashUtil.startHash(Double.doubleToLongBits(value));
 
@@ -261,4 +261,36 @@ public class HashUtilTest {
 		expected = HashUtil.nextHash(expected, Double.doubleToLongBits(value));
 		assertEquals(expected, hash);
 	}
+
+	// @Test
+	// public void distribution() {
+	// // int32, int32, int64, int64
+	// int matrixSide = 128;
+	// int matrixSize = matrixSide * matrixSide;
+	// short matrix[] = new short[matrixSize];
+	// byte[] data = new byte[16];
+	// Random r = new Random();
+	// for (int i = 0; i < matrixSize * 5; i++) {
+	// r.nextBytes(data);
+	// int h = MurmurHash.murmur3(data);
+	// int b = Math.abs(h) % matrixSize;
+	// matrix[b]++;
+	// }
+	// int lastY = matrixSide - 1;
+	// for (int i = matrixSize - 1; i >= 0; i--) {
+	// int y = i / matrixSide;
+	// int v = matrix[i];
+	// if (v == 0) {
+	// System.out.print(' ');
+	// } else if (v > 9) {
+	// System.out.print('#');
+	// } else {
+	// System.out.print(v);
+	// }
+	// if (y != lastY) {
+	// System.out.println();
+	// lastY = y;
+	// }
+	// }
+	// }
 }
