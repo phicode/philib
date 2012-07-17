@@ -34,7 +34,7 @@ import ch.bind.philib.net.events.SimpleEventDispatcher;
  */
 public final class SimpleNetContext extends NetContextImpl {
 
-	public SimpleNetContext() throws IOException {
+	public SimpleNetContext() {
 		// single threaded net selector and buffer cache
 		super(ByteBufferCache.createSimple(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
 				SimpleEventDispatcher.open());

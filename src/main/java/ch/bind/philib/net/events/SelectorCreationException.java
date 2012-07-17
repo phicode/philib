@@ -19,17 +19,20 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net;
 
-import java.io.IOException;
+package ch.bind.philib.net.events;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public interface SessionFactory {
 
-	Session createSession(Connection connection) throws IOException;
+public class SelectorCreationException extends RuntimeException {
 
+	private static final long serialVersionUID = 1295469328233223946L;
+
+	public SelectorCreationException(Throwable cause) {
+		super(cause);
+	}
 }

@@ -214,29 +214,38 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		// any), then our buffer
 		// if in the meantime more data arrives we do not want to block
 		// longer
-		final NetBuf externBuf = NetBuf.createExtern(data);
 		synchronized (w_writeBacklog) {
-			w_writeBacklog.addBack(externBuf);
-			while (true) {
-				boolean finished = sendPendingAsync();
-
-				if (finished) {
-					// all data from the backlog has been written
-					assert (!externBuf.isPending() && !data.hasRemaining());
+			boolean finished = sendPendingAsync();
+			if (finished) {
+				// all data from the backlog has been written
+				channelWrite(data);
+				if (!data.hasRemaining()) {
 					unregisterFromWriteEvents();
 					return;
 				}
-				registerForWriteEvents();
+			}
+
+			// ok, that wont work, add the remaining data to the backlog
+			final NetBuf externBuf = NetBuf.createExtern(data);
+			w_writeBacklog.addBack(externBuf);
+			registerForWriteEvents();
+			w_writeBacklog.wait();
+
+			while (true) {
+				finished = sendPendingAsync();
 
 				// not all data in the backlog has been written
 				if (externBuf.isPending()) {
 					// our data is among those who are waiting to be written
 					w_writeBacklog.wait();
-				} else {
-					// our data has been written
-					assert (!data.hasRemaining());
 					return;
 				}
+				// our data has been written
+				assert (!data.hasRemaining());
+				if (finished) {
+					unregisterFromWriteEvents();
+				}
+				return;
 			}
 		}
 	}

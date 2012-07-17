@@ -22,6 +22,7 @@
 
 package ch.bind.philib.net.context;
 
+import java.io.Closeable;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -36,7 +37,7 @@ import ch.bind.philib.net.events.EventDispatcher;
  * @author Philipp Meinen
  */
 // TODO: socket keep-alive options and others
-public interface NetContext {
+public interface NetContext extends Closeable {
 
 	ByteBufferCache getBufferCache();
 
@@ -80,4 +81,6 @@ public interface NetContext {
 	boolean isDebugMode();
 
 	void setDebugMode(boolean debugMode);
+
+	boolean isOpen();
 }

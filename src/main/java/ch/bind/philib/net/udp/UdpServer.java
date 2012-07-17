@@ -95,13 +95,14 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 	public NetContext getContext() {
 		return context;
 	}
-	
-	@Override
-	public Connection connect(SocketAddress addr) {
-		channel.con
-	}
 
-	void receive(SocketAddress addr, ByteBuffer rbuf) {
+	// @Override
+	// TODO
+	// public Connection connect(SocketAddress addr) {
+	// channel.con
+	// }
+
+	private void notifyReceive(SocketAddress addr, ByteBuffer rbuf) {
 		try {
 			session.receive(addr, rbuf);
 		} catch (IOException e) {
@@ -133,17 +134,12 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 				// assert (num == rbuf.limit());
 				// assert (num == rbuf.remaining());
 				totalRead += rbuf.remaining();
-				try {
-					session.receive(addr, rbuf);
-				} catch (Exception e) {
-					System.err.println("TODO: " + ExceptionUtil.buildMessageChain(e));
-					e.printStackTrace(System.err);
-					close();
-				}
+				notifyReceive(addr, rbuf);
 			}
 		} finally {
 			releaseBuffer(rbuf);
 		}
+		return EventUtil.READ;
 	}
 
 	void sendSync(final SocketAddress addr, final ByteBuffer data) throws IOException {

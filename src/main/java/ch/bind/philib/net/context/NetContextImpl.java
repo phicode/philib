@@ -22,6 +22,7 @@
 
 package ch.bind.philib.net.context;
 
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -60,11 +61,29 @@ public class NetContextImpl implements NetContext {
 
 	private int tcpServerSocketBacklog = DEFAULT_TCP_SERVER_SOCKET_BACKLOG;
 
+	private volatile boolean open;
+
 	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
 		Validation.notNull(bufferCache);
 		Validation.notNull(eventDispatcher);
 		this.bufferCache = bufferCache;
 		this.eventDispatcher = eventDispatcher;
+		this.open = true;
+	}
+
+	@Override
+	public void close() throws IOException {
+		boolean o = this.open;
+		if (o) {
+			this.open = false;
+			SafeCloseUtil.close(LOG, bufferCache);
+			SafeCloseUtil.close(LOG, eventDispatcher);
+		}
+	}
+
+	@Override
+	public boolean isOpen() {
+		return open;
 	}
 
 	@Override

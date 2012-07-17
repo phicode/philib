@@ -62,8 +62,13 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		this.selector = selector;
 	}
 
-	public static EventDispatcher open() throws IOException {
-		Selector selector = Selector.open();
+	public static EventDispatcher open()  {
+		Selector selector;
+		try {
+		selector = Selector.open();
+		} catch (IOException e) {
+			throw new SelectorCreationException(e);
+		}
 		SimpleEventDispatcher disp = new SimpleEventDispatcher(selector);
 		String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
 		Thread dispatcherThread = ThreadUtil.runForever(disp, threadName);

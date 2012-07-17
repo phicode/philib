@@ -21,8 +21,10 @@
  */
 package ch.bind.philib.net;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -40,6 +42,11 @@ public final class SocketAddresses {
 
 	public static InetSocketAddress fromIp(String address, int port) throws UnknownHostException {
 		InetAddress inetAddr = InetAddress.getByName(address);
+		return new InetSocketAddress(inetAddr, port);
+	}
+
+	public static InetSocketAddress localhost(int port) throws UnknownHostException {
+		InetAddress inetAddr = InetAddress.getLocalHost();
 		return new InetSocketAddress(inetAddr, port);
 	}
 }
