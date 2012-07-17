@@ -34,6 +34,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
 
@@ -44,6 +48,8 @@ import ch.bind.philib.lang.ThreadUtil;
  */
 // TODO: thread safe
 public final class SimpleEventDispatcher implements EventDispatcher {
+
+	private static final Logger LOG = LoggerFactory.getLogger(SimpleEventDispatcher.class);
 
 	private static final AtomicLong NAME_SEQ = new AtomicLong(0);
 
@@ -62,10 +68,10 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		this.selector = selector;
 	}
 
-	public static EventDispatcher open()  {
+	public static EventDispatcher open() {
 		Selector selector;
 		try {
-		selector = Selector.open();
+			selector = Selector.open();
 		} catch (IOException e) {
 			throw new SelectorCreationException(e);
 		}
@@ -171,12 +177,13 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		if (t != null) {
 			dispatcherThread = null;
 			ThreadUtil.interruptAndJoin(t);
-			try {
-				selector.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			SafeCloseUtil.close(selector, LOG);
+			// try {
+			// selector.close();
+			// } catch (IOException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
 			for (SelectionKey key : selector.keys()) {
 				if (key.isValid()) {
 					Object att = key.attachment();

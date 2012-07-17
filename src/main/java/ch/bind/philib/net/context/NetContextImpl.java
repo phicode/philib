@@ -28,7 +28,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.bind.philib.cache.ByteBufferCache;
+import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.validation.Validation;
 
@@ -38,6 +42,8 @@ import ch.bind.philib.validation.Validation;
  * @author Philipp Meinen
  */
 public class NetContextImpl implements NetContext {
+
+	private static final Logger LOG = LoggerFactory.getLogger(NetContextImpl.class);
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;
 
@@ -76,8 +82,8 @@ public class NetContextImpl implements NetContext {
 		boolean o = this.open;
 		if (o) {
 			this.open = false;
-			SafeCloseUtil.close(LOG, bufferCache);
-			SafeCloseUtil.close(LOG, eventDispatcher);
+			SafeCloseUtil.close(bufferCache, LOG);
+			SafeCloseUtil.close(eventDispatcher, LOG);
 		}
 	}
 

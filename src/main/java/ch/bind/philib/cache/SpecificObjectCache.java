@@ -22,6 +22,8 @@
 
 package ch.bind.philib.cache;
 
+import java.io.IOException;
+
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -51,5 +53,10 @@ public class SpecificObjectCache<E> implements ObjectCache<E> {
 	@Override
 	public final CacheStats getCacheStats() {
 		return cache.getCacheStats();
+	}
+
+	@Override
+	public void close() throws IOException {
+		cache.close();
 	}
 }

@@ -22,12 +22,14 @@
 
 package ch.bind.philib.cache;
 
+import java.io.Closeable;
+
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public interface ObjectCache<E> {
+public interface ObjectCache<E> extends Closeable {
 
 	E acquire();
 
