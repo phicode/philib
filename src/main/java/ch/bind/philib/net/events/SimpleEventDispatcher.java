@@ -85,9 +85,9 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		return disp;
 	}
 
-	private synchronized void initDispatcherThreads(Thread dispatcherThread) {
-		this.dispatcherThreadId = dispatcherThread.getId();
-		this.dispatcherThread = dispatcherThread;
+	private synchronized void initDispatcherThreads(Thread thread) {
+		this.dispatcherThreadId = thread.getId();
+		this.dispatcherThread = thread;
 	}
 
 	@Override
@@ -152,8 +152,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	private void updateRegistrations() {
-		NewRegistration reg = newRegistrations.poll();
-		while (reg != null) {
+		NewRegistration reg = null;
+		while ((reg = newRegistrations.poll()) != null) {
 			EventHandler eventHandler = reg.getEventHandler();
 			try {
 				SelectableChannel channel = eventHandler.getChannel();
@@ -161,15 +161,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				channel.register(selector, ops, eventHandler);
 			} catch (ClosedChannelException e) {
 				System.out.println("cant register an already closed channel");
-				try {
-					eventHandler.close();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				SafeCloseUtil.close(eventHandler, LOG);
 			}
-
-			reg = newRegistrations.poll();
 		}
 	}
 
@@ -240,8 +233,6 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	@Override
 	public void reRegister(EventHandler eventHandler, int ops, boolean asap) {
 		SelectableChannel channel = eventHandler.getChannel();
-		asdfkasjdfkljasdkfjajsdkfjksadf
-		keyFor is O(n), replace with map lookup
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			// channel is not registered for this selector

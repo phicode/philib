@@ -30,6 +30,9 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 
 import org.testng.annotations.Test;
 
@@ -50,14 +53,17 @@ import ch.bind.philib.net.context.SimpleNetContext;
 // TODO: make a big file, mmap it and transfer it
 public class TcpConnectionTest {
 
-	@Test(timeOut = 60000, invocationCount = 60)
-	public void sync() throws Exception {
+	@Test(timeOut = 60000, invocationCount = 60, priority = 0)
+	public void connectAndDisconnect() throws Exception {
 		NetContext context = new SimpleNetContext();
 		SocketAddress addr = SocketAddresses.localhost(1234);
 		ServerFactory serverFactory = new ServerFactory();
 		ClientFactory clientFactory = new ClientFactory();
 		NetServer openServer = TcpNetFactory.INSTANCE.openServer(context, addr, serverFactory);
 		Session openClient = TcpNetFactory.INSTANCE.openClient(context, addr, clientFactory);
+
+		// give some time for the client and server-side of the connection to establish proper fusion power
+		Thread.sleep(50);
 
 		ServerSession server = serverFactory.session;
 		ClientSession client = clientFactory.session;
@@ -67,6 +73,43 @@ public class TcpConnectionTest {
 		assertTrue(server.connection.isOpen());
 		assertTrue(client.connection.isOpen());
 		assertTrue(client.connection.isConnected());
+
+		// this should close the server as well as the client
+		context.close();
+
+		assertFalse(context.isOpen());
+		assertFalse(server.connection.isOpen());
+		assertFalse(client.connection.isOpen());
+		assertFalse(client.connection.isConnected());
+		assertTrue(server.closedCalled);
+		assertTrue(client.closedCalled);
+	}
+
+	@Test(timeOut = 60000, invocationCount = 6, priority = 10)
+	public void sync() throws Exception {
+		NetContext context = new SimpleNetContext();
+		SocketAddress addr = SocketAddresses.localhost(1234);
+		ServerFactory serverFactory = new ServerFactory();
+		ClientFactory clientFactory = new ClientFactory();
+		NetServer openServer = TcpNetFactory.INSTANCE.openServer(context, addr, serverFactory);
+		Session openClient = TcpNetFactory.INSTANCE.openClient(context, addr, clientFactory);
+
+		// give some time for the client and server-side of the connection to establish proper fusion power
+		Thread.sleep(50);
+
+		ServerSession server = serverFactory.session;
+		ClientSession client = clientFactory.session;
+		assertNotNull(server);
+		assertNotNull(client);
+		assertTrue(context.isOpen());
+		assertTrue(server.connection.isOpen());
+		assertTrue(client.connection.isOpen());
+		assertTrue(client.connection.isConnected());
+
+		FileChannel fc = null;
+		MappedByteBuffer mappedBuffer = fc.map(MapMode.READ_ONLY, 0, size);
+
+		client.connection.sendSync(mappedBuffer);
 
 		// this should close the server as well as the client
 		context.close();
