@@ -22,12 +22,12 @@
 
 package ch.bind.philib.validation;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class ValidationUtilTest {
 
@@ -91,13 +91,13 @@ public class ValidationUtilTest {
 		assertEquals(2, results.getNumErrors());
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void validateOneThrowNPE() {
 		ValidatableDummy dummy = null;
 		ValidationUtil.validate(dummy);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void validateCollectionThrowNPE() {
 		List<Validatable> list = new ArrayList<Validatable>();
 		ValidatableDummy dummy = null;
@@ -106,7 +106,7 @@ public class ValidationUtilTest {
 		ValidationUtil.validate(list);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void validateArrayThrowNPE() {
 		Validatable[] arr = new Validatable[1];
 		ValidationUtil.validate(arr);

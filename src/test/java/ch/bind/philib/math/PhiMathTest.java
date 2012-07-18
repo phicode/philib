@@ -22,9 +22,9 @@
 
 package ch.bind.philib.math;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class PhiMathTest {
 

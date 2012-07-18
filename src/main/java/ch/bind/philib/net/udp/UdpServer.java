@@ -29,11 +29,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectableChannel;
 
-import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.net.DatagramSession;
 import ch.bind.philib.net.NetServer;
-import ch.bind.philib.net.Session;
-import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;

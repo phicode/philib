@@ -22,13 +22,13 @@
 
 package ch.bind.philib.io;
 
-import static junit.framework.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class EndianConverterTest {
 
@@ -38,14 +38,14 @@ public class EndianConverterTest {
 
 	private byte[] buf;
 
-	@Before
-	public void setup() {
+	@BeforeMethod
+	public void beforeMethod() {
 		rand = new Random();
 		buf = new byte[4096];
 	}
 
-	@After
-	public void cleanup() {
+	@AfterMethod
+	public void afterMethod() {
 		rand = null;
 		buf = null;
 	}

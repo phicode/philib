@@ -25,11 +25,11 @@ package ch.bind.philib.io;
 import static ch.bind.philib.io.BitOps.findLowestSetBitIdx64;
 import static ch.bind.philib.io.BitOps.rotl32;
 import static ch.bind.philib.io.BitOps.rotr32;
-import static junit.framework.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class BitOpsTest {
 

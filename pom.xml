@@ -68,12 +68,19 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- unit tests -->
+		<!-- unit testing -->
 		<dependency>
-			<artifactId>junit</artifactId>
-			<groupId>junit</groupId>
-			<version>4.10</version>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.7</version>
 			<scope>test</scope>
+
+			<exclusions>
+				<exclusion>
+					<artifactId>junit</artifactId>
+					<groupId>junit</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 

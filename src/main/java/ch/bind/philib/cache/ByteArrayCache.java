@@ -88,7 +88,7 @@ public final class ByteArrayCache extends SpecificObjectCache<byte[]> {
 		}
 
 		@Override
-		public void destroy(byte[] e) { /* the GC takes care of cleaning up */ }
+		public void destroy(byte[] e) { /* the GC takes care of cleaning up */}
 
 		@Override
 		public byte[] create() {

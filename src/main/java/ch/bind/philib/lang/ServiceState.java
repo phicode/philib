@@ -5,8 +5,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class ServiceState {
 
 	private static final int STATE_UNINITIALIZED = 0;
+
 	private static final int STATE_OPEN = 1;
+
 	private static final int STATE_CLOSING = 2;
+
 	private static final int STATE_CLOSED = 3;
 
 	private AtomicInteger state = new AtomicInteger(STATE_UNINITIALIZED);

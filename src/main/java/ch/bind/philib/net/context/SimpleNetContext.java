@@ -35,6 +35,6 @@ public final class SimpleNetContext extends NetContextImpl {
 	public SimpleNetContext() {
 		// single threaded net selector and buffer cache
 		super(ByteBufferCache.createSimple(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
-		        SimpleEventDispatcher.open());
+				SimpleEventDispatcher.open());
 	}
 }

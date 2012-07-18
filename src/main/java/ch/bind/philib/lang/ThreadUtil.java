@@ -39,8 +39,7 @@ public final class ThreadUtil {
 
 	public static final long DEFAULT_JOIN_TIMEOUT_MS = 1000L;
 
-	private ThreadUtil() {
-	}
+	private ThreadUtil() {}
 
 	public static void sleepUntilMs(long time) throws InterruptedException {
 		long diff = time - System.currentTimeMillis();
@@ -81,9 +80,9 @@ public final class ThreadUtil {
 	public static Thread createForeverRunner(Runnable runnable) {
 		Validation.notNull(runnable);
 		String threadName = String.format(FOREVER_RUNNER_NAME_FMT, //
-		        ForeverRunner.class.getSimpleName(), //
-		        runnable.getClass().getSimpleName(), //
-		        FOREVER_RUNNER_SEQ.getAndIncrement());
+				ForeverRunner.class.getSimpleName(), //
+				runnable.getClass().getSimpleName(), //
+				FOREVER_RUNNER_SEQ.getAndIncrement());
 		return createForeverRunner(runnable, threadName);
 	}
 
@@ -119,7 +118,7 @@ public final class ThreadUtil {
 	}
 
 	public static Thread createAndStartForeverRunner(ThreadGroup group, Runnable runnable, String threadName,
-	        long stackSize) {
+			long stackSize) {
 		return start(createForeverRunner(group, runnable, threadName, stackSize));
 	}
 

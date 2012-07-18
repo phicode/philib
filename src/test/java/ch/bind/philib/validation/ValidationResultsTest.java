@@ -22,26 +22,26 @@
 
 package ch.bind.philib.validation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class ValidationResultsTest {
 
 	private ValidationResults results;
 
-	@Before
-	public void setup() {
+	@BeforeMethod
+	public void beforeMethod() {
 		results = new ValidationResults();
 	}
 
-	@After
-	public void cleanup() {
+	@AfterMethod
+	public void afterMethod() {
 		results = null;
 	}
 

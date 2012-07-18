@@ -22,16 +22,16 @@
 
 package ch.bind.philib.io;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class RingBufferTest {
 
@@ -181,19 +181,19 @@ public class RingBufferTest {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void notNullRead() {
 		RingBuffer buf = new RingBuffer();
 		buf.read(null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void notNullReadOffLen() {
 		RingBuffer buf = new RingBuffer();
 		buf.read(null, 0, 0);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void notNegativeOffsetRead() {
 		RingBuffer buf = new RingBuffer();
 		byte[] b = new byte[16];
@@ -201,7 +201,7 @@ public class RingBufferTest {
 		buf.read(b, -1, 16);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void notNegativeLengthRead() {
 		RingBuffer buf = new RingBuffer();
 		byte[] b = new byte[16];
@@ -209,7 +209,7 @@ public class RingBufferTest {
 		buf.read(b, 0, -1);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void tooBigReadForInbuf() {
 		RingBuffer buf = new RingBuffer();
 		byte[] b = new byte[16];
@@ -219,7 +219,7 @@ public class RingBufferTest {
 		buf.read(b, 0, 17); // too big read
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void tooBigWriteForOutbuf() {
 		RingBuffer buf = new RingBuffer();
 		byte[] b = new byte[16];

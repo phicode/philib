@@ -22,12 +22,12 @@
 
 package ch.bind.philib.cache;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.concurrent.Semaphore;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
 import ch.bind.philib.validation.Validation;

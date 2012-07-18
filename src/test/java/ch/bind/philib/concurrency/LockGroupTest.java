@@ -26,7 +26,7 @@ import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import ch.bind.philib.lang.ArrayUtil;
 
@@ -48,7 +48,7 @@ public class LockGroupTest {
 
 	private LockGroup[] lockgroups;
 
-	@Test(timeout = 15000)
+	@Test(timeOut = 15000)
 	public void concurrentTest() throws InterruptedException {
 		initThread();
 		initLockables();
@@ -129,7 +129,7 @@ public class LockGroupTest {
 		}
 	}
 
-	@Test(timeout = 5000)
+	@Test(timeOut = 5000)
 	public void testWithProphets() throws InterruptedException {
 		Thread[] ts = new Thread[5];
 		Lockable[] las = new Lockable[5];

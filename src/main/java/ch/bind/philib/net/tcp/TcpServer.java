@@ -92,7 +92,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	}
 
 	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress)
-	        throws IOException {
+			throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		int backlog = context.getTcpServerSocketBacklog();

@@ -22,9 +22,9 @@
 
 package ch.bind.philib.validation;
 
-import static junit.framework.Assert.fail;
+import static org.testng.Assert.fail;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class SimpleValidationTest {
 

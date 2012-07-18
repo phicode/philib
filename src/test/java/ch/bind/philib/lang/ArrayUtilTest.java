@@ -22,31 +22,31 @@
 
 package ch.bind.philib.lang;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class ArrayUtilTest {
 
-	@Test(expected = NullPointerException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void sourceNull() {
 		Object[] arr = new Object[1];
 
 		ArrayUtil.pickRandom(null, arr);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void destinationNull() {
 		Object[] arr = new Object[1];
 		ArrayUtil.pickRandom(arr, null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void sourceSmallerThenDestination() {
 		Object[] src = new Object[1];
 		Object[] dst = new Object[2];

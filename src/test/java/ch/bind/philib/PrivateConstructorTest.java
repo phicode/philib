@@ -23,7 +23,7 @@
 package ch.bind.philib;
 
 import static ch.bind.philib.io.BitOps.checkMask;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -31,7 +31,7 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 //this is here to satisfy the code-coverage tool emma
 //by invoking the private constructors.
@@ -59,7 +59,7 @@ public class PrivateConstructorTest {
 	private void recursiveTestPrivateCtors(String packageName, File path, int lvl) throws Exception {
 		// System.out.println("checking dir " + file);
 		File[] subPaths = path.listFiles();
-		assertNotNull(path + ".listFiles() == null", subPaths);
+		assertNotNull(subPaths);
 		int nextLvl = lvl + 1;
 		for (File subPath : subPaths) {
 			if (subPath.isDirectory()) {

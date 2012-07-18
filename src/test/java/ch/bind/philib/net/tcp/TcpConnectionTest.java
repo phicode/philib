@@ -22,16 +22,16 @@
 
 package ch.bind.philib.net.tcp;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetServer;
@@ -50,7 +50,7 @@ import ch.bind.philib.net.context.SimpleNetContext;
 // TODO: make a big file, mmap it and transfer it
 public class TcpConnectionTest {
 
-	@Test(timeout = 60000)
+	@Test(timeOut = 60000, invocationCount = 60)
 	public void sync() throws Exception {
 		NetContext context = new SimpleNetContext();
 		SocketAddress addr = SocketAddresses.localhost(1234);
@@ -59,9 +59,7 @@ public class TcpConnectionTest {
 		NetServer openServer = TcpNetFactory.INSTANCE.openServer(context, addr, serverFactory);
 		Session openClient = TcpNetFactory.INSTANCE.openClient(context, addr, clientFactory);
 
-		synchronized(serverFactory) {
 		ServerSession server = serverFactory.session;
-		}
 		ClientSession client = clientFactory.session;
 		assertNotNull(server);
 		assertNotNull(client);

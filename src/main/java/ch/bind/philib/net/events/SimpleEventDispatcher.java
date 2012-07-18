@@ -56,6 +56,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<NewRegistration>();
 
 	private final ServiceState serviceState = new ServiceState();
+
 	private final Selector selector;
 
 	private Thread dispatcherThread;
