@@ -59,7 +59,9 @@ public class TcpConnectionTest {
 		NetServer openServer = TcpNetFactory.INSTANCE.openServer(context, addr, serverFactory);
 		Session openClient = TcpNetFactory.INSTANCE.openClient(context, addr, clientFactory);
 
+		synchronized(serverFactory) {
 		ServerSession server = serverFactory.session;
+		}
 		ClientSession client = clientFactory.session;
 		assertNotNull(server);
 		assertNotNull(client);
@@ -71,7 +73,6 @@ public class TcpConnectionTest {
 		// this should close the server as well as the client
 		context.close();
 
-		assertFalse(context.isOpen());
 		assertFalse(context.isOpen());
 		assertFalse(server.connection.isOpen());
 		assertFalse(client.connection.isOpen());
@@ -134,7 +135,7 @@ public class TcpConnectionTest {
 
 	private static final class ServerFactory implements SessionFactory {
 
-		ServerSession session;
+		volatile ServerSession session;
 
 		@Override
 		public synchronized Session createSession(Connection connection) {
@@ -146,7 +147,7 @@ public class TcpConnectionTest {
 
 	private static final class ClientFactory implements SessionFactory {
 
-		ClientSession session;
+		volatile ClientSession session;
 
 		@Override
 		public synchronized Session createSession(Connection connection) throws IOException {

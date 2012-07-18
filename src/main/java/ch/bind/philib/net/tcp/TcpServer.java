@@ -31,6 +31,7 @@ import java.nio.channels.SocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
@@ -46,7 +47,7 @@ import ch.bind.philib.validation.Validation;
 public final class TcpServer extends EventHandlerBase implements NetServer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
-	
+
 	private final SessionFactory sessionFactory;
 
 	private final ServerSocketChannel channel;
@@ -68,14 +69,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	public void close() throws IOException {
 		// the event-dispatcher closes still-open client connections
 		context.getEventDispatcher().unregister(this);
-		channel.close();
-		throw new UnsupportedOperationException("TODO");
-	}
-
-	@Override
-	public int getActiveSessionCount() {
-		// TODO
-		throw new UnsupportedOperationException("TODO");
+		SafeCloseUtil.close(channel, LOG);
 	}
 
 	@Override
@@ -97,7 +91,8 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 		return EventUtil.ACCEPT;
 	}
 
-	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress) throws IOException {
+	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress)
+	        throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		int backlog = context.getTcpServerSocketBacklog();
