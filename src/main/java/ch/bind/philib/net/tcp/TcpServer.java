@@ -28,6 +28,9 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
@@ -42,6 +45,8 @@ import ch.bind.philib.validation.Validation;
  */
 public final class TcpServer extends EventHandlerBase implements NetServer {
 
+	private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
+	
 	private final SessionFactory sessionFactory;
 
 	private final ServerSocketChannel channel;
@@ -61,7 +66,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 
 	@Override
 	public void close() throws IOException {
-		// TODO: client connections
+		// the event-dispatcher closes still-open client connections
 		context.getEventDispatcher().unregister(this);
 		channel.close();
 		throw new UnsupportedOperationException("TODO");

@@ -24,6 +24,7 @@ package ch.bind.philib.io;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.channels.Selector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,8 @@ public final class SafeCloseUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SafeCloseUtil.class);
 
-	private SafeCloseUtil() {}
+	private SafeCloseUtil() {
+	}
 
 	public static void close(Closeable closeable, Logger logger) {
 		if (closeable == null) {
@@ -51,6 +53,20 @@ public final class SafeCloseUtil {
 			closeable.close();
 		} catch (IOException e) {
 			logger.error("error while closing an object: " + e.getMessage(), e);
+		}
+	}
+
+	public static void close(Selector selector, Logger logger) {
+		if (selector == null) {
+			return;
+		}
+		if (logger == null) {
+			logger = LOG;
+		}
+		try {
+			selector.close();
+		} catch (IOException e) {
+			logger.error("error while closing a selector: " + e.getMessage(), e);
 		}
 	}
 }

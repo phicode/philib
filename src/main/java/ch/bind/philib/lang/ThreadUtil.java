@@ -23,6 +23,9 @@ package ch.bind.philib.lang;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -32,11 +35,12 @@ import ch.bind.philib.validation.Validation;
  */
 public final class ThreadUtil {
 
-	static final PhiLog LOG = PhiLog.getLogger(ThreadUtil.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ThreadUtil.class);
 
 	public static final long DEFAULT_JOIN_TIMEOUT_MS = 1000L;
 
-	private ThreadUtil() {}
+	private ThreadUtil() {
+	}
 
 	public static void sleepUntilMs(long time) throws InterruptedException {
 		long diff = time - System.currentTimeMillis();
@@ -74,34 +78,54 @@ public final class ThreadUtil {
 	private static final String FOREVER_RUNNER_NAME_FMT = "%s-for-%s-%d";
 
 	// TODO: documentation
-	public static Thread runForever(Runnable runnable) {
+	public static Thread createForeverRunner(Runnable runnable) {
 		Validation.notNull(runnable);
 		String threadName = String.format(FOREVER_RUNNER_NAME_FMT, //
-				ForeverRunner.class.getSimpleName(), //
-				runnable.getClass().getSimpleName(), //
-				FOREVER_RUNNER_SEQ.getAndIncrement());
-		return runForever(runnable, threadName);
+		        ForeverRunner.class.getSimpleName(), //
+		        runnable.getClass().getSimpleName(), //
+		        FOREVER_RUNNER_SEQ.getAndIncrement());
+		return createForeverRunner(runnable, threadName);
 	}
 
 	// TODO: documentation
-	public static Thread runForever(Runnable runnable, String threadName) {
-		return runForever(null, runnable, threadName);
+	public static Thread createForeverRunner(Runnable runnable, String threadName) {
+		return createForeverRunner(null, runnable, threadName);
 	}
 
 	// TODO: documentation
-	public static Thread runForever(ThreadGroup group, Runnable runnable, String threadName) {
+	public static Thread createForeverRunner(ThreadGroup group, Runnable runnable, String threadName) {
 		// stackSize of 0 stands for: ignore this parameter
-		return runForever(group, runnable, threadName, 0);
+		return createForeverRunner(group, runnable, threadName, 0);
 	}
 
 	// TODO: documentation
-	public static Thread runForever(ThreadGroup group, Runnable runnable, String threadName, long stackSize) {
+	public static Thread createForeverRunner(ThreadGroup group, Runnable runnable, String threadName, long stackSize) {
 		Validation.notNull(runnable);
 		Validation.notNull(threadName);
 		ForeverRunner runner = new ForeverRunner(threadName, runnable);
-		Thread t = new Thread(group, runner, threadName, stackSize);
-		t.start();
-		return t;
+		return new Thread(group, runner, threadName, stackSize);
+	}
+
+	public static Thread createAndStartForeverRunner(Runnable runnable) {
+		return start(createForeverRunner(runnable));
+	}
+
+	public static Thread createAndStartForeverRunner(Runnable runnable, String threadName) {
+		return start(createForeverRunner(runnable, threadName));
+	}
+
+	public static Thread createAndStartForeverRunner(ThreadGroup group, Runnable runnable, String threadName) {
+		return start(createForeverRunner(group, runnable, threadName));
+	}
+
+	public static Thread createAndStartForeverRunner(ThreadGroup group, Runnable runnable, String threadName,
+	        long stackSize) {
+		return start(createForeverRunner(group, runnable, threadName, stackSize));
+	}
+
+	private static Thread start(Thread thread) {
+		thread.start();
+		return thread;
 	}
 
 	private static final class ForeverRunner implements Runnable {

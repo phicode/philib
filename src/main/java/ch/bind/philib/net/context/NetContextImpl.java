@@ -82,7 +82,6 @@ public class NetContextImpl implements NetContext {
 		boolean o = this.open;
 		if (o) {
 			this.open = false;
-			SafeCloseUtil.close(bufferCache, LOG);
 			SafeCloseUtil.close(eventDispatcher, LOG);
 		}
 	}

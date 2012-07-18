@@ -1,0 +1,53 @@
+package ch.bind.philib.lang;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+public final class ServiceState {
+
+	private static final int STATE_UNINITIALIZED = 0;
+	private static final int STATE_OPEN = 1;
+	private static final int STATE_CLOSING = 2;
+	private static final int STATE_CLOSED = 3;
+
+	private AtomicInteger state = new AtomicInteger(STATE_UNINITIALIZED);
+
+	public boolean isUninitialized() {
+		return state.get() == STATE_UNINITIALIZED;
+	}
+
+	public boolean isOpen() {
+		return state.get() == STATE_OPEN;
+	}
+
+	public boolean isClosing() {
+		return state.get() == STATE_CLOSING;
+	}
+
+	public boolean isClosed() {
+		return state.get() == STATE_CLOSED;
+	}
+
+	public void setOpen() {
+		switchState(STATE_OPEN);
+	}
+
+	public void setClosing() {
+		switchState(STATE_CLOSING);
+	}
+
+	public void setClosed() {
+		switchState(STATE_CLOSED);
+	}
+
+	private void switchState(int newState) {
+		while (true) {
+			int stateNow = state.get();
+			if (newState < stateNow) {
+				throw new IllegalStateException("service-states can only be moved forward");
+			}
+			if (state.compareAndSet(stateNow, newState)) {
+				return;
+			}
+		}
+	}
+}

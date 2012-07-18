@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.SafeCloseUtil;
-import ch.bind.philib.lang.ExceptionUtil;
+import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.lang.ThreadUtil;
 
 /**
@@ -55,6 +55,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<NewRegistration>();
 
+	private final ServiceState serviceState = new ServiceState();
 	private final Selector selector;
 
 	private Thread dispatcherThread;
@@ -77,8 +78,9 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		}
 		SimpleEventDispatcher disp = new SimpleEventDispatcher(selector);
 		String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
-		Thread dispatcherThread = ThreadUtil.runForever(disp, threadName);
+		Thread dispatcherThread = ThreadUtil.createForeverRunner(disp, threadName);
 		disp.initDispatcherThreads(dispatcherThread);
+		dispatcherThread.start();
 		return disp;
 	}
 
@@ -89,9 +91,12 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	@Override
 	public void run() {
+		if (serviceState.isUninitialized()) {
+			serviceState.setOpen();
+		}
 		try {
 			int selectIoeInArow = 0;
-			while (selectIoeInArow < 5) {
+			while (serviceState.isOpen() && selectIoeInArow < 5) {
 				// TODO: start to sleep with an exponentianl backoff when select
 				// fails ... why can it fail?
 				int num;
@@ -110,9 +115,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 						handleReadyKey(key);
 					}
 					selected.clear();
-				} else {
-					assert (selector.selectedKeys().isEmpty());
 				}
+
 				if (!handlersWithUndeliveredData.isEmpty()) {
 					// TODO: more efficient traversal
 					for (EventHandler eh : handlersWithUndeliveredData.values()) {
@@ -128,9 +132,6 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		} catch (ClosedSelectorException e) {
 			System.out.println("shutting down");
 		}
-		// finally {
-		// close();
-		// }
 	}
 
 	private int select() throws IOException, ClosedSelectorException {
@@ -145,7 +146,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			} else {
 				num = selector.selectNow();
 			}
-		} while (num == 0 && longSelect);
+		} while (num == 0 && longSelect && serviceState.isOpen());
 		return num;
 	}
 
@@ -175,37 +176,29 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	public void close() {
 		Thread t = dispatcherThread;
 		if (t != null) {
-			dispatcherThread = null;
+			// tell the dispatcher to stop processing events
+			serviceState.setClosing();
+			wakeup();
 			ThreadUtil.interruptAndJoin(t);
-			SafeCloseUtil.close(selector, LOG);
-			// try {
-			// selector.close();
-			// } catch (IOException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
+			dispatcherThread = null;
+
 			for (SelectionKey key : selector.keys()) {
 				if (key.isValid()) {
 					Object att = key.attachment();
 					if (att instanceof EventHandler) {
 						EventHandler e = (EventHandler) att;
-						try {
-							e.close();
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+						SafeCloseUtil.close(e, LOG);
 					}
 				}
 			}
+
+			SafeCloseUtil.close(selector, LOG);
+
 			for (NewRegistration newReg : newRegistrations) {
-				try {
-					newReg.eventHandler.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				SafeCloseUtil.close(newReg.eventHandler, LOG);
 			}
+
+			serviceState.setClosed();
 		}
 	}
 
@@ -216,7 +209,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			return;
 		}
 		if (!key.isValid()) {
-			closeHandler(eventHandler);
+			SafeCloseUtil.close(eventHandler, LOG);
 		}
 		try {
 			int readyOps = key.readyOps();
@@ -226,19 +219,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
-			System.err.println("eventHandler.handle() failed, closing: " + ExceptionUtil.buildMessageChain(e));
-			e.printStackTrace(System.err);
-			closeHandler(eventHandler);
-		}
-	}
-
-	private void closeHandler(EventHandler eventHandler) {
-		try {
-			eventHandler.close();
-		} catch (Exception e) {
-			// TODO
-			System.err.println("exception while closing: " + e.getMessage());
-			e.printStackTrace(System.err);
+			SafeCloseUtil.close(eventHandler, LOG);
 		}
 	}
 
@@ -258,14 +239,17 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	@Override
 	public void reRegister(EventHandler eventHandler, int ops, boolean asap) {
 		SelectableChannel channel = eventHandler.getChannel();
+		asdfkasjdfkljasdkfjajsdkfjksadf
+		keyFor is O(n), replace with map lookup
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
-			System.out.println("!!!!!!!!!!!!!!! channel is not registered for this selector");
+			// channel is not registered for this selector
+			register(eventHandler, ops);
 		} else {
 			key.interestOps(ops);
-		}
-		if (asap) {
-			wakeup();
+			if (asap) {
+				wakeup();
+			}
 		}
 	}
 
@@ -277,9 +261,6 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			key.cancel();
 			key.attach(null);
 			wakeup();
-			System.out.println("unreg, keys: " + selector.keys().size());
-		} else {
-			System.out.println("unreg failed, not registered");
 		}
 	}
 
