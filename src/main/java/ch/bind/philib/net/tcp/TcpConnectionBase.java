@@ -138,7 +138,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		}
 		if (finishedWrite) {
 			lastWriteBlocked = false;
-			notifyWritable();
+			session.writable();
 			return lastWriteBlocked ? EventUtil.READ_WRITE : EventUtil.READ;
 		}
 		return EventUtil.READ_WRITE;
@@ -174,8 +174,6 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			return 0;
 		}
 		synchronized (w_writeBacklog) {
-			// final int cap = writeCapacity;
-
 			// write as much as possible until the os-buffers are full or the
 			// write-per-round limit is reached
 			boolean finished = sendPendingAsync();
@@ -327,7 +325,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			if (numChanRead == -1) {
 				if (bb.position() > 0) {
 					System.err
-							.println("connection was closed and the corresponding session did not consume all read data");
+					        .println("connection was closed and the corresponding session did not consume all read data");
 				}
 				// connection closed
 				r_partialConsume = null;
@@ -370,7 +368,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		if (bb.position() > 0) {
 			// switch from write mode to read
 			bb.flip();
-			notifyReceive(bb);
+			session.receive(bb);
 			// switch back to write mode
 			if (bb.hasRemaining()) {
 				bb.compact();
@@ -410,17 +408,5 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	@Override
 	public long getTx() {
 		return tx.get();
-	}
-
-	private void notifyWritable() {
-		if (session != null) {
-			session.writable();
-		}
-	}
-
-	private void notifyReceive(ByteBuffer rbuf) throws IOException {
-		if (session != null) {
-			session.receive(rbuf);
-		}
 	}
 }

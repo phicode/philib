@@ -33,7 +33,7 @@ public interface Session {
 
 	void receive(ByteBuffer data) throws IOException;
 
-	void closed();
+	void writable() throws IOException;
 
-	void writable();
+	void closed();
 }

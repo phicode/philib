@@ -127,14 +127,13 @@ public class EchoSession implements Session {
 			sendPending = writeBb.hasRemaining();
 			loops++;
 			if (loops > 10 && !writeBb.hasRemaining()) {
+				//TODO: limit write capacity inside of a EventHandler.handle(..)
 				System.out.println("wrote " + (writeBb.capacity() * loops) + " in one go!");
 			}
 		}
 	}
 
 	private void enc(int num) {
-		// System.out.println("sending:  " + nextValueSend + "-" +
-		// (nextValueSend + num - 1));
 		for (int i = 0; i < num; i++) {
 			EndianConverter.encodeInt64LE(nextValueSend, sendEnc);
 			writeBb.put(sendEnc);
@@ -182,13 +181,8 @@ public class EchoSession implements Session {
 	}
 
 	@Override
-	public void writable() {
-		// TODO
-		try {
-			send();
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
-		}
+	public void writable() throws IOException {
+		send();
 	}
 
 	public String getDebugInformations() {

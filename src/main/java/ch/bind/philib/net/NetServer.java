@@ -33,4 +33,6 @@ import ch.bind.philib.net.context.NetContext;
 public interface NetServer extends Closeable {
 
 	NetContext getContext();
+
+	boolean isOpen();
 }

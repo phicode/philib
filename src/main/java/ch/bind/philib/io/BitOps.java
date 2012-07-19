@@ -68,19 +68,6 @@ public final class BitOps {
 		return (bitset & mask) == mask;
 	}
 
-	// public static final int MASK32[] = { 0x0, 0x1, 0x3, 0x7, 0xF, 0x10, 0x20,
-	// 0x40, 0x80, 0x10
-	//
-	// };
-	//
-	// public static final void main(String[] a) {
-	// long mask = 1L;
-	// for (long i = 1; i < 64; i++) {
-	// System.out.printf("%2d => 0x%16H%n", i, (Long)mask);
-	// mask = ((mask << 1L) | 1L);
-	// }
-	// }
-
 	public static final int rotl32(final int value, final int r) {
 		assert (r >= 0 && r <= 32);
 		return (value << r) | (value >>> (32 - r));

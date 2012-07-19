@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.SafeCloseUtil;
+import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
@@ -48,6 +49,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
 
+	private final ServiceState serviceState = new ServiceState();
 	private final SessionFactory sessionFactory;
 
 	private final ServerSocketChannel channel;
@@ -66,10 +68,17 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public boolean isOpen() {
+		return serviceState.isOpen();
+	}
+
+	@Override
+	public void close() {
+		serviceState.setClosing();
 		// the event-dispatcher closes still-open client connections
 		context.getEventDispatcher().unregister(this);
 		SafeCloseUtil.close(channel, LOG);
+		serviceState.setClosed();
 	}
 
 	@Override
@@ -92,7 +101,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	}
 
 	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress)
-			throws IOException {
+	        throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		int backlog = context.getTcpServerSocketBacklog();
@@ -108,6 +117,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	private void setup(NetContext context) throws IOException {
 		channel.configureBlocking(false);
 		context.setSocketOptions(channel.socket());
+		serviceState.setOpen();
 		context.getEventDispatcher().register(this, EventUtil.ACCEPT);
 	}
 

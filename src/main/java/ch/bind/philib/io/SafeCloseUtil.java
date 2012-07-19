@@ -34,12 +34,16 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Philipp Meinen
  */
-
 public final class SafeCloseUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SafeCloseUtil.class);
 
-	private SafeCloseUtil() {}
+	private SafeCloseUtil() {
+	}
+
+	public static void close(Closeable closeable) {
+		close(closeable, null);
+	}
 
 	public static void close(Closeable closeable, Logger logger) {
 		if (closeable == null) {

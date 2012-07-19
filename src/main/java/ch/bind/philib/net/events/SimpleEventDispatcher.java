@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.SafeCloseUtil;
+import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.lang.ThreadUtil;
 
@@ -88,6 +89,11 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	private synchronized void initDispatcherThreads(Thread thread) {
 		this.dispatcherThreadId = thread.getId();
 		this.dispatcherThread = thread;
+	}
+
+	@Override
+	public boolean isOpen() {
+		return serviceState.isOpen();
 	}
 
 	@Override
@@ -160,7 +166,6 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				int ops = reg.getOps();
 				channel.register(selector, ops, eventHandler);
 			} catch (ClosedChannelException e) {
-				System.out.println("cant register an already closed channel");
 				SafeCloseUtil.close(eventHandler, LOG);
 			}
 		}
@@ -213,6 +218,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
+			// TODO: log as trace?
+			LOG.info("closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e));
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
 	}

@@ -114,7 +114,7 @@ public class TcpEchoClient {
 			double rxMb = rxDiff / ((double) (1024 * 1024f));
 			double txMb = txDiff / ((double) (1024 * 1024f));
 			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d tDiff=%d%n", //
-					seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff), tDiff);
+			        seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff), tDiff);
 			if (seeded < 512 * 1024) {
 				// System.out.println("seeding an additional " + 8192 +
 				// " bytes into the echo chain");

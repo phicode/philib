@@ -39,7 +39,7 @@ import org.testng.annotations.Test;
 //test coverage, even utility classes.
 public class PrivateConstructorTest {
 
-	@Test
+	@Test(enabled=false)
 	public void invokeAllPrivateCtors() throws Exception {
 		Package rootPackage = getClass().getPackage();
 		String packageName = rootPackage.getName();

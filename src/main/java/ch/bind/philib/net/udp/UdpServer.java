@@ -34,7 +34,6 @@ import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
-import ch.bind.philib.net.events.NetBuf;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -84,24 +83,13 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 	}
 
 	@Override
-	public int getActiveSessionCount() { // TODO
-		throw new UnsupportedOperationException("TODO");
-	}
-
-	@Override
 	public NetContext getContext() {
 		return context;
 	}
 
-	// @Override
-	// TODO
-	// public Connection connect(SocketAddress addr) {
-	// channel.con
-	// }
-
-	private void notifyReceive(SocketAddress addr, ByteBuffer rbuf) {
+	private void notifyReceive(SocketAddress addr, ByteBuffer data) {
 		try {
-			session.receive(addr, rbuf);
+			session.receive(addr, data);
 		} catch (IOException e) {
 			// TODO Auto-generated method stub
 			e.printStackTrace(System.err);
@@ -148,35 +136,35 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
 		}
 
-		// first the remaining data in the backlog has to be written (if
-		// any), then our buffer
-		// if in the meantime more data arrives we do not want to block
-		// longer
-		final NetBuf externBuf = NetBuf.createExtern(data);
-		synchronized (w_writeBacklog) {
-			w_writeBacklog.addBack(externBuf);
-			while (true) {
-				boolean finished = sendPendingAsync();
-
-				if (finished) {
-					// all data from the backlog has been written
-					assert (!externBuf.isPending() && !data.hasRemaining());
-					unregisterFromWriteEvents();
-					return;
-				}
-				registerForWriteEvents();
-
-				// not all data in the backlog has been written
-				if (externBuf.isPending()) {
-					// our data is among those who are waiting to be written
-					w_writeBacklog.wait();
-				} else {
-					// our data has been written
-					assert (!data.hasRemaining());
-					return;
-				}
-			}
-		}
+		//		// first the remaining data in the backlog has to be written (if
+		//		// any), then our buffer
+		//		// if in the meantime more data arrives we do not want to block
+		//		// longer
+		//		final NetBuf externBuf = NetBuf.createExtern(data);
+		//		synchronized (w_writeBacklog) {
+		//			w_writeBacklog.addBack(externBuf);
+		//			while (true) {
+		//				boolean finished = sendPendingAsync();
+		//
+		//				if (finished) {
+		//					// all data from the backlog has been written
+		//					assert (!externBuf.isPending() && !data.hasRemaining());
+		//					unregisterFromWriteEvents();
+		//					return;
+		//				}
+		//				registerForWriteEvents();
+		//
+		//				// not all data in the backlog has been written
+		//				if (externBuf.isPending()) {
+		//					// our data is among those who are waiting to be written
+		//					w_writeBacklog.wait();
+		//				} else {
+		//					// our data has been written
+		//					assert (!data.hasRemaining());
+		//					return;
+		//				}
+		//			}
+		//		}
 	}
 
 	void sendAsync(final SocketAddress addr, final ByteBuffer data) throws IOException {
@@ -184,6 +172,5 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 		if (data == null || !data.hasRemaining()) {
 			return;
 		}
-
 	}
 }
