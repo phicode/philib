@@ -32,6 +32,7 @@ import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.SimpleNetContext;
+import ch.bind.philib.net.session.EchoSession;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 
 /**
@@ -64,7 +65,7 @@ public class TcpEchoServer implements SessionFactory {
 					System.out.println("sessions: " + sessions.size());
 					while (iter.hasNext()) {
 						EchoSession s = iter.next();
-						if (!s.connection.isConnected()) {
+						if (!s.getConnection().isConnected()) {
 							System.out.println("removeing disconnected session: " + s);
 							iter.remove();
 						} else {
@@ -74,7 +75,7 @@ public class TcpEchoServer implements SessionFactory {
 								System.out.printf("last interaction: %.5fsec => %s%n", //
 										lastSec, s.getDebugInformations());
 							}
-							System.out.printf("rx=%d, tx=%d%n", s.connection.getRx(), s.connection.getTx());
+							System.out.printf("rx=%d, tx=%d%n", s.getConnection().getRx(), s.getConnection().getTx());
 						}
 					}
 				}

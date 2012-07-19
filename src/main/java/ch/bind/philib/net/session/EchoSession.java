@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.net.examples;
+package ch.bind.philib.net.session;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -59,12 +59,16 @@ public class EchoSession implements Session {
 
 	private final boolean performVerification;
 
-	final Connection connection;
+	private final Connection connection;
 
-	EchoSession(Connection connection, boolean server, boolean performVerification) {
+	public EchoSession(Connection connection, boolean server, boolean performVerification) {
 		this.connection = connection;
 		this.server = server;
 		this.performVerification = performVerification;
+	}
+
+	public Connection getConnection() {
+		return connection;
 	}
 
 	@Override
@@ -127,7 +131,7 @@ public class EchoSession implements Session {
 			sendPending = writeBb.hasRemaining();
 			loops++;
 			if (loops > 10 && !writeBb.hasRemaining()) {
-				//TODO: limit write capacity inside of a EventHandler.handle(..)
+				// TODO: limit write capacity inside of a EventHandler.handle(..)
 				System.out.println("wrote " + (writeBb.capacity() * loops) + " in one go!");
 			}
 		}

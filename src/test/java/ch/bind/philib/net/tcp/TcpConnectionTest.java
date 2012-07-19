@@ -29,14 +29,12 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.Random;
 
 import org.testng.annotations.Test;
 
@@ -48,6 +46,7 @@ import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.SimpleNetContext;
+import ch.bind.philib.net.session.DevNullSession;
 
 /**
  * TODO
@@ -75,20 +74,22 @@ public class TcpConnectionTest {
 		assertTrue(client == clientS);
 		assertTrue(context.isOpen());
 		assertTrue(netServer.isOpen());
-		assertTrue(server.connection.isOpen());
-		assertTrue(client.connection.isOpen());
-		assertTrue(client.connection.isConnected());
+		assertTrue(server.getConnection().isOpen());
+		assertTrue(client.getConnection().isOpen());
+		assertTrue(client.getConnection().isConnected());
+		assertTrue(server.getServiceState().isOpen());
+		assertTrue(client.getServiceState().isOpen());
 
 		// this should close the server as well as the client
 		context.close();
 
 		assertFalse(context.isOpen());
 		assertFalse(netServer.isOpen());
-		assertFalse(server.connection.isOpen());
-		assertFalse(client.connection.isOpen());
-		assertFalse(client.connection.isConnected());
-		assertTrue(server.closedCalled);
-		assertTrue(client.closedCalled);
+		assertFalse(server.getConnection().isOpen());
+		assertFalse(client.getConnection().isOpen());
+		assertFalse(client.getConnection().isConnected());
+		assertTrue(server.getServiceState().isClosed());
+		assertTrue(client.getServiceState().isClosed());
 	}
 
 	@Test(timeOut = 60000, priority = 10)
@@ -105,12 +106,6 @@ public class TcpConnectionTest {
 
 		DevNullSession server = serverSessionFactory.session;
 		DevNullSession client = clientSessionFactory.session;
-		assertNotNull(server);
-		assertNotNull(client);
-		assertTrue(context.isOpen());
-		assertTrue(server.connection.isOpen());
-		assertTrue(client.connection.isOpen());
-		assertTrue(client.connection.isConnected());
 
 		File tempFile = File.createTempFile(getClass().getSimpleName(), ".tmp");
 		RandomAccessFile raf = null;
@@ -124,12 +119,12 @@ public class TcpConnectionTest {
 
 			assertEquals(mappedBuffer.remaining(), size);
 
-			sendSync(client.connection, server.connection, mappedBuffer);
+			sendSync(client.getConnection(), server.getConnection(), mappedBuffer);
 
 			mappedBuffer.rewind();
 			assertEquals(mappedBuffer.remaining(), size);
 
-			sendSync(server.connection, client.connection, mappedBuffer);
+			sendSync(server.getConnection(), client.getConnection(), mappedBuffer);
 
 			context.close();
 		} finally {
@@ -166,34 +161,6 @@ public class TcpConnectionTest {
 		long tEndReceive = System.nanoTime();
 		System.out.printf("write took %.3fms, write+receive took %.3fms%n", //
 		        (tEndWrite - tStart) / 1000000f, (tEndReceive - tStart) / 1000000f);
-	}
-
-	private static final class DevNullSession implements Session {
-
-		private final Connection connection;
-
-		private volatile boolean closedCalled;
-
-		private volatile boolean writableCalled;
-
-		public DevNullSession(Connection connection) {
-			this.connection = connection;
-		}
-
-		@Override
-		public void receive(ByteBuffer data) throws IOException {
-			data.position(data.limit());
-		}
-
-		@Override
-		public void closed() {
-			this.closedCalled = true;
-		}
-
-		@Override
-		public void writable() {
-			this.writableCalled = true;
-		}
 	}
 
 	private static final class DevNullSessionFactory implements SessionFactory {

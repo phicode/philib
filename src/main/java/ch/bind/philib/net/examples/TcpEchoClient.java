@@ -31,6 +31,7 @@ import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.SimpleNetContext;
+import ch.bind.philib.net.session.EchoSession;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 
 /**
@@ -99,12 +100,12 @@ public class TcpEchoClient {
 		session.incInTransitBytes(8192);
 		int seeded = 8192;
 		session.send();
-		while (session.connection.isConnected()) {
+		while (session.getConnection().isConnected()) {
 			long sleepUntil = start + (loop * loopTimeSec * 1000L);
 			ThreadUtil.sleepUntilMs(sleepUntil);
 
-			long rx = session.connection.getRx();
-			long tx = session.connection.getTx();
+			long rx = session.getConnection().getRx();
+			long tx = session.getConnection().getTx();
 			long rxDiff = rx - lastRx;
 			long txDiff = tx - lastTx;
 			long diff = rxDiff + txDiff;

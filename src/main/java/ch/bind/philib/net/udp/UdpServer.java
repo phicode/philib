@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectableChannel;
 
+import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.DatagramSession;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.context.NetContext;
@@ -47,6 +48,8 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 
 	private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
 
+	private final ServiceState serviceState = new ServiceState();
+
 	private final DatagramChannel channel;
 
 	private final DatagramSession session;
@@ -62,6 +65,7 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 	void setup() throws IOException {
 		channel.configureBlocking(false);
 		context.setSocketOptions(channel.socket());
+		serviceState.setOpen();
 		context.getEventDispatcher().register(this, EventUtil.READ);
 	}
 
@@ -78,7 +82,14 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 	}
 
 	@Override
+	public boolean isOpen() {
+		return serviceState.isOpen();
+	}
+
+	@Override
 	public void close() throws IOException { // TODO
+		serviceState.setClosing();
+		serviceState.setClosed();
 		throw new UnsupportedOperationException("TODO");
 	}
 
@@ -136,35 +147,35 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
 		}
 
-		//		// first the remaining data in the backlog has to be written (if
-		//		// any), then our buffer
-		//		// if in the meantime more data arrives we do not want to block
-		//		// longer
-		//		final NetBuf externBuf = NetBuf.createExtern(data);
-		//		synchronized (w_writeBacklog) {
-		//			w_writeBacklog.addBack(externBuf);
-		//			while (true) {
-		//				boolean finished = sendPendingAsync();
+		// // first the remaining data in the backlog has to be written (if
+		// // any), then our buffer
+		// // if in the meantime more data arrives we do not want to block
+		// // longer
+		// final NetBuf externBuf = NetBuf.createExtern(data);
+		// synchronized (w_writeBacklog) {
+		// w_writeBacklog.addBack(externBuf);
+		// while (true) {
+		// boolean finished = sendPendingAsync();
 		//
-		//				if (finished) {
-		//					// all data from the backlog has been written
-		//					assert (!externBuf.isPending() && !data.hasRemaining());
-		//					unregisterFromWriteEvents();
-		//					return;
-		//				}
-		//				registerForWriteEvents();
+		// if (finished) {
+		// // all data from the backlog has been written
+		// assert (!externBuf.isPending() && !data.hasRemaining());
+		// unregisterFromWriteEvents();
+		// return;
+		// }
+		// registerForWriteEvents();
 		//
-		//				// not all data in the backlog has been written
-		//				if (externBuf.isPending()) {
-		//					// our data is among those who are waiting to be written
-		//					w_writeBacklog.wait();
-		//				} else {
-		//					// our data has been written
-		//					assert (!data.hasRemaining());
-		//					return;
-		//				}
-		//			}
-		//		}
+		// // not all data in the backlog has been written
+		// if (externBuf.isPending()) {
+		// // our data is among those who are waiting to be written
+		// w_writeBacklog.wait();
+		// } else {
+		// // our data has been written
+		// assert (!data.hasRemaining());
+		// return;
+		// }
+		// }
+		// }
 	}
 
 	void sendAsync(final SocketAddress addr, final ByteBuffer data) throws IOException {
