@@ -35,6 +35,7 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.nio.file.FileSystem;
 
 import org.testng.annotations.Test;
 
@@ -107,34 +108,19 @@ public class TcpConnectionTest {
 		DevNullSession server = serverSessionFactory.session;
 		DevNullSession client = clientSessionFactory.session;
 
-		File tempFile = File.createTempFile(getClass().getSimpleName(), ".tmp");
-		RandomAccessFile raf = null;
-		try {
-			raf = new RandomAccessFile(tempFile, "rw");
-			FileChannel fc = raf.getChannel();
+		int size = 1024 * 1024 * 1024;
+		// just a whole lot of zeros to copy around
+		ByteBuffer mappedBuffer = ByteBuffer.allocateDirect(1024 * 1024 * 1024);
+		assertEquals(mappedBuffer.remaining(), size);
 
-			int size = 1024 * 1024 * 1024;
-			// just a whole lot of zeros to copy around
-			MappedByteBuffer mappedBuffer = fc.map(MapMode.READ_ONLY, 0, size);
+		sendSync(client.getConnection(), server.getConnection(), mappedBuffer);
 
-			assertEquals(mappedBuffer.remaining(), size);
+		mappedBuffer.rewind();
+		assertEquals(mappedBuffer.remaining(), size);
 
-			sendSync(client.getConnection(), server.getConnection(), mappedBuffer);
+		sendSync(server.getConnection(), client.getConnection(), mappedBuffer);
 
-			mappedBuffer.rewind();
-			assertEquals(mappedBuffer.remaining(), size);
-
-			sendSync(server.getConnection(), client.getConnection(), mappedBuffer);
-
-			context.close();
-		} finally {
-			if (raf != null) {
-				SafeCloseUtil.close(raf);
-			}
-			if (!tempFile.delete()) {
-				System.err.println("failed to delete: " + tempFile);
-			}
-		}
+		context.close();
 	}
 
 	private void sendSync(Connection from, Connection to, ByteBuffer data) throws Exception {
@@ -160,7 +146,7 @@ public class TcpConnectionTest {
 
 		long tEndReceive = System.nanoTime();
 		System.out.printf("write took %.3fms, write+receive took %.3fms%n", //
-		        (tEndWrite - tStart) / 1000000f, (tEndReceive - tStart) / 1000000f);
+				(tEndWrite - tStart) / 1000000f, (tEndReceive - tStart) / 1000000f);
 	}
 
 	private static final class DevNullSessionFactory implements SessionFactory {
