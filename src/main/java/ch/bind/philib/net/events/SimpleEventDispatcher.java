@@ -112,8 +112,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 					selectIoeInArow = 0;
 				} catch (IOException e) {
 					selectIoeInArow++;
-					System.out.println(e.getMessage());
-					e.printStackTrace();
+					LOG.error("Selector.select() threw an IOException: " + ExceptionUtil.buildMessageChain(e));
 					continue;
 				}
 				if (num > 0) {
@@ -127,12 +126,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				if (!handlersWithUndeliveredData.isEmpty()) {
 					// TODO: more efficient traversal
 					for (EventHandler eh : handlersWithUndeliveredData.values()) {
-						try {
-							eh.handle(EventUtil.READ);
-						} catch (IOException e) {
-							System.out.println(e.getMessage());
-							e.printStackTrace();
-						}
+						SelectionKey key = eh.getChannel().keyFor(selector);
+						handleEvent(eh, key, EventUtil.READ);
 					}
 				}
 			}
@@ -210,17 +205,21 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		if (!key.isValid()) {
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
+		int readyOps = key.readyOps();
+		handleEvent(eventHandler, key, readyOps);
+	}
+
+	private void handleEvent(final EventHandler handler, final SelectionKey key, final int ops) {
 		try {
-			int readyOps = key.readyOps();
 			int interestedOps = key.interestOps();
-			int newInterestedOps = eventHandler.handle(readyOps);
+			int newInterestedOps = handler.handle(ops);
 			if (newInterestedOps != interestedOps) {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
 			// TODO: log as trace?
 			LOG.info("closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e));
-			SafeCloseUtil.close(eventHandler, LOG);
+			SafeCloseUtil.close(handler, LOG);
 		}
 	}
 
