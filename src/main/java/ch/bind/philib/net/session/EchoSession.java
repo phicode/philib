@@ -143,23 +143,19 @@ public class EchoSession implements Session {
 	private void verifyReceived(ByteBuffer data) {
 		int rem = data.remaining();
 		assert (rem > 0);
-		int numVerifiable = rem / 8;
-		int numVerify = Math.min(readBuf.length / 8, numVerifiable);
-		// long verifyStart = nextValueRead;
-		while (rem >= 8) {
-			data.get(readBuf);
-			verify();
-			rem -= 8;
+		int numVerify = Math.min(readBuf.length / 8, rem / 8);
+		int verifyBytes = numVerify * 8;
+		data.get(readBuf, 0, verifyBytes);
+		int off = 0;
+		while (off < verifyBytes) {
+			long v = EndianConverter.decodeInt64LE(readBuf, off);
+			off += 8;
+			if (v != nextValueRead) {
+				throw new AssertionError(v + " != " + nextValueRead);
+			}
+			nextValueRead++;
+			numSendable++;
 		}
-	}
-
-	private void verify() {
-		long v = EndianConverter.decodeInt64LE(readBuf);
-		if (v != nextValueRead) {
-			throw new AssertionError(v + " != " + nextValueRead);
-		}
-		nextValueRead++;
-		numSendable++;
 	}
 
 	@Override
