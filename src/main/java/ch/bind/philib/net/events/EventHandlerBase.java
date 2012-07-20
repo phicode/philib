@@ -65,4 +65,9 @@ public abstract class EventHandlerBase implements EventHandler {
 		}
 		return true;
 	}
+	
+	// zero a buffer
+	protected final void makeBufferReusable(final ByteBuffer buf) {
+		context.getBufferCache().makeReusable(buf);
+	}
 }

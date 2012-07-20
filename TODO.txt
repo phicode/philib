@@ -2,18 +2,9 @@ rename all "selectable" to "event-handler" specific names
 
 100% RingBuffer test coverage
 
-testng
-
 PRIO TASK
   2  ThreadUtil unit-tests
   2  ThreadUtil: boolean hasThread(String name, boolean alive)
-  
-  
-  1  all net methods use ByteBuffer
-  1  write(byte[]) for the outside world
-  1  internal buffer pool, so that directly allocated buffer can be managed
-  1  no internal read/write buffers, but these ByteBuffers
-  
   
 bitstream codec
 

@@ -33,7 +33,7 @@ import ch.bind.philib.cache.impl.ScalableObjectCache;
  * 
  * @author Philipp Meinen
  */
-public final class ByteBufferCache extends SpecificObjectCache<ByteBuffer> {
+public final class ByteBufferCache extends BufferCacheBase<ByteBuffer> {
 
 	private ByteBufferCache(ObjectCache<ByteBuffer> cache) {
 		super(cache);
@@ -98,4 +98,10 @@ public final class ByteBufferCache extends SpecificObjectCache<ByteBuffer> {
 			return true;
 		}
 	}
+
+	@Override
+	public void makeReusable(ByteBuffer buf) {
+	    // TODO Auto-generated method stub
+	    
+    }
 }

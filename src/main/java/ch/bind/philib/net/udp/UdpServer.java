@@ -25,10 +25,15 @@ package ch.bind.philib.net.udp;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectableChannel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.DatagramSession;
 import ch.bind.philib.net.NetServer;
@@ -43,6 +48,8 @@ import ch.bind.philib.validation.Validation;
  * @author Philipp Meinen
  */
 public final class UdpServer extends EventHandlerBase implements NetServer {
+
+	private static final Logger LOG = LoggerFactory.getLogger(UdpServer.class);
 
 	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
 
@@ -72,7 +79,12 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 	static UdpServer open(NetContext context, DatagramSession session, SocketAddress bindAddress) throws IOException {
 		DatagramChannel channel = DatagramChannel.open();
 		DatagramSocket socket = channel.socket();
-		socket.bind(bindAddress);
+		try {
+			socket.bind(bindAddress);
+		} catch (SocketException e) {
+			SafeCloseUtil.close(channel, LOG);
+			throw e;
+		}
 
 		UdpServer server = new UdpServer(context, session, channel);
 		server.setup();
@@ -85,10 +97,12 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 	}
 
 	@Override
-	public void close() throws IOException { // TODO
+	public void close() {
 		serviceState.setClosing();
+		context.getEventDispatcher().unregister(this);
+		SafeCloseUtil.close(channel, LOG);
 		serviceState.setClosed();
-		throw new UnsupportedOperationException("TODO");
+		session.closed();
 	}
 
 	@Override
@@ -99,9 +113,14 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 	private void notifyReceive(SocketAddress addr, ByteBuffer data) {
 		try {
 			session.receive(addr, data);
-		} catch (IOException e) {
-			// TODO Auto-generated method stub
-			e.printStackTrace(System.err);
+			if (data.hasRemaining()) {
+				if (LOG.isTraceEnabled()) {
+					String m = "UDP packet from {} was not fully consumed, {} bytes remaining";
+					LOG.trace(m, addr, data.remaining());
+				}
+			}
+		} catch (Exception e) {
+			LOG.error("error notifying an UDP session about a packet from {}", addr);
 		}
 	}
 
@@ -112,26 +131,31 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 
 	@Override
 	public int handle(int ops) throws IOException {
-		// TODO
-		final ByteBuffer rbuf = acquireBuffer();
-		try {
-			int totalRead = 0;
-			while (totalRead < IO_READ_LIMIT_PER_ROUND) {
-				rbuf.clear();
-				SocketAddress addr = channel.receive(rbuf);
-				if (addr == null) {
-					// no more data to read
-					assert (rbuf.position() == 0 && rbuf.remaining() == 0);
-					return EventUtil.READ;
+		int totalRead = 0;
+		while (totalRead < IO_READ_LIMIT_PER_ROUND) {
+			final ByteBuffer rbuf = acquireBuffer();
+			rbuf.clear();
+			//TODO: jumbo-frames could be bigger then the default read-buffer size (8192), detect that or expose a NetContext configuration parameter which allows for jumbo-frames
+
+			SocketAddress addr;
+			try {
+				addr = channel.receive(rbuf);
+			} catch (SecurityException e) {
+				// this is the only possible runtime-exception, quite nasty
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("a security-manager blocked an incoming UDP packet");
 				}
-				rbuf.flip();
-				// assert (num == rbuf.limit());
-				// assert (num == rbuf.remaining());
-				totalRead += rbuf.remaining();
-				notifyReceive(addr, rbuf);
+				continue;
 			}
-		} finally {
-			releaseBuffer(rbuf);
+			if (addr == null) {
+				// no more data to read
+				assert (rbuf.position() == 0 && rbuf.limit() == rbuf.capacity());
+				return EventUtil.READ;
+			}
+			rbuf.flip();
+			totalRead += rbuf.remaining();
+			notifyReceive(addr, rbuf);
+			makeBufferReusable(rbuf);
 		}
 		return EventUtil.READ;
 	}
