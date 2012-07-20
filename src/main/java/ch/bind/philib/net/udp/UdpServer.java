@@ -73,8 +73,6 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 		DatagramChannel channel = DatagramChannel.open();
 		DatagramSocket socket = channel.socket();
 		socket.bind(bindAddress);
-		// TODO: log bridge
-		System.out.println("UDP listening on: " + bindAddress);
 
 		UdpServer server = new UdpServer(context, session, channel);
 		server.setup();

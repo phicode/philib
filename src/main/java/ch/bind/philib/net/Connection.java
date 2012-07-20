@@ -52,6 +52,4 @@ public interface Connection extends Closeable {
 	String getDebugInformations();
 
 	SocketAddress getRemoteAddress() throws IOException;
-
-	boolean isWritableNow();
 }

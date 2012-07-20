@@ -32,6 +32,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -56,6 +57,9 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<NewRegistration>();
 
+	// TODO: use a long->object map
+	private final ConcurrentMap<Long, EventHandler> handlersWithUndeliveredData = new ConcurrentHashMap<Long, EventHandler>();
+
 	private final ServiceState serviceState = new ServiceState();
 
 	private final Selector selector;
@@ -63,9 +67,6 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	private Thread dispatcherThread;
 
 	private long dispatcherThreadId;
-
-	// TODO: use a long->object map
-	private final Map<Long, EventHandler> handlersWithUndeliveredData = new ConcurrentHashMap<Long, EventHandler>();
 
 	private SimpleEventDispatcher(Selector selector) {
 		this.selector = selector;
@@ -104,15 +105,15 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		try {
 			int selectIoeInArow = 0;
 			while (serviceState.isOpen() && selectIoeInArow < 5) {
-				// TODO: start to sleep with an exponentianl backoff when select
-				// fails ... why can it fail?
+				// TODO: start to sleep with an exponential backoff when select
+				// fails ... why can it fail anyway?
 				int num;
 				try {
 					num = select();
 					selectIoeInArow = 0;
 				} catch (IOException e) {
 					selectIoeInArow++;
-					LOG.error("Selector.select() threw an IOException: " + ExceptionUtil.buildMessageChain(e));
+					LOG.error("IOException in Selector.select(): " + ExceptionUtil.buildMessageChain(e));
 					continue;
 				}
 				if (num > 0) {
@@ -132,7 +133,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 				}
 			}
 		} catch (ClosedSelectorException e) {
-			System.out.println("shutting down");
+			serviceState.setClosed();
 		}
 	}
 
@@ -202,11 +203,11 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			// cancelled key
 			return;
 		}
-		if (!key.isValid()) {
+		if (key.isValid()) {
+			handleEvent(eventHandler, key, key.readyOps());
+		} else {
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
-		int readyOps = key.readyOps();
-		handleEvent(eventHandler, key, readyOps);
 	}
 
 	private void handleEvent(final EventHandler handler, final SelectionKey key, final int ops) {

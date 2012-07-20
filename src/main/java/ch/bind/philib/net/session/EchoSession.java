@@ -113,7 +113,6 @@ public class EchoSession implements Session {
 			}
 			sendPending = false;
 		}
-		long loops = 0;
 		while (!sendPending) {// loop if all data has been written
 			// switch writeBb to write mode
 			writeBb.clear();
@@ -129,11 +128,6 @@ public class EchoSession implements Session {
 			Validation.isTrue(writeBb.position() == 0 && writeBb.limit() == sendNums * 8, "" + writeBb.limit());
 			connection.sendAsync(writeBb);
 			sendPending = writeBb.hasRemaining();
-			loops++;
-			if (loops > 10 && !writeBb.hasRemaining()) {
-				// TODO: limit write capacity inside of a EventHandler.handle(..)
-				System.out.println("wrote " + (writeBb.capacity() * loops) + " in one go!");
-			}
 		}
 	}
 
@@ -170,7 +164,6 @@ public class EchoSession implements Session {
 
 	@Override
 	public void closed() {
-		System.out.printf("closed() rx=%d, tx=%d%n", connection.getRx(), connection.getTx());
 	}
 
 	public long getLastInteractionNs() {

@@ -50,6 +50,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
 
 	private final ServiceState serviceState = new ServiceState();
+
 	private final SessionFactory sessionFactory;
 
 	private final ServerSocketChannel channel;
@@ -106,8 +107,6 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 		ServerSocket socket = channel.socket();
 		int backlog = context.getTcpServerSocketBacklog();
 		socket.bind(bindAddress, backlog);
-		// TODO: log bridge
-		System.out.println("TCP listening on: " + bindAddress);
 
 		TcpServer server = new TcpServer(context, sessionFactory, channel);
 		server.setup(context);

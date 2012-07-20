@@ -23,11 +23,15 @@
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.BitOps;
 import ch.bind.philib.lang.ExceptionUtil;
@@ -44,6 +48,8 @@ import ch.bind.philib.validation.Validation;
  */
 public final class DebugTcpConnection extends TcpConnectionBase {
 
+	private static final Logger LOG = LoggerFactory.getLogger(DebugTcpConnection.class);
+
 	private static final long LOG_HANDLE_TIME_THRESHOLD_NS = 10000000L;
 
 	private static final long LOG_READ_TIME_THRESHOLD_NS = 5000000L;
@@ -58,8 +64,6 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 
 	private volatile boolean lastHandleSendable;
 
-	private final Object statslock = new Object();
-
 	private DebugTcpConnection(NetContext context, SocketChannel channel) {
 		super(context, channel);
 	}
@@ -70,7 +74,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 	}
 
 	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
-			throws IOException {
+	        throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
@@ -78,7 +82,6 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			channel.finishConnect();
 		}
 
-		System.out.println("connected to: " + endpoint);
 		return create(context, channel, sessionFactory);
 	}
 
@@ -94,8 +97,8 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 		if (t > LOG_HANDLE_TIME_THRESHOLD_NS) {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
-			System.out.printf("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-					(t / 1000000f), rdiff, sdiff, getRx(), getTx());
+			LOG.debug(String.format("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
+			        (t / 1000000f), rdiff, sdiff, getRx(), getTx()));
 		}
 		return rv;
 	}
@@ -108,7 +111,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 		int num = super.channelWrite(data);
 		long t = System.nanoTime() - tStart;
 		if (t >= LOG_WRITE_TIME_THRESHOLD_NS) {
-			System.out.printf("write took %.6fms%n", (t / 1000000f));
+			LOG.debug(String.format("write took %.6fms%n", (t / 1000000f)));
 		}
 		return num;
 	}
@@ -121,35 +124,19 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 		int num = super.channelRead(rbuf);
 		long t = System.nanoTime() - tStart;
 		if (t >= LOG_READ_TIME_THRESHOLD_NS) {
-			System.out.printf("read took: %.6fms%n", (t / 1000000f));
+			LOG.debug(String.format("read took: %.6fms%n", (t / 1000000f)));
 		}
 		return num;
 	}
 
 	@Override
 	public String getDebugInformations() {
-		// synchronized (w_writeBacklog) {
-		// ByteBuffer r = r_partialConsume;
-		// if (r != null) {
-		// s = "read: " + r.position();
-		// } else {
-		// s = "read-ready=0";
-		// }
-		// }
-		// if (w_writeBacklog.isEmpty()) {
-		// s += ", write-available=0";
-		// } else {
-		// s += ", write-available=" + w_writeBacklog.size();
-		// }
 		try {
-			String s = ", readOps=" + readOps + ", sendOps=" + sendOps /* + ", reg4send=" + registeredForWriteEvt */
-					+ ", lasthandle-send=" + lastHandleSendable + ", numHandles=" + numHandles + ", rx=" + getRx()
-					+ ", tx=" + getTx() + ", no-delay=" + channel.socket().getTcpNoDelay() + ", rcvBuf="
-					+ channel.socket().getReceiveBufferSize() + ", sndBuf=" + channel.socket().getSendBufferSize();
-			return s;
+			Socket sock = channel.socket();
+			String m = "readOps=%d, sendOps=%d, reg4send=%s, lastHandleSendable=%s, numHandles=%d, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
+			return String.format(m, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles,
+			        getRx(), getTx(), sock.getTcpNoDelay(), sock.getReceiveBufferSize(), sock.getSendBufferSize());
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			return "error: " + ExceptionUtil.buildMessageChain(e);
 		}
 	}

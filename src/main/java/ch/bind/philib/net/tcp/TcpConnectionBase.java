@@ -248,12 +248,6 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		}
 	}
 
-	@Override
-	public boolean isWritableNow() {
-		// TODO
-		throw new UnsupportedOperationException("TODO");
-	}
-
 	// package private so that the DebugTcpConnection subclass can override this method and gather additional
 	// information
 	// holding the sendLock is required
@@ -302,7 +296,6 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				w_writeBacklog.addFront(pending);
 				break;
 			}
-			// } while (true);
 		} while (totalWrite < IO_WRITE_LIMIT_PER_ROUND);
 		return false;
 	}
@@ -408,5 +401,9 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	@Override
 	public long getTx() {
 		return tx.get();
+	}
+	
+	boolean isRegisteredForWriteEvents() {
+		return registeredForWriteEvt;
 	}
 }

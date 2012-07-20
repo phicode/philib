@@ -46,7 +46,8 @@ public final class TcpConnection extends TcpConnectionBase {
 		return connection.setup(sessionFactory);
 	}
 
-	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
+	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
+	        throws IOException {
 		SocketChannel channel = SocketChannel.open();
 
 		channel.configureBlocking(true);
@@ -54,7 +55,6 @@ public final class TcpConnection extends TcpConnectionBase {
 			channel.finishConnect();
 		}
 
-		System.out.println("connected to: " + endpoint);
 		return create(context, channel, sessionFactory);
 	}
 
