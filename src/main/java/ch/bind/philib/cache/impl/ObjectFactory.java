@@ -32,7 +32,7 @@ public interface ObjectFactory<E> {
 
 	void destroy(E e);
 
-	boolean release(E e);
+	boolean prepareForReuse(E e);
 
 	boolean canReuse(E e);
 }

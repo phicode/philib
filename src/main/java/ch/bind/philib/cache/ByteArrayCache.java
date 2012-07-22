@@ -51,42 +51,42 @@ public final class ByteArrayCache extends BufferCacheBase<byte[]> {
 	public static ByteArrayCache createSimple(int bufferSize) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, DEFAULT_NUM_BUFFERS);
-		return new ByteArrayCache(cache,factory);
+		return new ByteArrayCache(cache, factory);
 	}
 
 	public static ByteArrayCache createSimple(int bufferSize, int maxEntries) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, maxEntries);
-		return new ByteArrayCache(cache,factory);
+		return new ByteArrayCache(cache, factory);
 	}
 
 	public static ByteArrayCache createScalable(int bufferSize, int maxEntries) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new ScalableObjectCache<byte[]>(factory, maxEntries);
-		return new ByteArrayCache(cache,factory);
+		return new ByteArrayCache(cache, factory);
 	}
 
 	public static ByteArrayCache createScalable(int bufferSize, int maxEntries, int bufferBuckets) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new ScalableObjectCache<byte[]>(factory, maxEntries, bufferBuckets);
-		return new ByteArrayCache(cache,factory);
+		return new ByteArrayCache(cache, factory);
 	}
 
 	public static ByteArrayCache createNoop(int bufferSize) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new NoopObjectCache<byte[]>(factory);
-		return new ByteArrayCache(cache,factory);
+		return new ByteArrayCache(cache, factory);
 	}
 
 	public static ObjectFactory<byte[]> createFactory(int bufferSize) {
-		return new ByteArrayFactory(bufferSize,factory);
+		return new ByteArrayFactory(bufferSize);
 	}
-	
+
 	@Override
 	public void fillZero(byte[] e) {
 		factory.fillZero(e);
 	}
-	
+
 	private static final class ByteArrayFactory implements ObjectFactory<byte[]> {
 
 		private final int bufferSize;
@@ -104,7 +104,7 @@ public final class ByteArrayCache extends BufferCacheBase<byte[]> {
 		}
 
 		@Override
-		public boolean release(byte[] e) {
+		public boolean prepareForReuse(byte[] e) {
 			if (e.length == bufferSize) {
 				Arrays.fill(e, (byte) 0);
 				return true;
