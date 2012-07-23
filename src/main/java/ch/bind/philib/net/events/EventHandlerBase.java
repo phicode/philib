@@ -23,7 +23,9 @@
 package ch.bind.philib.net.events;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
+import ch.bind.philib.io.BufferOps;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.validation.Validation;
 
@@ -64,10 +66,5 @@ public abstract class EventHandlerBase implements EventHandler {
 			return false;
 		}
 		return true;
-	}
-	
-	// zero a buffer
-	protected final void makeBufferReusable(final ByteBuffer buf) {
-		context.getBufferCache().makeReusable(buf);
 	}
 }

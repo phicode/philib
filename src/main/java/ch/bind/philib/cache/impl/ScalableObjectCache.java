@@ -69,8 +69,8 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 	}
 
 	@Override
-	public boolean release(E e) {
-		return cacheByThread.get().release(e);
+	public void release(E e) {
+		cacheByThread.get().release(e);
 	}
 
 	@Override

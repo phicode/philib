@@ -22,69 +22,60 @@
 
 package ch.bind.philib.cache;
 
-import java.util.Arrays;
-
 import ch.bind.philib.cache.impl.LinkedObjectCache;
 import ch.bind.philib.cache.impl.NoopObjectCache;
 import ch.bind.philib.cache.impl.ObjectFactory;
 import ch.bind.philib.cache.impl.ScalableObjectCache;
+import ch.bind.philib.io.BufferOps;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class ByteArrayCache extends BufferCacheBase<byte[]> {
+public final class ByteArrayCache extends SpecificCacheBase<byte[]> {
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;
 
 	// 1 mb of buffers with the default buffer size of 8k
 	public static final int DEFAULT_NUM_BUFFERS = 128;
 
-	private final ObjectFactory<byte[]> factory;
-
-	private ByteArrayCache(ObjectCache<byte[]> cache, ObjectFactory<byte[]> factory) {
+	private ByteArrayCache(ObjectCache<byte[]> cache) {
 		super(cache);
-		this.factory = factory;
 	}
 
 	public static ByteArrayCache createSimple(int bufferSize) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, DEFAULT_NUM_BUFFERS);
-		return new ByteArrayCache(cache, factory);
+		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createSimple(int bufferSize, int maxEntries) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, maxEntries);
-		return new ByteArrayCache(cache, factory);
+		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createScalable(int bufferSize, int maxEntries) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new ScalableObjectCache<byte[]>(factory, maxEntries);
-		return new ByteArrayCache(cache, factory);
+		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createScalable(int bufferSize, int maxEntries, int bufferBuckets) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new ScalableObjectCache<byte[]>(factory, maxEntries, bufferBuckets);
-		return new ByteArrayCache(cache, factory);
+		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createNoop(int bufferSize) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
 		ObjectCache<byte[]> cache = new NoopObjectCache<byte[]>(factory);
-		return new ByteArrayCache(cache, factory);
+		return new ByteArrayCache(cache);
 	}
 
 	public static ObjectFactory<byte[]> createFactory(int bufferSize) {
 		return new ByteArrayFactory(bufferSize);
-	}
-
-	@Override
-	public void fillZero(byte[] e) {
-		factory.fillZero(e);
 	}
 
 	private static final class ByteArrayFactory implements ObjectFactory<byte[]> {
@@ -96,7 +87,8 @@ public final class ByteArrayCache extends BufferCacheBase<byte[]> {
 		}
 
 		@Override
-		public void destroy(byte[] e) { /* the GC takes care of cleaning up */}
+		public void destroy(byte[] e) { /* the GC takes care of cleaning up */
+		}
 
 		@Override
 		public byte[] create() {
@@ -106,7 +98,7 @@ public final class ByteArrayCache extends BufferCacheBase<byte[]> {
 		@Override
 		public boolean prepareForReuse(byte[] e) {
 			if (e.length == bufferSize) {
-				Arrays.fill(e, (byte) 0);
+				BufferOps.memsetZero(e);
 				return true;
 			}
 			return false;

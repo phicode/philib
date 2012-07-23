@@ -59,16 +59,17 @@ public abstract class ObjectCacheBase<E> implements ObjectCache<E> {
 	}
 
 	@Override
-	public final boolean release(final E e) {
-		if (e != null && factory.prepareForReuse(e)) {
-			if (tryRelease(e)) {
-				stats.incrementReleases();
-				return true;
+	public final void release(final E e) {
+		if (e != null) {
+			if (factory.prepareForReuse(e)) {
+				if (tryRelease(e)) {
+					stats.incrementReleases();
+					return;
+				}
 			}
 			stats.incrementDestroyed();
 			factory.destroy(e);
 		}
-		return false;
 	}
 
 	@Override

@@ -27,13 +27,14 @@ import java.nio.ByteBuffer;
 import ch.bind.philib.cache.impl.LinkedObjectCache;
 import ch.bind.philib.cache.impl.ObjectFactory;
 import ch.bind.philib.cache.impl.ScalableObjectCache;
+import ch.bind.philib.io.BufferOps;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class ByteBufferCache extends BufferCacheBase<ByteBuffer> {
+public final class ByteBufferCache extends SpecificCacheBase<ByteBuffer> {
 
 	private ByteBufferCache(ObjectCache<ByteBuffer> cache) {
 		super(cache);
@@ -65,11 +66,8 @@ public final class ByteBufferCache extends BufferCacheBase<ByteBuffer> {
 
 		private final int bufferSize;
 
-		private final byte[] nullFiller;
-
 		ByteBufferFactory(int bufferSize) {
 			this.bufferSize = bufferSize;
-			this.nullFiller = new byte[bufferSize];
 		}
 
 		@Override
@@ -79,14 +77,13 @@ public final class ByteBufferCache extends BufferCacheBase<ByteBuffer> {
 		}
 
 		@Override
-		public void destroy(ByteBuffer e) { /* the GC takes care of cleaning up */}
+		public void destroy(ByteBuffer e) { /* the GC takes care of cleaning up */
+		}
 
 		@Override
-		public boolean release(ByteBuffer e) {
+		public boolean prepareForReuse(ByteBuffer e) {
 			if (e.capacity() == bufferSize) {
-				e.clear();
-				e.put(nullFiller);
-				e.clear();
+				BufferOps.memsetZero(e);
 				return true;
 			}
 			return false;
@@ -98,10 +95,4 @@ public final class ByteBufferCache extends BufferCacheBase<ByteBuffer> {
 			return true;
 		}
 	}
-
-	@Override
-	public void makeReusable(ByteBuffer buf) {
-	    // TODO Auto-generated method stub
-	    
-    }
 }

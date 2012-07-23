@@ -22,6 +22,9 @@
 
 package ch.bind.philib.io;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 /**
  * TODO
  * 
@@ -29,5 +32,51 @@ package ch.bind.philib.io;
  */
 public final class BufferOps {
 
-	private BufferOps() {}
+	private BufferOps() {
+	}
+
+	private static volatile byte[] nullFiller;
+
+	public static void memsetZero(ByteBuffer buf) {
+		if (buf.hasArray()) {
+			memsetZero(buf.array());
+		} else {
+			byte[] filler = getFiller();
+			int filLen = filler.length;
+			buf.clear();
+			int rem = buf.remaining();
+			while (rem > 0) {
+				int l = Math.min(rem, filLen);
+				buf.put(filler, 0, l);
+				rem -= l;
+			}
+			buf.clear();
+		}
+	}
+
+	public static void memsetZero(byte[] buf) {
+		byte[] filler = getFiller();
+		int filLen = filler.length;
+		int rem = buf.length;
+		int off = 0;
+		while (rem > 0) {
+			int l = Math.min(rem, filLen);
+			memset(filler, buf, off, l);
+			rem -= l;
+			off += l;
+		}
+	}
+
+	private static final void memset(byte[] src, byte[] dst, int dstOff, int len) {
+		System.arraycopy(src, 0, dst, dstOff, len);
+	}
+
+	private static byte[] getFiller() {
+		byte[] f = nullFiller;
+		if (f == null) {
+			f = new byte[8192];
+			nullFiller = f;
+		}
+		return f;
+	}
 }

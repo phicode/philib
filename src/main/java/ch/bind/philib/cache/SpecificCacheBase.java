@@ -29,11 +29,11 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public abstract class BufferCacheBase<E> implements BufferCache<E> {
+public abstract class SpecificCacheBase<E> implements ObjectCache<E> {
 
 	private final ObjectCache<E> cache;
 
-	protected BufferCacheBase(ObjectCache<E> cache) {
+	protected SpecificCacheBase(ObjectCache<E> cache) {
 		Validation.notNull(cache);
 		this.cache = cache;
 	}
@@ -44,8 +44,8 @@ public abstract class BufferCacheBase<E> implements BufferCache<E> {
 	}
 
 	@Override
-	public final boolean release(E e) {
-		return cache.release(e);
+	public final void release(E e) {
+		cache.release(e);
 	}
 
 	@Override
