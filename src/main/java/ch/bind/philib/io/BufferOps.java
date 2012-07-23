@@ -23,7 +23,6 @@
 package ch.bind.philib.io;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /**
  * TODO
