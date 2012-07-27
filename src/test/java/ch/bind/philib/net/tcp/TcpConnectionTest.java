@@ -29,6 +29,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -36,6 +37,9 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.io.SafeCloseUtil;
@@ -53,10 +57,53 @@ import ch.bind.philib.net.session.DevNullSession;
  * 
  * @author Philipp Meinen
  */
+@Test(singleThreaded = true)
 public class TcpConnectionTest {
+
+	private static final int MAPPED_BUFFER_SIZE = Integer.MAX_VALUE;
+
+	private File tempFile;
+	private RandomAccessFile randomAccessFile;
+	private FileChannel fileChannel;
+
+	private ByteBuffer bigMappedBuffer;
+
+	@BeforeClass
+	public void beforeClass() throws Exception {
+		tempFile = File.createTempFile(getClass().getSimpleName(), ".tmp");
+		randomAccessFile = new RandomAccessFile(tempFile, "rw");
+		fileChannel = randomAccessFile.getChannel();
+
+		// just a whole lot of zeros to copy around
+		bigMappedBuffer = fileChannel.map(MapMode.READ_ONLY, 0, MAPPED_BUFFER_SIZE);
+	}
+
+	@AfterClass
+	public void afterClass() throws Exception {
+		bigMappedBuffer = null;
+		SafeCloseUtil.close(fileChannel);
+		fileChannel = null;
+		SafeCloseUtil.close(randomAccessFile);
+		randomAccessFile = null;
+		// make sure that the mapped file is actually cleaned up
+		System.gc();
+		Thread.sleep(500);
+
+		if (tempFile != null && !tempFile.delete()) {
+			System.err.println("failed to delete: " + tempFile);
+		}
+	}
+
+	@BeforeMethod
+	public void beforeMethod() {
+		if (bigMappedBuffer != null) {
+			bigMappedBuffer.clear();
+		}
+	}
 
 	@Test(timeOut = 60000, priority = 0)
 	public void connectAndDisconnect() throws Exception {
+		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
 		NetContext context = new SimpleNetContext();
 		SocketAddress addr = SocketAddresses.localhost(1234);
 		DevNullSessionFactory serverSessionFactory = new DevNullSessionFactory();
@@ -94,6 +141,7 @@ public class TcpConnectionTest {
 
 	@Test(timeOut = 60000, priority = 10)
 	public void sendManyZeros() throws Exception {
+		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
 		NetContext context = new SimpleNetContext();
 		SocketAddress addr = SocketAddresses.localhost(1234);
 		DevNullSessionFactory serverSessionFactory = new DevNullSessionFactory();
@@ -107,17 +155,14 @@ public class TcpConnectionTest {
 		DevNullSession server = serverSessionFactory.session;
 		DevNullSession client = clientSessionFactory.session;
 
-		int size = 1024 * 1024 * 1024;
-		// just a whole lot of zeros to copy around
-		ByteBuffer mappedBuffer = ByteBuffer.allocateDirect(1024 * 1024 * 1024);
-		assertEquals(mappedBuffer.remaining(), size);
+		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
 
-		sendSync(client.getConnection(), server.getConnection(), mappedBuffer);
+		sendSync(client.getConnection(), server.getConnection(), bigMappedBuffer);
 
-		mappedBuffer.rewind();
-		assertEquals(mappedBuffer.remaining(), size);
+		bigMappedBuffer.rewind();
+		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
 
-		sendSync(server.getConnection(), client.getConnection(), mappedBuffer);
+		sendSync(server.getConnection(), client.getConnection(), bigMappedBuffer);
 
 		context.close();
 	}
@@ -144,8 +189,10 @@ public class TcpConnectionTest {
 		assertEquals(to.getTx(), toTx); // no change
 
 		long tEndReceive = System.nanoTime();
-		System.out.printf("write took %.3fms, write+receive took %.3fms%n", //
-				(tEndWrite - tStart) / 1000000f, (tEndReceive - tStart) / 1000000f);
+		long t = tEndReceive - tStart;
+		double mbPerSec = ((double) size) / (1024f * 1024f) / (t / 1000000000f);
+		System.out.printf("write took %.3fms, write+receive took %.3fms -> %.3fMb/s%n", //
+		        (tEndWrite - tStart) / 1000000f, t / 1000000f, mbPerSec);
 	}
 
 	private static final class DevNullSessionFactory implements SessionFactory {
