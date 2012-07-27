@@ -86,12 +86,16 @@ public class TcpConnectionTest {
 		SafeCloseUtil.close(randomAccessFile);
 		randomAccessFile = null;
 		// make sure that the mapped file is actually cleaned up
-		System.gc();
-		Thread.sleep(500);
+		int tryCount = -1;
+		do {
+			tryCount++;
+			System.gc();
+			Thread.sleep(500);
 
-		if (tempFile != null && !tempFile.delete()) {
-			System.err.println("failed to delete: " + tempFile);
-		}
+			if (tempFile != null && !tempFile.delete()) {
+				System.err.println("failed to delete: " + tempFile);
+			}
+		} while (tempFile.exists() && tryCount < 120);
 	}
 
 	@BeforeMethod
