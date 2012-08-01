@@ -158,7 +158,6 @@ public class NetContextImpl implements NetContext {
 	@Override
 	public void setSocketOptions(Socket socket) throws SocketException {
 		Validation.notNull(socket);
-		socket.set
 		if (tcpNoDelay != null) {
 			socket.setTcpNoDelay(tcpNoDelay);
 		}

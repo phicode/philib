@@ -28,6 +28,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -68,21 +69,38 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 		super(context, channel);
 	}
 
-	static Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
-		DebugTcpConnection connection = new DebugTcpConnection(context, channel);
-		return connection.setup(sessionFactory);
-	}
+	static TcpConnectionFactory FACTORY = new TcpConnectionFactory() {
 
-	public static Session open(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
-	        throws IOException {
+		@Override
+		public Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
+			DebugTcpConnection connection = new DebugTcpConnection(context, channel);
+			return connection.setup(sessionFactory);
+		}
+	};
+
+	public static Session syncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
+			throws IOException {
 		SocketChannel channel = SocketChannel.open();
-
 		channel.configureBlocking(true);
+		context.setSocketOptions(channel.socket());
 		if (!channel.connect(endpoint)) {
 			channel.finishConnect();
 		}
 
-		return create(context, channel, sessionFactory);
+		return FACTORY.create(context, channel, sessionFactory);
+	}
+
+	public static Future<Session> asyncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
+		SocketChannel channel = SocketChannel.open();
+		channel.configureBlocking(false);
+		context.setSocketOptions(channel.socket());
+
+		boolean finished = channel.connect(endpoint);
+		if (finished) {
+			return AsyncConnectHandler.forFinishedConnect(context, channel, sessionFactory, FACTORY);
+		} else {
+			return AsyncConnectHandler.forPendingConnect(context, channel, sessionFactory, FACTORY);
+		}
 	}
 
 	@Override
@@ -98,7 +116,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
 			LOG.debug(String.format("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-			        (t / 1000000f), rdiff, sdiff, getRx(), getTx()));
+					(t / 1000000f), rdiff, sdiff, getRx(), getTx()));
 		}
 		return rv;
 	}
@@ -135,7 +153,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			Socket sock = channel.socket();
 			String m = "readOps=%d, sendOps=%d, reg4send=%s, lastHandleSendable=%s, numHandles=%d, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
 			return String.format(m, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles,
-			        getRx(), getTx(), sock.getTcpNoDelay(), sock.getReceiveBufferSize(), sock.getSendBufferSize());
+					getRx(), getTx(), sock.getTcpNoDelay(), sock.getReceiveBufferSize(), sock.getSendBufferSize());
 		} catch (SocketException e) {
 			return "error: " + ExceptionUtil.buildMessageChain(e);
 		}

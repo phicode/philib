@@ -102,7 +102,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	}
 
 	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress)
-	        throws IOException {
+			throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		int backlog = context.getTcpServerSocketBacklog();
@@ -123,9 +123,9 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	private void createSession(SocketChannel clientChannel) {
 		try {
 			if (context.isDebugMode()) {
-				DebugTcpConnection.create(context, clientChannel, sessionFactory);
+				DebugTcpConnection.FACTORY.create(context, clientChannel, sessionFactory);
 			} else {
-				TcpConnection.create(context, clientChannel, sessionFactory);
+				TcpConnection.FACTORY.create(context, clientChannel, sessionFactory);
 			}
 		} catch (IOException e) {
 			// TODO: notify an error handler
