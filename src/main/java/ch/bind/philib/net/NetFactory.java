@@ -23,6 +23,7 @@ package ch.bind.philib.net;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.concurrent.Future;
 
 import ch.bind.philib.net.context.NetContext;
 
@@ -33,7 +34,11 @@ import ch.bind.philib.net.context.NetContext;
  */
 public interface NetFactory {
 
-	Session openClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException;
+	Session syncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
+	        throws IOException;
+
+	Future<Session> asyncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
+	        throws IOException;
 
 	NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory factory) throws IOException;
 

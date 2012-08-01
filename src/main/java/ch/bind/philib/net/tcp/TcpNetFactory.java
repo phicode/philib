@@ -23,6 +23,7 @@ package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.concurrent.Future;
 
 import ch.bind.philib.net.NetFactory;
 import ch.bind.philib.net.NetServer;
@@ -39,19 +40,31 @@ public final class TcpNetFactory implements NetFactory {
 
 	public static final TcpNetFactory INSTANCE = new TcpNetFactory();
 
-	private TcpNetFactory() {}
+	private TcpNetFactory() {
+	}
 
 	// TODO: supply session directly!
 	@Override
-	public Session openClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
+	public Session syncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
+	        throws IOException {
 		if (context.isDebugMode()) {
-			return DebugTcpConnection.open(context, endpoint, sessionFactory);
+			return DebugTcpConnection.syncOpen(context, endpoint, sessionFactory);
 		}
-		return TcpConnection.open(context, endpoint, sessionFactory);
+		return TcpConnection.syncOpen(context, endpoint, sessionFactory);
 	}
 
 	@Override
-	public NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory consumerFactory) throws IOException {
+	public Future<Session> asyncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
+	        throws IOException {
+		if (context.isDebugMode()) {
+			return DebugTcpConnection.asyncOpen(context, endpoint, sessionFactory);
+		}
+		return TcpConnection.asyncOpen(context, endpoint, sessionFactory);
+	}
+
+	@Override
+	public NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory consumerFactory)
+	        throws IOException {
 		return TcpServer.open(context, consumerFactory, bindAddress);
 	}
 }
