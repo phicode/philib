@@ -173,7 +173,7 @@ public class TcpConnectionTest {
 		context.close();
 	}
 
-	private void sendSync(Connection from, Connection to, ByteBuffer data) throws Exception {
+	private static void sendSync(Connection from, Connection to, ByteBuffer data) throws Exception {
 		long fromRx = from.getRx();
 		long fromTx = from.getTx();
 		long toRx = to.getRx();
