@@ -40,13 +40,11 @@ public final class TcpNetFactory implements NetFactory {
 
 	public static final TcpNetFactory INSTANCE = new TcpNetFactory();
 
-	private TcpNetFactory() {
-	}
+	private TcpNetFactory() {}
 
 	// TODO: supply session directly!
 	@Override
-	public Session syncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
-	        throws IOException {
+	public Session syncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		if (context.isDebugMode()) {
 			return DebugTcpConnection.syncOpen(context, endpoint, sessionFactory);
 		}
@@ -54,8 +52,7 @@ public final class TcpNetFactory implements NetFactory {
 	}
 
 	@Override
-	public Future<Session> asyncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
-	        throws IOException {
+	public Future<Session> asyncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		if (context.isDebugMode()) {
 			return DebugTcpConnection.asyncOpen(context, endpoint, sessionFactory);
 		}
@@ -64,7 +61,7 @@ public final class TcpNetFactory implements NetFactory {
 
 	@Override
 	public NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory consumerFactory)
-	        throws IOException {
+			throws IOException {
 		return TcpServer.open(context, consumerFactory, bindAddress);
 	}
 }

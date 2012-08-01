@@ -23,9 +23,7 @@
 package ch.bind.philib.net.events;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
-import ch.bind.philib.io.BufferOps;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.validation.Validation;
 

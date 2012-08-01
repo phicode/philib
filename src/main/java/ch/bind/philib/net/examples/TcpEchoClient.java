@@ -88,7 +88,8 @@ public class TcpEchoClient {
 				return new EchoSession(connection, false, true);
 			}
 		};
-		EchoSession session = (EchoSession) TcpNetFactory.INSTANCE.openClient(context, endpoint, factory);
+		EchoSession session = (EchoSession) TcpNetFactory.INSTANCE.syncOpenClient(context, endpoint, factory);
+		numRunning = 1;
 
 		final int loopTimeSec = 10;
 		long lastT = System.currentTimeMillis();

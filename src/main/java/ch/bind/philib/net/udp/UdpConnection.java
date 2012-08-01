@@ -19,25 +19,16 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net;
 
-import java.io.IOException;
-import java.net.SocketAddress;
-import java.util.concurrent.Future;
+package ch.bind.philib.net.udp;
 
-import ch.bind.philib.net.context.NetContext;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public interface NetFactory {
 
-	Session syncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException;
-
-	Future<Session> asyncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException;
-
-	NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory factory) throws IOException;
+public class UdpConnection {
 
 }

@@ -318,7 +318,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			if (numChanRead == -1) {
 				if (bb.position() > 0) {
 					System.err
-					        .println("connection was closed and the corresponding session did not consume all read data");
+							.println("connection was closed and the corresponding session did not consume all read data");
 				}
 				// connection closed
 				r_partialConsume = null;
@@ -402,7 +402,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	public long getTx() {
 		return tx.get();
 	}
-	
+
 	boolean isRegisteredForWriteEvents() {
 		return registeredForWriteEvt;
 	}
