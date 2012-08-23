@@ -35,11 +35,9 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public class EchoSession implements Session {
+public class EchoClientSession implements Session {
 
 	private long lastInteractionNs;
-
-	private final boolean server;
 
 	private long nextValueRead;
 
@@ -49,21 +47,21 @@ public class EchoSession implements Session {
 
 	private final ByteBuffer writeBb = ByteBuffer.wrap(new byte[8192]);
 
-	private boolean sendPending = false;
-
 	private final byte[] sendEnc = new byte[8];
 
 	private final Object lock = new Object();
 
-	private int numSendable;
-
 	private final boolean performVerification;
 
 	private final Connection connection;
+	private boolean sendPending = false;
+	private int numSendable = 16384;
 
-	public EchoSession(Connection connection, boolean server, boolean performVerification) {
+	private long lastRx;
+	private long lastTx;
+
+	public EchoClientSession(Connection connection, boolean performVerification) {
 		this.connection = connection;
-		this.server = server;
 		this.performVerification = performVerification;
 	}
 
@@ -73,28 +71,19 @@ public class EchoSession implements Session {
 
 	@Override
 	public void receive(ByteBuffer data) throws IOException {
-		assert (data.position() == 0);
-
-		if (server) {
-			// the server only performs data echoing
-			if (connection.sendAsync(data) > 0) {
-				lastInteractionNs = System.nanoTime();
+		lastInteractionNs = System.nanoTime();
+		synchronized (lock) {
+			if (performVerification) {
+				verifyReceived(data);
+			} else {
+				int rem = data.remaining();
+				int consume = (rem / 8);
+				numSendable += consume;
+				int newPos = data.position() + (consume * 8);
+				data.position(newPos);
 			}
-		} else {
-			lastInteractionNs = System.nanoTime();
-			synchronized (lock) {
-				if (performVerification) {
-					verifyReceived(data);
-				} else {
-					int rem = data.remaining();
-					int consume = (rem / 8);
-					numSendable += consume;
-					int newPos = data.position() + (consume * 8);
-					data.position(newPos);
-				}
-				// TODO: send nulled packets if we are not in verification mode
-				_send();
-			}
+			// TODO: send nulled packets if we are not in verification mode
+			_send();
 		}
 	}
 
@@ -151,7 +140,8 @@ public class EchoSession implements Session {
 			long v = EndianConverter.decodeInt64LE(readBuf, off);
 			off += 8;
 			if (v != nextValueRead) {
-				throw new AssertionError(v + " != " + nextValueRead);
+				System.out.println("expected: " + nextValueRead + " got: " + v);
+				//				throw new AssertionError(v + " != " + nextValueRead);
 			}
 			nextValueRead++;
 			numSendable++;
@@ -178,7 +168,22 @@ public class EchoSession implements Session {
 		send();
 	}
 
-	public String getDebugInformations() {
-		return connection.getDebugInformations();
+	public long getRxDiff() {
+		long rx = connection.getRx();
+		long diff = rx - lastRx;
+		lastRx = rx;
+		return diff;
+	}
+
+	public long getTxDiff() {
+		long tx = connection.getTx();
+		long diff = tx - lastTx;
+		lastTx = tx;
+		return diff;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s[rx=%d, tx=%d, remote=%s]", getClass().getSimpleName(), connection.getRx(), connection.getTx(), connection.getRemoteAddress());
 	}
 }

@@ -71,7 +71,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		this.selector = selector;
 	}
 
-	public static EventDispatcher open() {
+	public static SimpleEventDispatcher open() {
 		Selector selector;
 		try {
 			selector = Selector.open();
@@ -89,6 +89,10 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	private synchronized void initDispatcherThreads(Thread thread) {
 		this.dispatcherThreadId = thread.getId();
 		this.dispatcherThread = thread;
+	}
+
+	long getDispatcherThreadId() {
+		return dispatcherThreadId;
 	}
 
 	@Override
@@ -213,7 +217,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		try {
 			int interestedOps = key.interestOps();
 			int newInterestedOps = handler.handle(ops);
-			if (newInterestedOps != interestedOps) {
+			if (newInterestedOps != EventUtil.OP_DONT_CHANGE && newInterestedOps != interestedOps) {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
@@ -245,6 +249,7 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			register(eventHandler, ops);
 		} else {
 			key.interestOps(ops);
+			key.attach(eventHandler);
 			if (asap) {
 				wakeup();
 			}

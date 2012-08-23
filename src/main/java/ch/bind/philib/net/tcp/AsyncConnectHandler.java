@@ -59,6 +59,8 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 
 	private boolean cancelled;
 
+	private boolean registered;
+
 	private AsyncConnectHandler(NetContext context, Session session) {
 		super(context);
 		this.session = session;
@@ -77,11 +79,13 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 		this.channel = channel;
 		this.sessionFactory = sessionFactory;
 		this.tcpConFactory = tcpConFactory;
+		context.getEventDispatcher().register(this, EventUtil.CONNECT);
+		registered = true;
 	}
 
 	static Future<Session> forFinishedConnect(NetContext context, SocketChannel channel, SessionFactory sessionFactory, TcpConnectionFactory tcpConFactory) {
 		try {
-			Session session = tcpConFactory.create(context, channel, sessionFactory);
+			Session session = tcpConFactory.create(false, context, channel, sessionFactory);
 			return new AsyncConnectHandler(context, session);
 		} catch (IOException exc) {
 			return new AsyncConnectHandler(context, exc);
@@ -89,9 +93,7 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 	}
 
 	static Future<Session> forPendingConnect(NetContext context, SocketChannel channel, SessionFactory sessionFactory, TcpConnectionFactory tcpConFactory) {
-		AsyncConnectHandler asyncConnect = new AsyncConnectHandler(context, channel, sessionFactory, tcpConFactory);
-		context.getEventDispatcher().register(asyncConnect, EventUtil.CONNECT);
-		return asyncConnect;
+		return new AsyncConnectHandler(context, channel, sessionFactory, tcpConFactory);
 	}
 
 	@Override
@@ -124,7 +126,7 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 			wait();
 		}
 		if (execException != null) {
-			throw new ExecutionException("connect failed", execException);
+			throw new ExecutionException("async connect failed", execException);
 		}
 		if (cancelled) {
 			throw new CancellationException();
@@ -142,7 +144,10 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 	public synchronized void close() throws IOException {
 		// TODO: make get reliable
 		if (context != null && channel != null) {
-			context.getEventDispatcher().unregister(this);
+			if (registered) {
+				context.getEventDispatcher().unregister(this);
+				registered = false;
+			}
 			sessionFactory = null;
 		}
 		SafeCloseUtil.close(channel);
@@ -157,16 +162,23 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 	}
 
 	@Override
-	public synchronized int handle(int ops) throws IOException {
+	public synchronized int handle(int ops) {
 		Validation.isTrue(ops == EventUtil.CONNECT);
 		if (execException != null || cancelled) {
 			SafeCloseUtil.close(this);
 		} else {
-			this.session = tcpConFactory.create(context, channel, sessionFactory);
-			context.getEventDispatcher().unregister(this);
+			try {
+				if (channel.finishConnect()) {
+					this.session = tcpConFactory.create(true, context, channel, sessionFactory);
+					registered = false;
+					// creating a tcp-connection has changed the interested-ops and handler-attachment of the registration-key. this async connect handler is no longer registered and must tell the event handler that it does not want to overwrite its interested-ops
+					return EventUtil.OP_DONT_CHANGE;
+				}
+			} catch (IOException e) {
+				execException = e;
+			}
 		}
 		notifyAll();
 		return EventUtil.CONNECT;
 	}
-
 }

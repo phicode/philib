@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.cache.ByteBufferCache;
 import ch.bind.philib.io.SafeCloseUtil;
+import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.validation.Validation;
 
@@ -67,28 +68,29 @@ public class NetContextImpl implements NetContext {
 
 	private int tcpServerSocketBacklog = DEFAULT_TCP_SERVER_SOCKET_BACKLOG;
 
-	private volatile boolean open;
+	private ServiceState serviceState = new ServiceState();
 
 	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
 		Validation.notNull(bufferCache);
 		Validation.notNull(eventDispatcher);
 		this.bufferCache = bufferCache;
 		this.eventDispatcher = eventDispatcher;
-		this.open = true;
+		serviceState.setOpen();
 	}
 
 	@Override
 	public void close() throws IOException {
-		boolean o = this.open;
-		if (o) {
-			this.open = false;
-			SafeCloseUtil.close(eventDispatcher, LOG);
+		if (serviceState.isClosed()) {
+			return;
 		}
+		serviceState.setClosing();
+		SafeCloseUtil.close(eventDispatcher, LOG);
+		serviceState.setClosed();
 	}
 
 	@Override
 	public boolean isOpen() {
-		return open;
+		return serviceState.isOpen();
 	}
 
 	@Override

@@ -72,14 +72,13 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 	static TcpConnectionFactory FACTORY = new TcpConnectionFactory() {
 
 		@Override
-		public Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
+		public Session create(boolean asyncConnect, NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
 			DebugTcpConnection connection = new DebugTcpConnection(context, channel);
-			return connection.setup(sessionFactory);
+			return connection.setup(asyncConnect, sessionFactory);
 		}
 	};
 
-	public static Session syncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
-			throws IOException {
+	public static Session syncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 		channel.configureBlocking(true);
 		context.setSocketOptions(channel.socket());
@@ -87,7 +86,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			channel.finishConnect();
 		}
 
-		return FACTORY.create(context, channel, sessionFactory);
+		return FACTORY.create(false, context, channel, sessionFactory);
 	}
 
 	public static Future<Session> asyncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
@@ -116,7 +115,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
 			LOG.debug(String.format("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-					(t / 1000000f), rdiff, sdiff, getRx(), getTx()));
+			        (t / 1000000f), rdiff, sdiff, getRx(), getTx()));
 		}
 		return rv;
 	}
@@ -152,8 +151,8 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 		try {
 			Socket sock = channel.socket();
 			String m = "readOps=%d, sendOps=%d, reg4send=%s, lastHandleSendable=%s, numHandles=%d, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
-			return String.format(m, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles,
-					getRx(), getTx(), sock.getTcpNoDelay(), sock.getReceiveBufferSize(), sock.getSendBufferSize());
+			return String.format(m, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles, getRx(), getTx(), sock.getTcpNoDelay(),
+			        sock.getReceiveBufferSize(), sock.getSendBufferSize());
 		} catch (SocketException e) {
 			return "error: " + ExceptionUtil.buildMessageChain(e);
 		}

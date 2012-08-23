@@ -37,5 +37,18 @@ import ch.bind.philib.net.context.NetContext;
 
 public interface TcpConnectionFactory {
 
-	Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException;
+	/**
+	 * 
+	 * @param asyncConnect if {@code true} A selector key is already present but must be
+	 *            re-registered so that events go to the connection event-handler. if {@code false}
+	 *            no selector key is present, the event handler must be registered with the
+	 *            selector.
+	 * @param context
+	 * @param channel
+	 * @param sessionFactory
+	 * @return
+	 * @throws IOException
+	 */
+	Session create(boolean asyncConnect, NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException;
+
 }

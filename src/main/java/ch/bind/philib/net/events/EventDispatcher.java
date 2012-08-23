@@ -28,7 +28,7 @@ import java.io.Closeable;
  * 
  * @author Philipp Meinen
  */
-public interface EventDispatcher extends Runnable, Closeable {
+public interface EventDispatcher extends Closeable {
 	
 	boolean isOpen();
 

@@ -20,64 +20,57 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.lang;
+package ch.bind.philib.net.session;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.Session;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class ServiceState {
+public class EchoServerSession implements Session {
 
-	private static final int STATE_UNINITIALIZED = 0;
+	private long lastInteractionNs;
 
-	private static final int STATE_OPEN = 1;
+	private final Connection connection;
 
-	private static final int STATE_CLOSING = 2;
-
-	private static final int STATE_CLOSED = 3;
-
-	private AtomicInteger state = new AtomicInteger(STATE_UNINITIALIZED);
-
-	public boolean isUninitialized() {
-		return state.get() == STATE_UNINITIALIZED;
+	public EchoServerSession(Connection connection) {
+		this.connection = connection;
 	}
 
-	public boolean isOpen() {
-		return state.get() == STATE_OPEN;
-	}
+	@Override
+	public void receive(ByteBuffer data) throws IOException {
+		assert (data.position() == 0);
 
-	public boolean isClosing() {
-		return state.get() == STATE_CLOSING;
-	}
-
-	public boolean isClosed() {
-		return state.get() == STATE_CLOSED;
-	}
-
-	public void setOpen() {
-		switchState(STATE_OPEN);
-	}
-
-	public void setClosing() {
-		switchState(STATE_CLOSING);
-	}
-
-	public void setClosed() {
-		switchState(STATE_CLOSED);
-	}
-
-	private void switchState(int newState) {
-		while (true) {
-			int stateNow = state.get();
-			if (newState < stateNow) {
-				throw new IllegalStateException("service-states can only be moved forward");
-			}
-			if (state.compareAndSet(stateNow, newState)) {
-				return;
-			}
+		// the server only performs data echoing
+		if (connection.sendAsync(data) > 0) {
+			lastInteractionNs = System.nanoTime();
 		}
+	}
+
+	@Override
+	public void writable() throws IOException {
+	}
+
+	@Override
+	public void closed() {
+	}
+
+	public Connection getConnection() {
+		return connection;
+	}
+
+	public long getLastInteractionNs() {
+		return lastInteractionNs;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s[rx=%d, tx=%d, remote=%s]", getClass().getSimpleName(), connection.getRx(), connection.getTx(), connection.getRemoteAddress());
 	}
 }

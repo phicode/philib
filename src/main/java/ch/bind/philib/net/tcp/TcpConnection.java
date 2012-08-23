@@ -45,14 +45,13 @@ public final class TcpConnection extends TcpConnectionBase {
 	static TcpConnectionFactory FACTORY = new TcpConnectionFactory() {
 
 		@Override
-		public Session create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
+		public Session create(boolean asyncConnect, NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
 			TcpConnection connection = new TcpConnection(context, channel);
-			return connection.setup(sessionFactory);
+			return connection.setup(asyncConnect, sessionFactory);
 		}
 	};
 
-	public static Session syncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory)
-			throws IOException {
+	public static Session syncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 		channel.configureBlocking(true);
 		context.setSocketOptions(channel.socket());
@@ -60,7 +59,7 @@ public final class TcpConnection extends TcpConnectionBase {
 			channel.finishConnect();
 		}
 
-		return FACTORY.create(context, channel, sessionFactory);
+		return FACTORY.create(false, context, channel, sessionFactory);
 	}
 
 	public static Future<Session> asyncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
@@ -78,6 +77,6 @@ public final class TcpConnection extends TcpConnectionBase {
 
 	@Override
 	public String getDebugInformations() {
-		return "none";
+		return "no debug informations available";
 	}
 }

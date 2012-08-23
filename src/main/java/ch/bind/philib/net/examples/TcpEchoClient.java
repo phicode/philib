@@ -23,15 +23,22 @@ package ch.bind.philib.net.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
-import ch.bind.philib.lang.ThreadUtil;
+import ch.bind.philib.io.SafeCloseUtil;
+import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.SimpleNetContext;
-import ch.bind.philib.net.session.EchoSession;
+import ch.bind.philib.net.session.EchoClientSession;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 
 /**
@@ -43,6 +50,8 @@ import ch.bind.philib.net.tcp.TcpNetFactory;
 // TODO: latency measurements
 // TODO: many threads
 public class TcpEchoClient {
+
+	private static final boolean VERIFY_MODE = false;
 
 	public static void main(String[] args) throws Exception {
 		int numClients = 1;
@@ -65,70 +74,176 @@ public class TcpEchoClient {
 		new TcpEchoClient().run(numClients);
 	}
 
-	private void run(int numClients) throws IOException, InterruptedException {
-		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.0.0.71", 1234);
-		// InetSocketAddress endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
-		InetSocketAddress endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
+	private List<RichEchoClientSession> sessions = new LinkedList<RichEchoClientSession>();
+	private List<Future<Session>> connecting = new LinkedList<Future<Session>>();
 
-		int numRunning = 0;
-		long rampUpMs = 1000;
-		long startNext = System.currentTimeMillis();
+	private long numConnectFails;
+	private long numCloseFails;
+	private InetSocketAddress endpoint;
+	private NetContext context;
 
-		// byte[] buf = new byte[8 * 1024];
-		// new Random().nextBytes(buf);
-		// ByteBuffer seedBuffer = ByteBuffer.wrap(buf);
-		NetContext context = new SimpleNetContext();
+	private static final SessionFactory sessionFactory = new SessionFactory() {
+
+		@Override
+		public Session createSession(Connection connection) throws IOException {
+			EchoClientSession session = new EchoClientSession(connection, VERIFY_MODE);
+			session.send();
+			return session;
+		}
+	};
+
+	private void run(int numClients) {
+		// endpoint = SocketAddresses.fromIp("10.0.0.71", 1234);
+		// endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
+		try {
+			endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
+		} catch (UnknownHostException e) {
+			System.out.println("unknown host: " + ExceptionUtil.buildMessageChain(e));
+			return;
+		}
+
+		context = new SimpleNetContext();
 		context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
-		SessionFactory factory = new SessionFactory() {
 
-			@Override
-			public Session createSession(Connection connection) {
-				return new EchoSession(connection, false, true);
-			}
-		};
-		EchoSession session = (EchoSession) TcpNetFactory.INSTANCE.syncOpenClient(context, endpoint, factory);
-		numRunning = 1;
-
-		final int loopTimeSec = 10;
-		long lastT = System.currentTimeMillis();
-		// connection.sendSync(seedBuffer);
-		// long seeded = seedBuffer.capacity();
-		int loop = 1;
-		long lastRx = 0, lastTx = 0;
+		final long printStatsIntervalMs = 10000;
 		final long start = System.currentTimeMillis();
-		session.incInTransitBytes(8192);
-		int seeded = 8192;
-		session.send();
-		while (session.getConnection().isConnected()) {
-			long sleepUntil = start + (loop * loopTimeSec * 1000L);
-			ThreadUtil.sleepUntilMs(sleepUntil);
+		long rampUpMs = 100L;
+		long rampDownMs = 60000L;
+		int maxConnections = 2000;
+		long startNext = start - 1;
+		long lastPrintStats = start;
+		try {
+			Thread self = Thread.currentThread();
+			while (!self.isInterrupted()) {
+				long now = System.currentTimeMillis();
 
-			long rx = session.getConnection().getRx();
-			long tx = session.getConnection().getTx();
-			long rxDiff = rx - lastRx;
-			long txDiff = tx - lastTx;
-			long diff = rxDiff + txDiff;
-			long now = System.currentTimeMillis();
-			long tDiff = now - lastT;
-			double mbit = (diff * 8) / 1e6 / (tDiff / 1000f);
-			double rxMb = rxDiff / ((double) (1024 * 1024f));
-			double txMb = txDiff / ((double) (1024 * 1024f));
-			System.out.printf("seed=%d, last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d tDiff=%d%n", //
-			        seeded, loopTimeSec, rxMb, txMb, mbit, (rxDiff + txDiff), tDiff);
-			if (seeded < 512 * 1024) {
-				// System.out.println("seeding an additional " + 8192 +
-				// " bytes into the echo chain");
-				session.incInTransitBytes(8192);
-				seeded += 8192;
+				closeTooOld(rampDownMs);
+
+				// periodically start new connections
+				while (now > startNext) {
+					maybeConnectOne(maxConnections);
+					startNext += rampUpMs;
+				}
+				handleConnected();
+
+				long tDiff = now - lastPrintStats;
+				if (tDiff > printStatsIntervalMs) {
+					printStats(printStatsIntervalMs, tDiff);
+					lastPrintStats = now;
+				}
+
+				removeDisconnected();
+				Thread.sleep((rampUpMs / 2) - 10);
 			}
-			loop++;
-			lastRx = rx;
-			lastTx = tx;
-			lastT = now;
+		} catch (InterruptedException e) {
+
 		}
-		// TODO: save shutdown of clients
+		SafeCloseUtil.close(context);
 		System.exit(0);
+	}
+
+	private void removeDisconnected() {
+		Iterator<RichEchoClientSession> iter = sessions.iterator();
+		while (iter.hasNext()) {
+			RichEchoClientSession recs = iter.next();
+			if (!recs.session.getConnection().isConnected()) {
+				iter.remove();
+				close(recs);
+			}
+		}
+	}
+
+	private void close(RichEchoClientSession recs) {
+		try {
+			recs.session.getConnection().close();
+		} catch (IOException e) {
+			numCloseFails++;
+			System.out.println("connection.close() failed: " + ExceptionUtil.buildMessageChain(e));
+		}
+	}
+
+	private void printStats(long intervalMs, long timeDiff) {
+		long totalRx = 0;
+		long totalTx = 0;
+		int num = sessions.size();
+		Iterator<RichEchoClientSession> iter = sessions.iterator();
+		while (iter.hasNext()) {
+			RichEchoClientSession recs = iter.next();
+			long rxDiff = recs.session.getRxDiff();
+			long txDiff = recs.session.getTxDiff();
+			totalRx += rxDiff;
+			totalTx += txDiff;
+			if (num == 1) {
+				long diff = rxDiff + txDiff;
+				double mbit = (diff * 8) / 1e6 / (timeDiff / 1000f);
+				double rxMb = rxDiff / ((double) (1024 * 1024f));
+				double txMb = txDiff / ((double) (1024 * 1024f));
+				System.out.printf("last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d timeDiff=%d%n", //
+				        intervalMs / 1000, rxMb, txMb, mbit, (rxDiff + txDiff), timeDiff);
+			}
+		}
+		if (num > 1) {
+			double rxMb = totalRx / ((double) (1024 * 1024f));
+			double txMb = totalTx / ((double) (1024 * 1024f));
+			double mbit = ((totalRx + totalTx) * 8) / 1e6 / (timeDiff / 1000f);
+			System.out.printf("last %dsec total-rx=%.3fM, total-tx=%.3fM bytes => %.5f mbit/sec, #connections: %d, connecting: %d%n", //
+			        intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size());
+		}
+		if (sessions.isEmpty() && connecting.isEmpty()) {
+			System.out.println("no active or connecting sessions!");
+		}
+	}
+
+	private void handleConnected() throws InterruptedException {
+		Iterator<Future<Session>> iter = connecting.iterator();
+		while (iter.hasNext()) {
+			Future<Session> fes = iter.next();
+			if (fes.isDone()) {
+				iter.remove();
+				try {
+					Session s = fes.get();
+					sessions.add(new RichEchoClientSession((EchoClientSession) s));
+				} catch (ExecutionException e) {
+					numConnectFails++;
+					System.out.println("exception while opening a connection async: " + ExceptionUtil.buildMessageChain(e));
+				}
+			}
+		}
+	}
+
+	private void maybeConnectOne(int maxConnections) {
+		if ((sessions.size() + connecting.size()) >= maxConnections) {
+			return;
+		}
+		try {
+			Future<Session> future = TcpNetFactory.INSTANCE.asyncOpenClient(context, endpoint, sessionFactory);
+			connecting.add(future);
+		} catch (IOException e) {
+			System.out.println("asyncOpenClient failed: " + ExceptionUtil.buildMessageChain(e));
+		}
+	}
+
+	private void closeTooOld(long maxAgeMs) {
+		long killIfOlder = System.currentTimeMillis() - maxAgeMs;
+		Iterator<RichEchoClientSession> iter = sessions.iterator();
+		while (iter.hasNext()) {
+			RichEchoClientSession recs = iter.next();
+			if (recs.createdAt < killIfOlder) {
+				iter.remove();
+				close(recs);
+			}
+		}
+	}
+
+	private static class RichEchoClientSession {
+		final EchoClientSession session;
+		final long createdAt = System.currentTimeMillis();
+
+		private RichEchoClientSession(EchoClientSession session) {
+			super();
+			this.session = session;
+		}
 	}
 }

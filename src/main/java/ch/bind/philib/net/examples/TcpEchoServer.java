@@ -32,7 +32,7 @@ import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.SimpleNetContext;
-import ch.bind.philib.net.session.EchoSession;
+import ch.bind.philib.net.session.EchoServerSession;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 
 /**
@@ -60,11 +60,11 @@ public class TcpEchoServer implements SessionFactory {
 				if (sessions.size() > 0) {
 					long now = System.nanoTime();
 					long tooFarAgo = now - 5000000L; // 5ms
-					Iterator<EchoSession> iter = sessions.iterator();
+					Iterator<EchoServerSession> iter = sessions.iterator();
 					System.out.println(server.getContext().getBufferCache().getCacheStats().toString());
 					System.out.println("sessions: " + sessions.size());
 					while (iter.hasNext()) {
-						EchoSession s = iter.next();
+						EchoServerSession s = iter.next();
 						if (!s.getConnection().isConnected()) {
 							System.out.println("removeing disconnected session: " + s);
 							iter.remove();
@@ -73,9 +73,9 @@ public class TcpEchoServer implements SessionFactory {
 							if (lastInteractionNs < tooFarAgo) {
 								double lastSec = (now - lastInteractionNs) / 1000000000f;
 								System.out.printf("last interaction: %.5fsec => %s%n", //
-										lastSec, s.getDebugInformations());
+								        lastSec, s.getConnection().getDebugInformations());
 							}
-							System.out.printf("rx=%d, tx=%d%n", s.getConnection().getRx(), s.getConnection().getTx());
+							System.out.println(s);
 						}
 					}
 				}
@@ -83,11 +83,11 @@ public class TcpEchoServer implements SessionFactory {
 		}
 	}
 
-	private List<EchoSession> sessions = new ArrayList<EchoSession>();
+	private List<EchoServerSession> sessions = new ArrayList<EchoServerSession>();
 
 	@Override
-	public synchronized EchoSession createSession(Connection connection) {
-		EchoSession session = new EchoSession(connection, true, false);
+	public synchronized EchoServerSession createSession(Connection connection) {
+		EchoServerSession session = new EchoServerSession(connection);
 		synchronized (sessions) {
 			sessions.add(session);
 		}

@@ -90,12 +90,12 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	}
 
 	@Override
-	public SocketAddress getRemoteAddress() throws IOException {
+	public SocketAddress getRemoteAddress() {
 		return channel.socket().getRemoteSocketAddress();
 		// return channel.getRemoteAddress(); // JDK7
 	}
 
-	Session setup(SessionFactory sessionFactory) throws IOException {
+	Session setup(boolean asyncConnect, SessionFactory sessionFactory) throws IOException {
 		// make the socket ready for the session to write to
 		channel.configureBlocking(false);
 		context.setSocketOptions(channel.socket());
@@ -108,7 +108,11 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			close();
 			throw new IOException("session-creation failed", e);
 		}
-		context.getEventDispatcher().register(this, EventUtil.READ);
+		if (asyncConnect) {
+			context.getEventDispatcher().reRegister(this, EventUtil.READ, false);
+		} else {
+			context.getEventDispatcher().register(this, EventUtil.READ);
+		}
 		return session;
 	}
 
@@ -317,8 +321,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			deliverReadData(bb);
 			if (numChanRead == -1) {
 				if (bb.position() > 0) {
-					System.err
-							.println("connection was closed and the corresponding session did not consume all read data");
+					System.err.println("connection was closed and the corresponding session did not consume all read data");
 				}
 				// connection closed
 				r_partialConsume = null;

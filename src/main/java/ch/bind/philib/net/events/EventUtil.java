@@ -42,6 +42,8 @@ public final class EventUtil {
 	public static final int ACCEPT = SelectionKey.OP_ACCEPT;
 
 	public static final int CONNECT = SelectionKey.OP_CONNECT;
+	
+	public static final int OP_DONT_CHANGE = Integer.MAX_VALUE;
 
 	// public static void writeAllBlocking(final Connection connection, final
 	// ByteBuffer data) throws IOException {
