@@ -264,6 +264,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 			key.cancel();
 			key.attach(null);
 			wakeup();
+		} else {
+			removePendingRegistration(eventHandler);
 		}
 	}
 

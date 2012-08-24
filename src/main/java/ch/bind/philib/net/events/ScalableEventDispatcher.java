@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ServiceState;
@@ -43,7 +45,8 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		LEAST_LOAD
 	}
 
-	private final Map<EventHandler, EventDispatcher> map = new ConcurrentHashMap<EventHandler, EventDispatcher>();
+	// TODO: long -> Object map
+	private final ConcurrentMap<Long, EventDispatcher> map = new ConcurrentHashMap<Long, EventDispatcher>();
 
 	private final ServiceState serviceState = new ServiceState();
 
@@ -52,6 +55,8 @@ public class ScalableEventDispatcher implements EventDispatcher {
 	private final long[] threadIds;
 
 	private final ScaleStrategy scaleStrategy;
+
+	private final AtomicLong nextRoundRobinIdx = new AtomicLong(0);
 
 	private ScalableEventDispatcher(EventDispatcher[] dispatchers, long[] threadIds, ScaleStrategy scaleStrategy) {
 		this.dispatchers = dispatchers;
@@ -71,12 +76,13 @@ public class ScalableEventDispatcher implements EventDispatcher {
 
 	public static ScalableEventDispatcher open(ScaleStrategy scaleStrategy, int concurrency) {
 		scaleStrategy = scaleStrategy != null ? scaleStrategy : ScaleStrategy.ROUND_ROBIN;
-		concurrency = concurrency >= 1 ? concurrency : 1;
+		concurrency = concurrency >= 2 ? concurrency : 2;
 		EventDispatcher[] dispatchers = new EventDispatcher[concurrency];
 		long[] threadIds = new long[concurrency];
+		boolean collectDispatchTime = scaleStrategy == ScaleStrategy.LEAST_LOAD;
 		for (int i = 0; i < concurrency; i++) {
 			try {
-				SimpleEventDispatcher sed = SimpleEventDispatcher.open();
+				SimpleEventDispatcher sed = SimpleEventDispatcher.open(collectDispatchTime);
 				dispatchers[i] = sed;
 				threadIds[i] = sed.getDispatcherThreadId();
 			} catch (Exception e) {
@@ -114,6 +120,71 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		disp.register(eventHandler, ops);
 	}
 
+	private EventDispatcher findMapping(EventHandler eventHandler) {
+		if (eventHandler == null) {
+			return null;
+		}
+		long id = eventHandler.getEventHandlerId();
+		return map.get(id);
+	}
+
+	private EventDispatcher createMapping(EventHandler eventHandler) {
+		long id = eventHandler.getEventHandlerId();
+		EventDispatcher disp = map.get(id);
+		if (disp == null) {
+			disp = findBestDispatcher();
+			EventDispatcher registeredDisp = map.putIfAbsent(id, disp);
+			if (registeredDisp) 
+		}
+		return disp;
+	}
+
+	private EventDispatcher findBestDispatcher() {
+		switch (scaleStrategy) {
+		case LEAST_CONNECTIONS:
+			return findLeastConnections();
+		case LEAST_LOAD:
+			return findLeastLoad();
+		case ROUND_ROBIN:
+		default:
+			return findRoundRobin();
+		}
+	}
+
+	private EventDispatcher findLeastConnections() {
+		EventDispatcher best = dispatchers[0];
+		int bestConnections = best.getNumEventHandlers();
+		for (int i = 1; i < dispatchers.length; i++) {
+			EventDispatcher disp = dispatchers[i];
+			int numCon = disp.getNumEventHandlers();
+			if (numCon < bestConnections) {
+				best = disp;
+				bestConnections = numCon;
+			}
+		}
+		return best;
+	}
+
+	private EventDispatcher findLeastLoad() {
+		EventDispatcher best = dispatchers[0];
+		int bestAvgDispatchTime = best.getRecentAverageDispatchTime();
+		for (int i = 1; i < dispatchers.length; i++) {
+			EventDispatcher disp = dispatchers[i];
+			int avgDispTime = disp.getRecentAverageDispatchTime();
+			if (avgDispTime < bestAvgDispatchTime) {
+				best = disp;
+				bestAvgDispatchTime = avgDispTime;
+			}
+		}
+		return best;
+	}
+
+	private EventDispatcher findRoundRobin() {
+		long dispIdx = nextRoundRobinIdx.getAndIncrement();
+		int realDispIdx = (int) (dispIdx % dispatchers.length);
+		return dispatchers[realDispIdx];
+	}
+
 	@Override
 	public void reRegister(EventHandler eventHandler, int ops, boolean asap) {
 		EventDispatcher disp = findMapping(eventHandler);
@@ -124,8 +195,12 @@ public class ScalableEventDispatcher implements EventDispatcher {
 
 	@Override
 	public void unregister(EventHandler eventHandler) {
-		// TODO Auto-generated method stub
-
+		if (eventHandler != null) {
+			EventDispatcher disp = map.remove(eventHandler.getEventHandlerId());
+			if (disp != null) {
+				disp.unregister(eventHandler);
+			}
+		}
 	}
 
 	@Override
