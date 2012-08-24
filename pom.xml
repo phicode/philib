@@ -19,6 +19,11 @@
 		<svn.url>http://svn.bind.ch/svn/philib/trunk</svn.url>
 		<scm.url>scm:svn:${svn.url}</scm.url>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.source.version>1.7</java.source.version>
+		<java.target.version>1.7</java.target.version>
+		<javac.optimize>true</javac.optimize>
+		<javac.showWarnings>true</javac.showWarnings>
+		<javac.showDeprecation>true</javac.showDeprecation>
 	</properties>
 
 	<licenses>
@@ -91,11 +96,11 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.5.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-					<optimize>true</optimize>
-					<showWarnings>true</showWarnings>
-					<showDeprecation>true</showDeprecation>
+					<source>${java.source.version}</source>
+					<target>${java.target.version}</target>
+					<optimize>${javac.optimize}</optimize>
+					<showWarnings>${javac.showWarnings}</showWarnings>
+					<showDeprecation>${javac.showDeprecation}</showDeprecation>
 				</configuration>
 			</plugin>
 

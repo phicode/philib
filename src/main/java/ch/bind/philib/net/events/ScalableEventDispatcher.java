@@ -135,13 +135,17 @@ public class ScalableEventDispatcher implements EventDispatcher {
 
 	@Override
 	public void registerForRedeliverPartialReads(EventHandler eventHandler) {
-		// TODO Auto-generated method stub
-
+		EventDispatcher disp = findMapping(eventHandler);
+		if (disp != null) {
+			disp.registerForRedeliverPartialReads(eventHandler);
+		}
 	}
 
 	@Override
 	public void unregisterFromRedeliverPartialReads(EventHandler eventHandler) {
-		// TODO Auto-generated method stub
-
+		EventDispatcher disp = findMapping(eventHandler);
+		if (disp != null) {
+			disp.unregisterFromRedeliverPartialReads(eventHandler);
+		}
 	}
 }
