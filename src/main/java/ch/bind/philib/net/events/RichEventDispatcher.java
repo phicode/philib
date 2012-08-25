@@ -32,6 +32,6 @@ public interface RichEventDispatcher extends EventDispatcher {
 
 	int getNumEventHandlers();
 
-	long getDispatcherThreadId();
+	long getLoadAvg();
 
 }

@@ -37,7 +37,7 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public class ScalableEventDispatcher implements RichEventDispatcher {
+public class ScalableEventDispatcher implements EventDispatcher {
 
 	public enum ScaleStrategy {
 		ROUND_ROBIN, //
@@ -66,11 +66,11 @@ public class ScalableEventDispatcher implements RichEventDispatcher {
 		serviceState.setOpen();
 	}
 
-	public static RichEventDispatcher open() {
+	public static EventDispatcher open() {
 		return open(ScaleStrategy.ROUND_ROBIN);
 	}
 
-	public static RichEventDispatcher open(ScaleStrategy scaleStrategy) {
+	public static EventDispatcher open(ScaleStrategy scaleStrategy) {
 		return open(scaleStrategy, Runtime.getRuntime().availableProcessors());
 	}
 
@@ -82,7 +82,7 @@ public class ScalableEventDispatcher implements RichEventDispatcher {
 		boolean collectDispatchTime = scaleStrategy == ScaleStrategy.LEAST_LOAD;
 		for (int i = 0; i < concurrency; i++) {
 			try {
-				RichEventDispatcher sed = SimpleEventDispatcher.open(collectDispatchTime);
+				SimpleEventDispatcher sed = SimpleEventDispatcher.open(collectDispatchTime);
 				dispatchers[i] = sed;
 				threadIds[i] = sed.getDispatcherThreadId();
 			} catch (Exception e) {
@@ -151,11 +151,12 @@ public class ScalableEventDispatcher implements RichEventDispatcher {
 		}
 	}
 
-	private EventDispatcher findLeastConnections() {
-		EventDispatcher best = dispatchers[0];
+	// TODO: find something more effective then looping over all dispatchers
+	private RichEventDispatcher findLeastConnections() {
+		RichEventDispatcher best = dispatchers[0];
 		int bestConnections = best.getNumEventHandlers();
 		for (int i = 1; i < dispatchers.length; i++) {
-			EventDispatcher disp = dispatchers[i];
+			RichEventDispatcher disp = dispatchers[i];
 			int numCon = disp.getNumEventHandlers();
 			if (numCon < bestConnections) {
 				best = disp;
@@ -165,15 +166,16 @@ public class ScalableEventDispatcher implements RichEventDispatcher {
 		return best;
 	}
 
+	// TODO: find something more effective then looping over all dispatchers
 	private EventDispatcher findLeastLoad() {
-		EventDispatcher best = dispatchers[0];
-		int bestAvgDispatchTime = best.getRecentAverageDispatchTime();
+		RichEventDispatcher best = dispatchers[0];
+		long bestLoadAvg = best.getLoadAvg();
 		for (int i = 1; i < dispatchers.length; i++) {
-			EventDispatcher disp = dispatchers[i];
-			int avgDispTime = disp.getRecentAverageDispatchTime();
-			if (avgDispTime < bestAvgDispatchTime) {
+			RichEventDispatcher disp = dispatchers[i];
+			long loadAvg = disp.getLoadAvg();
+			if (loadAvg < bestLoadAvg) {
 				best = disp;
-				bestAvgDispatchTime = avgDispTime;
+				bestLoadAvg = loadAvg;
 			}
 		}
 		return best;
@@ -224,18 +226,12 @@ public class ScalableEventDispatcher implements RichEventDispatcher {
 		}
 	}
 
-	@Override
-	public int getNumEventHandlers() {
-		int total = 0;
-		for (RichEventDispatcher disp : dispatchers) {
-			total += disp.getNumEventHandlers();
-		}
-		return total;
-	}
-	
-	@Override
-	public long getDispatcherThreadIds() {
-		// TODO
-		throw new UnsupportedOperationException("TODO");
-	}
+	//	@Override
+	//	public int getNumEventHandlers() {
+	//		int total = 0;
+	//		for (RichEventDispatcher disp : dispatchers) {
+	//			total += disp.getNumEventHandlers();
+	//		}
+	//		return total;
+	//	}
 }
