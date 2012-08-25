@@ -37,7 +37,7 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public class ScalableEventDispatcher implements EventDispatcher {
+public class ScalableEventDispatcher implements RichEventDispatcher {
 
 	public enum ScaleStrategy {
 		ROUND_ROBIN, //
@@ -50,7 +50,7 @@ public class ScalableEventDispatcher implements EventDispatcher {
 
 	private final ServiceState serviceState = new ServiceState();
 
-	private final EventDispatcher[] dispatchers;
+	private final RichEventDispatcher[] dispatchers;
 
 	private final long[] threadIds;
 
@@ -58,7 +58,7 @@ public class ScalableEventDispatcher implements EventDispatcher {
 
 	private final AtomicLong nextRoundRobinIdx = new AtomicLong(0);
 
-	private ScalableEventDispatcher(EventDispatcher[] dispatchers, long[] threadIds, ScaleStrategy scaleStrategy) {
+	private ScalableEventDispatcher(RichEventDispatcher[] dispatchers, long[] threadIds, ScaleStrategy scaleStrategy) {
 		this.dispatchers = dispatchers;
 		this.threadIds = threadIds;
 		this.scaleStrategy = scaleStrategy;
@@ -66,23 +66,23 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		serviceState.setOpen();
 	}
 
-	public static ScalableEventDispatcher open() {
+	public static RichEventDispatcher open() {
 		return open(ScaleStrategy.ROUND_ROBIN);
 	}
 
-	public static ScalableEventDispatcher open(ScaleStrategy scaleStrategy) {
+	public static RichEventDispatcher open(ScaleStrategy scaleStrategy) {
 		return open(scaleStrategy, Runtime.getRuntime().availableProcessors());
 	}
 
-	public static ScalableEventDispatcher open(ScaleStrategy scaleStrategy, int concurrency) {
+	public static EventDispatcher open(ScaleStrategy scaleStrategy, int concurrency) {
 		scaleStrategy = scaleStrategy != null ? scaleStrategy : ScaleStrategy.ROUND_ROBIN;
 		concurrency = concurrency >= 2 ? concurrency : 2;
-		EventDispatcher[] dispatchers = new EventDispatcher[concurrency];
+		RichEventDispatcher[] dispatchers = new RichEventDispatcher[concurrency];
 		long[] threadIds = new long[concurrency];
 		boolean collectDispatchTime = scaleStrategy == ScaleStrategy.LEAST_LOAD;
 		for (int i = 0; i < concurrency; i++) {
 			try {
-				SimpleEventDispatcher sed = SimpleEventDispatcher.open(collectDispatchTime);
+				RichEventDispatcher sed = SimpleEventDispatcher.open(collectDispatchTime);
 				dispatchers[i] = sed;
 				threadIds[i] = sed.getDispatcherThreadId();
 			} catch (Exception e) {
@@ -222,5 +222,20 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		if (disp != null) {
 			disp.unregisterFromRedeliverPartialReads(eventHandler);
 		}
+	}
+
+	@Override
+	public int getNumEventHandlers() {
+		int total = 0;
+		for (RichEventDispatcher disp : dispatchers) {
+			total += disp.getNumEventHandlers();
+		}
+		return total;
+	}
+	
+	@Override
+	public long getDispatcherThreadIds() {
+		// TODO
+		throw new UnsupportedOperationException("TODO");
 	}
 }

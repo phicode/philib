@@ -19,29 +19,19 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.events;
 
-import java.io.Closeable;
+package ch.bind.philib.net.events;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public interface EventDispatcher extends Closeable {
 
-	boolean isOpen();
+public interface RichEventDispatcher extends EventDispatcher {
 
-	void register(EventHandler eventHandler, int ops);
+	int getNumEventHandlers();
 
-	void reRegister(EventHandler eventHandler, int ops, boolean asap);
-
-	void unregister(EventHandler eventHandler);
-
-	boolean isEventDispatcherThread(Thread thread);
-
-	void registerForRedeliverPartialReads(EventHandler eventHandler);
-
-	void unregisterFromRedeliverPartialReads(EventHandler eventHandler);
+	long getDispatcherThreadId();
 
 }

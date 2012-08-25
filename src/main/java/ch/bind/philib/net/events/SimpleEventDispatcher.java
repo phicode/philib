@@ -48,7 +48,7 @@ import ch.bind.philib.lang.ThreadUtil;
  * @author Philipp Meinen
  */
 // TODO: thread safe
-public final class SimpleEventDispatcher implements EventDispatcher {
+public final class SimpleEventDispatcher implements RichEventDispatcher {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SimpleEventDispatcher.class);
 
@@ -67,11 +67,15 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 
 	private long dispatcherThreadId;
 
-	private SimpleEventDispatcher(Selector selector) {
+	private SimpleEventDispatcher(Selector selector, Thread dispatcherThread) {
 		this.selector = selector;
+		this.dispatcherThread = dispatcherThread;
+		this.dispatcherThreadId = dispatcherThread.getId();
+		//TODO
+//		serviceState.setOpen();
 	}
 
-	public static SimpleEventDispatcher open() {
+	public static RichEventDispatcher open() {
 		Selector selector;
 		try {
 			selector = Selector.open();
@@ -80,18 +84,13 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		}
 		SimpleEventDispatcher disp = new SimpleEventDispatcher(selector);
 		String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
-		Thread dispatcherThread = ThreadUtil.createForeverRunner(disp, threadName);
+		Thread dispatcherThread = ThreadUtil.createAndStartForeverRunner(disp, threadName);
 		disp.initDispatcherThreads(dispatcherThread);
-		dispatcherThread.start();
 		return disp;
 	}
 
-	private synchronized void initDispatcherThreads(Thread thread) {
-		this.dispatcherThreadId = thread.getId();
-		this.dispatcherThread = thread;
-	}
-
-	long getDispatcherThreadId() {
+	@Override
+	public long getDispatcherThreadId() {
 		return dispatcherThreadId;
 	}
 
@@ -101,43 +100,9 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public void run() {
-		if (serviceState.isUninitialized()) {
-			serviceState.setOpen();
-		}
-		try {
-			int selectIoeInArow = 0;
-			while (serviceState.isOpen() && selectIoeInArow < 5) {
-				// TODO: start to sleep with an exponential backoff when select
-				// fails ... why can it fail anyway?
-				int num;
-				try {
-					num = select();
-					selectIoeInArow = 0;
-				} catch (IOException e) {
-					selectIoeInArow++;
-					LOG.error("IOException in Selector.select(): " + ExceptionUtil.buildMessageChain(e));
-					continue;
-				}
-				if (num > 0) {
-					Set<SelectionKey> selected = selector.selectedKeys();
-					for (SelectionKey key : selected) {
-						handleReadyKey(key);
-					}
-					selected.clear();
-				}
-
-				if (!handlersWithUndeliveredData.isEmpty()) {
-					// TODO: more efficient traversal
-					for (EventHandler eh : handlersWithUndeliveredData.values()) {
-						SelectionKey key = eh.getChannel().keyFor(selector);
-						handleEvent(eh, key, EventUtil.READ);
-					}
-				}
-			}
-		} catch (ClosedSelectorException e) {
-			serviceState.setClosed();
-		}
+	public int getNumEventHandlers() {
+		// this is actually not thread safe but we access the information in read-only mode
+		return selector.keys().size();
 	}
 
 	private int select() throws IOException, ClosedSelectorException {
@@ -269,6 +234,8 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 		}
 	}
 
+
+
 	@Override
 	public void registerForRedeliverPartialReads(EventHandler eventHandler) {
 		handlersWithUndeliveredData.put(eventHandler.getEventHandlerId(), eventHandler);
@@ -283,7 +250,56 @@ public final class SimpleEventDispatcher implements EventDispatcher {
 	public boolean isEventDispatcherThread(final Thread thread) {
 		return (thread != null) && (thread.getId() == dispatcherThreadId);
 	}
+	
+	private void removePendingRegistration(EventHandler eventHandler) {
+		int id = eventHandler.getEventHandlerId();
+		Iter
+		for (NewRegistration newReg:  newRegistrations )
+	}
 
+	private static final class EventDispatchWorker implements Runnable {
+
+		@Override
+		public void run() {
+			if (serviceState.isUninitialized()) {
+				serviceState.setOpen();
+			}
+			try {
+				int selectIoeInArow = 0;
+				while (serviceState.isOpen() && selectIoeInArow < 5) {
+					// TODO: start to sleep with an exponential backoff when select
+					// fails ... why can it fail anyway?
+					int num;
+					try {
+						num = select();
+						selectIoeInArow = 0;
+					} catch (IOException e) {
+						selectIoeInArow++;
+						LOG.error("IOException in Selector.select(): " + ExceptionUtil.buildMessageChain(e));
+						continue;
+					}
+					if (num > 0) {
+						Set<SelectionKey> selected = selector.selectedKeys();
+						for (SelectionKey key : selected) {
+							handleReadyKey(key);
+						}
+						selected.clear();
+					}
+
+					if (!handlersWithUndeliveredData.isEmpty()) {
+						// TODO: more efficient traversal
+						for (EventHandler eh : handlersWithUndeliveredData.values()) {
+							SelectionKey key = eh.getChannel().keyFor(selector);
+							handleEvent(eh, key, EventUtil.READ);
+						}
+					}
+				}
+			} catch (ClosedSelectorException e) {
+				serviceState.setClosed();
+			}
+		}
+	}
+	
 	private static final class NewRegistration {
 
 		final EventHandler eventHandler;
