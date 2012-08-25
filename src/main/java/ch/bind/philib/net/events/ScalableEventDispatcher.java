@@ -79,10 +79,10 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		concurrency = concurrency >= 2 ? concurrency : 2;
 		RichEventDispatcher[] dispatchers = new RichEventDispatcher[concurrency];
 		long[] threadIds = new long[concurrency];
-		boolean collectDispatchTime = scaleStrategy == ScaleStrategy.LEAST_LOAD;
+		boolean collectLoadAverage = scaleStrategy == ScaleStrategy.LEAST_LOAD;
 		for (int i = 0; i < concurrency; i++) {
 			try {
-				SimpleEventDispatcher sed = SimpleEventDispatcher.open(collectDispatchTime);
+				SimpleEventDispatcher sed = SimpleEventDispatcher.open(collectLoadAverage);
 				dispatchers[i] = sed;
 				threadIds[i] = sed.getDispatcherThreadId();
 			} catch (Exception e) {
