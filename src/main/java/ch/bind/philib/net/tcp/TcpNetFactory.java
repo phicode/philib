@@ -40,8 +40,7 @@ public final class TcpNetFactory implements NetFactory {
 
 	public static final TcpNetFactory INSTANCE = new TcpNetFactory();
 
-	private TcpNetFactory() {
-	}
+	private TcpNetFactory() {}
 
 	// TODO: supply session directly!
 	@Override

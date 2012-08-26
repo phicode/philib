@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.net.session;
 
 import java.io.IOException;
@@ -54,10 +53,13 @@ public class EchoClientSession implements Session {
 	private final boolean performVerification;
 
 	private final Connection connection;
+
 	private boolean sendPending = false;
+
 	private int numSendable = 16384;
 
 	private long lastRx;
+
 	private long lastTx;
 
 	public EchoClientSession(Connection connection, boolean performVerification) {
@@ -141,7 +143,7 @@ public class EchoClientSession implements Session {
 			off += 8;
 			if (v != nextValueRead) {
 				System.out.println("expected: " + nextValueRead + " got: " + v);
-				//				throw new AssertionError(v + " != " + nextValueRead);
+				// throw new AssertionError(v + " != " + nextValueRead);
 			}
 			nextValueRead++;
 			numSendable++;
@@ -149,8 +151,7 @@ public class EchoClientSession implements Session {
 	}
 
 	@Override
-	public void closed() {
-	}
+	public void closed() {}
 
 	public long getLastInteractionNs() {
 		return lastInteractionNs;

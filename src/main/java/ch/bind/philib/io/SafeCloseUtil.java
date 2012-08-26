@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.io;
 
 import java.io.Closeable;
@@ -38,8 +37,7 @@ public final class SafeCloseUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SafeCloseUtil.class);
 
-	private SafeCloseUtil() {
-	}
+	private SafeCloseUtil() {}
 
 	public static void close(Closeable closeable) {
 		close(closeable, null);

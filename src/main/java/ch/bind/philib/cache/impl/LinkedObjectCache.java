@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.cache.impl;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,15 +36,15 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 
 	private final AtomicReference<Node<E>> objList;
 
-	private final Node<E> LOCK_DUMMY = new Node<E>();
+	private final Node<E> LOCK_DUMMY = new Node<>();
 
 	public LinkedObjectCache(ObjectFactory<E> factory, int maxEntries) {
 		super(factory);
 		Validation.isTrue(maxEntries > 0);
-		this.freeList = new AtomicReference<Node<E>>();
-		this.objList = new AtomicReference<Node<E>>();
+		this.freeList = new AtomicReference<>();
+		this.objList = new AtomicReference<>();
 		for (int i = 0; i < maxEntries; i++) {
-			Node<E> n = new Node<E>();
+			Node<E> n = new Node<>();
 			put(freeList, n);
 		}
 	}

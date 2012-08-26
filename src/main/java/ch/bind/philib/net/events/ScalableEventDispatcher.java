@@ -23,14 +23,12 @@ package ch.bind.philib.net.events;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ServiceState;
-import ch.bind.philib.validation.Validation;
 
 /**
  * TODO
@@ -46,7 +44,7 @@ public class ScalableEventDispatcher implements EventDispatcher {
 	}
 
 	// TODO: long -> Object map
-	private final ConcurrentMap<Long, EventDispatcher> map = new ConcurrentHashMap<Long, EventDispatcher>();
+	private final ConcurrentMap<Long, EventDispatcher> map = new ConcurrentHashMap<>();
 
 	private final ServiceState serviceState = new ServiceState();
 
@@ -70,6 +68,10 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		return open(ScaleStrategy.ROUND_ROBIN);
 	}
 
+	public static EventDispatcher open(int concurrency) {
+		return open(ScaleStrategy.ROUND_ROBIN, concurrency);
+	}
+
 	public static EventDispatcher open(ScaleStrategy scaleStrategy) {
 		return open(scaleStrategy, Runtime.getRuntime().availableProcessors());
 	}
@@ -88,7 +90,7 @@ public class ScalableEventDispatcher implements EventDispatcher {
 			} catch (Exception e) {
 				// close all event-dispatchers which have already been created
 				for (int j = 0; j < i; j++) {
-					SafeCloseUtil.close(dispatchers[i]);
+					SafeCloseUtil.close(dispatchers[j]);
 				}
 				throw new EventDispatcherCreationException("could not start " + concurrency + " dispatchers", e);
 			}
@@ -134,7 +136,9 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		if (disp == null) {
 			disp = findBestDispatcher();
 			EventDispatcher registeredDisp = map.putIfAbsent(id, disp);
-			if (registeredDisp) 
+			if (registeredDisp != null) {
+				disp = registeredDisp;
+			}
 		}
 		return disp;
 	}
@@ -226,12 +230,12 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		}
 	}
 
-	//	@Override
-	//	public int getNumEventHandlers() {
-	//		int total = 0;
-	//		for (RichEventDispatcher disp : dispatchers) {
-	//			total += disp.getNumEventHandlers();
-	//		}
-	//		return total;
-	//	}
+	// @Override
+	// public int getNumEventHandlers() {
+	// int total = 0;
+	// for (RichEventDispatcher disp : dispatchers) {
+	// total += disp.getNumEventHandlers();
+	// }
+	// return total;
+	// }
 }

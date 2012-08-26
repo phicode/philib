@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.io;
 
 import static org.testng.Assert.assertEquals;
@@ -57,7 +56,7 @@ public class RingBufferTest {
 
 	@Test
 	public void frontAndBack() {
-		LinkedList<byte[]> bufExp = new LinkedList<byte[]>();
+		LinkedList<byte[]> bufExp = new LinkedList<>();
 		RingBuffer buf = new RingBuffer();
 		assertEquals(0, buf.available());
 		final int chunkSize = 16;
@@ -81,7 +80,7 @@ public class RingBufferTest {
 
 	@Test
 	public void randomAccess() {
-		LinkedList<Byte> bufExp = new LinkedList<Byte>();
+		LinkedList<Byte> bufExp = new LinkedList<>();
 		RingBuffer ringBuf = new RingBuffer();
 		int size = 0;
 		long performed = 0;

@@ -31,7 +31,7 @@ import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.context.SimpleNetContext;
+import ch.bind.philib.net.context.ScalableNetContext;
 import ch.bind.philib.net.session.EchoServerSession;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 
@@ -42,6 +42,8 @@ import ch.bind.philib.net.tcp.TcpNetFactory;
  */
 public class TcpEchoServer implements SessionFactory {
 
+	private static final boolean DEBUG_MODE = true;
+
 	public static void main(String[] args) throws Exception {
 		new TcpEchoServer().foo();
 	}
@@ -49,17 +51,19 @@ public class TcpEchoServer implements SessionFactory {
 	private void foo() throws Exception {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
 		SessionFactory sessionFactory = this;
-		NetContext context = new SimpleNetContext();
-		context.setTcpNoDelay(false);
+		// NetContext context = new SimpleNetContext();
+		NetContext context = new ScalableNetContext(2);
+		context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
+		context.setDebugMode(DEBUG_MODE);
 		NetServer server = TcpNetFactory.INSTANCE.openServer(context, bindAddress, sessionFactory);
 		while (true) {
 			Thread.sleep(20000);
 			synchronized (sessions) {
 				if (sessions.size() > 0) {
 					long now = System.nanoTime();
-					long tooFarAgo = now - 5000000L; // 5ms
+					long tooFarAgo = now - 10_000_000L; // 10ms
 					Iterator<EchoServerSession> iter = sessions.iterator();
 					System.out.println(server.getContext().getBufferCache().getCacheStats().toString());
 					System.out.println("sessions: " + sessions.size());
@@ -71,11 +75,11 @@ public class TcpEchoServer implements SessionFactory {
 						} else {
 							long lastInteractionNs = s.getLastInteractionNs();
 							if (lastInteractionNs < tooFarAgo) {
-								double lastSec = (now - lastInteractionNs) / 1000000000f;
-								System.out.printf("last interaction: %.5fsec => %s%n", //
-								        lastSec, s.getConnection().getDebugInformations());
+								double lastSec = (now - lastInteractionNs) / 1000_000_000f;
+								System.out.printf("last interaction: %.5fsec => %s, %s%n", //
+										lastSec, s, s.getConnection().getDebugInformations());
 							}
-							System.out.println(s);
+							// System.out.println(s);
 						}
 					}
 				}
@@ -83,7 +87,7 @@ public class TcpEchoServer implements SessionFactory {
 		}
 	}
 
-	private List<EchoServerSession> sessions = new ArrayList<EchoServerSession>();
+	private List<EchoServerSession> sessions = new ArrayList<>();
 
 	@Override
 	public synchronized EchoServerSession createSession(Connection connection) {

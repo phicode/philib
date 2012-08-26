@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.validation;
 
 import static org.testng.Assert.assertEquals;
@@ -45,7 +44,7 @@ public class ValidationUtilTest {
 
 	@Test
 	public void validateCollection() {
-		List<ValidatableDummy> list = new ArrayList<ValidatableDummy>();
+		List<ValidatableDummy> list = new ArrayList<>();
 		list.add(new ValidatableDummy());
 		list.add(new ValidatableDummy());
 
@@ -99,7 +98,7 @@ public class ValidationUtilTest {
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void validateCollectionThrowNPE() {
-		List<Validatable> list = new ArrayList<Validatable>();
+		List<Validatable> list = new ArrayList<>();
 		ValidatableDummy dummy = null;
 		list.add(dummy);
 		assertEquals(1, list.size());

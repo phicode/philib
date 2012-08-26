@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
@@ -39,10 +38,9 @@ public interface TcpConnectionFactory {
 
 	/**
 	 * 
-	 * @param asyncConnect if {@code true} A selector key is already present but must be
-	 *            re-registered so that events go to the connection event-handler. if {@code false}
-	 *            no selector key is present, the event handler must be registered with the
-	 *            selector.
+	 * @param asyncConnect if {@code true} A selector key is already present but must be re-registered so that events go
+	 *            to the connection event-handler. if {@code false} no selector key is present, the event handler must
+	 *            be registered with the selector.
 	 * @param context
 	 * @param channel
 	 * @param sessionFactory

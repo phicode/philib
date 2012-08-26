@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.io;
 
 import java.nio.ByteBuffer;
@@ -31,8 +30,7 @@ import java.nio.ByteBuffer;
  */
 public final class BufferOps {
 
-	private BufferOps() {
-	}
+	private BufferOps() {}
 
 	private static volatile byte[] nullFiller;
 

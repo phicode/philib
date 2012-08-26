@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.cache;
 
 import ch.bind.philib.cache.impl.LinkedObjectCache;
@@ -46,31 +45,31 @@ public final class ByteArrayCache extends SpecificCacheBase<byte[]> {
 
 	public static ByteArrayCache createSimple(int bufferSize) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, DEFAULT_NUM_BUFFERS);
+		ObjectCache<byte[]> cache = new LinkedObjectCache<>(factory, DEFAULT_NUM_BUFFERS);
 		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createSimple(int bufferSize, int maxEntries) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, maxEntries);
+		ObjectCache<byte[]> cache = new LinkedObjectCache<>(factory, maxEntries);
 		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createScalable(int bufferSize, int maxEntries) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new ScalableObjectCache<byte[]>(factory, maxEntries);
+		ObjectCache<byte[]> cache = new ScalableObjectCache<>(factory, maxEntries);
 		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createScalable(int bufferSize, int maxEntries, int bufferBuckets) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new ScalableObjectCache<byte[]>(factory, maxEntries, bufferBuckets);
+		ObjectCache<byte[]> cache = new ScalableObjectCache<>(factory, maxEntries, bufferBuckets);
 		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createNoop(int bufferSize) {
 		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new NoopObjectCache<byte[]>(factory);
+		ObjectCache<byte[]> cache = new NoopObjectCache<>(factory);
 		return new ByteArrayCache(cache);
 	}
 

@@ -45,6 +45,7 @@ import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.util.LoadAvg;
 import ch.bind.philib.util.NoOpLoadAvg;
 import ch.bind.philib.util.SimpleLoadAvg;
+import ch.bind.philib.validation.Validation;
 
 /**
  * TODO
@@ -60,10 +61,10 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 
 	private static final int LOAD_AVG_SECONDS = 60;
 
-	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<NewRegistration>();
+	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<>();
 
 	// TODO: use a long->object map
-	private final ConcurrentMap<Long, EventHandler> handlersWithUndeliveredData = new ConcurrentHashMap<Long, EventHandler>();
+	private final ConcurrentMap<Long, EventHandler> handlersWithUndeliveredData = new ConcurrentHashMap<>();
 
 	private final ServiceState serviceState = new ServiceState();
 
@@ -152,7 +153,9 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 					// TODO: more efficient traversal
 					for (EventHandler eh : handlersWithUndeliveredData.values()) {
 						SelectionKey key = eh.getChannel().keyFor(selector);
-						handleEvent(eh, key, EventUtil.READ);
+						if (key != null) {
+							handleEvent(eh, key, EventUtil.READ);
+						}
 					}
 				}
 				loadAvg.end();
@@ -237,6 +240,8 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 
 	private void handleEvent(final EventHandler handler, final SelectionKey key, final int ops) {
 		try {
+			Validation.notNull(handler);
+			Validation.notNull(key);
 			int interestedOps = key.interestOps();
 			int newInterestedOps = handler.handle(ops);
 			if (newInterestedOps != EventUtil.OP_DONT_CHANGE && newInterestedOps != interestedOps) {
@@ -244,8 +249,11 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 			}
 		} catch (Exception e) {
 			// TODO: log as trace?
-			LOG.info("closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e));
+			LOG.info("closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e), e);
 			SafeCloseUtil.close(handler, LOG);
+			if (e instanceof NullPointerException) {
+				System.exit(0);
+			}
 		}
 	}
 

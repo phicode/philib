@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.validation;
 
 import java.io.Serializable;
@@ -37,7 +36,7 @@ public final class ValidationResults implements Serializable {
 	private final LinkedList<String> errors;
 
 	public ValidationResults() {
-		errors = new LinkedList<String>();
+		errors = new LinkedList<>();
 	}
 
 	public int getNumErrors() {

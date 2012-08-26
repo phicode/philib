@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.net.session;
 
 import java.io.IOException;
@@ -35,7 +34,7 @@ import ch.bind.philib.net.Session;
  */
 public class EchoServerSession implements Session {
 
-	private long lastInteractionNs;
+	private volatile long lastInteractionNs;
 
 	private final Connection connection;
 
@@ -54,12 +53,10 @@ public class EchoServerSession implements Session {
 	}
 
 	@Override
-	public void writable() throws IOException {
-	}
+	public void writable() throws IOException {}
 
 	@Override
-	public void closed() {
-	}
+	public void closed() {}
 
 	public Connection getConnection() {
 		return connection;

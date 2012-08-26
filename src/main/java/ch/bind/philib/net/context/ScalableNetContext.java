@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.net.context;
 
 import ch.bind.philib.cache.ByteBufferCache;
@@ -35,6 +34,12 @@ public class ScalableNetContext extends NetContextImpl {
 	public ScalableNetContext() {
 		// multi threaded net selector and buffer cache
 		super(ByteBufferCache.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
-		        ScalableEventDispatcher.open());
+				ScalableEventDispatcher.open());
+	}
+
+	public ScalableNetContext(int concurrency) {
+		// multi threaded net selector and buffer cache
+		super(ByteBufferCache.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS, concurrency), //
+				ScalableEventDispatcher.open(concurrency));
 	}
 }

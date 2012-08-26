@@ -37,7 +37,7 @@ import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.context.SimpleNetContext;
+import ch.bind.philib.net.context.ScalableNetContext;
 import ch.bind.philib.net.session.EchoClientSession;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 
@@ -51,7 +51,9 @@ import ch.bind.philib.net.tcp.TcpNetFactory;
 // TODO: many threads
 public class TcpEchoClient {
 
-	private static final boolean VERIFY_MODE = false;
+	private static final boolean VERIFY_MODE = true;
+
+	private static final boolean DEBUG_MODE = true;
 
 	public static void main(String[] args) throws Exception {
 		int numClients = 1;
@@ -74,12 +76,16 @@ public class TcpEchoClient {
 		new TcpEchoClient().run(numClients);
 	}
 
-	private List<RichEchoClientSession> sessions = new LinkedList<RichEchoClientSession>();
-	private List<Future<Session>> connecting = new LinkedList<Future<Session>>();
+	private List<RichEchoClientSession> sessions = new LinkedList<>();
+
+	private List<Future<Session>> connecting = new LinkedList<>();
 
 	private long numConnectFails;
+
 	private long numCloseFails;
+
 	private InetSocketAddress endpoint;
+
 	private NetContext context;
 
 	private static final SessionFactory sessionFactory = new SessionFactory() {
@@ -102,16 +108,24 @@ public class TcpEchoClient {
 			return;
 		}
 
-		context = new SimpleNetContext();
+		// context = new SimpleNetContext();
+		context = new ScalableNetContext(2);
 		context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
+		context.setDebugMode(DEBUG_MODE);
 
 		final long printStatsIntervalMs = 10000;
 		final long start = System.currentTimeMillis();
-		long rampUpMs = 100L;
-		long rampDownMs = 60000L;
-		int maxConnections = 2000;
+
+		// final long rampUpMs = 100L;
+		// final long rampDownMs = 60000L;
+		// final int maxConnections = 2000;
+
+		final long rampUpMs = 1000L;
+		final long rampDownMs = 20000L;
+		final int maxConnections = 100;
+
 		long startNext = start - 1;
 		long lastPrintStats = start;
 		try {
@@ -181,7 +195,7 @@ public class TcpEchoClient {
 				double rxMb = rxDiff / ((double) (1024 * 1024f));
 				double txMb = txDiff / ((double) (1024 * 1024f));
 				System.out.printf("last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d timeDiff=%d%n", //
-				        intervalMs / 1000, rxMb, txMb, mbit, (rxDiff + txDiff), timeDiff);
+						intervalMs / 1000, rxMb, txMb, mbit, (rxDiff + txDiff), timeDiff);
 			}
 		}
 		if (num > 1) {
@@ -189,7 +203,7 @@ public class TcpEchoClient {
 			double txMb = totalTx / ((double) (1024 * 1024f));
 			double mbit = ((totalRx + totalTx) * 8) / 1e6 / (timeDiff / 1000f);
 			System.out.printf("last %dsec total-rx=%.3fM, total-tx=%.3fM bytes => %.5f mbit/sec, #connections: %d, connecting: %d%n", //
-			        intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size());
+					intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size());
 		}
 		if (sessions.isEmpty() && connecting.isEmpty()) {
 			System.out.println("no active or connecting sessions!");
@@ -238,7 +252,9 @@ public class TcpEchoClient {
 	}
 
 	private static class RichEchoClientSession {
+
 		final EchoClientSession session;
+
 		final long createdAt = System.currentTimeMillis();
 
 		private RichEchoClientSession(EchoClientSession session) {

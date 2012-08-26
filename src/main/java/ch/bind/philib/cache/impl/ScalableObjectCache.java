@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.cache.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -57,7 +56,7 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 		this.caches = new LinkedObjectCache[numBuckets];
 		CacheStats[] s = new CacheStats[numBuckets];
 		for (int i = 0; i < numBuckets; i++) {
-			caches[i] = new LinkedObjectCache<E>(factory, entriesPerBucket);
+			caches[i] = new LinkedObjectCache<>(factory, entriesPerBucket);
 			s[i] = caches[i].getCacheStats();
 		}
 		this.stats = new CombinedCacheStats(s);

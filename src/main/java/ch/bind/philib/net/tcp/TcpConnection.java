@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
@@ -70,9 +69,8 @@ public final class TcpConnection extends TcpConnectionBase {
 		boolean finished = channel.connect(endpoint);
 		if (finished) {
 			return AsyncConnectHandler.forFinishedConnect(context, channel, sessionFactory, FACTORY);
-		} else {
-			return AsyncConnectHandler.forPendingConnect(context, channel, sessionFactory, FACTORY);
 		}
+		return AsyncConnectHandler.forPendingConnect(context, channel, sessionFactory, FACTORY);
 	}
 
 	@Override

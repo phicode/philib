@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.io;
 
 /**
@@ -121,7 +120,7 @@ public final class RingImpl<T> implements Ring<T> {
 				if (newLen < 0) {
 					if (l == Integer.MAX_VALUE) {
 						throw new OverflowException("size of " + getClass().getSimpleName()
-						        + " is at Integer.MAX_VALUE, can't add another value");
+								+ " is at Integer.MAX_VALUE, can't add another value");
 					}
 					newLen = Integer.MAX_VALUE;
 				}
@@ -153,8 +152,8 @@ public final class RingImpl<T> implements Ring<T> {
 
 	private static final void copyRingData(Object[] oldRing, int off, int used, Object[] newRing) {
 		assert (oldRing != null && newRing != null && //
-		        off >= 0 && off < oldRing.length && //
-		        used >= 0 && used <= oldRing.length && newRing.length >= used);
+				off >= 0 && off < oldRing.length && //
+				used >= 0 && used <= oldRing.length && newRing.length >= used);
 
 		if (off == 0) {
 			System.arraycopy(oldRing, 0, newRing, 0, used);

@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.lang;
 
 /**
@@ -49,6 +48,13 @@ public final class ExceptionUtil {
 
 	private static void add(StringBuilder sb, Throwable t) {
 		sb.append(t.getClass().getSimpleName());
+		StackTraceElement[] trace = t.getStackTrace();
+		if (trace != null && trace.length > 0) {
+			sb.append('@');
+			sb.append(trace[0].toString());
+		} else {
+			sb.append("@no-stack-trace");
+		}
 		String msg = t.getMessage();
 		if (msg == null) {
 			sb.append("()");

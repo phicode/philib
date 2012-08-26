@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.net.udp;
 
 import java.io.IOException;
@@ -139,7 +138,8 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 				// clear the data from the first read
 				BufferOps.memsetZero(rbuf);
 			}
-			//TODO: jumbo-frames could be bigger then the default read-buffer size (8192), detect that or expose a NetContext configuration parameter which allows for jumbo-frames
+			// TODO: jumbo-frames could be bigger then the default read-buffer size (8192), detect that or expose a
+			// NetContext configuration parameter which allows for jumbo-frames
 
 			SocketAddress addr;
 			try {

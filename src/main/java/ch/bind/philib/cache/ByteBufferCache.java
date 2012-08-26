@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.cache;
 
 import java.nio.ByteBuffer;
@@ -42,19 +41,19 @@ public final class ByteBufferCache extends SpecificCacheBase<ByteBuffer> {
 
 	public static ByteBufferCache createSimple(int bufferSize, int maxEntries) {
 		ObjectFactory<ByteBuffer> factory = createFactory(bufferSize);
-		ObjectCache<ByteBuffer> cache = new LinkedObjectCache<ByteBuffer>(factory, maxEntries);
+		ObjectCache<ByteBuffer> cache = new LinkedObjectCache<>(factory, maxEntries);
 		return new ByteBufferCache(cache);
 	}
 
 	public static ByteBufferCache createScalable(int bufferSize, int maxEntries) {
 		ObjectFactory<ByteBuffer> factory = createFactory(bufferSize);
-		ObjectCache<ByteBuffer> cache = new ScalableObjectCache<ByteBuffer>(factory, maxEntries);
+		ObjectCache<ByteBuffer> cache = new ScalableObjectCache<>(factory, maxEntries);
 		return new ByteBufferCache(cache);
 	}
 
 	public static ByteBufferCache createScalable(int bufferSize, int maxEntries, int bufferBuckets) {
 		ObjectFactory<ByteBuffer> factory = createFactory(bufferSize);
-		ObjectCache<ByteBuffer> cache = new ScalableObjectCache<ByteBuffer>(factory, maxEntries, bufferBuckets);
+		ObjectCache<ByteBuffer> cache = new ScalableObjectCache<>(factory, maxEntries, bufferBuckets);
 		return new ByteBufferCache(cache);
 	}
 

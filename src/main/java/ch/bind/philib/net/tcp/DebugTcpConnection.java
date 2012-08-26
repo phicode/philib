@@ -19,7 +19,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
@@ -97,9 +96,8 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 		boolean finished = channel.connect(endpoint);
 		if (finished) {
 			return AsyncConnectHandler.forFinishedConnect(context, channel, sessionFactory, FACTORY);
-		} else {
-			return AsyncConnectHandler.forPendingConnect(context, channel, sessionFactory, FACTORY);
 		}
+		return AsyncConnectHandler.forPendingConnect(context, channel, sessionFactory, FACTORY);
 	}
 
 	@Override
@@ -115,7 +113,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
 			LOG.debug(String.format("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-			        (t / 1000000f), rdiff, sdiff, getRx(), getTx()));
+					(t / 1000000f), rdiff, sdiff, getRx(), getTx()));
 		}
 		return rv;
 	}
@@ -150,9 +148,9 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 	public String getDebugInformations() {
 		try {
 			Socket sock = channel.socket();
-			String m = "readOps=%d, sendOps=%d, reg4send=%s, lastHandleSendable=%s, numHandles=%d, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
+			String m = "readOps=%s, sendOps=%s, reg4send=%s, lastHandleSendable=%s, numHandles=%s, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
 			return String.format(m, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles, getRx(), getTx(), sock.getTcpNoDelay(),
-			        sock.getReceiveBufferSize(), sock.getSendBufferSize());
+					sock.getReceiveBufferSize(), sock.getSendBufferSize());
 		} catch (SocketException e) {
 			return "error: " + ExceptionUtil.buildMessageChain(e);
 		}

@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import ch.bind.philib.io.BitOps;
 import ch.bind.philib.io.Ring;
 import ch.bind.philib.io.RingImpl;
+import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
@@ -58,7 +59,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	final SocketChannel channel;
 
 	// this object also provides the sendLock
-	private final Ring<NetBuf> w_writeBacklog = new RingImpl<NetBuf>();
+	private final Ring<NetBuf> w_writeBacklog = new RingImpl<>();
 
 	private ByteBuffer r_partialConsume;
 
@@ -91,8 +92,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 	@Override
 	public SocketAddress getRemoteAddress() {
-		return channel.socket().getRemoteSocketAddress();
-		// return channel.getRemoteAddress(); // JDK7
+		return channel.getRemoteAddress();
 	}
 
 	Session setup(boolean asyncConnect, SessionFactory sessionFactory) throws IOException {
@@ -151,12 +151,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	@Override
 	public void close() {
 		context.getEventDispatcher().unregister(this);
-		try {
-			if (channel.isOpen()) {
-				channel.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (channel.isOpen()) {
+			SafeCloseUtil.close(channel);
 		}
 		synchronized (w_writeBacklog) {
 			w_writeBacklog.clear();
