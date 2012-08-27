@@ -152,6 +152,7 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 					// creating a tcp-connection has changed the interested-ops and handler-attachment of the
 					// registration-key. this async connect handler is no longer registered and must tell the event
 					// handler that it does not want to overwrite its interested-ops
+					notifyAll();
 					return EventUtil.OP_DONT_CHANGE;
 				}
 			} catch (IOException e) {
