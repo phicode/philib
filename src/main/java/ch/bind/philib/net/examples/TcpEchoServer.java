@@ -57,7 +57,7 @@ public class TcpEchoServer implements SessionFactory {
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
 		context.setDebugMode(DEBUG_MODE);
-		NetServer server = TcpNetFactory.INSTANCE.openServer(context, bindAddress, sessionFactory);
+		NetServer server = TcpNetFactory.openServer(context, bindAddress, sessionFactory);
 		while (true) {
 			Thread.sleep(20000);
 			synchronized (sessions) {
@@ -77,7 +77,7 @@ public class TcpEchoServer implements SessionFactory {
 							if (lastInteractionNs < tooFarAgo) {
 								double lastSec = (now - lastInteractionNs) / 1000_000_000f;
 								System.out.printf("last interaction: %.5fsec => %s, %s%n", //
-										lastSec, s, s.getConnection().getDebugInformations());
+								        lastSec, s, s.getConnection().getDebugInformations());
 							}
 							// System.out.println(s);
 						}

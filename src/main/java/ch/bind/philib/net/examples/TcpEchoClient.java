@@ -195,7 +195,7 @@ public class TcpEchoClient {
 				double rxMb = rxDiff / ((double) (1024 * 1024f));
 				double txMb = txDiff / ((double) (1024 * 1024f));
 				System.out.printf("last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d timeDiff=%d%n", //
-						intervalMs / 1000, rxMb, txMb, mbit, (rxDiff + txDiff), timeDiff);
+				        intervalMs / 1000, rxMb, txMb, mbit, (rxDiff + txDiff), timeDiff);
 			}
 		}
 		if (num > 1) {
@@ -203,7 +203,7 @@ public class TcpEchoClient {
 			double txMb = totalTx / ((double) (1024 * 1024f));
 			double mbit = ((totalRx + totalTx) * 8) / 1e6 / (timeDiff / 1000f);
 			System.out.printf("last %dsec total-rx=%.3fM, total-tx=%.3fM bytes => %.5f mbit/sec, #connections: %d, connecting: %d%n", //
-					intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size());
+			        intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size());
 		}
 		if (sessions.isEmpty() && connecting.isEmpty()) {
 			System.out.println("no active or connecting sessions!");
@@ -232,7 +232,7 @@ public class TcpEchoClient {
 			return;
 		}
 		try {
-			Future<Session> future = TcpNetFactory.INSTANCE.asyncOpenClient(context, endpoint, sessionFactory);
+			Future<Session> future = TcpNetFactory.asyncOpen(context, endpoint, sessionFactory);
 			connecting.add(future);
 		} catch (IOException e) {
 			System.out.println("asyncOpenClient failed: " + ExceptionUtil.buildMessageChain(e));
@@ -246,6 +246,7 @@ public class TcpEchoClient {
 			RichEchoClientSession recs = iter.next();
 			if (recs.createdAt < killIfOlder) {
 				iter.remove();
+				System.out.println("closing: " + recs.session + ", " + recs.session.getConnection().getDebugInformations());
 				close(recs);
 			}
 		}

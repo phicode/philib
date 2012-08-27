@@ -32,8 +32,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.SafeCloseUtil;
+import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.NetServer;
+import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
@@ -121,15 +123,14 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 
 	private void createSession(SocketChannel clientChannel) {
 		try {
-			if (context.isDebugMode()) {
-				DebugTcpConnection.FACTORY.create(false, context, clientChannel, sessionFactory);
-			} else {
-				TcpConnection.FACTORY.create(false, context, clientChannel, sessionFactory);
-			}
+			SocketAddress remoteAddress = clientChannel.getRemoteAddress();
+			Session session = TcpNetFactory.create(false, context, clientChannel, remoteAddress, sessionFactory);
+			//TODO
+			//			contextListener.sessionCreated(session, remoteAddress);
 		} catch (IOException e) {
 			// TODO: notify an error handler
-			System.err.println("faild to create a tcp connection: " + e.getMessage());
-			e.printStackTrace(System.err);
+			LOG.debug("faild to create a tcp connection: " + ExceptionUtil.buildMessageChain(e));
+			SafeCloseUtil.close(clientChannel);
 		}
 	}
 }

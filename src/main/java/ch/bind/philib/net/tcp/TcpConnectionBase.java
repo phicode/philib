@@ -69,10 +69,13 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 	private Session session;
 
-	TcpConnectionBase(NetContext context, SocketChannel channel) {
+	private final SocketAddress remoteAddress;
+
+	TcpConnectionBase(NetContext context, SocketChannel channel, SocketAddress remoteAddress) {
 		super(context);
 		Validation.notNull(channel);
 		this.channel = channel;
+		this.remoteAddress = remoteAddress;
 	}
 
 	@Override
@@ -92,7 +95,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 	@Override
 	public SocketAddress getRemoteAddress() {
-		return channel.getRemoteAddress();
+		return remoteAddress;
 	}
 
 	Session setup(boolean asyncConnect, SessionFactory sessionFactory) throws IOException {

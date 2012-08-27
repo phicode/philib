@@ -23,6 +23,7 @@ package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.Future;
 
 import ch.bind.philib.net.NetFactory;
@@ -30,37 +31,59 @@ import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.util.FinishedFuture;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class TcpNetFactory implements NetFactory {
+public final class TcpNetFactory {
 
-	public static final TcpNetFactory INSTANCE = new TcpNetFactory();
-
-	private TcpNetFactory() {}
+	private TcpNetFactory() {
+	}
 
 	// TODO: supply session directly!
-	@Override
-	public Session syncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
-		if (context.isDebugMode()) {
-			return DebugTcpConnection.syncOpen(context, endpoint, sessionFactory);
+	public static Session syncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
+		SocketChannel channel = SocketChannel.open();
+		channel.configureBlocking(true);
+		context.setSocketOptions(channel.socket());
+		if (!channel.connect(endpoint)) {
+			channel.finishConnect();
 		}
-		return TcpConnection.syncOpen(context, endpoint, sessionFactory);
+		return create(false, context, channel, endpoint, sessionFactory);
 	}
 
-	@Override
-	public Future<Session> asyncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
-		if (context.isDebugMode()) {
-			return DebugTcpConnection.asyncOpen(context, endpoint, sessionFactory);
+	public static Future<Session> asyncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
+		SocketChannel channel = SocketChannel.open();
+		channel.configureBlocking(false);
+		context.setSocketOptions(channel.socket());
+
+		boolean finished = channel.connect(endpoint);
+		if (finished) {
+			Session session = create(false, context, channel, endpoint, sessionFactory);
+			return new FinishedFuture<Session>(session);
 		}
-		return TcpConnection.asyncOpen(context, endpoint, sessionFactory);
+		return AsyncConnectHandler.create(context, channel, sessionFactory);
 	}
 
-	@Override
-	public NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory sessionFactory) throws IOException {
+	public static NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory sessionFactory) throws IOException {
 		return TcpServer.open(context, sessionFactory, bindAddress);
+	}
+
+	public static Session create(boolean asyncConnect, NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
+		SocketAddress remoteAddress = channel.getRemoteAddress();
+		return create(asyncConnect, context, channel, remoteAddress, sessionFactory);
+	}
+
+	public static Session create(boolean asyncConnect, NetContext context, SocketChannel channel, SocketAddress remoteAddress, SessionFactory sessionFactory)
+	        throws IOException {
+		TcpConnectionBase connection = null;
+		if (context.isDebugMode()) {
+			connection = new DebugTcpConnection(context, channel, remoteAddress);
+		} else {
+			connection = new TcpConnection(context, channel, remoteAddress);
+		}
+		return connection.setup(asyncConnect, sessionFactory);
 	}
 }

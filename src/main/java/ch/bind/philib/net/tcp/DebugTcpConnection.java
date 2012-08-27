@@ -27,7 +27,6 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -35,8 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.BitOps;
 import ch.bind.philib.lang.ExceptionUtil;
-import ch.bind.philib.net.Session;
-import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
@@ -64,40 +61,8 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 
 	private volatile boolean lastHandleSendable;
 
-	private DebugTcpConnection(NetContext context, SocketChannel channel) {
-		super(context, channel);
-	}
-
-	static TcpConnectionFactory FACTORY = new TcpConnectionFactory() {
-
-		@Override
-		public Session create(boolean asyncConnect, NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
-			DebugTcpConnection connection = new DebugTcpConnection(context, channel);
-			return connection.setup(asyncConnect, sessionFactory);
-		}
-	};
-
-	public static Session syncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
-		SocketChannel channel = SocketChannel.open();
-		channel.configureBlocking(true);
-		context.setSocketOptions(channel.socket());
-		if (!channel.connect(endpoint)) {
-			channel.finishConnect();
-		}
-
-		return FACTORY.create(false, context, channel, sessionFactory);
-	}
-
-	public static Future<Session> asyncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
-		SocketChannel channel = SocketChannel.open();
-		channel.configureBlocking(false);
-		context.setSocketOptions(channel.socket());
-
-		boolean finished = channel.connect(endpoint);
-		if (finished) {
-			return AsyncConnectHandler.forFinishedConnect(context, channel, sessionFactory, FACTORY);
-		}
-		return AsyncConnectHandler.forPendingConnect(context, channel, sessionFactory, FACTORY);
+	DebugTcpConnection(NetContext context, SocketChannel channel, SocketAddress remoteAddress) {
+		super(context, channel, remoteAddress);
 	}
 
 	@Override
@@ -113,17 +78,23 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
 			LOG.debug(String.format("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-					(t / 1000000f), rdiff, sdiff, getRx(), getTx()));
+			        (t / 1000000f), rdiff, sdiff, getRx(), getTx()));
 		}
 		return rv;
 	}
 
 	@Override
 	int channelWrite(ByteBuffer data) throws IOException {
+		if (data.remaining() < 10) {
+			LOG.debug("small channel write pending: " + data.remaining());
+		}
 		sendOps.incrementAndGet();
 		Validation.isFalse(channel.isBlocking());
 		long tStart = System.nanoTime();
 		int num = super.channelWrite(data);
+		if (num > 0 && num < 50) {
+			LOG.debug("small channel write: " + num);
+		}
 		long t = System.nanoTime() - tStart;
 		if (t >= LOG_WRITE_TIME_THRESHOLD_NS) {
 			LOG.debug(String.format("write took %.6fms%n", (t / 1000000f)));
@@ -150,7 +121,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			Socket sock = channel.socket();
 			String m = "readOps=%s, sendOps=%s, reg4send=%s, lastHandleSendable=%s, numHandles=%s, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
 			return String.format(m, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles, getRx(), getTx(), sock.getTcpNoDelay(),
-					sock.getReceiveBufferSize(), sock.getSendBufferSize());
+			        sock.getReceiveBufferSize(), sock.getSendBufferSize());
 		} catch (SocketException e) {
 			return "error: " + ExceptionUtil.buildMessageChain(e);
 		}

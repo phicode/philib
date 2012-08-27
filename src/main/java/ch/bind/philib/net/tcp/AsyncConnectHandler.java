@@ -22,6 +22,7 @@
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CancellationException;
@@ -50,8 +51,6 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 
 	private SessionFactory sessionFactory;
 
-	private TcpConnectionFactory tcpConFactory;
-
 	private Session session;
 
 	private Exception execException;
@@ -60,39 +59,19 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 
 	private boolean registered;
 
-	private AsyncConnectHandler(NetContext context, Session session) {
-		super(context);
-		this.session = session;
-	}
-
-	private AsyncConnectHandler(NetContext context, IOException exc) {
-		super(context);
-		this.execException = exc;
-	}
-
-	private AsyncConnectHandler(NetContext context, SocketChannel channel, SessionFactory sessionFactory, TcpConnectionFactory tcpConFactory) {
+	private AsyncConnectHandler(NetContext context, SocketChannel channel, SessionFactory sessionFactory) {
 		super(context);
 		Validation.notNull(channel);
 		Validation.notNull(sessionFactory);
-		Validation.notNull(tcpConFactory);
 		this.channel = channel;
 		this.sessionFactory = sessionFactory;
-		this.tcpConFactory = tcpConFactory;
-		context.getEventDispatcher().register(this, EventUtil.CONNECT);
-		registered = true;
 	}
 
-	static Future<Session> forFinishedConnect(NetContext context, SocketChannel channel, SessionFactory sessionFactory, TcpConnectionFactory tcpConFactory) {
-		try {
-			Session session = tcpConFactory.create(false, context, channel, sessionFactory);
-			return new AsyncConnectHandler(context, session);
-		} catch (IOException exc) {
-			return new AsyncConnectHandler(context, exc);
-		}
-	}
-
-	static Future<Session> forPendingConnect(NetContext context, SocketChannel channel, SessionFactory sessionFactory, TcpConnectionFactory tcpConFactory) {
-		return new AsyncConnectHandler(context, channel, sessionFactory, tcpConFactory);
+	public static AsyncConnectHandler create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) {
+		AsyncConnectHandler rv = new AsyncConnectHandler(context, channel, sessionFactory);
+		rv.context.getEventDispatcher().register(rv, EventUtil.CONNECT);
+		rv.registered = true;
+		return rv;
 	}
 
 	@Override
@@ -168,7 +147,7 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 		} else {
 			try {
 				if (channel.finishConnect()) {
-					this.session = tcpConFactory.create(true, context, channel, sessionFactory);
+					this.session = TcpNetFactory.create(true, context, channel, sessionFactory);
 					registered = false;
 					// creating a tcp-connection has changed the interested-ops and handler-attachment of the
 					// registration-key. this async connect handler is no longer registered and must tell the event
@@ -177,6 +156,7 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 				}
 			} catch (IOException e) {
 				execException = e;
+				SafeCloseUtil.close(channel);
 			}
 		}
 		notifyAll();

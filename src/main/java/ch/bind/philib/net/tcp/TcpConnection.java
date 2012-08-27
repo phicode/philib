@@ -21,13 +21,9 @@
  */
 package ch.bind.philib.net.tcp;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.Future;
 
-import ch.bind.philib.net.Session;
-import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
 
 /**
@@ -37,40 +33,8 @@ import ch.bind.philib.net.context.NetContext;
  */
 public final class TcpConnection extends TcpConnectionBase {
 
-	private TcpConnection(NetContext context, SocketChannel channel) {
-		super(context, channel);
-	}
-
-	static TcpConnectionFactory FACTORY = new TcpConnectionFactory() {
-
-		@Override
-		public Session create(boolean asyncConnect, NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
-			TcpConnection connection = new TcpConnection(context, channel);
-			return connection.setup(asyncConnect, sessionFactory);
-		}
-	};
-
-	public static Session syncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
-		SocketChannel channel = SocketChannel.open();
-		channel.configureBlocking(true);
-		context.setSocketOptions(channel.socket());
-		if (!channel.connect(endpoint)) {
-			channel.finishConnect();
-		}
-
-		return FACTORY.create(false, context, channel, sessionFactory);
-	}
-
-	public static Future<Session> asyncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
-		SocketChannel channel = SocketChannel.open();
-		channel.configureBlocking(false);
-		context.setSocketOptions(channel.socket());
-
-		boolean finished = channel.connect(endpoint);
-		if (finished) {
-			return AsyncConnectHandler.forFinishedConnect(context, channel, sessionFactory, FACTORY);
-		}
-		return AsyncConnectHandler.forPendingConnect(context, channel, sessionFactory, FACTORY);
+	TcpConnection(NetContext context, SocketChannel channel, SocketAddress remoteAddress) {
+		super(context, channel, remoteAddress);
 	}
 
 	@Override
