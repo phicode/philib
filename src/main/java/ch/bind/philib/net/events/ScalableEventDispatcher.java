@@ -210,10 +210,11 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		}
 		long oldId = oldHandler.getEventHandlerId();
 		long newId = newHandler.getEventHandlerId();
-		EventDispatcher disp = map.remove(oldId);
+		EventDispatcher disp = map.get(oldId);
 		if (disp != null) {
 			map.put(newId, disp);
 			disp.changeHandler(oldHandler, newHandler, ops, asap);
+			map.remove(oldId);
 		} else {
 			//TODO: error and stuff
 			System.out.println("handler has no dispatcher: " + oldHandler);
@@ -269,13 +270,4 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		System.out.println("event handler is not registered: " + eventHandler);
 		return 0;
 	}
-
-	// @Override
-	// public int getNumEventHandlers() {
-	// int total = 0;
-	// for (RichEventDispatcher disp : dispatchers) {
-	// total += disp.getNumEventHandlers();
-	// }
-	// return total;
-	// }
 }
