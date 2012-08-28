@@ -58,7 +58,7 @@ public class MurmurHashTest {
 		long sum = 0;
 		long tStart = System.nanoTime();
 		final long process = 1 << 30;
-		final long bucket = size * 8;
+		final long bucket = size * 8L;
 		while ((total + bucket) < process) {
 			sum += MurmurHash.murmur2(b);
 			sum += MurmurHash.murmur2(b);
@@ -88,7 +88,7 @@ public class MurmurHashTest {
 		long sum = 0;
 		long tStart = System.nanoTime();
 		final long process = 1 << 30;
-		final long bucket = size * 8;
+		final long bucket = size * 8L;
 		while ((total + bucket) < process) {
 			sum += MurmurHash.murmur3(b);
 			sum += MurmurHash.murmur3(b);

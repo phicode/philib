@@ -251,9 +251,6 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 			// TODO: log as trace?
 			LOG.info("closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e), e);
 			SafeCloseUtil.close(handler, LOG);
-			if (e instanceof NullPointerException) {
-				System.exit(0);
-			}
 		}
 	}
 

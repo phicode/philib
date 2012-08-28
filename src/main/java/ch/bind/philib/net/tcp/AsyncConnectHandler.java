@@ -22,7 +22,6 @@
 package ch.bind.philib.net.tcp;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CancellationException;
@@ -45,7 +44,7 @@ import ch.bind.philib.validation.Validation;
  * @author Philipp Meinen
  */
 
-public class AsyncConnectHandler extends EventHandlerBase implements Future<Session> {
+public final class AsyncConnectHandler extends EventHandlerBase implements Future<Session> {
 
 	private SocketChannel channel;
 
