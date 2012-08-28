@@ -119,8 +119,10 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 	public String getDebugInformations() {
 		try {
 			Socket sock = channel.socket();
-			String m = "readOps=%s, sendOps=%s, reg4send=%s, lastHandleSendable=%s, numHandles=%s, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
-			return String.format(m, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles, getRx(), getTx(), sock.getTcpNoDelay(),
+			int ops = context.getEventDispatcher().getRegisteredOps(this);
+			String sOps = EventUtil.opsToString(ops);
+			String m = "ops=%s, readOps=%s, sendOps=%s, reg4send=%s, lastHandleSendable=%s, numHandles=%s, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
+			return String.format(m, sOps, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles, getRx(), getTx(), sock.getTcpNoDelay(),
 			        sock.getReceiveBufferSize(), sock.getSendBufferSize());
 		} catch (SocketException e) {
 			return "error: " + ExceptionUtil.buildMessageChain(e);

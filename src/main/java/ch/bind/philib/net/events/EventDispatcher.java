@@ -34,7 +34,9 @@ public interface EventDispatcher extends Closeable {
 
 	void register(EventHandler eventHandler, int ops);
 
-	void reRegister(EventHandler eventHandler, int ops, boolean asap);
+	void changeOps(EventHandler eventHandler, int ops, boolean asap);
+
+	void changeHandler(EventHandler oldHandler, EventHandler newHandler, int ops, boolean asap);
 
 	void unregister(EventHandler eventHandler);
 
@@ -43,5 +45,7 @@ public interface EventDispatcher extends Closeable {
 	void registerForRedeliverPartialReads(EventHandler eventHandler);
 
 	void unregisterFromRedeliverPartialReads(EventHandler eventHandler);
+
+	int getRegisteredOps(EventHandler eventHandler);
 
 }

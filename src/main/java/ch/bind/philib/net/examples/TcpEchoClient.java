@@ -51,7 +51,7 @@ import ch.bind.philib.net.tcp.TcpNetFactory;
 // TODO: many threads
 public class TcpEchoClient {
 
-	private static final boolean VERIFY_MODE = true;
+	private static final boolean VERIFY_MODE = false;
 
 	private static final boolean DEBUG_MODE = true;
 

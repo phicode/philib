@@ -147,7 +147,7 @@ public class AsyncConnectHandler extends EventHandlerBase implements Future<Sess
 		} else {
 			try {
 				if (channel.finishConnect()) {
-					this.session = TcpNetFactory.create(true, context, channel, sessionFactory);
+					this.session = TcpNetFactory.create(this, context, channel, sessionFactory);
 					registered = false;
 					// creating a tcp-connection has changed the interested-ops and handler-attachment of the
 					// registration-key. this async connect handler is no longer registered and must tell the event

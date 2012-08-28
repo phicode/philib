@@ -36,6 +36,7 @@ import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.net.events.EventHandler;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.net.events.NetBuf;
@@ -98,7 +99,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		return remoteAddress;
 	}
 
-	Session setup(boolean asyncConnect, SessionFactory sessionFactory) throws IOException {
+	Session setup(EventHandler oldHandler, SessionFactory sessionFactory) throws IOException {
 		// make the socket ready for the session to write to
 		channel.configureBlocking(false);
 		context.setSocketOptions(channel.socket());
@@ -111,8 +112,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			close();
 			throw new IOException("session-creation failed", e);
 		}
-		if (asyncConnect) {
-			context.getEventDispatcher().reRegister(this, EventUtil.READ, false);
+		if (oldHandler != null) {
+			context.getEventDispatcher().changeHandler(oldHandler, this, EventUtil.READ, false);
 		} else {
 			context.getEventDispatcher().register(this, EventUtil.READ);
 		}
@@ -375,14 +376,14 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 	private void registerForWriteEvents() {
 		if (!registeredForWriteEvt) {
-			context.getEventDispatcher().reRegister(this, EventUtil.READ_WRITE, true);
+			context.getEventDispatcher().changeOps(this, EventUtil.READ_WRITE, true);
 			registeredForWriteEvt = true;
 		}
 	}
 
 	private void unregisterFromWriteEvents() {
 		if (registeredForWriteEvt) {
-			context.getEventDispatcher().reRegister(this, EventUtil.READ, false);
+			context.getEventDispatcher().changeOps(this, EventUtil.READ, false);
 			registeredForWriteEvt = false;
 		}
 	}

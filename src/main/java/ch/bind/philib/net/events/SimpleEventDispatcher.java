@@ -271,15 +271,32 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 	}
 
 	@Override
-	public void reRegister(EventHandler eventHandler, int ops, boolean asap) {
+	public void changeOps(EventHandler eventHandler, int ops, boolean asap) {
 		SelectableChannel channel = eventHandler.getChannel();
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			// channel is not registered for this selector
-			register(eventHandler, ops);
+			//TODO: notify a listener
+			System.err.println("cannot change ops for a channel which is not yet registered, handler: " + eventHandler);
 		} else {
 			key.interestOps(ops);
-			key.attach(eventHandler);
+			if (asap) {
+				wakeup();
+			}
+		}
+	}
+
+	@Override
+	public void changeHandler(EventHandler oldHandler, EventHandler newHandler, int ops, boolean asap) {
+		// TODO Auto-generated method stub
+		SelectableChannel channel = oldHandler.getChannel();
+		Validation.isTrue(channel == newHandler.getChannel());
+		SelectionKey key = channel.keyFor(selector);
+		if (key == null) {
+			System.err.println("cannot change handlers for a channel which is not yet registered, handler: " + oldHandler);
+		} else {
+			key.interestOps(ops);
+			key.attach(newHandler);
 			if (asap) {
 				wakeup();
 			}
@@ -320,6 +337,15 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 	@Override
 	public boolean isEventDispatcherThread(final Thread thread) {
 		return (thread != null) && (thread.getId() == dispatchThreadId);
+	}
+
+	@Override
+	public int getRegisteredOps(EventHandler eventHandler) {
+		SelectionKey selectionKey = eventHandler.getChannel().keyFor(selector);
+		if (selectionKey != null) {
+			return selectionKey.interestOps();
+		}
+		return 0;
 	}
 
 	private static final class NewRegistration {

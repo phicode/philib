@@ -124,7 +124,7 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	private void createSession(SocketChannel clientChannel) {
 		try {
 			SocketAddress remoteAddress = clientChannel.getRemoteAddress();
-			Session session = TcpNetFactory.create(false, context, clientChannel, remoteAddress, sessionFactory);
+			Session session = TcpNetFactory.create(null, context, clientChannel, remoteAddress, sessionFactory);
 			//TODO
 			//			contextListener.sessionCreated(session, remoteAddress);
 		} catch (IOException e) {

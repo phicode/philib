@@ -192,10 +192,31 @@ public class ScalableEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public void reRegister(EventHandler eventHandler, int ops, boolean asap) {
+	public void changeOps(EventHandler eventHandler, int ops, boolean asap) {
 		EventDispatcher disp = findMapping(eventHandler);
 		if (disp != null) {
-			disp.reRegister(eventHandler, ops, asap);
+			disp.changeOps(eventHandler, ops, asap);
+		} else {
+			// TODO: notify listener
+			System.out.println("event handler is not registered: " + eventHandler);
+		}
+	}
+
+	@Override
+	public void changeHandler(EventHandler oldHandler, EventHandler newHandler, int ops, boolean asap) {
+		if (findMapping(newHandler) != null) {
+			System.out.println("an event-dispatcher is already registered for " + newHandler);
+			return;
+		}
+		long oldId = oldHandler.getEventHandlerId();
+		long newId = newHandler.getEventHandlerId();
+		EventDispatcher disp = map.remove(oldId);
+		if (disp != null) {
+			map.put(newId, disp);
+			disp.changeHandler(oldHandler, newHandler, ops, asap);
+		} else {
+			//TODO: error and stuff
+			System.out.println("handler has no dispatcher: " + oldHandler);
 		}
 	}
 
@@ -205,6 +226,9 @@ public class ScalableEventDispatcher implements EventDispatcher {
 			EventDispatcher disp = map.remove(eventHandler.getEventHandlerId());
 			if (disp != null) {
 				disp.unregister(eventHandler);
+			} else {
+				// TODO: notify listener
+				System.out.println("event handler is not registered: " + eventHandler);
 			}
 		}
 	}
@@ -219,6 +243,9 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		EventDispatcher disp = findMapping(eventHandler);
 		if (disp != null) {
 			disp.registerForRedeliverPartialReads(eventHandler);
+		} else {
+			// TODO: notify listener
+			System.out.println("event handler is not registered: " + eventHandler);
 		}
 	}
 
@@ -228,6 +255,19 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		if (disp != null) {
 			disp.unregisterFromRedeliverPartialReads(eventHandler);
 		}
+		// TODO: notify listener
+		System.out.println("event handler is not registered: " + eventHandler);
+	}
+
+	@Override
+	public int getRegisteredOps(EventHandler eventHandler) {
+		EventDispatcher disp = findMapping(eventHandler);
+		if (disp != null) {
+			return disp.getRegisteredOps(eventHandler);
+		}
+		// TODO: notify listener
+		System.out.println("event handler is not registered: " + eventHandler);
+		return 0;
 	}
 
 	// @Override

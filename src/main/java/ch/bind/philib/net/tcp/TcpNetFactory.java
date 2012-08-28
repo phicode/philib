@@ -31,6 +31,7 @@ import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.net.events.EventHandler;
 import ch.bind.philib.util.FinishedFuture;
 
 /**
@@ -51,7 +52,7 @@ public final class TcpNetFactory {
 		if (!channel.connect(endpoint)) {
 			channel.finishConnect();
 		}
-		return create(false, context, channel, endpoint, sessionFactory);
+		return create(null, context, channel, endpoint, sessionFactory);
 	}
 
 	public static Future<Session> asyncOpen(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException {
@@ -61,7 +62,7 @@ public final class TcpNetFactory {
 
 		boolean finished = channel.connect(endpoint);
 		if (finished) {
-			Session session = create(false, context, channel, endpoint, sessionFactory);
+			Session session = create(null, context, channel, endpoint, sessionFactory);
 			return new FinishedFuture<Session>(session);
 		}
 		return AsyncConnectHandler.create(context, channel, sessionFactory);
@@ -71,12 +72,12 @@ public final class TcpNetFactory {
 		return TcpServer.open(context, sessionFactory, bindAddress);
 	}
 
-	public static Session create(boolean asyncConnect, NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
+	public static Session create(EventHandler oldHandler, NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
 		SocketAddress remoteAddress = channel.getRemoteAddress();
-		return create(asyncConnect, context, channel, remoteAddress, sessionFactory);
+		return create(oldHandler, context, channel, remoteAddress, sessionFactory);
 	}
 
-	public static Session create(boolean asyncConnect, NetContext context, SocketChannel channel, SocketAddress remoteAddress, SessionFactory sessionFactory)
+	public static Session create(EventHandler oldHandler, NetContext context, SocketChannel channel, SocketAddress remoteAddress, SessionFactory sessionFactory)
 	        throws IOException {
 		TcpConnectionBase connection = null;
 		if (context.isDebugMode()) {
@@ -84,6 +85,6 @@ public final class TcpNetFactory {
 		} else {
 			connection = new TcpConnection(context, channel, remoteAddress);
 		}
-		return connection.setup(asyncConnect, sessionFactory);
+		return connection.setup(oldHandler, sessionFactory);
 	}
 }
