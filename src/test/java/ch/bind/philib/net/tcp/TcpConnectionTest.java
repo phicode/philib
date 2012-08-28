@@ -111,8 +111,8 @@ public class TcpConnectionTest {
 		SocketAddress addr = SocketAddresses.localhost(1234);
 		DevNullSessionFactory serverSessionFactory = new DevNullSessionFactory();
 		DevNullSessionFactory clientSessionFactory = new DevNullSessionFactory();
-		NetServer netServer = TcpNetFactory.INSTANCE.openServer(context, addr, serverSessionFactory);
-		Session clientS = TcpNetFactory.INSTANCE.syncOpenClient(context, addr, clientSessionFactory);
+		NetServer netServer = TcpNetFactory.openServer(context, addr, serverSessionFactory);
+		Session clientS = TcpNetFactory.syncOpen(context, addr, clientSessionFactory);
 
 		// give some time for the client and server-side of the connection to establish proper fusion power
 		Thread.sleep(50);
@@ -149,8 +149,8 @@ public class TcpConnectionTest {
 		SocketAddress addr = SocketAddresses.localhost(1234);
 		DevNullSessionFactory serverSessionFactory = new DevNullSessionFactory();
 		DevNullSessionFactory clientSessionFactory = new DevNullSessionFactory();
-		NetServer netServer = TcpNetFactory.INSTANCE.openServer(context, addr, serverSessionFactory);
-		Session clientS = TcpNetFactory.INSTANCE.syncOpenClient(context, addr, clientSessionFactory);
+		NetServer netServer = TcpNetFactory.openServer(context, addr, serverSessionFactory);
+		Session clientS = TcpNetFactory.syncOpen(context, addr, clientSessionFactory);
 
 		// give some time for the client and server-side of the connection to establish proper fusion power
 		Thread.sleep(50);
@@ -195,7 +195,7 @@ public class TcpConnectionTest {
 		long t = tEndReceive - tStart;
 		double mbPerSec = ((double) size) / (1024f * 1024f) / (t / 1000000000f);
 		System.out.printf("write took %.3fms, write+receive took %.3fms -> %.3fMb/s%n", //
-				(tEndWrite - tStart) / 1000000f, t / 1000000f, mbPerSec);
+		        (tEndWrite - tStart) / 1000000f, t / 1000000f, mbPerSec);
 	}
 
 	private static final class DevNullSessionFactory implements SessionFactory {
