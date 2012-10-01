@@ -26,7 +26,6 @@ import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Future;
 
-import ch.bind.philib.net.NetFactory;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;

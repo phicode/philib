@@ -122,9 +122,9 @@ public class TcpEchoClient {
 		// final long rampDownMs = 60000L;
 		// final int maxConnections = 2000;
 
-		final long rampUpMs = 1000L;
-		final long rampDownMs = 20000L;
-		final int maxConnections = 100;
+		final long rampUpMs = 50L;
+		final long rampDownMs = 200_000L;
+		final int maxConnections = 1000;
 
 		long startNext = start - 1;
 		long lastPrintStats = start;
