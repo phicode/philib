@@ -28,7 +28,8 @@ package ch.bind.philib;
  */
 public final class Constants {
 
-	private Constants() {}
+	private Constants() {
+	}
 
 	public static final int PHILIB_VERSION_MAJOR = 0;
 

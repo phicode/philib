@@ -32,7 +32,8 @@ public final class Fibonacci {
 
 	private long curFib = 1;
 
-	public Fibonacci() {}
+	public Fibonacci() {
+	}
 
 	public long nextFib() {
 		long cur = lastFib + curFib;

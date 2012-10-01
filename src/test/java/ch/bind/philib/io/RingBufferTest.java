@@ -150,7 +150,7 @@ public class RingBufferTest {
 		double mb = ((double) performed / MB);
 		double mbPerSec = mb / (time / 1000f);
 		System.out.printf("%s - %d MB in %dms = %.1fMB/s%n", //
-				getClass().getSimpleName(), performed / MB, time, mbPerSec);
+		        getClass().getSimpleName(), performed / MB, time, mbPerSec);
 	}
 
 	private static void verifyReadBack(byte[] bs, LinkedList<Byte> bufExp) {
@@ -241,8 +241,7 @@ public class RingBufferTest {
 	@Test
 	public void clear() {
 		RingBuffer buf = new RingBuffer();
-		byte[] a = {
-				0, 1, 2, 3 };
+		byte[] a = { 0, 1, 2, 3 };
 		buf.write(a);
 		assertEquals(a.length, buf.available());
 		buf.clear();

@@ -57,7 +57,8 @@ public class DevNullSession implements Session {
 	}
 
 	@Override
-	public void writable() { /* there will never be something to write */}
+	public void writable() { /* there will never be something to write */
+	}
 
 	public Connection getConnection() {
 		return connection;

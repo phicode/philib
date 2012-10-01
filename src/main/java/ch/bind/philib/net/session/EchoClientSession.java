@@ -151,7 +151,8 @@ public class EchoClientSession implements Session {
 	}
 
 	@Override
-	public void closed() {}
+	public void closed() {
+	}
 
 	public long getLastInteractionNs() {
 		return lastInteractionNs;

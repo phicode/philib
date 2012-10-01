@@ -44,7 +44,8 @@ package ch.bind.philib.lang;
  */
 public final class HashUtil {
 
-	private HashUtil() {}
+	private HashUtil() {
+	}
 
 	private static final int HASH_PRIME_START = 17;
 

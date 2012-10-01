@@ -122,8 +122,8 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			int ops = context.getEventDispatcher().getRegisteredOps(this);
 			String sOps = EventUtil.opsToString(ops);
 			String m = "ops=%s, readOps=%s, sendOps=%s, reg4send=%s, lastHandleSendable=%s, numHandles=%s, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
-			return String.format(m, sOps, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles, getRx(), getTx(), sock.getTcpNoDelay(),
-			        sock.getReceiveBufferSize(), sock.getSendBufferSize());
+			return String.format(m, sOps, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles, getRx(), getTx(),
+			        sock.getTcpNoDelay(), sock.getReceiveBufferSize(), sock.getSendBufferSize());
 		} catch (SocketException e) {
 			return "error: " + ExceptionUtil.buildMessageChain(e);
 		}

@@ -53,10 +53,12 @@ public class EchoServerSession implements Session {
 	}
 
 	@Override
-	public void writable() throws IOException {}
+	public void writable() throws IOException {
+	}
 
 	@Override
-	public void closed() {}
+	public void closed() {
+	}
 
 	public Connection getConnection() {
 		return connection;

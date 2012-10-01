@@ -31,7 +31,8 @@ import ch.bind.philib.io.EndianConverter;
  */
 public final class MurmurHash {
 
-	private MurmurHash() {}
+	private MurmurHash() {
+	}
 
 	private static final int MURMUR2_32_M = 0x5BD1E995;
 
@@ -137,8 +138,7 @@ public final class MurmurHash {
 	}
 
 	public static final long optimize() {
-		byte[] b = {
-				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+		byte[] b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 		final long s = System.nanoTime();
 		for (int i = 0; i < 12000; i++) {
 			murmur2(b);

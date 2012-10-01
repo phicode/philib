@@ -122,8 +122,7 @@ public class ByteArrayCacheTest {
 		}
 	}
 
-	public long stressTest(int type, boolean firstRun, int numThreads, long numOps, int getOps, int putOps)
-	        throws Exception {
+	public long stressTest(int type, boolean firstRun, int numThreads, long numOps, int getOps, int putOps) throws Exception {
 		TestUtil.gcAndSleep();
 
 		int totalbufferSize = 32 * 1024 * 1024;
@@ -207,8 +206,7 @@ public class ByteArrayCacheTest {
 
 		private final int putOps;
 
-		public StressTester(Semaphore ready, Semaphore go, Semaphore end, ByteArrayCache bp, long numOps, int getOps,
-		        int putOps) {
+		public StressTester(Semaphore ready, Semaphore go, Semaphore end, ByteArrayCache bp, long numOps, int getOps, int putOps) {
 			Validation.isTrue(getOps >= putOps);
 			this.ready = ready;
 			this.go = go;

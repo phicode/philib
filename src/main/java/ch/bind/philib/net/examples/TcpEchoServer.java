@@ -87,7 +87,7 @@ public class TcpEchoServer implements SessionFactory {
 		}
 	}
 
-	private List<EchoServerSession> sessions = new ArrayList<>();
+	private List<EchoServerSession> sessions = new ArrayList<EchoServerSession>();
 
 	@Override
 	public synchronized EchoServerSession createSession(Connection connection) {

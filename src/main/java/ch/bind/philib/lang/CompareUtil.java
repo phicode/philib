@@ -28,7 +28,8 @@ package ch.bind.philib.lang;
  */
 public final class CompareUtil {
 
-	private CompareUtil() {}
+	private CompareUtil() {
+	}
 
 	/**
 	 * A null-safe equality checking method.<br/>

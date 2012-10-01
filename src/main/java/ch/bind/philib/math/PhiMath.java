@@ -28,7 +28,8 @@ package ch.bind.philib.math;
  */
 public final class PhiMath {
 
-	private PhiMath() {}
+	private PhiMath() {
+	}
 
 	/**
 	 * Calculate the sum of all values from 1 to <code>end</code>, including. That is:

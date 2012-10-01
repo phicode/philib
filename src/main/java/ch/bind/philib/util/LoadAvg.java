@@ -28,7 +28,7 @@ public interface LoadAvg {
 	void logWorkNs(long workNs);
 
 	long getLoadAvg();
-	
+
 	double getLoadAvgAsFactor();
 
 }

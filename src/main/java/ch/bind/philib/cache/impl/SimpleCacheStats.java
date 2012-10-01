@@ -79,6 +79,6 @@ public final class SimpleCacheStats implements CacheStats {
 	@Override
 	public String toString() {
 		return String.format("acquires=%d, creates=%d, releases=%d, destroyed=%d",//
-				acquires.get(), creates.get(), releases.get(), destroyed.get());
+		        acquires.get(), creates.get(), releases.get(), destroyed.get());
 	}
 }

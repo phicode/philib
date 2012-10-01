@@ -25,8 +25,6 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-import ch.bind.philib.util.Counter;
-
 public class CounterTest {
 
 	private static final String EXPECT_ZERO = "a[unit=ms, #adds=0, total=0, min=N/A, max=N/A, avg=N/A]";

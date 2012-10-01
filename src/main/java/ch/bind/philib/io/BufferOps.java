@@ -30,7 +30,8 @@ import java.nio.ByteBuffer;
  */
 public final class BufferOps {
 
-	private BufferOps() {}
+	private BufferOps() {
+	}
 
 	private static volatile byte[] nullFiller;
 

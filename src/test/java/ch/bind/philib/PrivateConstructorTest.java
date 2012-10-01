@@ -32,13 +32,13 @@ import java.util.Enumeration;
 
 import org.testng.annotations.Test;
 
-//this is here to satisfy the code-coverage tool emma
-//by invoking the private constructors.
-//This helps to identify classes which do not yet have 100%
-//test coverage, even utility classes.
+// this is here to satisfy the code-coverage tool emma
+// by invoking the private constructors.
+// This helps to identify classes which do not yet have 100%
+// test coverage, even utility classes.
 public class PrivateConstructorTest {
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	public void invokeAllPrivateCtors() throws Exception {
 		Package rootPackage = getClass().getPackage();
 		String packageName = rootPackage.getName();

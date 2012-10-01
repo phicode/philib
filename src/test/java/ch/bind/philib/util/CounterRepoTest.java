@@ -25,11 +25,8 @@ import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
-import ch.bind.philib.util.Counter;
-import ch.bind.philib.util.CounterRepo;
-
 public class CounterRepoTest {
-	
+
 	@Test
 	public void reuseExisting() {
 		Counter a = CounterRepo.DEFAULT.forName("a", null);
