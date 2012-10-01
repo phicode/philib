@@ -39,7 +39,8 @@ public final class ThreadUtil {
 
 	public static final long DEFAULT_JOIN_TIMEOUT_MS = 1000L;
 
-	private ThreadUtil() {}
+	private ThreadUtil() {
+	}
 
 	public static void sleepUntilMs(long time) throws InterruptedException {
 		long diff = time - System.currentTimeMillis();
@@ -49,10 +50,19 @@ public final class ThreadUtil {
 		Thread.sleep(diff);
 	}
 
+	/**
+	 * @param t the thread which must be interrupted and joined with a default timeout
+	 * @return {@code true} for OK, {@code false} in case of an error.
+	 */
 	public static boolean interruptAndJoin(Thread t) {
 		return interruptAndJoin(t, DEFAULT_JOIN_TIMEOUT_MS);
 	}
 
+	/**
+	 * @param t the thread which must be interrupted
+	 * @param waitTime a specific timeout for the join operation
+	 * @return {@code true} for OK, {@code false} in case of an error.
+	 */
 	public static boolean interruptAndJoin(Thread t, long waitTime) {
 		if (t == null)
 			return true;
@@ -80,9 +90,9 @@ public final class ThreadUtil {
 	public static Thread createForeverRunner(Runnable runnable) {
 		Validation.notNull(runnable);
 		String threadName = String.format(FOREVER_RUNNER_NAME_FMT, //
-				ForeverRunner.class.getSimpleName(), //
-				runnable.getClass().getSimpleName(), //
-				FOREVER_RUNNER_SEQ.getAndIncrement());
+		        ForeverRunner.class.getSimpleName(), //
+		        runnable.getClass().getSimpleName(), //
+		        FOREVER_RUNNER_SEQ.getAndIncrement());
 		return createForeverRunner(runnable, threadName);
 	}
 
@@ -117,8 +127,7 @@ public final class ThreadUtil {
 		return start(createForeverRunner(group, runnable, threadName));
 	}
 
-	public static Thread createAndStartForeverRunner(ThreadGroup group, Runnable runnable, String threadName,
-			long stackSize) {
+	public static Thread createAndStartForeverRunner(ThreadGroup group, Runnable runnable, String threadName, long stackSize) {
 		return start(createForeverRunner(group, runnable, threadName, stackSize));
 	}
 
