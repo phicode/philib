@@ -63,7 +63,7 @@ public class TcpEchoServer implements SessionFactory {
 			synchronized (sessions) {
 				if (sessions.size() > 0) {
 					long now = System.nanoTime();
-					long tooFarAgo = now - 10_000_000L; // 10ms
+					long tooFarAgo = now - 10000000L; // 10ms
 					Iterator<EchoServerSession> iter = sessions.iterator();
 					System.out.println(server.getContext().getBufferCache().getCacheStats().toString());
 					System.out.println("sessions: " + sessions.size());
@@ -75,7 +75,7 @@ public class TcpEchoServer implements SessionFactory {
 						} else {
 							long lastInteractionNs = s.getLastInteractionNs();
 							if (lastInteractionNs < tooFarAgo) {
-								double lastSec = (now - lastInteractionNs) / 1000_000_000f;
+								double lastSec = (now - lastInteractionNs) / 1000000000f;
 								System.out.printf("last interaction: %.5fsec => %s, %s%n", //
 								        lastSec, s, s.getConnection().getDebugInformations());
 							}

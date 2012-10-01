@@ -43,8 +43,8 @@ import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.util.LoadAvg;
-import ch.bind.philib.util.NoOpLoadAvg;
-import ch.bind.philib.util.SimpleLoadAvg;
+import ch.bind.philib.util.LoadAvgNoop;
+import ch.bind.philib.util.LoadAvgSimple;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -61,10 +61,10 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 
 	private static final int LOAD_AVG_SECONDS = 60;
 
-	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<>();
+	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<NewRegistration>();
 
 	// TODO: use a long->object map
-	private final ConcurrentMap<Long, EventHandler> handlersWithUndeliveredData = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Long, EventHandler> handlersWithUndeliveredData = new ConcurrentHashMap<Long, EventHandler>();
 
 	private final ServiceState serviceState = new ServiceState();
 
@@ -88,7 +88,7 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 		} catch (IOException e) {
 			throw new SelectorCreationException(e);
 		}
-		LoadAvg loadAvg = collectLoadAverage ? SimpleLoadAvg.forSeconds(LOAD_AVG_SECONDS) : NoOpLoadAvg.INSTANCE;
+		LoadAvg loadAvg = collectLoadAverage ? LoadAvgSimple.forSeconds(LOAD_AVG_SECONDS) : LoadAvgNoop.INSTANCE;
 		SimpleEventDispatcher dispatcher = new SimpleEventDispatcher(selector, loadAvg);
 		String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
 		Thread dispatchThread = ThreadUtil.createAndStartForeverRunner(dispatcher, threadName);
@@ -140,7 +140,7 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 					LOG.error("IOException in Selector.select(): " + ExceptionUtil.buildMessageChain(e));
 					continue;
 				}
-				loadAvg.start();
+				long tStartNs = System.nanoTime();
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
 					for (SelectionKey key : selected) {
@@ -158,7 +158,8 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 						}
 					}
 				}
-				loadAvg.end();
+				long tWorkNs = System.nanoTime() - tStartNs;
+				loadAvg.logWorkNs(tWorkNs);
 			}
 		} catch (ClosedSelectorException e) {
 			serviceState.setClosed();

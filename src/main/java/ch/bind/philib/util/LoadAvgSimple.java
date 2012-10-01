@@ -23,7 +23,7 @@ package ch.bind.philib.util;
 
 import ch.bind.philib.validation.Validation;
 
-public final class SimpleLoadAvg implements LoadAvg {
+public final class LoadAvgSimple implements LoadAvg {
 
 	private final long lAvgOfXNs;
 
@@ -33,81 +33,69 @@ public final class SimpleLoadAvg implements LoadAvg {
 
 	private long tIdle;
 
-	private long startAt;
+	private long lastNormalizeNs;
 
-	private long endAt;
-
-	private SimpleLoadAvg(long avgOfXNs) {
+	private LoadAvgSimple(long avgOfXNs) {
 		this.lAvgOfXNs = avgOfXNs;
 		this.fAvgOfXNs = avgOfXNs;
 		// no work has been logged yet
 		this.tIdle = avgOfXNs;
 	}
 
-	public static SimpleLoadAvg forSeconds(int secs) {
+	public static LoadAvgSimple forSeconds(int secs) {
 		Validation.isTrue(secs >= 1);
-		return new SimpleLoadAvg(secs * 1_000_000_000L);
+		return new LoadAvgSimple(secs * 1000000000L);
 	}
 
-	public static SimpleLoadAvg forMillis(int millis) {
+	public static LoadAvgSimple forMillis(int millis) {
 		Validation.isTrue(millis >= 1);
-		return new SimpleLoadAvg(millis * 1_000_000L);
+		return new LoadAvgSimple(millis * 1000000L);
 	}
 
-	public static SimpleLoadAvg forMicros(int micros) {
+	public static LoadAvgSimple forMicros(int micros) {
 		Validation.isTrue(micros >= 1);
-		return new SimpleLoadAvg(micros * 1000L);
+		return new LoadAvgSimple(micros * 1000L);
 	}
 
-	public static SimpleLoadAvg forNanos(int nanos) {
+	public static LoadAvgSimple forNanos(int nanos) {
 		Validation.isTrue(nanos >= 1);
-		return new SimpleLoadAvg(nanos);
+		return new LoadAvgSimple(nanos);
 	}
 
 	@Override
-	public void start() {
-		if (startAt == 0) {
-			startAt = System.nanoTime();
-			if (endAt > 0) {
-				long diff = startAt - endAt;
-				if (diff > 0) {
-					tIdle += diff;
-					normalize();
-				}
-			}
-		}
+	public void logWorkMs(long workMs) {
+		logWorkNs(workMs * 1000000L);
 	}
 
 	@Override
-	public void end() {
-		if (startAt != 0) {
-			long s = startAt;
-			startAt = 0;
-			endAt = System.nanoTime();
-			long diff = endAt - s;
-			if (diff > 0) {
-				tWork += diff;
-				normalize();
+	public void logWorkNs(long workNs) {
+		long now = System.nanoTime();
+		long diff;
+		if (lastNormalizeNs == 0) {
+			diff = lAvgOfXNs;
+		} else {
+			diff = now - lastNormalizeNs;
+			if (diff < 0) {
+				diff = 0;
 			}
 		}
-	}
-
-	private void normalize() {
+		tWork += workNs;
+		tIdle += Math.max(0, diff - workNs);
 		long total = tIdle + tWork;
-		if (total > lAvgOfXNs) {
-			double factor = fAvgOfXNs / total;
-			tIdle = (long) (tIdle * factor);
-			tWork = (long) (tWork * factor);
-		}
+		double factor = fAvgOfXNs / total;
+		tIdle = (long) (tIdle * factor);
+		tWork = (long) (tWork * factor);
 	}
 
 	@Override
 	public long getLoadAvg() {
+		// update the internal state first
+		logWorkNs(0);
 		return tWork;
 	}
 
 	@Override
 	public double getLoadAvgAsFactor() {
-		return tWork / fAvgOfXNs;
+		return getLoadAvg() / fAvgOfXNs;
 	}
 }

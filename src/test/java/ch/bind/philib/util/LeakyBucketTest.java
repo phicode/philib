@@ -124,7 +124,7 @@ public class LeakyBucketTest {
 	public void exactRelease() {
 		final long tStart = System.nanoTime();
 
-		long intervalNs = 100_000_000L; // 100ms
+		long intervalNs = 100000000L; // 100ms
 		long i3 = intervalNs * 3;
 		long i4 = intervalNs * 4;
 		LeakyBucket bc = LeakyBucket.withLeakIntervalNano(intervalNs, 1);
@@ -145,6 +145,6 @@ public class LeakyBucketTest {
 		assertTrue(bc.canFill(i4 + 1) == 1);
 		assertTrue(bc.nextFillNano(i4 + 1) == 0);
 
-		System.out.printf("time for exact-release: %.3fsec%n", ((System.nanoTime() - tStart) / 1000_000_000f));
+		System.out.printf("time for exact-release: %.3fsec%n", ((System.nanoTime() - tStart) / 1000000000f));
 	}
 }

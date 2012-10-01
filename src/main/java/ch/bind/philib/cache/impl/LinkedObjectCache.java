@@ -36,15 +36,15 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 
 	private final AtomicReference<Node<E>> objList;
 
-	private final Node<E> LOCK_DUMMY = new Node<>();
+	private final Node<E> LOCK_DUMMY = new Node<E>();
 
 	public LinkedObjectCache(ObjectFactory<E> factory, int maxEntries) {
 		super(factory);
 		Validation.isTrue(maxEntries > 0);
-		this.freeList = new AtomicReference<>();
-		this.objList = new AtomicReference<>();
+		this.freeList = new AtomicReference<Node<E>>();
+		this.objList = new AtomicReference<Node<E>>();
 		for (int i = 0; i < maxEntries; i++) {
-			Node<E> n = new Node<>();
+			Node<E> n = new Node<E>();
 			put(freeList, n);
 		}
 	}

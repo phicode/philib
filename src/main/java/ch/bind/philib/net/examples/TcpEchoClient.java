@@ -76,9 +76,9 @@ public class TcpEchoClient {
 		new TcpEchoClient().run(numClients);
 	}
 
-	private List<RichEchoClientSession> sessions = new LinkedList<>();
+	private List<RichEchoClientSession> sessions = new LinkedList<RichEchoClientSession>();
 
-	private List<Future<Session>> connecting = new LinkedList<>();
+	private List<Future<Session>> connecting = new LinkedList<Future<Session>>();
 
 	private long numConnectFails;
 
@@ -123,7 +123,7 @@ public class TcpEchoClient {
 		// final int maxConnections = 2000;
 
 		final long rampUpMs = 50L;
-		final long rampDownMs = 200_000L;
+		final long rampDownMs = 200000L;
 		final int maxConnections = 1000;
 
 		long startNext = start - 1;

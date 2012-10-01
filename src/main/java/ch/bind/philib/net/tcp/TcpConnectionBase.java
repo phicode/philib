@@ -60,7 +60,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 	final SocketChannel channel;
 
 	// this object also provides the sendLock
-	private final Ring<NetBuf> w_writeBacklog = new RingImpl<>();
+	private final Ring<NetBuf> w_writeBacklog = new RingImpl<NetBuf>();
 
 	private ByteBuffer r_partialConsume;
 

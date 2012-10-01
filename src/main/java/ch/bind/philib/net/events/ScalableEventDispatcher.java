@@ -44,7 +44,7 @@ public class ScalableEventDispatcher implements EventDispatcher {
 	}
 
 	// TODO: long -> Object map
-	private final ConcurrentMap<Long, EventDispatcher> map = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Long, EventDispatcher> map = new ConcurrentHashMap<Long, EventDispatcher>();
 
 	private final ServiceState serviceState = new ServiceState();
 

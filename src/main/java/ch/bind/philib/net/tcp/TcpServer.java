@@ -123,7 +123,8 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 
 	private void createSession(SocketChannel clientChannel) {
 		try {
-			SocketAddress remoteAddress = clientChannel.getRemoteAddress();
+			//TODO:jdk7		SocketAddress remoteAddress = clientChannel.getRemoteAddress();
+			SocketAddress remoteAddress = clientChannel.socket().getRemoteSocketAddress();
 			Session session = TcpNetFactory.create(null, context, clientChannel, remoteAddress, sessionFactory);
 			//TODO
 			//			contextListener.sessionCreated(session, remoteAddress);

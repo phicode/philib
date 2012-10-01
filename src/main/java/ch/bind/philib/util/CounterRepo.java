@@ -32,7 +32,7 @@ public final class CounterRepo {
 
 	public static final CounterRepo DEFAULT = new CounterRepo();
 
-	private final ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<String, Counter>();
 
 	public CounterRepo() {
 	}

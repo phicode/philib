@@ -72,7 +72,8 @@ public final class TcpNetFactory {
 	}
 
 	public static Session create(EventHandler oldHandler, NetContext context, SocketChannel channel, SessionFactory sessionFactory) throws IOException {
-		SocketAddress remoteAddress = channel.getRemoteAddress();
+		//TODO:jdk7		SocketAddress remoteAddress = channel.getRemoteAddress();
+		SocketAddress remoteAddress = channel.socket().getRemoteSocketAddress();
 		return create(oldHandler, context, channel, remoteAddress, sessionFactory);
 	}
 

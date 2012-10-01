@@ -56,7 +56,7 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 		this.caches = new LinkedObjectCache[numBuckets];
 		CacheStats[] s = new CacheStats[numBuckets];
 		for (int i = 0; i < numBuckets; i++) {
-			caches[i] = new LinkedObjectCache<>(factory, entriesPerBucket);
+			caches[i] = new LinkedObjectCache<E>(factory, entriesPerBucket);
 			s[i] = caches[i].getCacheStats();
 		}
 		this.stats = new CombinedCacheStats(s);

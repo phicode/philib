@@ -50,7 +50,7 @@ public final class LeakyBucket {
 	public static LeakyBucket withLeakPerSecond(double leakPerSecond, long capacity) {
 		Validation.isTrue(leakPerSecond >= 0.000001, "leakPerSecond must be >= 0.000001");
 		Validation.isTrue(capacity >= 1, "capacity must be >= 1");
-		long leakIntervalNs = (long) Math.ceil(1000_000_000f / leakPerSecond);
+		long leakIntervalNs = (long) Math.ceil(1000000000f / leakPerSecond);
 		return new LeakyBucket(leakIntervalNs, capacity);
 	}
 
@@ -99,8 +99,8 @@ public final class LeakyBucket {
 	public void sleepWhileNotFillable() throws InterruptedException {
 		long nextFillNano;
 		while ((nextFillNano = nextFillNano()) > 0) {
-			long sleepMs = nextFillNano / 1000_000L;
-			int sleepNano = (int) (nextFillNano % 1000_000L);
+			long sleepMs = nextFillNano / 1000000L;
+			int sleepNano = (int) (nextFillNano % 1000000L);
 			Thread.sleep(sleepMs, sleepNano);
 		}
 	}

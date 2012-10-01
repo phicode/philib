@@ -56,7 +56,7 @@ public class RingBufferTest {
 
 	@Test
 	public void frontAndBack() {
-		LinkedList<byte[]> bufExp = new LinkedList<>();
+		LinkedList<byte[]> bufExp = new LinkedList<byte[]>();
 		RingBuffer buf = new RingBuffer();
 		assertEquals(0, buf.available());
 		final int chunkSize = 16;
@@ -80,7 +80,7 @@ public class RingBufferTest {
 
 	@Test
 	public void randomAccess() {
-		LinkedList<Byte> bufExp = new LinkedList<>();
+		LinkedList<Byte> bufExp = new LinkedList<Byte>();
 		RingBuffer ringBuf = new RingBuffer();
 		int size = 0;
 		long performed = 0;

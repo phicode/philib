@@ -18,7 +18,7 @@
 		<svn.url>http://svn.bind.ch/svn/philib/trunk</svn.url>
 		<scm.url>scm:svn:${svn.url}</scm.url>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.source.version>1.7</java.source.version>
+		<java.source.version>1.6</java.source.version>
 		<java.target.version>1.6</java.target.version>
 		<javac.optimize>true</javac.optimize>
 		<javac.showWarnings>true</javac.showWarnings>
