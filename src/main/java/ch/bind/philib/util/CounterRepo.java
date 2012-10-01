@@ -21,6 +21,8 @@
  */
 package ch.bind.philib.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -64,6 +66,10 @@ public final class CounterRepo {
 
 	public void remove(String name) {
 		counters.remove(getOrElse(name, DEFAULT_COUNTER_NAME));
+	}
+
+	public Collection<Counter> getCounters() {
+		return new ArrayList<Counter>(counters.values());
 	}
 
 	private String getOrElse(String name, String def) {

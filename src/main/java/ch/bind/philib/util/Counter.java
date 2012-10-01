@@ -40,6 +40,14 @@ public final class Counter {
 		this.name = name;
 		this.unit = unit;
 	}
+	
+	public String getName() {
+	    return name;
+    }
+	
+	public String getUnit() {
+	    return unit;
+    }
 
 	public void add(long value) {
 		if (value <= 0) {

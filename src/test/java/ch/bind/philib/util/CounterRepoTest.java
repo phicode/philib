@@ -21,6 +21,7 @@
  */
 package ch.bind.philib.util;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
@@ -32,6 +33,7 @@ public class CounterRepoTest {
 		Counter a = CounterRepo.DEFAULT.forName("a", null);
 		Counter b = CounterRepo.DEFAULT.forName("b", null);
 
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 2);
 		assertTrue(a == CounterRepo.DEFAULT.forName("a", null));
 		assertTrue(b == CounterRepo.DEFAULT.forName("b", null));
 	}
@@ -40,6 +42,7 @@ public class CounterRepoTest {
 	public void remove() {
 		Counter a = CounterRepo.DEFAULT.forName("a", null);
 		CounterRepo.DEFAULT.remove("a");
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 0);
 		assertTrue(a != CounterRepo.DEFAULT.forName("a", null));
 	}
 }
