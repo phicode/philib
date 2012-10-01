@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- * 
+ *  
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -25,7 +25,10 @@ import ch.bind.philib.io.BitOps;
 import ch.bind.philib.io.EndianConverter;
 
 /**
- * TODO
+ * Implementation of the murmur hashing functions.
+ * <p>
+ * Based on Austin Appleby's <a href="http://code.google.com/p/smhasher">smhasher</a> public domain code. 
+ * </p>
  * 
  * @author Philipp Meinen
  */
@@ -120,6 +123,8 @@ public final class MurmurHash {
 		hash = murmur3_fmix32(hash);
 		return hash;
 	}
+	
+//	murmur3_start_8bit(byte v)
 
 	private static final int murmur3_round32(int k) {
 		k *= MURMUR3_32_C1;
