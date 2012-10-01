@@ -32,75 +32,78 @@ public class LeakyBucketTest {
 
 	@Test
 	public void normalTimeInitialCalc() {
-		LeakyBucket bc = LeakyBucket.withReleasePerSecond(2500, 1000);
-		assertEquals(1000, bc.available());
+		LeakyBucket bc = LeakyBucket.withLeakPerSecond(2500, 1000);
+		assertEquals(1000, bc.canFill());
 		assertEquals(1000, bc.getCapacity());
 	}
 
 	@Test
 	public void fakeTimeInitialCalc() {
-		LeakyBucket bc = LeakyBucket.withReleasePerSecond(100, 1000);
-		// not quite a second
+		LeakyBucket bc = LeakyBucket.withLeakPerSecond(100, 1000);
+		// fill the bucket
+		bc.fill(1000, 0);
+		// not quite a second a second later
 		long time = SEC - 1;
-		assertEquals(99, bc.available(time));
+		assertEquals(99, bc.canFill(time));
 		time++; // 1sec
-		assertEquals(100, bc.available(time));
+		assertEquals(100, bc.canFill(time));
 	}
 
 	@Test
 	public void fakeTimeCountSmallSteps() {
-		LeakyBucket bc = LeakyBucket.withReleasePerSecond(2500, 2500);
+		LeakyBucket bc = LeakyBucket.withLeakPerSecond(2500, 2500);
 		long time = SEC;
 		long interval = 400000; // SEC / 2500
-		assertEquals(2500, bc.available(time));
-		assertEquals(0, bc.nextAvailableNano(time));
+		assertEquals(2500, bc.canFill(time));
+		assertEquals(0, bc.nextFillNano(time));
 		// simulate one whole day
 		for (int numSeconds = 0; numSeconds < 86400; numSeconds++) {
-			assertEquals(2500, bc.available(time));
-			assertEquals(0, bc.nextAvailableNano(time));
+			assertEquals(2500, bc.canFill(time));
+			assertEquals(0, bc.nextFillNano(time));
 
-			bc.acquire(2500, time);
-			assertEquals(0, bc.available(time));
-			assertEquals(interval, bc.nextAvailableNano(time));
+			bc.fill(2500, time);
+			assertEquals(0, bc.canFill(time));
+			assertEquals(interval, bc.nextFillNano(time));
 			time++; // x sec + 1 nano
-			assertEquals(0, bc.available(time));
-			assertEquals(interval - 1, bc.nextAvailableNano(time));
+			assertEquals(0, bc.canFill(time));
+			assertEquals(interval - 1, bc.nextFillNano(time));
 
 			// x.5 sec - 1 nano
 			time += (SEC / 2 - 2);
-			assertEquals(1249, bc.available(time));
+			assertEquals(1249, bc.canFill(time));
 			// x.5 sec
 			time++;
-			assertEquals(1250, bc.available(time));
+			assertEquals(1250, bc.canFill(time));
 
 			// x.5 sec + 1 nano
 			time++;
-			assertEquals(1250, bc.available(time));
+			assertEquals(1250, bc.canFill(time));
 
 			// x + 1 sec - 1 nano
 			time += (SEC / 2 - 2);
-			assertEquals(2499, bc.available(time));
+			assertEquals(2499, bc.canFill(time));
 
 			// x + 1sec
 			time++;
-			assertEquals(2500, bc.available(time));
+			assertEquals(2500, bc.canFill(time));
 		}
 	}
 
 	@Test
-	public void acquireWithRealTime() {
-		LeakyBucket bc = LeakyBucket.withReleasePerSecond(2500, 1000);
+	public void fillWithRealTime() {
+		LeakyBucket bc = LeakyBucket.withLeakPerSecond(2500, 1000);
 		long start = System.nanoTime();
-		assertEquals(1000, bc.available());
-		bc.acquire(1000);
+		assertEquals(bc.canFill(), 1000);
+		bc.fill(1000);
+		assertEquals(bc.canFill(), 0);
 		long moreAcquired = 0;
 		while (moreAcquired < 5000) {
 			long time = System.nanoTime();
-			long nextAvail = bc.nextAvailableNano(time);
-			long a = bc.available(time);
+			long nextAvail = bc.nextFillNano(time);
+			long a = bc.canFill(time);
 			if (a > 0) {
 				assertEquals(nextAvail, 0); // available now
-				bc.acquire(a, time);
+				bc.fill(a, time);
 				moreAcquired += a;
 			} else {
 				assertTrue(nextAvail > 0);
@@ -113,32 +116,35 @@ public class LeakyBucketTest {
 		// should take 2 seconds
 		long min = 2 * 1000 * 1000 * 1000 - delta;
 		long max = 2 * 1000 * 1000 * 1000 + delta;
-		assertTrue(totalTime >= min && totalTime <= max);
+		assertTrue(totalTime >= min && totalTime <= max, "total: " + totalTime);
 		System.out.println("time: " + totalTime);
 	}
 
 	@Test
 	public void exactRelease() {
 		final long tStart = System.nanoTime();
-		long intervalNs = 100 * 1000000L; // 100ms
+
+		long intervalNs = 100_000_000L; // 100ms
 		long i3 = intervalNs * 3;
 		long i4 = intervalNs * 4;
-		LeakyBucket bc = LeakyBucket.withReleaseIntervalNano(intervalNs, 1);
+		LeakyBucket bc = LeakyBucket.withLeakIntervalNano(intervalNs, 1);
+		bc.fill(1);
 		for (long t = 0; t < intervalNs; t += 10) {
-			assertTrue(bc.available(t) == 0);
-			assertTrue(bc.nextAvailableNano(t) == intervalNs - t);
+			assertTrue(bc.canFill(t) == 0);
+			assertTrue(bc.nextFillNano(t) == intervalNs - t);
 		}
 		for (long t = intervalNs; t < i3; t += 10) {
-			assertTrue(bc.available(t) == 1);
-			assertTrue(bc.nextAvailableNano(t) == 0);
+			assertTrue(bc.canFill(t) == 1);
+			assertTrue(bc.nextFillNano(t) == 0);
 		}
-		bc.acquire(1, i3);
+		bc.fill(1, i3);
 		for (long t = i3; t < i4; t += 10) {
-			assertTrue(bc.available(t) == 0);
-			assertTrue(bc.nextAvailableNano(t) == i4 - t);
+			assertTrue(bc.canFill(t) == 0);
+			assertTrue(bc.nextFillNano(t) == i4 - t);
 		}
-		assertTrue(bc.available(i4 + 1) == 1);
-		assertTrue(bc.nextAvailableNano(i4 + 1) == 0);
-		System.out.printf("time for exact-release: %.9fsec%n", ((System.nanoTime() - tStart) / 1000000000f));
+		assertTrue(bc.canFill(i4 + 1) == 1);
+		assertTrue(bc.nextFillNano(i4 + 1) == 0);
+
+		System.out.printf("time for exact-release: %.3fsec%n", ((System.nanoTime() - tStart) / 1000_000_000f));
 	}
 }

@@ -24,105 +24,106 @@ package ch.bind.philib.util;
 import ch.bind.philib.validation.Validation;
 
 /**
- * TODO
+ * An implementation of the leaky bucket pattern for throughput control.
  * 
  * @author Philipp Meinen
  */
 public final class LeakyBucket {
 
+	/** the maximum amount before the bucket will drop */
 	private final long capacity;
 
-	private final long releaseIntervalNs;
+	/** how often the bucket will leak until it is empty */
+	private final long leakIntervalNs;
 
-	private long lastReleaseNs;
+	/** the last time the bucket leaked */
+	private long lastLeakNs;
 
-	private long numLeases;
+	/** the current content of the bucket */
+	private long current;
 
-	private LeakyBucket(long releaseIntervalNs, long capacity) {
-		this.releaseIntervalNs = releaseIntervalNs;
+	private LeakyBucket(long leakIntervalNs, long capacity) {
+		this.leakIntervalNs = leakIntervalNs;
 		this.capacity = capacity;
 	}
 
-	/**
-	 * @param releasePerSecond
-	 * @param capacity
-	 * @return
-	 */
-	public static LeakyBucket withReleasePerSecond(double releasePerSecond, long capacity) {
-		Validation.isTrue(releasePerSecond >= 0.000001, "releasePerSecond must be >= 0.000001");
+	public static LeakyBucket withLeakPerSecond(double leakPerSecond, long capacity) {
+		Validation.isTrue(leakPerSecond >= 0.000001, "leakPerSecond must be >= 0.000001");
 		Validation.isTrue(capacity >= 1, "capacity must be >= 1");
-		long releaseIntervalNano = (long) Math.ceil(1000000000f / releasePerSecond);
-		return new LeakyBucket(releaseIntervalNano, capacity);
+		long leakIntervalNs = (long) Math.ceil(1000_000_000f / leakPerSecond);
+		return new LeakyBucket(leakIntervalNs, capacity);
 	}
 
-	public static LeakyBucket withReleaseIntervalNano(long releaseIntervalNano, long capacity) {
-		Validation.isTrue(releaseIntervalNano > 0, "releaseIntervalNano must be > 0");
+	public static LeakyBucket withLeakIntervalNano(long leakIntervalNs, long capacity) {
+		Validation.isTrue(leakIntervalNs > 0, "leakIntervalNs must be > 0");
 		Validation.isTrue(capacity >= 1, "capacity must be >= 1");
-		return new LeakyBucket(releaseIntervalNano, capacity);
+		return new LeakyBucket(leakIntervalNs, capacity);
 	}
 
 	public long getCapacity() {
 		return capacity;
 	}
 
-	public void acquire(long amount) {
-		acquire(amount, System.nanoTime());
+	public void fill(long amount) {
+		fill(amount, System.nanoTime());
 	}
 
-	public void acquire(long amount, long timeNs) {
-		recalc(timeNs);
-		numLeases -= amount;
+	public void fill(long amount, long timeNs) {
+		leak(timeNs);
+		current += amount;
 	}
 
-	public long available() {
-		return available(System.nanoTime());
+	public long canFill() {
+		return canFill(System.nanoTime());
 	}
 
-	public long available(long timeNs) {
-		recalc(timeNs);
-		return numLeases;
+	public long canFill(long timeNs) {
+		leak(timeNs);
+		return capacity - current;
 	}
 
-	public long nextAvailableNano() {
-		return nextAvailableNano(System.nanoTime());
+	public long nextFillNano() {
+		return nextFillNano(System.nanoTime());
 	}
 
-	public long nextAvailableNano(long timeNs) {
-		recalc(timeNs);
-		if (numLeases > 0) {
+	public long nextFillNano(long timeNs) {
+		leak(timeNs);
+		if (current < capacity) {
 			// available immediately
 			return 0;
 		}
-		long nextAvailNano = lastReleaseNs + releaseIntervalNs;
-		return nextAvailNano - timeNs;
+		long nextLeakNano = lastLeakNs + leakIntervalNs;
+		return nextLeakNano - timeNs;
 	}
 
-	public void sleepWhileNoneAvailable() throws InterruptedException {
-		long nextAvailNano = nextAvailableNano();
-		while (nextAvailNano > 0) {
-			long sleepMs = nextAvailNano / 1000000L;
-			int sleepNano = (int) (nextAvailNano % 1000000L);
+	public void sleepWhileNotFillable() throws InterruptedException {
+		long nextFillNano;
+		while ((nextFillNano = nextFillNano()) > 0) {
+			long sleepMs = nextFillNano / 1000_000L;
+			int sleepNano = (int) (nextFillNano % 1000_000L);
 			Thread.sleep(sleepMs, sleepNano);
-			nextAvailNano = nextAvailableNano();
 		}
 	}
 
-	private void recalc(final long timeNs) {
-		if (timeNs < lastReleaseNs) {
+	private void leak(final long timeNs) {
+		if (timeNs < lastLeakNs) {
 			// it seems that someone adjusted his clock backwards
-			lastReleaseNs = timeNs;
+			lastLeakNs = timeNs;
 		} else {
-			long elapsedNs = timeNs - lastReleaseNs;
-			long numRelease = elapsedNs / releaseIntervalNs;
-			long newLeases = numLeases + numRelease;
-
-			// dont go over the limit
-			if (newLeases > capacity) {
-				numLeases = capacity;
-				lastReleaseNs = timeNs;
-			} else {
-				numLeases = newLeases;
-				lastReleaseNs += (numRelease * releaseIntervalNs);
+			long diff = timeNs - lastLeakNs;
+			long canLeak = diff / leakIntervalNs;
+			if (canLeak > 0) {
+				// dont go below 0
+				if (canLeak >= current) {
+					lastLeakNs = (leakIntervalNs * current);
+					current = 0;
+				} else {
+					lastLeakNs += (leakIntervalNs * canLeak);
+					current -= canLeak;
+				}
+			}
+			if (current == 0) {
+				lastLeakNs = timeNs;
 			}
 		}
 	}
