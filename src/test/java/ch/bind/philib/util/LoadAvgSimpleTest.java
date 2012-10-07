@@ -74,13 +74,13 @@ public class LoadAvgSimpleTest {
 		verify(la, 0, 0.1);
 	}
 
-	private void verify(LoadAvg la, double min, double max) {
+	private static void verify(LoadAvg la, double min, double max) {
 		double factor = la.getLoadAvgAsFactor();
 		assertTrue(factor >= min, factor + " should be >= " + min);
 		assertTrue(factor <= max, factor + " should be <= " + max);
 	}
 
-	private void simulateLoadMs(LoadAvg la, int work, int idle, int durationMs) {
+	private static void simulateLoadMs(LoadAvg la, int work, int idle, int durationMs) {
 		long durationNs = durationMs * 1000000L;
 		long workNs = work * 1000000L;
 		long idleNs = idle * 1000000L;
@@ -100,6 +100,11 @@ public class LoadAvgSimpleTest {
 				}
 				atWork = !atWork;
 			}
+		}
+		if (atWork) {
+			la.logWorkNs(workNs);
+		} else {
+			la.logWorkNs(0);
 		}
 	}
 }

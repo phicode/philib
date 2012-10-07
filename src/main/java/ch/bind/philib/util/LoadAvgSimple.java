@@ -79,8 +79,10 @@ public final class LoadAvgSimple implements LoadAvg {
 				diff = 0;
 			}
 		}
+		lastNormalizeNs = now;
 		tWork += workNs;
 		tIdle += Math.max(0, diff - workNs);
+		System.out.printf("added work=%d, idle=%d\n", workNs, Math.max(0, diff - workNs));
 		long total = tIdle + tWork;
 		double factor = fAvgOfXNs / total;
 		tIdle = (long) (tIdle * factor);
