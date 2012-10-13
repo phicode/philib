@@ -72,7 +72,7 @@ public final class CounterRepo {
 		return new ArrayList<Counter>(counters.values());
 	}
 
-	private String getOrElse(String name, String def) {
+	private static String getOrElse(String name, String def) {
 		return (name == null || name.isEmpty()) ? def : name;
 	}
 }
