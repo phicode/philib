@@ -28,8 +28,7 @@ package ch.bind.philib.lang;
  */
 public final class ToStringUtil {
 
-	private ToStringUtil() {
-	}
+	private ToStringUtil() {}
 
 	/**
 	 * Pretty-prints a matrix.

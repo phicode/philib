@@ -33,8 +33,7 @@ public interface ObjectFactory<E> {
 	void destroy(E e);
 
 	/**
-	 * Prepare an object to be reused by a different user. Implementors of this method must make
-	 * sure that any data from
+	 * Prepare an object to be reused by a different user. Implementors of this method must make sure that any data from
 	 * previous users is cleared.
 	 * 
 	 * @param e The object which must be prepared for reuse.
