@@ -36,8 +36,12 @@ public final class LoadAvgNoop implements LoadAvg {
 	}
 
 	@Override
-	public void logWorkMs(long workMs) {}
+	public void logWorkMs(long workMs) {
+		// noop
+	}
 
 	@Override
-	public void logWorkNs(long workNs) {}
+	public void logWorkNs(long workNs) {
+		// noop
+	}
 }
