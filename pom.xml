@@ -7,13 +7,14 @@
 		<maven>2.2.1</maven>
 	</prerequisites>
 
-	<name>philib</name>
-	<description>utility classes by Philipp Meinen &lt;philipp@bind.ch&gt;</description>
-
 	<groupId>ch.bind</groupId>
 	<artifactId>philib</artifactId>
 	<version>0.2.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
+
+	<name>philib</name>
+	<description>utility classes by Philipp Meinen &lt;philipp@bind.ch&gt;</description>
+	<url>http://svn.bind.ch/svn/philib</url>
 
 	<properties>
 		<svn.url>http://svn.bind.ch/svn/philib/trunk</svn.url>
@@ -121,6 +122,20 @@
 					<!-- <workspace>${basedir}</workspace> -->
 					<workspaceCodeStylesURL>./settings/eclipse-formatting.xml</workspaceCodeStylesURL>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
