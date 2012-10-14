@@ -17,19 +17,32 @@ public class StaticLongMapTest {
 		StaticLongMap.create((Set<TestDummy>) null);
 	}
 
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "null or empty array provided")
+	public void noNullCreateArray() {
+		StaticLongMap.create((TestDummy[]) null);
+	}
+
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "null or empty collection provided")
 	public void noEmptyCreateCollection() {
 		StaticLongMap.create(Collections.<TestDummy> emptyList());
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "null or empty array provided")
-	public void noNullCreateArray() {
-		StaticLongMap.create((TestDummy[]) null);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "null or empty array provided")
 	public void noEmptyCreateArray() {
 		StaticLongMap.create(new TestDummy[0]);
+	}
+
+	@Test(expectedExceptions = NullPointerException.class)
+	public void noNullElementsInCreateArray() {
+		TestDummy a = new TestDummy(1, "a");
+		StaticLongMap.create(new TestDummy[] {
+				a, null });
+	}
+
+	@Test(expectedExceptions = NullPointerException.class)
+	public void noNullElementsInCreateCollection() {
+		TestDummy a = new TestDummy(1, "a");
+		StaticLongMap.create(Arrays.asList(null, a));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "duplicate key: 1")
