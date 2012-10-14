@@ -44,7 +44,7 @@ public interface ObjectFactory<E> {
 	/**
 	 * 
 	 * @param e
-	 * @return
+	 * @return {@code true} if this cached object is can be reused, {@code false} otherwise.
 	 */
 	boolean canReuse(E e);
 }

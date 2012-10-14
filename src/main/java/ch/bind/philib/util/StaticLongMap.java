@@ -45,7 +45,7 @@ public final class StaticLongMap<T> {
 	/**
 	 * 
 	 * @param elements
-	 * @return
+	 * @return A fully initialized {@code StaticLongMap}.
 	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i>, contains
 	 *             {@code null LongPair}s or contains duplicate keys.
 	 */
@@ -62,7 +62,7 @@ public final class StaticLongMap<T> {
 	/**
 	 * 
 	 * @param elements
-	 * @return
+	 * @return A fully initialized {@code StaticLongMap}.
 	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i>, contains
 	 *             {@code null LongPair}s or contains duplicate keys.
 	 */
