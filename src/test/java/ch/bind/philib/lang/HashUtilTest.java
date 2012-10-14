@@ -21,6 +21,8 @@
  */
 package ch.bind.philib.lang;
 
+import static ch.bind.philib.lang.HashUtil.nextHash;
+import static ch.bind.philib.lang.HashUtil.startHash;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -30,200 +32,56 @@ import org.testng.annotations.Test;
 
 public class HashUtilTest {
 
-	@Test(enabled = false)
-	public void objectHashes() {
-		Integer value = 0;
-		int expected = 17 * 31;
-
-		int hash = HashUtil.startHash(value);
-		assertEquals(expected, hash);
-
-		value = (int) 4294967295L; // 2^32-1
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 - 1;
-		assertEquals(expected, hash);
-
-		value = (int) 2147483647L; // 2^31-1
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 2147483647;
-		assertEquals(expected, hash);
-
-		value = (int) 2147483648L; // 2^31
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + -2147483648;
-		assertEquals(expected, hash);
-
-		value = null;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31;
-		assertEquals(expected, hash);
-	}
-
-	@Test(enabled = false)
-	public void booleanHashes() {
-		boolean value = false;
-		int expected = 17 * 31;
-
-		int hash = HashUtil.startHash(value);
-		assertEquals(expected, hash);
-
-		value = true;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 1;
-		assertEquals(expected, hash);
-
-		value = true;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 1;
-		assertEquals(expected, hash);
-
-		value = false;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 0;
-		assertEquals(expected, hash);
-
-		value = false;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 0;
-		assertEquals(expected, hash);
-	}
-
-	@Test(enabled = false)
-	public void byteHashes() {
-		byte value = 0;
-		int expected = 17 * 31;
-
-		int hash = HashUtil.startHash(value);
-		assertEquals(expected, hash);
-
-		value = (byte) 254;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 - 2;
-		assertEquals(expected, hash);
-
-		value = (byte) 127;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 127;
-		assertEquals(expected, hash);
-
-		value = (byte) 128;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 - 128;
-		assertEquals(expected, hash);
-
-		for (int i = 1; i < 256; i++) {
-			value = (byte) i;
-			hash = HashUtil.nextHash(hash, value);
-			expected = expected * 31 + value;
-			assertEquals(expected, hash);
+	@Test
+	public void simpleByte() {
+		for (byte a = -128; a < 127; a++) {
+			for (short b = -128; b <= 127; b++) {
+				if (a != b) {
+					int h1 = nextHash(startHash(a), b);
+					int h2 = nextHash(startHash(b), a);
+					assertTrue(h1 != h2);
+				}
+			}
 		}
 	}
 
-	@Test(enabled = false)
-	public void shortHashes() {
-		short value = 0;
-		int expected = 17 * 31;
-
-		int hash = HashUtil.startHash(value);
-		assertEquals(expected, hash);
-
-		value = (short) 65534;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 - 2;
-		assertEquals(expected, hash);
-
-		value = (short) 32767;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 32767;
-		assertEquals(expected, hash);
-
-		value = (short) 32768;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 - 32768;
-		assertEquals(expected, hash);
-
-		for (int i = 1; i < 65536; i++) {
-			value = (short) i;
-			hash = HashUtil.nextHash(hash, value);
-			expected = expected * 31 + value;
-			assertEquals(expected, hash);
+	@Test
+	public void simpleShort() {
+		for (short a = -5000; a < 5000; a++) {
+			for (short b = -5000; b < 5000; b++) {
+				if (a != b) {
+					int h1 = nextHash(startHash(a), b);
+					int h2 = nextHash(startHash(b), a);
+					assertTrue(h1 != h2);
+				}
+			}
 		}
 	}
 
-	@Test(enabled = false)
-	public void charHashes() {
-		char value = 0;
-		int expected = 17 * 31;
-
-		int hash = HashUtil.startHash(value);
-		assertEquals(expected, hash);
-
-		value = (char) 65534;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 65534;
-		assertEquals(expected, hash);
-
-		value = (char) 32767;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 32767;
-		assertEquals(expected, hash);
-
-		value = (char) 32768;
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 32768;
-		assertEquals(expected, hash);
-
-		for (int i = 1; i < 65536; i++) {
-			value = (char) i;
-			hash = HashUtil.nextHash(hash, value);
-			expected = expected * 31 + value;
-			assertEquals(expected, hash);
+	@Test
+	public void simpleInt() {
+		for (int a = 0; a < 10000; a++) {
+			for (int b = 0; b < 10000; b++) {
+				if (a != b) {
+					int h1 = nextHash(startHash(a), b);
+					int h2 = nextHash(startHash(b), a);
+					assertTrue(h1 != h2);
+				}
+			}
 		}
 	}
 
-	@Test(enabled = false)
-	public void intHashes() {
-		int value = 0;
-		int expected = 17 * 31;
-
-		int hash = HashUtil.startHash(value);
-		assertEquals(expected, hash);
-
-		value = (int) 4294967295L; // 2^32-1
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 - 1;
-		assertEquals(expected, hash);
-
-		value = (int) 2147483647L; // 2^31-1
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + 2147483647;
-		assertEquals(expected, hash);
-
-		value = (int) 2147483648L; // 2^31
-		hash = HashUtil.nextHash(hash, value);
-		expected = expected * 31 + -2147483648;
-		assertEquals(expected, hash);
-	}
-
-	@Test(enabled = false)
-	public void longHashes() {
-		long value = 0;
-		int expected = 17 * 31;
-
-		int hash = HashUtil.startHash(value);
-		assertEquals(expected, hash);
-
-		value = 9223372036854775807L; // 2^63-1
-		hash = HashUtil.nextHash(hash, value);
-		int masked = (int) (value >>> 32 ^ value);
-		expected = expected * 31 + masked;
-		assertEquals(expected, hash);
-
-		value++; // 2^31
-		hash = HashUtil.nextHash(hash, value);
-		masked = (int) (value >>> 32 ^ value);
-		expected = expected * 31 + masked;
-		assertEquals(expected, hash);
+	@Test
+	public void simpleLong() {
+		for (long a = 0; a < 10000; a++) {
+			for (long b = 0; b < 10000; b++) {
+				if (a != b) {
+					int h1 = nextHash(startHash(a), b);
+					int h2 = nextHash(startHash(b), a);
+					assertTrue(h1 != h2);
+				}
+			}
+		}
 	}
 
 	@Test
@@ -264,7 +122,7 @@ public class HashUtilTest {
 		assertEquals(expected, hash);
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void differentHashes() {
 		// all permutations of a:64b, b:32b, c:16b, d:8b
 		// where a := [ 3 .. 300 @ step 3 ]
