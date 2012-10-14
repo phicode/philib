@@ -21,7 +21,7 @@
  */
 package ch.bind.philib.util;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.validation.Validation;
 
@@ -32,32 +32,46 @@ import ch.bind.philib.validation.Validation;
  */
 public class RingQueue<E> {
 
-	private final AtomicInteger nextWriteIdx = new AtomicInteger();
+	// extends AbstractQueue<E> implements Queue<E>, java.io.Serializable
 
-	private final AtomicInteger writeCommittedIdx = new AtomicInteger(-1);
+	private final AtomicLong nextWriteIdx = new AtomicLong(0);
 
-	private final AtomicInteger readIdx = new AtomicInteger(-1);
+	private final AtomicLong writeCommittedIdx = new AtomicLong(-1);
 
-	private final E[] entries;
+	private final AtomicLong nextReadIdx = new AtomicLong(0);
+
+	private final AtomicLong readDoneIdx = new AtomicLong(-1);
+
+	private final Object[] entries;
 
 	private final int mask;
 
-	@SuppressWarnings("unchecked")
-	public RingQueue(int numEntries) {
-		Validation.isTrue(numEntries > 0, "numEntries must be > 0");
-		if (Integer.bitCount(numEntries) != 1) {
-			// not a power of two
-			for (int i = 0; i < 32; i++) {
-				int x = 1 << i;
-				if (x > numEntries) {
-					numEntries = x;
-					break;
-				}
-			}
+	public RingQueue(int capacity) {
+		Validation.isTrue(capacity > 0, "capacity must be > 0");
+		if (Integer.bitCount(capacity) != 1) {
+			throw new IllegalArgumentException("capacity must be a power of 2");
 		}
+		this.entries = new Object[capacity];
+		this.mask = capacity - 1;
+	}
 
-		mask = numEntries - 1;
-		this.entries = (E[]) new Object[numEntries];
+	public E poll() {
+		do {
+			final long canReadTo = writeCommittedIdx.get();
+			final long readAt = nextReadIdx.get();
+			if (canReadTo < readAt) {
+				return null;
+			}
+			// we can only read if noone else has done so already
+			if (nextReadIdx.compareAndSet(readAt, readAt + 1)) {
+				int readAtIdx = (int) (readAt & mask);
+				Object v = entries[readAtIdx];
+
+				// advance the read-commit thingy
+
+				return v;
+			}
+		} while (true);
 	}
 
 	public boolean offer(E e) {
