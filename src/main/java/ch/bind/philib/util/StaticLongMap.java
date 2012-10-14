@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
+import ch.bind.philib.validation.Validation;
+
 /**
  * A statically initialized and immutable map of {@code long -> T}.
  * 
@@ -49,10 +51,8 @@ public final class StaticLongMap<T> {
 	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i>, contains
 	 *             {@code null LongPair}s or contains duplicate keys.
 	 */
-	public static <T> StaticLongMap<T> create(Collection<LongPair<T>> elements) {
-		if (elements == null || elements.isEmpty()) {
-			throw new IllegalArgumentException("null or empty collection provided");
-		}
+	public static <T> StaticLongMap<T> create(Collection<? extends LongPair<T>> elements) {
+		Validation.notNullOrEmpty(elements);
 		final int l = elements.size();
 		LongPair<?>[] elems = new LongPair<?>[l];
 		elems = elements.toArray(elems);
@@ -60,16 +60,13 @@ public final class StaticLongMap<T> {
 	}
 
 	/**
-	 * 
 	 * @param elements
 	 * @return A fully initialized {@code StaticLongMap}.
 	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i>, contains
 	 *             {@code null LongPair}s or contains duplicate keys.
 	 */
-	public static <T> StaticLongMap<T> create(LongPair<T>... elements) {
-		if (elements == null || elements.length == 0) {
-			throw new IllegalArgumentException("null or empty collection provided");
-		}
+	public static <T> StaticLongMap<T> create(LongPair<T>[] elements) {
+		Validation.notNullOrEmpty(elements);
 		// make a copy which we can sort so that we do not disturb the caller's array
 		elements = elements.clone();
 		return init(elements);
