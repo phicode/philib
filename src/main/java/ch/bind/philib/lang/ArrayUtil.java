@@ -21,9 +21,7 @@
  */
 package ch.bind.philib.lang;
 
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -154,12 +152,4 @@ public final class ArrayUtil {
 
 	private static final char[] TO_HEX = {
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-	
-	public static <T> T[] extractIterator(int num, Iterator<T> iter) {
-		if (num <= 0 || !iter.hasNext()) {
-			return (T[])new Object[0];
-		}
-		T first = iter.next(); 
-		T[] rv = Array.newInstance(T.class, num);
-	}
 }
