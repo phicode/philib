@@ -131,6 +131,8 @@
 			<id>release-sign-artifacts</id>
 			<activation>
 				<property>
+					<!-- 'maven-release-plugin' goal:'release:perform' sets 'performRelease' 
+						to true -->
 					<name>performRelease</name>
 					<value>true</value>
 				</property>
