@@ -21,7 +21,9 @@
  */
 package ch.bind.philib.lang;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -96,11 +98,26 @@ public final class ArrayUtil {
 		return rv;
 	}
 
+	public static String formatShortHex(byte[] data) {
+		if (data == null || data.length == 0) {
+			return "";
+		}
+		return formatShortHex(data, 0, data.length);
+	}
+
 	public static String formatShortHex(byte[] data, int off, int len) {
+		if (data == null) {
+			return "";
+		}
+		final int l = data.length;
+
 		StringBuilder sb = new StringBuilder(len * 2);
 		for (int i = 0; i < len; i++) {
-			int v = data[off + i] & 0xFF;
-			toShortHex(sb, v);
+			int idx = off + i;
+			if (idx >= l) {
+				break;
+			}
+			toShortHex(sb, (data[idx] & 0xFF));
 		}
 		return sb.toString();
 	}
@@ -119,8 +136,7 @@ public final class ArrayUtil {
 		StringBuilder sb = new StringBuilder(len * 2);
 		final int initialPos = data.position();
 		for (int i = 0; i < len; i++) {
-			int v = data.get() & 0xFF;
-			toShortHex(sb, v);
+			toShortHex(sb, (data.get() & 0xFF));
 		}
 		data.position(initialPos);
 		return sb.toString();
@@ -138,4 +154,12 @@ public final class ArrayUtil {
 
 	private static final char[] TO_HEX = {
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	
+	public static <T> T[] extractIterator(int num, Iterator<T> iter) {
+		if (num <= 0 || !iter.hasNext()) {
+			return (T[])new Object[0];
+		}
+		T first = iter.next(); 
+		T[] rv = Array.newInstance(T.class, num);
+	}
 }

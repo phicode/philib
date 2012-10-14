@@ -56,7 +56,7 @@ public final class ToStringUtil {
 				}
 			}
 		}
-		// N * <maximale länge> + (N-1) mal " | "
+		// N * <max length> + (N-1) * " | "
 		int linelen = N * max + (N - 1) * 3;
 		char[] linepad = new char[linelen + 2];
 		for (int x = 1; x <= linelen; x++)
