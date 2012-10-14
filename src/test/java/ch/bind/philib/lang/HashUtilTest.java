@@ -292,12 +292,19 @@ public class HashUtilTest {
 		Arrays.sort(results);
 		final long t1 = System.currentTimeMillis() - tStart - t0;
 		int prev = results[0];
-
 		int colls = 0;
+		int colCount = 0;
+		int highColl = 0;
 		for (int i = 1; i < n; i++) {
 			int cur = results[i];
 			if (cur == prev) {
 				colls++;
+				colCount++;
+			} else {
+				if (colCount > highColl) {
+					highColl = colCount;
+				}
+				colCount = 0;
 			}
 			prev = cur;
 			cur++;
@@ -306,7 +313,23 @@ public class HashUtilTest {
 		double collFactor = ((double) colls) / ((double) n);
 		// less then 1.5%
 		assertTrue(collFactor < 0.015);
-		System.out.printf("t0=%d, t1=%d, t2=%d, collisions=%d/%d\n", t0, t1, t2, colls, n);
+		System.out.printf("t0=%d, t1=%d, t2=%d, collisions=%d/%d, highColl=%d\n", t0, t1, t2, colls, n, highColl);
+
+		// for (long a = 3; a <= 300; a += 3) {
+		// for (int b = 8; b <= 800; b += 8) {
+		// for (short c = 9; c <= 900; c += 9) {
+		// for (int id = 1; id < 256; id += 2) {
+		// byte d = (byte) (id & 0xFF);
+		// int hc = hash(a, b, c, d);
+		// if (Arrays.binarySearch(results, hc) >= 0) {
+		// System.out.printf("collision with %d,%d,%d,%d\n", a, b, c, d);
+		// }
+		// }
+		// }
+		// }
+		// }
+		// final long t3 = System.currentTimeMillis() - tStart - t0 - t1 - t2;
+		// System.out.printf("t0=%d, t1=%d, t2=%d,t3=%d, collisions=%d/%d\n", t0, t1, t2, t3, colls, n);
 	}
 
 	private static final int hash(long a, int b, short c, byte d) {
