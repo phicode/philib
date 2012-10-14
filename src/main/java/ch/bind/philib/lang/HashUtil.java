@@ -34,7 +34,7 @@ package ch.bind.philib.lang;
  *     hash = HashUtil.nextHash(hash, field2);
  *     ...
  *     hash = HashUtil.nextHash(hash, fieldN);
- *     return HashUtil._endHash(hash);
+ *     return hash;
  * }
  * </pre>
  * 
