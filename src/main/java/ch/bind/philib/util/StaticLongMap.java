@@ -99,6 +99,7 @@ public final class StaticLongMap<T> {
 	 * @param key
 	 * @return The value associated with {@code key}, which may be {@code null}.
 	 */
+	@SuppressWarnings("unchecked")
 	public T get(long key) {
 		final int idx = Arrays.binarySearch(keys, key);
 		return (T) (idx < 0 ? null : values[idx]);
@@ -108,6 +109,7 @@ public final class StaticLongMap<T> {
 	 * @param key
 	 * @return The value associated with {@code key}, {@code defaultVal} otherwise.
 	 */
+	@SuppressWarnings("unchecked")
 	public T getOrElse(long key, T defaultVal) {
 		final int idx = Arrays.binarySearch(keys, key);
 		return (T) (idx < 0 ? defaultVal : values[idx]);
@@ -118,6 +120,7 @@ public final class StaticLongMap<T> {
 	 * @return The value associated with {@code key}, which may be {@code null}.
 	 * @throws NoSuchElementException If no value is associated with {@code key}.
 	 */
+	@SuppressWarnings("unchecked")
 	public T getOrThrow(long key) throws NoSuchElementException {
 		final int idx = Arrays.binarySearch(keys, key);
 		if (idx < 0) {
