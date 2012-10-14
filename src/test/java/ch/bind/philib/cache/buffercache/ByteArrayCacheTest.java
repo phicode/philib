@@ -19,7 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache;
+package ch.bind.philib.cache.buffercache;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -29,6 +29,7 @@ import java.util.concurrent.Semaphore;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
+import ch.bind.philib.cache.buffercache.ByteArrayCache;
 import ch.bind.philib.validation.Validation;
 
 public class ByteArrayCacheTest {
