@@ -24,13 +24,14 @@ package ch.bind.philib.util;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 /**
  * A statically initialized and immutable map of {@code long -> T}.
  * 
  * @author Philipp Meinen
  */
-public class StaticLongMap<T> {
+public final class StaticLongMap<T> {
 
 	private final long[] keys;
 
@@ -55,7 +56,7 @@ public class StaticLongMap<T> {
 		final int l = elements.size();
 		LongPair<?>[] elems = new LongPair<?>[l];
 		elems = elements.toArray(elems);
-		return create((LongPair<T>[]) elems);
+		return init(elems);
 	}
 
 	/**
@@ -74,16 +75,16 @@ public class StaticLongMap<T> {
 		return init(elements);
 	}
 
-	private static <T> StaticLongMap<T> init(LongPair<T>[] elements) {
+	private static <T> StaticLongMap<T> init(LongPair<?>[] elements) {
 		int len = elements.length;
 		Arrays.sort(elements, LongPair.KEY_COMPARATOR);
 		long[] keys = new long[len];
 		Object[] values = new Object[len];
 		long prevKey = 0;
 		for (int i = 0; i < len; i++) {
-			LongPair<T> elem = elements[i];
+			LongPair<?> elem = elements[i];
 			long key = elem.getKey();
-			T value = elem.getValue();
+			Object value = elem.getValue();
 			if (i > 0 && prevKey == key) {
 				throw new IllegalArgumentException("duplicate key: " + key);
 			}
@@ -94,9 +95,35 @@ public class StaticLongMap<T> {
 		return new StaticLongMap<T>(keys, values);
 	}
 
+	/**
+	 * @param key
+	 * @return The value associated with {@code key}, which may be {@code null}.
+	 */
 	public T get(long key) {
-		int idx = Arrays.binarySearch(keys, key);
+		final int idx = Arrays.binarySearch(keys, key);
 		return (T) (idx < 0 ? null : values[idx]);
+	}
+
+	/**
+	 * @param key
+	 * @return The value associated with {@code key}, {@code defaultVal} otherwise.
+	 */
+	public T getOrElse(long key, T defaultVal) {
+		final int idx = Arrays.binarySearch(keys, key);
+		return (T) (idx < 0 ? defaultVal : values[idx]);
+	}
+
+	/**
+	 * @param key
+	 * @return The value associated with {@code key}, which may be {@code null}.
+	 * @throws NoSuchElementException If no value is associated with {@code key}.
+	 */
+	public T getOrThrow(long key) throws NoSuchElementException {
+		final int idx = Arrays.binarySearch(keys, key);
+		if (idx < 0) {
+			throw new NoSuchElementException("no value found for key: " + key);
+		}
+		return (T) values[idx];
 	}
 
 	public boolean containsKey(long key) {
