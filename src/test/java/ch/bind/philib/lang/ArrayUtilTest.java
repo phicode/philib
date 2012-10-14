@@ -21,6 +21,12 @@
  */
 package ch.bind.philib.lang;
 
+import static ch.bind.philib.lang.ArrayUtil.EMPTY_BYTE_ARRAY;
+import static ch.bind.philib.lang.ArrayUtil.concat;
+import static ch.bind.philib.lang.ArrayUtil.extractBack;
+import static ch.bind.philib.lang.ArrayUtil.extractFront;
+import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
+import static ch.bind.philib.lang.ArrayUtil.pickRandom;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -29,7 +35,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 
 import org.testng.annotations.Test;
-import static ch.bind.philib.lang.ArrayUtil.*;
 
 public class ArrayUtilTest {
 
