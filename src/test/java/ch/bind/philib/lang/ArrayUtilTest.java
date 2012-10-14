@@ -140,24 +140,21 @@ public class ArrayUtilTest {
 		assertEquals(extractBack(a, 3), "bcd".getBytes());
 		assertEquals(extractBack(a, 4), "abcd".getBytes());
 	}
-	
+
 	@Test
 	public void testExtractFront() {
 		byte[] a = "abcd".getBytes();
 		assertEquals(extractFront(a, 0), EMPTY_BYTE_ARRAY);
-		assertEquals(extractFront(a, 1), "ad".getBytes());
+		assertEquals(extractFront(a, 1), "a".getBytes());
 		assertEquals(extractFront(a, 2), "ab".getBytes());
 		assertEquals(extractFront(a, 3), "abc".getBytes());
 		assertEquals(extractFront(a, 4), "abcd".getBytes());
 	}
-	
+
 	@Test
 	public void testFormatShortHex() {
 		byte[] a = "abcd".getBytes();
-		assertEquals(formatShortHex(EMPTY_BYTE_ARRAY),"");
-		assertEquals(formatShortHex(a),"");
-		assertEquals(extractFront(a, 2), "ab".getBytes());
-		assertEquals(extractFront(a, 3), "abc".getBytes());
-		assertEquals(extractFront(a, 4), "abcd".getBytes());
+		assertEquals(formatShortHex(EMPTY_BYTE_ARRAY), "");
+		assertEquals(formatShortHex(a), "61626364");
 	}
 }
