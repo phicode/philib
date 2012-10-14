@@ -79,6 +79,7 @@ public final class LoadAvgSimple implements LoadAvg {
 				diff = 0;
 			}
 		}
+		lastNormalizeNs = now;
 		tWork += workNs;
 		tIdle += Math.max(0, diff - workNs);
 		long total = tIdle + tWork;

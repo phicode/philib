@@ -26,10 +26,9 @@ package ch.bind.philib.math;
  * 
  * @author Philipp Meinen
  */
-public final class PhiMath {
+public final class RangeSum {
 
-	private PhiMath() {
-	}
+	private RangeSum() {}
 
 	/**
 	 * Calculate the sum of all values from 1 to <code>end</code>, including. That is:

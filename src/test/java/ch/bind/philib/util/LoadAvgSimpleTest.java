@@ -27,79 +27,66 @@ import org.testng.annotations.Test;
 
 public class LoadAvgSimpleTest {
 
+	private static final boolean debug = false;
+
 	@Test
 	public void withMillis() {
-		LoadAvg la = LoadAvgSimple.forMillis(500);
+		LoadAvg la = LoadAvgSimple.forMillis(250);
 		verify(la, 0, 0.01);
 
 		// 0 load
-		simulateLoadMs(la, 0, 100, 1000);
-		System.out.println("after   0% load: " + la.getLoadAvgAsFactor());
+		simulateLoadMs(la, 0, 1000);
 		verify(la, 0, 0);
 
 		// approx 25% load
-		simulateLoadMs(la, 25, 75, 1000);
-		System.out.println("after  25% load: " + la.getLoadAvgAsFactor());
+		simulateLoadMs(la, 25, 1000);
 		verify(la, 0.2, 0.3);
 
-		//approx 50% load
-		simulateLoadMs(la, 50, 50, 1000);
-		System.out.println("after  50% load: " + la.getLoadAvgAsFactor());
-		verify(la, 0.4, 0.6);
+		// approx 50% load
+		simulateLoadMs(la, 50, 1000);
+		verify(la, 0.45, 0.55);
 
-		//approx 75% load
-		simulateLoadMs(la, 75, 25, 1000);
-		System.out.println("after  75% load: " + la.getLoadAvgAsFactor());
-		verify(la, 0.6, 0.8);
+		// approx 75% load
+		simulateLoadMs(la, 75, 1000);
+		verify(la, 0.7, 0.8);
 
 		// full load
-		simulateLoadMs(la, 100, 0, 1000);
-		System.out.println("after 100% load: " + la.getLoadAvgAsFactor());
-		verify(la, 0.8, 1);
+		simulateLoadMs(la, 100, 1000);
+		verify(la, 0.95, 1);
 
-		simulateLoadMs(la, 75, 25, 1000);
-		System.out.println("after  75% load: " + la.getLoadAvgAsFactor());
-		verify(la, 0.6, 0.8);
+		simulateLoadMs(la, 75, 1000);
+		verify(la, 0.7, 0.8);
 
-		simulateLoadMs(la, 50, 50, 1000);
-		System.out.println("after  50% load: " + la.getLoadAvgAsFactor());
-		verify(la, 0.4, 0.6);
+		simulateLoadMs(la, 50, 1000);
+		verify(la, 0.45, 0.55);
 
-		simulateLoadMs(la, 25, 75, 1000);
-		System.out.println("after  25% load: " + la.getLoadAvgAsFactor());
-		verify(la, 0.2, 0.4);
+		simulateLoadMs(la, 25, 1000);
+		verify(la, 0.2, 0.3);
 
-		simulateLoadMs(la, 0, 100, 1000);
-		System.out.println("after   0% load: " + la.getLoadAvgAsFactor());
-		verify(la, 0, 0.1);
+		simulateLoadMs(la, 0, 1000);
+		verify(la, 0, 0.05);
 	}
 
-	private void verify(LoadAvg la, double min, double max) {
+	private static void verify(LoadAvg la, double min, double max) {
 		double factor = la.getLoadAvgAsFactor();
 		assertTrue(factor >= min, factor + " should be >= " + min);
 		assertTrue(factor <= max, factor + " should be <= " + max);
 	}
 
-	private void simulateLoadMs(LoadAvg la, int work, int idle, int durationMs) {
-		long durationNs = durationMs * 1000000L;
-		long workNs = work * 1000000L;
-		long idleNs = idle * 1000000L;
-		long now = System.nanoTime();
-		long end = now + durationNs;
-		boolean atWork = true;
-		long switchWorkIdleAt = now + workNs;
+	private static void simulateLoadMs(LoadAvg la, int work, int durationMs) {
+		final long nsPerMs = 1000000L;
+		final long startNs = System.nanoTime();
+		final long logWorkEveryMs = work * nsPerMs / 100;
 
-		while (now < end) {
-			now = System.nanoTime();
-			if (now > switchWorkIdleAt) {
-				if (atWork) {
-					la.logWorkNs(workNs);
-					switchWorkIdleAt = now + idleNs;
-				} else {
-					switchWorkIdleAt = now + workNs;
-				}
-				atWork = !atWork;
+		for (int i = 0; i < durationMs; i++) {
+			final long endOfLoop = startNs + (nsPerMs * (i + 1));
+			while (System.nanoTime() < endOfLoop) {
+				// busy loop for 1 ms
 			}
+			la.logWorkNs(logWorkEveryMs);
+		}
+		if (debug) {
+			System.out.printf("after %3d%% load: %f\n", work, la.getLoadAvgAsFactor());
 		}
 	}
 }

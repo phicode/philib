@@ -19,32 +19,35 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.impl;
+
+package ch.bind.philib.util;
+
+import java.util.Comparator;
 
 /**
- * TODO
+ * A key value pair who's key is of type long.
  * 
  * @author Philipp Meinen
  */
-public interface ObjectFactory<E> {
+public interface LongPair<T> {
 
-	E create();
+	long getKey();
 
-	void destroy(E e);
+	T getValue();
 
-	/**
-	 * Prepare an object to be reused by a different user. Implementors of this method must make sure that any data from
-	 * previous users is cleared.
-	 * 
-	 * @param e The object which must be prepared for reuse.
-	 * @return {@code true} if this object can be reused, {@code false} otherwise.
-	 */
-	boolean prepareForReuse(E e);
+	public static final Comparator<LongPair<?>> KEY_COMPARATOR = new Comparator<LongPair<?>>() {
 
-	/**
-	 * 
-	 * @param e
-	 * @return
-	 */
-	boolean canReuse(E e);
+		@Override
+		public int compare(LongPair<?> a, LongPair<?> b) {
+			if (a == null || b == null) {
+				throw new NullPointerException("LongPair.KEY_COMPARATOR does not support null-values");
+			}
+			long ka = a.getKey();
+			long kb = b.getKey();
+			if (ka == kb) {
+				return 0;
+			}
+			return ka < kb ? -1 : 1;
+		}
+	};
 }

@@ -30,12 +30,12 @@ import java.nio.ByteBuffer;
  */
 public final class BufferOps {
 
-	private BufferOps() {
-	}
-
-	private static volatile byte[] nullFiller;
+	private BufferOps() {}
 
 	public static void memsetZero(ByteBuffer buf) {
+		if (buf == null) {
+			return;
+		}
 		if (buf.hasArray()) {
 			memsetZero(buf.array());
 		} else {
@@ -53,6 +53,9 @@ public final class BufferOps {
 	}
 
 	public static void memsetZero(byte[] buf) {
+		if (buf == null || buf.length == 0) {
+			return;
+		}
 		byte[] filler = getFiller();
 		int filLen = filler.length;
 		int rem = buf.length;
@@ -68,6 +71,8 @@ public final class BufferOps {
 	private static final void memset(byte[] src, byte[] dst, int dstOff, int len) {
 		System.arraycopy(src, 0, dst, dstOff, len);
 	}
+
+	private static volatile byte[] nullFiller;
 
 	private static byte[] getFiller() {
 		byte[] f = nullFiller;

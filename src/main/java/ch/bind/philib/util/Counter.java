@@ -40,14 +40,14 @@ public final class Counter {
 		this.name = name;
 		this.unit = unit;
 	}
-	
+
 	public String getName() {
-	    return name;
-    }
-	
+		return name;
+	}
+
 	public String getUnit() {
-	    return unit;
-    }
+		return unit;
+	}
 
 	public void add(long value) {
 		if (value <= 0) {
@@ -94,9 +94,8 @@ public final class Counter {
 
 		if (add == 0) {
 			return String.format("%s[unit=%s, #adds=0, total=0, min=N/A, max=N/A, avg=N/A]", name, unit);
-		} else {
-			double avg = ((double) to) / add;
-			return String.format("%s[unit=%s, #adds=%d, total=%d, min=%d, max=%d, avg=%.3f]", name, unit, add, to, mi, ma, avg);
 		}
+		double avg = ((double) to) / add;
+		return String.format("%s[unit=%s, #adds=%d, total=%d, min=%d, max=%d, avg=%.3f]", name, unit, add, to, mi, ma, avg);
 	}
 }

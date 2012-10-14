@@ -36,8 +36,7 @@ public final class CounterRepo {
 
 	private final ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<String, Counter>();
 
-	public CounterRepo() {
-	}
+	public CounterRepo() {}
 
 	public Counter forClass(Class<?> clazz) {
 		return forClass(clazz, null);
@@ -72,7 +71,7 @@ public final class CounterRepo {
 		return new ArrayList<Counter>(counters.values());
 	}
 
-	private String getOrElse(String name, String def) {
+	private static String getOrElse(String name, String def) {
 		return (name == null || name.isEmpty()) ? def : name;
 	}
 }

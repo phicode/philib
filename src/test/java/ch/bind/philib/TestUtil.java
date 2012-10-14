@@ -25,8 +25,7 @@ public class TestUtil {
 
 	private static final long DEFAULT_SLEEPTIME_MS = 500;
 
-	private TestUtil() {
-	}
+	private TestUtil() {}
 
 	public static void gcAndSleep() {
 		gcAndSleep(DEFAULT_SLEEPTIME_MS);

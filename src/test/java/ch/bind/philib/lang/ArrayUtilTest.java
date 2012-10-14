@@ -21,6 +21,12 @@
  */
 package ch.bind.philib.lang;
 
+import static ch.bind.philib.lang.ArrayUtil.EMPTY_BYTE_ARRAY;
+import static ch.bind.philib.lang.ArrayUtil.concat;
+import static ch.bind.philib.lang.ArrayUtil.extractBack;
+import static ch.bind.philib.lang.ArrayUtil.extractFront;
+import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
+import static ch.bind.philib.lang.ArrayUtil.pickRandom;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -36,20 +42,20 @@ public class ArrayUtilTest {
 	public void sourceNull() {
 		Object[] arr = new Object[1];
 
-		ArrayUtil.pickRandom(null, arr);
+		pickRandom(null, arr);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void destinationNull() {
 		Object[] arr = new Object[1];
-		ArrayUtil.pickRandom(arr, null);
+		pickRandom(arr, null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void sourceSmallerThenDestination() {
 		Object[] src = new Object[1];
 		Object[] dst = new Object[2];
-		ArrayUtil.pickRandom(src, dst);
+		pickRandom(src, dst);
 	}
 
 	@Test
@@ -61,7 +67,7 @@ public class ArrayUtilTest {
 		for (int i = 0; i < N; i++) {
 			src[i] = i;
 		}
-		ArrayUtil.pickRandom(src, dst);
+		pickRandom(src, dst);
 		for (int i = 0; i < N; i++) {
 			int v = dst[i].intValue();
 			assertTrue(v >= 0);
@@ -73,28 +79,28 @@ public class ArrayUtilTest {
 
 	@Test
 	public void concatNullNull() {
-		byte[] r = ArrayUtil.concat(null, null);
+		byte[] r = concat(null, null);
 		assertNotNull(r);
 		assertEquals(0, r.length);
 	}
 
 	@Test
 	public void concatNullEmpty() {
-		byte[] r = ArrayUtil.concat(null, ArrayUtil.EMPTY_BYTE_ARRAY);
+		byte[] r = concat(null, EMPTY_BYTE_ARRAY);
 		assertNotNull(r);
 		assertEquals(0, r.length);
 	}
 
 	@Test
 	public void concatEmptyNull() {
-		byte[] r = ArrayUtil.concat(ArrayUtil.EMPTY_BYTE_ARRAY, null);
+		byte[] r = concat(EMPTY_BYTE_ARRAY, null);
 		assertNotNull(r);
 		assertEquals(0, r.length);
 	}
 
 	@Test
 	public void concatEmptyEmpty() {
-		byte[] r = ArrayUtil.concat(ArrayUtil.EMPTY_BYTE_ARRAY, ArrayUtil.EMPTY_BYTE_ARRAY);
+		byte[] r = concat(EMPTY_BYTE_ARRAY, EMPTY_BYTE_ARRAY);
 		assertNotNull(r);
 		assertEquals(0, r.length);
 	}
@@ -103,7 +109,7 @@ public class ArrayUtilTest {
 	public void concatNormalNull() {
 		byte[] a = "123".getBytes();
 		byte[] b = null;
-		byte[] c = ArrayUtil.concat(a, b);
+		byte[] c = concat(a, b);
 		assertNotNull(c);
 		assertEquals(3, c.length);
 		assertTrue(Arrays.equals(a, c));
@@ -113,7 +119,7 @@ public class ArrayUtilTest {
 	public void concatNullNormal() {
 		byte[] a = null;
 		byte[] b = "123".getBytes();
-		byte[] c = ArrayUtil.concat(a, b);
+		byte[] c = concat(a, b);
 		assertNotNull(c);
 		assertEquals(3, c.length);
 		assertTrue(Arrays.equals(b, c));
@@ -123,10 +129,37 @@ public class ArrayUtilTest {
 	public void concatNormalNormal() {
 		byte[] a = "123".getBytes();
 		byte[] b = "abc".getBytes();
-		byte[] c = ArrayUtil.concat(a, b);
+		byte[] c = concat(a, b);
 		byte[] ce = "123abc".getBytes();
 		assertNotNull(c);
 		assertEquals(6, c.length);
 		assertTrue(Arrays.equals(ce, c));
+	}
+
+	@Test
+	public void testExtractBack() {
+		byte[] a = "abcd".getBytes();
+		assertEquals(extractBack(a, 0), EMPTY_BYTE_ARRAY);
+		assertEquals(extractBack(a, 1), "d".getBytes());
+		assertEquals(extractBack(a, 2), "cd".getBytes());
+		assertEquals(extractBack(a, 3), "bcd".getBytes());
+		assertEquals(extractBack(a, 4), "abcd".getBytes());
+	}
+
+	@Test
+	public void testExtractFront() {
+		byte[] a = "abcd".getBytes();
+		assertEquals(extractFront(a, 0), EMPTY_BYTE_ARRAY);
+		assertEquals(extractFront(a, 1), "a".getBytes());
+		assertEquals(extractFront(a, 2), "ab".getBytes());
+		assertEquals(extractFront(a, 3), "abc".getBytes());
+		assertEquals(extractFront(a, 4), "abcd".getBytes());
+	}
+
+	@Test
+	public void testFormatShortHex() {
+		byte[] a = "abcd".getBytes();
+		assertEquals(formatShortHex(EMPTY_BYTE_ARRAY), "");
+		assertEquals(formatShortHex(a), "61626364");
 	}
 }

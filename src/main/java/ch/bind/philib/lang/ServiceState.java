@@ -56,6 +56,10 @@ public final class ServiceState {
 		return state.get() == STATE_CLOSED;
 	}
 
+	public boolean isClosingOrClosed() {
+		return state.get() >= STATE_CLOSING;
+	}
+
 	public void setOpen() {
 		switchState(STATE_OPEN);
 	}
