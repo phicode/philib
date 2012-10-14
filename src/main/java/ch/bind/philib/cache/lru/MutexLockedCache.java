@@ -1,16 +1,16 @@
 /*
- * Copyright (c) 2006-2009 Philipp Meinen <philipp@bind.ch>
- *
+ * Copyright (c) 2006 Philipp Meinen <philipp@bind.ch>
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -20,19 +20,17 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.cache;
+package ch.bind.philib.cache.lru;
 
-/**
- * A synchronization class for a cache implementation.
- * 
- * @version 0.1
- * @author Philipp Meinen
- * @since 2006-10-14
- */
-// TODO: test java 1.5 locks for better performance
-public final class SynchronizedCache<K, V> implements ICache<K, V> {
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-    private final ICache<K, V> cache;
+//TODO: documentation
+//TODO: benchmarks
+public class MutexLockedCache<K, V> implements ICache<K, V> {
+
+    private ICache<K, V> cache;
+    private final Lock mutex;
 
     /**
      * Create a new <code>SynchronizedCache</code>.
@@ -43,113 +41,156 @@ public final class SynchronizedCache<K, V> implements ICache<K, V> {
      * @throws IllegalArgumentException
      *             If <code>cache</code> is <code>null</code>.
      */
-    public SynchronizedCache(ICache<K, V> cache) {
+    public MutexLockedCache(ICache<K, V> cache) {
         if (cache == null)
             throw new IllegalArgumentException("cache must not be null.");
+        mutex = new ReentrantLock();
         this.cache = cache;
     }
 
     /**
      * @see ICache#add(Object, Object)
      */
-    public void add(K key, V value) {
-        synchronized (cache) {
+    @Override
+	public void add(K key, V value) {
+        mutex.lock();
+        try {
             cache.add(key, value);
+        } finally {
+            mutex.unlock();
         }
     }
 
     /**
      * @see ICache#remove(Object)
      */
-    public void remove(K key) {
-        synchronized (cache) {
+    @Override
+	public void remove(K key) {
+        mutex.lock();
+        try {
             cache.remove(key);
+        } finally {
+            mutex.unlock();
         }
     }
 
     /**
      * @see ICache#contains(Object)
      */
-    public boolean contains(K key) {
-        synchronized (cache) {
+    @Override
+	public boolean contains(K key) {
+        mutex.lock();
+        try {
             return cache.contains(key);
+        } finally {
+            mutex.unlock();
         }
     }
 
     /**
      * @see ICache#clear()
      */
-    public void clear() {
-        synchronized (cache) {
+    @Override
+	public void clear() {
+        mutex.lock();
+        try {
             cache.clear();
+        } finally {
+            mutex.unlock();
         }
     }
 
     /**
      * @see ICache#getCapacity()
      */
-    public int getCapacity() {
+    @Override
+	public int getCapacity() {
         return cache.getCapacity();
     }
 
     /**
      * @see ICache#size()
      */
-    public int size() {
-        synchronized (cache) {
+    @Override
+	public int size() {
+        mutex.lock();
+        try {
             return cache.size();
+        } finally {
+            mutex.unlock();
         }
     }
 
     /**
      * @see ICache#isEmpty()
      */
-    public boolean isEmpty() {
-        synchronized (cache) {
+    @Override
+	public boolean isEmpty() {
+        mutex.lock();
+        try {
             return cache.isEmpty();
+        } finally {
+            mutex.unlock();
         }
     }
 
     /**
      * @see ICache#get(Object)
      */
-    public V get(K key) {
-        synchronized (cache) {
+    @Override
+	public V get(K key) {
+        mutex.lock();
+        try {
             return cache.get(key);
+        } finally {
+            mutex.unlock();
         }
     }
 
     /**
      * @see ICache#getTimeout()
      */
-    public long getTimeout() {
+    @Override
+	public long getTimeout() {
         return cache.getTimeout();
     }
 
     /**
      * @see ICache#clearTimedOutPairs()
      */
-    public void clearTimedOutPairs() {
-        synchronized (cache) {
+    @Override
+	public void clearTimedOutPairs() {
+        mutex.lock();
+        try {
             cache.clearTimedOutPairs();
+        } finally {
+            mutex.unlock();
         }
     }
 
     /**
      * @see ICache#addRecycleListener(RecycleListener)
      */
-    public void addRecycleListener(RecycleListener<K, V> listener) {
-        synchronized (cache) {
+    @Override
+	public void addRecycleListener(RecycleListener<K, V> listener) {
+        mutex.lock();
+        try {
             cache.addRecycleListener(listener);
+        } finally {
+            mutex.unlock();
         }
     }
 
     /**
      * @see ICache#removeRecycleListener(RecycleListener)
      */
-    public void removeRecycleListener(RecycleListener<K, V> listener) {
-        synchronized (cache) {
+    @Override
+	public void removeRecycleListener(RecycleListener<K, V> listener) {
+        mutex.lock();
+        try {
             cache.removeRecycleListener(listener);
+        } finally {
+            mutex.unlock();
         }
     }
 }

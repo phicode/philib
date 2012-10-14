@@ -29,7 +29,6 @@ import java.util.concurrent.Semaphore;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.cache.buffercache.ByteArrayCache;
 import ch.bind.philib.validation.Validation;
 
 public class ByteArrayCacheTest {
