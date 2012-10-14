@@ -32,7 +32,7 @@ public final class Constants {
 
 	public static final int PHILIB_VERSION_MAJOR = 0;
 
-	public static final int PHILIB_VERSION_MINOR = 2;
+	public static final int PHILIB_VERSION_MINOR = 3;
 
 	public static final int PHILIB_VERSION_PATCH = 0;
 
