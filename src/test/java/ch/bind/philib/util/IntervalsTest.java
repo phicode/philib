@@ -19,11 +19,13 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib;
+package ch.bind.philib.util;
 
 import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
+
+import ch.bind.philib.util.Intervals;
 
 public class IntervalsTest {
 
