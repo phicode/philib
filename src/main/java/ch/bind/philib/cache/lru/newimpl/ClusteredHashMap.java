@@ -33,6 +33,11 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 	boolean add(final T entry) {
 		assert (entry != null && entry.getNext() == null && entry.getKey() != null && entry.getValue() != null);
 
+		if (entry.getKey().equals(Long.valueOf(64))) {
+			int foo= 5;
+			foo++;
+		}
+		
 		final int hash = entry.cachedHash();
 		final int position = hashPosition(hash);
 
@@ -52,7 +57,7 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 				now = now.getNext();
 			}
 			assert (prev != null);
-			prev.setNext(now);
+			prev.setNext(entry);
 			return true;
 		}
 	}
