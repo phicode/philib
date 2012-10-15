@@ -56,7 +56,7 @@ import java.util.ArrayList;
  * @author Philipp Meinen
  */
 // TODO: synchronization within buckets to improve parallel threaded acess
-public final class MemoryObjectCache<K, V> implements ICache<K, V>, Serializable {
+public final class MemoryObjectCache<K, V> implements Cache<K, V>, Serializable {
 
 	/** The minumum capacity of an object cache. */
 	public static final int MIN_CACHE_CAPACITY = 64;
@@ -574,19 +574,23 @@ public final class MemoryObjectCache<K, V> implements ICache<K, V>, Serializable
 		}
 
 		private final K key;
+
 		private final int hash;
 
-		private volatile V value;
-		private long timeout;
+		private volatile V _value;
 
-		Pair<K, V> nextInHash;
+		private long _timeout;
 
-		Pair<K, V> lruYounger;
-		Pair<K, V> lruOlder;
+		Pair<K, V> hashtableNext;
 
-		Pair<K, V> timeoutYounger;
-		Pair<K, V> timeoutOlder;
+		Pair<K, V> lruYoungGenPrev;
+		Pair<K, V> lruYoungGenNext;
 
+		Pair<K, V> lruOldGenPrev;
+		Pair<K, V> lruOldGenNext;
+
+		Pair<K, V> timeoutPrev;
+		Pair<K, V> timeoutNext;
 
 		public void update(V value, long timeout) {
 			this.value = value;

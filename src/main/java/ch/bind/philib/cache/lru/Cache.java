@@ -27,21 +27,29 @@ package ch.bind.philib.cache.lru;
  * 
  * @author Philipp Meinen
  */
-public interface ICache<K, V> {
+public interface Cache<K, V> {
 
 	/**
 	 * Add a key-value-pair to the cache.
 	 * 
 	 * @throws IllegalArgumentException
-	 *             if the key is null.
+	 *             if the key is {@code null}.
 	 */
 	public void add(K key, V value);
+
+	/**
+	 * Add a key-value-pair with a certain time-to-live (in milliseconds) to the cache.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the key is {@code null}.
+	 */
+	public void add(K key, V value, long ttlMs);
 
 	/**
 	 * Query a value from the cache by its key.
 	 * 
 	 * @throws IllegalArgumentException
-	 *             if the key is null.
+	 *             if the key is {@code null}.
 	 * @return null if no value for the given key was found. Otherwise the value
 	 *         for this key.
 	 */
@@ -51,7 +59,7 @@ public interface ICache<K, V> {
 	 * Remove a key-value-pair from the cache.
 	 * 
 	 * @throws IllegalArgumentException
-	 *             if the key is null.
+	 *             if the key is {@code null}.
 	 */
 	public void remove(K key);
 
@@ -63,9 +71,9 @@ public interface ICache<K, V> {
 	 * @return <code>true</code> if a key-value-pair with the given
 	 *         <code>key</code> is in the cache. <code>false</code> otherwise.
 	 * @throws IllegalArgumentException
-	 *             if the key is null.
+	 *             if the key is {@code null}.
 	 */
-	public boolean contains(K key);
+	// public boolean contains(K key);
 
 	/**
 	 * Get the current number of objects in the cache.
@@ -92,27 +100,27 @@ public interface ICache<K, V> {
 	 * 
 	 * @return the timeout in milliseconds.
 	 */
-	public long getTimeout();
+	// public long getTimeout();
 
 	/**
 	 * Get the capacity of this cache.
 	 * 
 	 * @return the capacity of this cache.
 	 */
-	public int getCapacity();
+	public int capacity();
 
 	/** Remove all elements from the cache. */
 	public void clear();
 
 	/** Remove all pairs which reached their timeout. */
-	public void clearTimedOutPairs();
+	// public void clearTimedOutPairs();
 
 	/**
 	 * Add a <code>RecycleListener</code> which must be invoked when a pair gets
 	 * recycled.
 	 */
-	public void addRecycleListener(RecycleListener<K, V> listener);
+	// public void addRecycleListener(RecycleListener<K, V> listener);
 
 	/** Add a <code>RecycleListener</code>. */
-	public void removeRecycleListener(RecycleListener<K, V> listener);
+	// public void removeRecycleListener(RecycleListener<K, V> listener);
 }
