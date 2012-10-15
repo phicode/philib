@@ -22,12 +22,19 @@
 
 package ch.bind.philib.cache.lru.newimpl;
 
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Random;
+
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
-
 public class ClusteredHashMapTest {
-	
+
 	@Test
 	public void noDoubleAdds() {
 		ClusteredHashMap<Long, String, Entry<Long, String>> map = new ClusteredHashMap<Long, String, Entry<Long, String>>(64);
@@ -39,7 +46,47 @@ public class ClusteredHashMapTest {
 
 		for (int i = 0; i < 128; i++) {
 			Entry<Long, String> e = new Entry<Long, String>(Long.valueOf(i), Long.toString(i));
-			assertFalse(map.add(e), ""+i);
+			assertFalse(map.add(e));
+		}
+	}
+
+	@Test
+	public void addRemove() {
+		ClusteredHashMap<Long, String, Entry<Long, String>> map = new ClusteredHashMap<Long, String, Entry<Long, String>>(64);
+
+		LinkedList<Long> inMap = new LinkedList<Long>();
+		for (int i = 0; i < 128; i++) {
+			Long key = Long.valueOf(i);
+			Entry<Long, String> e = new Entry<Long, String>(key, Long.toString(i));
+			assertTrue(map.add(e));
+			inMap.add(key);
+		}
+
+		Random rnd = new SecureRandom();
+		for (int n = 0; n < 1000; n++) {
+			Collections.shuffle(inMap, rnd);
+
+			for (int i = 0; i < 64; i++) {
+				Long key = inMap.poll();
+				Entry<Long, String> e = map.get(key);
+				assertNotNull(e);
+				assertTrue(map.remove(e));
+			}
+
+			for (int i = -100; i < 200; i++) {
+				Long key = Long.valueOf(i);
+				Entry<Long, String> e = new Entry<Long, String>(key, Long.toString(i));
+				if (i >= 0 && i < 128) {
+					if (inMap.contains(key)) {
+						assertFalse(map.add(e));
+					} else {
+						assertTrue(map.add(e));
+						inMap.add(key);
+					}
+				} else {
+					assertFalse(map.remove(e));
+				}
+			}
 		}
 	}
 

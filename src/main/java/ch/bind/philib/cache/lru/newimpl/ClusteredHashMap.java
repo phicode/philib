@@ -26,12 +26,13 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 
 	private final ClusteredHashEntry<K, V>[] table;
 
+	@SuppressWarnings("unchecked")
 	ClusteredHashMap(int capacity) {
 		table = new ClusteredHashEntry[capacity];
 	}
 
 	boolean add(final T entry) {
-		assert (entry != null && entry.getNext() == null && entry.getKey() != null && entry.getValue() != null);
+		assert (entry != null && entry.getNext() == null && entry.getKey() != null);
 
 		final int hash = entry.cachedHash();
 		final int position = hashPosition(hash);
@@ -85,6 +86,7 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 	}
 
 	// returns null if a pair does not exist
+	@SuppressWarnings("unchecked")
 	T get(final K key) {
 		assert (key != null);
 
