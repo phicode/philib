@@ -73,35 +73,35 @@ public class LruListTest {
 
 		LruList lru = new LruList(3);
 		assertEquals(lru.capacity(), 3);
-		lru.add(a);
+		lru.add(a); // list: a
 		assertEquals(lru.size(), 1);
-		lru.add(b);
+		lru.add(b); // list: b, a
 		assertEquals(lru.size(), 2);
-		lru.add(c);
+		lru.add(c); // list: c, b, a
 		assertEquals(lru.size(), 3);
-		lru.moveToHead(a);
-		lru.moveToHead(b);
-		lru.moveToHead(c);
-		lru.moveToHead(b);
-		lru.moveToHead(a);
+		lru.moveToHead(a); // list: a, c, b
+		lru.moveToHead(b); // list: b, a, c
+		lru.moveToHead(c); // list: c, a, b
+		lru.moveToHead(b); // list: b, a, c
+		lru.moveToHead(a); // list: a, b, c
 		assertEquals(lru.size(), 3);
 		// remove from the middle
-		lru.remove(b);
+		lru.remove(b); // list: a, c
 		assertEquals(lru.size(), 2);
-		lru.add(b);
+		lru.add(b); // list: b, a, c
 		assertEquals(lru.size(), 3);
-		lru.moveToHead(a);
+		lru.moveToHead(a); // list: a, b, c
 		// remove from the tail
-		lru.remove(c);
+		lru.remove(c); // list: a, b
 		assertEquals(lru.size(), 2);
-		lru.add(c);
+		lru.add(c); // list: c, a, b
 		assertEquals(lru.size(), 3);
-		lru.moveToHead(b);
-		lru.moveToHead(a);
+		lru.moveToHead(b); // list: b, a, c
+		lru.moveToHead(a); // list: a, b, c
 		// remove from head
-		lru.remove(a);
+		lru.remove(a); // list: b, c
 		assertEquals(lru.size(), 2);
-		lru.remove(b);
+		lru.remove(b); // list: c
 		assertEquals(lru.size(), 1);
 		lru.remove(c);
 		assertEquals(lru.size(), 0);
