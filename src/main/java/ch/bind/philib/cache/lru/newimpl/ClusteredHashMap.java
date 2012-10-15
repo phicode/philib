@@ -33,31 +33,26 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 	boolean add(final T entry) {
 		assert (entry != null && entry.getNext() == null && entry.getKey() != null && entry.getValue() != null);
 
-		if (entry.getKey().equals(Long.valueOf(64))) {
-			int foo= 5;
-			foo++;
-		}
-		
 		final int hash = entry.cachedHash();
 		final int position = hashPosition(hash);
 
-		ClusteredHashEntry<K, V> now = table[position];
-		if (now == null) {
+		ClusteredHashEntry<K, V> scanNow = table[position];
+		if (scanNow == null) {
 			table[position] = entry;
 			return true;
 		} else {
 			final K key = entry.getKey();
-			ClusteredHashEntry<K, V> prev = null;
-			while (now != null) {
-				if (hash == now.cachedHash() && key.equals(now.getKey())) {
+			ClusteredHashEntry<K, V> scanPrev = null;
+			while (scanNow != null) {
+				if (hash == scanNow.cachedHash() && key.equals(scanNow.getKey())) {
 					// key is already in the table
 					return false;
 				}
-				prev = now;
-				now = now.getNext();
+				scanPrev = scanNow;
+				scanNow = scanNow.getNext();
 			}
-			assert (prev != null);
-			prev.setNext(entry);
+			assert (scanPrev != null);
+			scanPrev.setNext(entry);
 			return true;
 		}
 	}
@@ -69,20 +64,20 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 		final int hash = entry.cachedHash();
 		final int position = hashPosition(hash);
 
-		ClusteredHashEntry<K, V> prev = null;
-		ClusteredHashEntry<K, V> now = table[position];
-		while (now != null && now != entry) {
-			prev = now;
-			now = now.getNext();
+		ClusteredHashEntry<K, V> scanPrev = null;
+		ClusteredHashEntry<K, V> scanNow = table[position];
+		while (scanNow != null && scanNow != entry) {
+			scanPrev = scanNow;
+			scanNow = scanNow.getNext();
 		}
-		if (now != null) {
-			assert (hash == now.cachedHash() && key.equals(now.getKey()));
-			if (prev == null) {
+		if (scanNow != null) {
+			assert (hash == scanNow.cachedHash() && key.equals(scanNow.getKey()));
+			if (scanPrev == null) {
 				// first entry in the table
-				table[position] = now.getNext();
+				table[position] = scanNow.getNext();
 			} else {
 				// there are entries before this one
-				prev.setNext(now.getNext());
+				scanPrev.setNext(scanNow.getNext());
 			}
 			return true; // entry found and removed
 		}
