@@ -40,8 +40,7 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 		if (now == null) {
 			table[position] = entry;
 			return true;
-		}
-		else {
+		} else {
 			final K key = entry.getKey();
 			ClusteredHashEntry<K, V> prev = null;
 			while (now != null) {
@@ -76,8 +75,7 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 			if (prev == null) {
 				// first entry in the table
 				table[position] = now.getNext();
-			}
-			else {
+			} else {
 				// there are entries before this one
 				prev.setNext(now.getNext());
 			}
