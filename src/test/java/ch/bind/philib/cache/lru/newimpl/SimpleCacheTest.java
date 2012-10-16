@@ -188,12 +188,6 @@ public class SimpleCacheTest {
 		assertNull(cache.get("1"));
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void getWithNull() {
-		Cache<String, String> cache = new SimpleCache<String, String>();
-		cache.get(null);
-	}
-
 	@Test
 	public void overwrite() {
 		Cache<String, String> cache = new SimpleCache<String, String>();
@@ -235,8 +229,8 @@ public class SimpleCacheTest {
 		cache.clear();
 		TestUtil.gcAndSleep(100);
 		System.out.printf("JVM held on to %d out of %d cached elements => %dMiB\n", inMem, cap, inMem / 2);
-		System.out.printf("times[init=%.3fms, filling %dGiB: %.3fms, counting live entries: %.3fms]\n", //
-				t1 / 1000000f, cap / 2048, t2 / 1000000f, t3 / 1000000f);
+		System.out.printf("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
+				t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f);
 	}
 
 	private static String itos(int i) {
