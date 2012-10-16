@@ -26,7 +26,9 @@ final class StagedCacheEntry<K, V> extends SimpleCacheEntry<K, V> {
 
 	private long hits;
 
-	private boolean inLruYoungGen = true;
+	private static final long IN_LRU_OLD_GEN_MASK = 1L << 62;
+
+	// private boolean inLruYoungGen = true;
 
 	StagedCacheEntry(K key, V value) {
 		super(key, value);
@@ -37,10 +39,11 @@ final class StagedCacheEntry<K, V> extends SimpleCacheEntry<K, V> {
 	}
 
 	boolean isInLruYoungGen() {
-		return inLruYoungGen;
+		return (hits & IN_LRU_OLD_GEN_MASK) == 0; 
 	}
 
 	void setInLruYoungGen(boolean inLruYoungGen) {
+		hits = inLruYoungGen 
 		this.inLruYoungGen = inLruYoungGen;
 	}
 }
