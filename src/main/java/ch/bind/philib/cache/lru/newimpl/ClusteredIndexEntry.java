@@ -22,33 +22,12 @@
 
 package ch.bind.philib.cache.lru.newimpl;
 
-final class LruCacheEntry<K, V> {
+public interface ClusteredIndexEntry<K> {
 
-	LruCacheEntry(K key, V value) {
-		this.key = key;
-		this.value = value;
-		hash = key.hashCode();
-	}
+	K getKey();
 
-	private final K key;
+	ClusteredIndexEntry<K> getNextIndexEntry();
 
-	private final int hash;
+	void setNextIndexEntry(ClusteredIndexEntry<K> nextHashEntry);
 
-	private final V value;
-
-	private LruCacheEntry<K, V> nextInHash;
-
-	private LruCacheEntry<K, V> lruYounger;
-
-	private LruCacheEntry<K, V> lruOlder;
-
-	@Override
-	public int hashCode() {
-		return hash;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return this == obj;
-	}
 }

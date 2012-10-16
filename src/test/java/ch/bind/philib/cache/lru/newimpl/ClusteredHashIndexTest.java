@@ -24,7 +24,9 @@ package ch.bind.philib.cache.lru.newimpl;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.security.SecureRandom;
 import java.util.Collections;
@@ -33,32 +35,32 @@ import java.util.Random;
 
 import org.testng.annotations.Test;
 
-public class ClusteredHashMapTest {
+public class ClusteredHashIndexTest {
 
 	@Test
 	public void noDoubleAdds() {
-		ClusteredHashMap<Long, String, Entry<Long, String>> map = new ClusteredHashMap<Long, String, Entry<Long, String>>(64);
+		ClusteredHashIndex<Long, Entry<Long>> index = new ClusteredHashIndex<Long, Entry<Long>>(64);
 
 		for (int i = 0; i < 128; i++) {
-			Entry<Long, String> e = new Entry<Long, String>(Long.valueOf(i), Long.toString(i));
-			assertTrue(map.add(e));
+			Entry<Long> e = new Entry<Long>(Long.valueOf(i));
+			assertTrue(index.add(e));
 		}
 
 		for (int i = 0; i < 128; i++) {
-			Entry<Long, String> e = new Entry<Long, String>(Long.valueOf(i), Long.toString(i));
-			assertFalse(map.add(e));
+			Entry<Long> e = new Entry<Long>(Long.valueOf(i));
+			assertFalse(index.add(e));
 		}
 	}
 
 	@Test
 	public void addRemove() {
-		ClusteredHashMap<Long, String, Entry<Long, String>> map = new ClusteredHashMap<Long, String, Entry<Long, String>>(64);
+		ClusteredHashIndex<Long, Entry<Long>> index = new ClusteredHashIndex<Long, Entry<Long>>(64);
 
 		LinkedList<Long> inMap = new LinkedList<Long>();
 		for (int i = 0; i < 128; i++) {
 			Long key = Long.valueOf(i);
-			Entry<Long, String> e = new Entry<Long, String>(key, Long.toString(i));
-			assertTrue(map.add(e));
+			Entry<Long> e = new Entry<Long>(key);
+			assertTrue(index.add(e));
 			inMap.add(key);
 		}
 
@@ -68,40 +70,41 @@ public class ClusteredHashMapTest {
 
 			for (int i = 0; i < 64; i++) {
 				Long key = inMap.poll();
-				Entry<Long, String> e = map.get(key);
+				Entry<Long> e = index.get(key);
 				assertNotNull(e);
-				assertTrue(map.remove(e));
+				assertTrue(index.remove(e));
 			}
 
 			for (int i = -100; i < 200; i++) {
 				Long key = Long.valueOf(i);
-				Entry<Long, String> e = new Entry<Long, String>(key, Long.toString(i));
+				Entry<Long> e = new Entry<Long>(key);
 				if (i >= 0 && i < 128) {
 					if (inMap.contains(key)) {
-						assertFalse(map.add(e));
-					} else {
-						assertTrue(map.add(e));
+						assertFalse(index.add(e));
+						assertNotNull(index.get(key));
+					}
+					else {
+						assertNull(index.get(key));
+						assertTrue(index.add(e));
+						assertNotNull(index.get(key));
 						inMap.add(key);
 					}
-				} else {
-					assertFalse(map.remove(e));
+				}
+				else {
+					assertFalse(index.remove(e));
 				}
 			}
 		}
 	}
 
-	private static final class Entry<K, V> implements ClusteredHashEntry<K, V> {
+	private static final class Entry<K> implements ClusteredIndexEntry<K> {
 
 		private final K key;
-		private final V value;
-		private final int hash;
 
-		private ClusteredHashEntry<K, V> next;
+		private ClusteredIndexEntry<K> nextHashEntry;
 
-		public Entry(K key, V value) {
+		public Entry(K key) {
 			this.key = key;
-			this.value = value;
-			this.hash = key.hashCode();
 		}
 
 		@Override
@@ -110,23 +113,25 @@ public class ClusteredHashMapTest {
 		}
 
 		@Override
-		public int cachedHash() {
-			return hash;
+		public ClusteredIndexEntry<K> getNextIndexEntry() {
+			return nextHashEntry;
 		}
 
 		@Override
-		public V getValue() {
-			return value;
+		public void setNextIndexEntry(ClusteredIndexEntry<K> nextHashEntry) {
+			this.nextHashEntry = nextHashEntry;
 		}
 
 		@Override
-		public ClusteredHashEntry<K, V> getNext() {
-			return next;
+		public int hashCode() {
+			fail();
+			return 0;
 		}
 
 		@Override
-		public void setNext(ClusteredHashEntry<K, V> next) {
-			this.next = next;
+		public boolean equals(Object obj) {
+			fail();
+			return false;
 		}
 	}
 }

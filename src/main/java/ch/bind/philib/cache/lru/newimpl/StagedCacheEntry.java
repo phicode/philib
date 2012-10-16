@@ -22,62 +22,25 @@
 
 package ch.bind.philib.cache.lru.newimpl;
 
-public class LruCache<K, V> implements Cache<K, V> {
+final class StagedCacheEntry<K, V> extends SimpleCacheEntry<K, V> {
 
-	/** The minimum capacity of an object cache. */
-	public static final int MIN_CACHE_CAPACITY = 64;
+	private long hits;
 
-	/** The default capacity of an object cache. */
-	public static final int DEFAULT_CACHE_CAPACITY = 1024;
+	private boolean inLruYoungGen = true;
 
-	private final int capacity;
-
-	private final int size;
-
-	private LruCacheEntry<K, V> lruHead; // most recently accessed
-
-	private LruCacheEntry<K, V> lruTail; // least recently accessed
-
-	@Override
-	public void add(Object key, Object value) {
-		// TODO Auto-generated method stub
-
+	StagedCacheEntry(K key, V value) {
+		super(key, value);
 	}
 
-	@Override
-	public Object get(Object key) {
-		// TODO Auto-generated method stub
-		return null;
+	long recordHit() {
+		return ++hits;
 	}
 
-	@Override
-	public void remove(Object key) {
-		// TODO Auto-generated method stub
-
+	boolean isInLruYoungGen() {
+		return inLruYoungGen;
 	}
 
-	@Override
-	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+	void setInLruYoungGen(boolean inLruYoungGen) {
+		this.inLruYoungGen = inLruYoungGen;
 	}
-
-	@Override
-	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public int capacity() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void clear() {
-		// TODO Auto-generated method stub
-
-	}
-
 }

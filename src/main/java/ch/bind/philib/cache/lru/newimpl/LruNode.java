@@ -24,16 +24,16 @@ package ch.bind.philib.cache.lru.newimpl;
 
 public interface LruNode {
 
-	void setNext(LruNode next);
+	void setLruNext(LruNode lruNext);
 
-	void setPrev(LruNode prev);
+	void setLruPrev(LruNode lruPrev);
 
-	LruNode getNext();
+	LruNode getLruNext();
 
-	LruNode getPrev();
+	LruNode getLruPrev();
 
 	/**
 	 * Set next and prev to {@code null}.
 	 */
-	void reset();
+	void resetLruNode();
 }

@@ -30,13 +30,13 @@ public interface Cache<K, V> {
 
 	/**
 	 * Add a key-value-pair to the cache.
-	 * @throws IllegalArgumentException if the key is null.
+	 * @throws IllegalArgumentException if the key is {@code null}.
 	 */
 	public void add(K key, V value);
 
 	/**
 	 * Query a value from the cache by its key.
-	 * @throws IllegalArgumentException if the key is null.
+	 * @throws IllegalArgumentException if the key is {@code null}.
 	 * @return null if no value for the given key was found. Otherwise the value
 	 *         for this key.
 	 */
@@ -44,31 +44,11 @@ public interface Cache<K, V> {
 
 	/**
 	 * Remove a key-value-pair from the cache.
-	 * @throws IllegalArgumentException if the key is null.
+	 * @throws IllegalArgumentException if the key is {@code null}.
 	 */
 	public void remove(K key);
 
 	/**
-	 * Get the current number of objects in the cache.
-	 * 
-	 * This method may be slower then expected and should not normally be used!
-	 * In order to correctly determine the size of a cache all timed-out pairs
-	 * must be removed first. When you invoke this method you effectively invoke
-	 * the {@link Cache#clearTimedOutPairs()} first.
-	 * 
-	 * @return the current number of objects in the cache.
-	 */
-	public int size();
-
-	/**
-	 * Tests whether the cache is empty or not.
-	 * @return <code>true</code> if the cache is empty. <code>false</code>
-	 *         otherwise.
-	 */
-	public boolean isEmpty();
-
-	/**
-	 * Get the capacity of this cache.
 	 * @return the capacity of this cache.
 	 */
 	public int capacity();

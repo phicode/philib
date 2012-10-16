@@ -24,13 +24,13 @@ package ch.bind.philib.cache.lru.newimpl;
 
 import ch.bind.philib.validation.Validation;
 
-public final class LruList {
+public final class LruList<E extends LruNode> {
 
 	private final int capacity;
 
-	private LruNode head;
+	private E head;
 
-	private LruNode tail;
+	private E tail;
 
 	private int size;
 
@@ -42,26 +42,26 @@ public final class LruList {
 	/**
 	 * Add a new {@code LruNode} to the head of the LRU.
 	 * 
-	 * @param node
-	 *            The new head of the {@code LruList}.
+	 * @param node The new head of the {@code LruList}.
 	 * @return {@code null} if the the size after adding the new {@code LruNode}
 	 *         does not exceed this list's {@code capacity}. Otherwise the list
 	 *         will remove the tail (the element which wasn't accessed for the
 	 *         longest amount of time) and return it.
 	 */
-	public LruNode add(final LruNode node) {
-		assert (node.getPrev() == null && node.getNext() == null);
+	public E add(final E node) {
+		assert (node.getLruPrev() == null && node.getLruNext() == null);
 
 		if (head == null) {
 			assert (tail == null);
 			// empty LRU
 			head = node;
 			tail = node;
-		} else {
+		}
+		else {
 			assert (tail != null);
 			// non-empty LRU
-			node.setNext(head);
-			head.setPrev(node);
+			node.setLruNext(head);
+			head.setLruPrev(node);
 			head = node;
 		}
 		size++;
@@ -71,11 +71,13 @@ public final class LruList {
 		return removeTail();
 	}
 
-	public void remove(final LruNode node) {
+	public void remove(final E node) {
 		assert (head != null && tail != null);
 
-		final LruNode prev = node.getPrev();
-		final LruNode next = node.getNext();
+		@SuppressWarnings("unchecked")
+		final E prev = (E) node.getLruPrev();
+		@SuppressWarnings("unchecked")
+		final E next = (E) node.getLruNext();
 
 		if (head == node) {
 			if (tail == node) {
@@ -83,75 +85,94 @@ public final class LruList {
 				// this was the only element in the LRU
 				head = null;
 				tail = null;
-			} else {
-				assert (prev == null && next.getPrev() == node);
+			}
+			else {
+				assert (prev == null && next.getLruPrev() == node);
 				// node is at the head of the LRU
-				next.setPrev(null);
+				next.setLruPrev(null);
 				head = next;
 			}
-		} else {
+		}
+		else {
 			if (tail == node) {
-				assert (next == null && prev.getNext() == node);
+				assert (next == null && prev.getLruNext() == node);
 				// node is at the tail of the LRU
-				prev.setNext(null);
+				prev.setLruNext(null);
 				tail = prev;
-			} else {
-				assert (prev != null && next != null && prev.getNext() == node && next.getPrev() == node);
+			}
+			else {
+				assert (prev != null && next != null && prev.getLruNext() == node && next.getLruPrev() == node);
 				// node is is the middle of the LRU
-				prev.setNext(next);
-				next.setPrev(prev);
+				prev.setLruNext(next);
+				next.setLruPrev(prev);
 			}
 		}
 		size--;
-		node.reset();
+		node.resetLruNode();
 	}
 
-	public void moveToHead(final LruNode node) {
+	public E removeTail() {
+		if (tail == null) {
+			return null;
+		}
+		final E node = tail;
+		// 1 element lru
+		if (head == node) {
+			tail = null;
+			head = null;
+			size = 0;
+		}
+		else {
+			@SuppressWarnings("unchecked")
+			final E prev = (E) node.getLruPrev();
+			prev.setLruNext(null);
+			tail = prev;
+			size--;
+		}
+		node.resetLruNode();
+		return node;
+	}
+
+	public void moveToHead(final E node) {
 		assert (head != null && tail != null);
 
 		if (head == node) {
 			// LRU with size 1 or the the node is already in head position
 			return;
 		}
-		final LruNode prev = node.getPrev();
-		final LruNode next = node.getNext();
+		@SuppressWarnings("unchecked")
+		final E prev = (E) node.getLruPrev();
+		@SuppressWarnings("unchecked")
+		final E next = (E) node.getLruNext();
 
 		// since this node is not the head there are 2
 		// or more elements in the LRU
 		if (tail == node) {
-			assert (prev != null && next == null && prev.getNext() == node);
+			assert (prev != null && next == null && prev.getLruNext() == node);
 			// move from tail to head
-			node.setPrev(null);
-			prev.setNext(null);
-			head.setPrev(node);
-			node.setNext(head);
+			node.setLruPrev(null);
+			prev.setLruNext(null);
+			head.setLruPrev(node);
+			node.setLruNext(head);
 			head = node;
 			tail = prev;
-		} else {
-			assert (prev != null && next != null && prev.getNext() == node && next.getPrev() == node);
+		}
+		else {
+			assert (prev != null && //
+					next != null && //
+					prev.getLruNext() == node && //
+			next.getLruPrev() == node);
 			// node is is the middle of the LRU -> unlink
-			prev.setNext(next);
-			next.setPrev(prev);
-			node.setNext(head);
-			node.setPrev(null);
-			head.setPrev(node);
+			prev.setLruNext(next);
+			next.setLruPrev(prev);
+			node.setLruNext(head);
+			node.setLruPrev(null);
+			head.setLruPrev(node);
 			head = node;
 		}
 	}
 
-	public LruNode removeTail() {
-		assert (head != null && tail != null);
-
-		final LruNode node = tail;
-		final LruNode prev = node.getPrev();
-		prev.setNext(null);
-		tail = prev;
-		size--;
-		node.reset();
-		return node;
-	}
-
-	// TODO: clean clear() implementation which calls reset() on every node
+	// TODO: cleaner clear() implementation which calls reset() on every node??
 	public void clear() {
 		size = 0;
 		head = null;

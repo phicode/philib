@@ -28,10 +28,10 @@ import static org.testng.Assert.*;
 public class LruListTest {
 
 	@Test
-	public void autoRemoveTail() {
+	public void removeTailOnOverflow() {
 		Node a = new Node(), b = new Node(), c = new Node();
 
-		LruList lru = new LruList(2);
+		LruList<Node> lru = new LruList<Node>(2);
 		assertNull(lru.add(a));
 		assertNull(lru.add(b));
 		assertEquals(lru.add(c), a);
@@ -41,7 +41,7 @@ public class LruListTest {
 	public void moveToHead() {
 		Node a = new Node(), b = new Node(), c = new Node();
 
-		LruList lru = new LruList(2);
+		LruList<Node> lru = new LruList<Node>(2);
 		assertNull(lru.add(a));
 		assertNull(lru.add(b));
 		lru.moveToHead(a);
@@ -54,7 +54,7 @@ public class LruListTest {
 	public void clear() {
 		Node a = new Node(), b = new Node();
 
-		LruList lru = new LruList(2);
+		LruList<Node> lru = new LruList<Node>(2);
 		assertNull(lru.add(a));
 		assertNull(lru.add(b));
 		assertEquals(lru.size(), 2);
@@ -64,44 +64,62 @@ public class LruListTest {
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ctorValidation() {
-		new LruList(0);
+		new LruList<Node>(0);
+	}
+
+	@Test
+	public void removeTail() {
+		Node a = new Node(), b = new Node(), c = new Node();
+
+		LruList<Node> lru = new LruList<Node>(3);
+		lru.add(a); // lru: a
+		lru.add(b); // lru: b, a
+		lru.add(c); // lru: c, b, a
+		assertEquals(lru.removeTail(), a); // lru: c, b
+		assertEquals(lru.size(), 2);
+		lru.moveToHead(b);// lru: b, c
+		assertEquals(lru.removeTail(), c); // lru: b
+		assertEquals(lru.size(), 1);
+		assertEquals(lru.removeTail(), b);
+		assertEquals(lru.size(), 0);
+		assertNull(lru.removeTail());
 	}
 
 	@Test
 	public void fullScenario() {
 		Node a = new Node(), b = new Node(), c = new Node();
 
-		LruList lru = new LruList(3);
+		LruList<Node> lru = new LruList<Node>(3);
 		assertEquals(lru.capacity(), 3);
-		lru.add(a); // list: a
+		lru.add(a); // lru: a
 		assertEquals(lru.size(), 1);
-		lru.add(b); // list: b, a
+		lru.add(b); // lru: b, a
 		assertEquals(lru.size(), 2);
-		lru.add(c); // list: c, b, a
+		lru.add(c); // lru: c, b, a
 		assertEquals(lru.size(), 3);
-		lru.moveToHead(a); // list: a, c, b
-		lru.moveToHead(b); // list: b, a, c
-		lru.moveToHead(c); // list: c, a, b
-		lru.moveToHead(b); // list: b, a, c
-		lru.moveToHead(a); // list: a, b, c
+		lru.moveToHead(a); // lru: a, c, b
+		lru.moveToHead(b); // lru: b, a, c
+		lru.moveToHead(c); // lru: c, a, b
+		lru.moveToHead(b); // lru: b, a, c
+		lru.moveToHead(a); // lru: a, b, c
 		assertEquals(lru.size(), 3);
 		// remove from the middle
-		lru.remove(b); // list: a, c
+		lru.remove(b); // lru: a, c
 		assertEquals(lru.size(), 2);
-		lru.add(b); // list: b, a, c
+		lru.add(b); // lru: b, a, c
 		assertEquals(lru.size(), 3);
-		lru.moveToHead(a); // list: a, b, c
+		lru.moveToHead(a); // lru: a, b, c
 		// remove from the tail
-		lru.remove(c); // list: a, b
+		lru.remove(c); // lru: a, b
 		assertEquals(lru.size(), 2);
-		lru.add(c); // list: c, a, b
+		lru.add(c); // lru: c, a, b
 		assertEquals(lru.size(), 3);
-		lru.moveToHead(b); // list: b, a, c
-		lru.moveToHead(a); // list: a, b, c
+		lru.moveToHead(b); // lru: b, a, c
+		lru.moveToHead(a); // lru: a, b, c
 		// remove from head
-		lru.remove(a); // list: b, c
+		lru.remove(a); // lru: b, c
 		assertEquals(lru.size(), 2);
-		lru.remove(b); // list: c
+		lru.remove(b); // lru: c
 		assertEquals(lru.size(), 1);
 		lru.remove(c);
 		assertEquals(lru.size(), 0);
@@ -114,27 +132,27 @@ public class LruListTest {
 		private LruNode prev;
 
 		@Override
-		public void setNext(LruNode next) {
+		public void setLruNext(LruNode next) {
 			this.next = next;
 		}
 
 		@Override
-		public void setPrev(LruNode prev) {
+		public void setLruPrev(LruNode prev) {
 			this.prev = prev;
 		}
 
 		@Override
-		public LruNode getNext() {
+		public LruNode getLruNext() {
 			return next;
 		}
 
 		@Override
-		public LruNode getPrev() {
+		public LruNode getLruPrev() {
 			return prev;
 		}
 
 		@Override
-		public void reset() {
+		public void resetLruNode() {
 			next = null;
 			prev = null;
 		}

@@ -22,16 +22,67 @@
 
 package ch.bind.philib.cache.lru.newimpl;
 
-public interface ClusteredHashEntry<K, V> {
+import java.lang.ref.SoftReference;
 
-	K getKey();
+class SimpleCacheEntry<K, V> implements ClusteredIndexEntry<K>, LruNode {
 
-	int cachedHash();
+	SimpleCacheEntry(K key, V value) {
+		this.key = key;
+		setValue(value);
+	}
 
-	V getValue();
+	private final K key;
 
-	ClusteredHashEntry<K, V> getNext();
+	private SoftReference<V> value;
 
-	void setNext(ClusteredHashEntry<K, V> next);
+	private ClusteredIndexEntry<K> nextIndexEntry;
 
+	private LruNode lruNext;
+
+	private LruNode lruPrev;
+
+	@Override
+	public K getKey() {
+		return key;
+	}
+
+	V getValue() {
+		return value.get();
+	}
+
+	void setValue(V value) {
+		this.value = new SoftReference<V>(value);
+	}
+
+	@Override
+	public ClusteredIndexEntry<K> getNextIndexEntry() {
+		return nextIndexEntry;
+	}
+
+	@Override
+	public void setNextIndexEntry(ClusteredIndexEntry<K> nextIndexEntry) {
+		this.nextIndexEntry = nextIndexEntry;
+	}
+
+	public LruNode getLruNext() {
+		return lruNext;
+	}
+
+	public void setLruNext(LruNode lruNext) {
+		this.lruNext = lruNext;
+	}
+
+	public LruNode getLruPrev() {
+		return lruPrev;
+	}
+
+	public void setLruPrev(LruNode lruPrev) {
+		this.lruPrev = lruPrev;
+	}
+
+	@Override
+	public void resetLruNode() {
+		lruPrev = null;
+		lruNext = null;
+	}
 }

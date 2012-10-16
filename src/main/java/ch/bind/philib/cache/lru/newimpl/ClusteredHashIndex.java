@@ -22,38 +22,42 @@
 
 package ch.bind.philib.cache.lru.newimpl;
 
-final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
+import java.util.Arrays;
 
-	private final ClusteredHashEntry<K, V>[] table;
+final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
+
+	private final ClusteredIndexEntry<K>[] table;
 
 	@SuppressWarnings("unchecked")
-	ClusteredHashMap(int capacity) {
-		table = new ClusteredHashEntry[capacity];
+	public ClusteredHashIndex(int capacity) {
+		table = new ClusteredIndexEntry[capacity];
 	}
 
 	boolean add(final T entry) {
-		assert (entry != null && entry.getNext() == null && entry.getKey() != null);
+		assert (entry != null && entry.getNextIndexEntry() == null && entry.getKey() != null);
 
-		final int hash = entry.cachedHash();
+		final K key = entry.getKey();
+		final int hash = key.hashCode();
 		final int position = hashPosition(hash);
 
-		ClusteredHashEntry<K, V> scanNow = table[position];
+		ClusteredIndexEntry<K> scanNow = table[position];
 		if (scanNow == null) {
 			table[position] = entry;
 			return true;
-		} else {
-			final K key = entry.getKey();
-			ClusteredHashEntry<K, V> scanPrev = null;
+		}
+		else {
+			ClusteredIndexEntry<K> scanPrev = null;
 			while (scanNow != null) {
-				if (hash == scanNow.cachedHash() && key.equals(scanNow.getKey())) {
+				K nowKey = scanNow.getKey();
+				if (hash == nowKey.hashCode() && key.equals(nowKey)) {
 					// key is already in the table
 					return false;
 				}
 				scanPrev = scanNow;
-				scanNow = scanNow.getNext();
+				scanNow = scanNow.getNextIndexEntry();
 			}
 			assert (scanPrev != null);
-			scanPrev.setNext(entry);
+			scanPrev.setNextIndexEntry(entry);
 			return true;
 		}
 	}
@@ -62,23 +66,24 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 		assert (entry != null);
 
 		final K key = entry.getKey();
-		final int hash = entry.cachedHash();
+		final int hash = key.hashCode();
 		final int position = hashPosition(hash);
 
-		ClusteredHashEntry<K, V> scanPrev = null;
-		ClusteredHashEntry<K, V> scanNow = table[position];
+		ClusteredIndexEntry<K> scanPrev = null;
+		ClusteredIndexEntry<K> scanNow = table[position];
 		while (scanNow != null && scanNow != entry) {
 			scanPrev = scanNow;
-			scanNow = scanNow.getNext();
+			scanNow = scanNow.getNextIndexEntry();
 		}
 		if (scanNow != null) {
-			assert (hash == scanNow.cachedHash() && key.equals(scanNow.getKey()));
+			assert (hash == scanNow.getKey().hashCode() && key.equals(scanNow.getKey()));
 			if (scanPrev == null) {
 				// first entry in the table
-				table[position] = scanNow.getNext();
-			} else {
+				table[position] = scanNow.getNextIndexEntry();
+			}
+			else {
 				// there are entries before this one
-				scanPrev.setNext(scanNow.getNext());
+				scanPrev.setNextIndexEntry(scanNow.getNextIndexEntry());
 			}
 			return true; // entry found and removed
 		}
@@ -93,15 +98,23 @@ final class ClusteredHashMap<K, V, T extends ClusteredHashEntry<K, V>> {
 		final int hash = key.hashCode();
 		final int position = hashPosition(hash);
 
-		ClusteredHashEntry<K, V> entry = table[position];
-		while (entry != null && hash != entry.cachedHash() && key.equals(entry.getKey()) == false) {
-			entry = entry.getNext();
+		ClusteredIndexEntry<K> entry = table[position];
+		while (entry != null) {
+			K entryKey = entry.getKey();
+			if (hash == entryKey.hashCode() && key.equals(entryKey)) {
+				return (T) entry;
+			}
+			entry = entry.getNextIndexEntry();
 		}
-		return (T) entry;
+		return null;
 	}
 
 	private int hashPosition(int hash) {
 		int p = hash % table.length;
 		return Math.abs(p);
+	}
+
+	public void clear() {
+		Arrays.fill(table, null);
 	}
 }
