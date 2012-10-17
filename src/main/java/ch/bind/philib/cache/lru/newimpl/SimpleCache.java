@@ -35,7 +35,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 
 	private final LruList<SimpleCacheEntry<K, V>> lru;
 
-	private final ClusteredHashIndex<K, SimpleCacheEntry<K, V>> hashIndex;
+	private final ClusteredHashIndex<K, SimpleCacheEntry<K, V>> index;
 
 	public SimpleCache() {
 		this(DEFAULT_CACHE_CAPACITY);
@@ -44,25 +44,25 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	public SimpleCache(int capacity) {
 		capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
 		lru = new LruList<SimpleCacheEntry<K, V>>(capacity);
-		hashIndex = new ClusteredHashIndex<K, SimpleCacheEntry<K, V>>(capacity);
+		index = new ClusteredHashIndex<K, SimpleCacheEntry<K, V>>(capacity);
 	}
 
 	@Override
 	public void add(K key, V value) {
 		Validation.notNull(key);
-		SimpleCacheEntry<K, V> entry = hashIndex.get(key);
+		SimpleCacheEntry<K, V> entry = index.get(key);
 		if (value == null) {
 			if (entry != null) {
-				remove(entry);
+				removeLruAndIndex(entry);
 			}
 			return;
 		}
 		if (entry == null) {
 			entry = new SimpleCacheEntry<K, V>(key, value);
-			hashIndex.add(entry);
+			index.add(entry);
 			SimpleCacheEntry<K, V> removed = lru.add(entry);
 			if (removed != null) {
-				hashIndex.remove(removed);
+				index.remove(removed);
 			}
 		}
 		else {
@@ -73,30 +73,24 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	@Override
 	public V get(K key) {
 		Validation.notNull(key);
-		SimpleCacheEntry<K, V> entry = hashIndex.get(key);
-		if (entry != null) {
-			V value = entry.getValue();
-			if (value != null) {
-				// the soft-reference has not been collected by the gc
-				lru.moveToHead(entry);
-				return value;
-			}
-			remove(key);
+		SimpleCacheEntry<K, V> entry = index.get(key);
+		if (entry == null) {
+			return null;
 		}
-		return null;
+		V value = entry.getValue();
+		if (value == null) {
+			// the soft-reference has been collected by the gc
+			removeLruAndIndex(entry);
+			return null;
+		}
+		lru.moveToHead(entry);
+		return value;
 	}
 
 	@Override
 	public void remove(K key) {
 		Validation.notNull(key);
-		remove(hashIndex.get(key));
-	}
-
-	private void remove(SimpleCacheEntry<K, V> entry) {
-		if (entry != null) {
-			hashIndex.remove(entry);
-			lru.remove(entry);
-		}
+		removeLruAndIndex(index.get(key));
 	}
 
 	@Override
@@ -107,6 +101,13 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	@Override
 	public void clear() {
 		lru.clear();
-		hashIndex.clear();
+		index.clear();
+	}
+
+	private void removeLruAndIndex(SimpleCacheEntry<K, V> entry) {
+		if (entry != null) {
+			index.remove(entry);
+			lru.remove(entry);
+		}
 	}
 }

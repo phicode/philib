@@ -41,7 +41,11 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 
 	private final LruList<StagedCacheEntry<K, V>> lruOldGen;
 
-	private final ClusteredHashIndex<K, StagedCacheEntry<K, V>> hashIndex;
+	private final ClusteredHashIndex<K, StagedCacheEntry<K, V>> index;
+
+	private final long oldGenAfterHits;
+
+	private final int capacity;
 
 	public StagedCache() {
 		this(DEFAULT_CACHE_CAPACITY);
@@ -56,31 +60,31 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	}
 
 	public StagedCache(int capacity, double oldGenRatio, long oldGenAfterHits) {
-
-		capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
+		this.capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
+		this.oldGenAfterHits = oldGenAfterHits;
+		int oldCap = (int) (this.capacity * oldGenRatio);
+		int youngCap = this.capacity - oldCap;
+		// TODO: >=10 % && <= 90%
 		lruYoungGen = new LruList<StagedCacheEntry<K, V>>(youngCap);
 		lruOldGen = new LruList<StagedCacheEntry<K, V>>(oldCap);
-		hashIndex = new ClusteredHashIndex<K, StagedCacheEntry<K, V>>(capacity);
+		index = new ClusteredHashIndex<K, StagedCacheEntry<K, V>>(capacity);
 	}
 
 	// TODO: remove code duplication
 	@Override
 	public void add(K key, V value) {
 		Validation.notNull(key);
-		StagedCacheEntry<K, V> entry = hashIndex.get(key);
+		StagedCacheEntry<K, V> entry = index.get(key);
 		if (value == null) {
 			if (entry != null) {
-				remove(entry);
+				removeLruAndIndex(entry);
 			}
 			return;
 		}
 		if (entry == null) {
 			entry = new StagedCacheEntry<K, V>(key, value);
-			hashIndex.add(entry);
-			StagedCacheEntry<K, V> removed = lruYoungGen.add(entry);
-			if (removed != null) {
-				hashIndex.remove(removed);
-			}
+			index.add(entry);
+			addYoungGen(entry);
 		}
 		else {
 			entry.setValue(value);
@@ -90,61 +94,37 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	@Override
 	public V get(K key) {
 		Validation.notNull(key);
-		StagedCacheEntry<K, V> entry = hashIndex.get(key);
-		if (entry != null) {
-			V value = entry.getValue();
-			if (value != null) {
-				// the soft-reference has not been collected by the gc
-				if (entry.isInLruYoungGen()) {
-					long hits = entry.recordHit();
-					if (hits < oldGenAfterHits) {
-						lruYoungGen.moveToHead(entry);
-					}
-					else {
-						// TODO: make separete moveUp/moveDown methods
-						lruYoungGen.remove(entry);
-						entry.setInLruYoungGen(false);
-						StagedCacheEntry<K, V> removed = lruOldGen.add(entry);
-						if (removed != null) {
-							if (removed.getValue() == null) {
-								hashIndex.remove(removed);
-							}
-							else {
-								removed.setInLruYoungGen(true);
-								StagedCacheEntry<K, V> removed2 = lruYoungGen.add(removed);
-								if (removed2 != null) {
-									hashIndex.remove(removed2);
-								}
-							}
-						}
-					}
-				}
-				else {
-					lruOldGen.moveToHead(entry);
-				}
-				return value;
-			}
-			remove(key);
+		final StagedCacheEntry<K, V> entry = index.get(key);
+		if (entry == null) {
+			return null;
 		}
-		return null;
+		final V value = entry.getValue();
+		if (value == null) {
+			// the soft-reference has been collected by the gc
+			removeLruAndIndex(entry);
+			return null;
+		}
+		if (entry.isInLruYoungGen()) {
+			int hits = entry.recordHit();
+			if (hits >= oldGenAfterHits) {
+				entry.resetHits();
+				lruYoungGen.remove(entry);
+				addOldGen(entry, false);
+			}
+			else {
+				lruYoungGen.moveToHead(entry);
+			}
+		}
+		else {
+			lruOldGen.moveToHead(entry);
+		}
+		return value;
 	}
 
 	@Override
 	public void remove(K key) {
 		Validation.notNull(key);
-		remove(hashIndex.get(key));
-	}
-
-	private void remove(StagedCacheEntry<K, V> entry) {
-		if (entry != null) {
-			hashIndex.remove(entry);
-			if (entry.isInLruYoungGen()) {
-				lruYoungGen.remove(entry);
-			}
-			else {
-				lruOldGen.remove(entry);
-			}
-		}
+		removeLruAndIndex(index.get(key));
 	}
 
 	@Override
@@ -156,6 +136,48 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	public void clear() {
 		lruYoungGen.clear();
 		lruOldGen.clear();
-		hashIndex.clear();
+		index.clear();
+	}
+
+	private void removeLruAndIndex(StagedCacheEntry<K, V> entry) {
+		if (entry != null) {
+			index.remove(entry);
+			if (entry.isInLruYoungGen()) {
+				lruYoungGen.remove(entry);
+			}
+			else {
+				lruOldGen.remove(entry);
+			}
+		}
+	}
+
+	private void addYoungGen(StagedCacheEntry<K, V> entry) {
+		if (entry != null) {
+			if (entry.getValue() == null) {
+				index.remove(entry);
+			}
+			else {
+				entry.setInLruYoungGen(true);
+				StagedCacheEntry<K, V> removed = lruYoungGen.add(entry);
+				if (removed != null) {
+					index.remove(removed);
+				}
+			}
+		}
+	}
+
+	private void addOldGen(StagedCacheEntry<K, V> entry, boolean checkValue) {
+		if (entry != null) {
+			if (checkValue && entry.getValue() == null) {
+				index.remove(entry);
+			}
+			else {
+				entry.setInLruYoungGen(false);
+				StagedCacheEntry<K, V> removed = lruOldGen.add(entry);
+				if (removed != null) {
+					addYoungGen(removed);
+				}
+			}
+		}
 	}
 }

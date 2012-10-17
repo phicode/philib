@@ -24,26 +24,31 @@ package ch.bind.philib.cache.lru.newimpl;
 
 final class StagedCacheEntry<K, V> extends SimpleCacheEntry<K, V> {
 
-	private long hits;
+	private static final int TOGGLE_OLD_GEN_BIT = 0x40000000;
 
-	private static final long IN_LRU_OLD_GEN_MASK = 1L << 62;
+	private static final int NO_OLD_GEN_BITMASK = 0x3FFFFFFF;
 
-	// private boolean inLruYoungGen = true;
+	// bits 0-29 are for the hit-counter, bit 30 is the old-gen toggle
+	// and bit 31 is the 'unused' sign-extension
+	private int hits;
 
 	StagedCacheEntry(K key, V value) {
 		super(key, value);
 	}
 
-	long recordHit() {
-		return ++hits;
+	int recordHit() {
+		return (++hits & NO_OLD_GEN_BITMASK);
+	}
+
+	void resetHits() {
+		hits = hits & TOGGLE_OLD_GEN_BIT;
 	}
 
 	boolean isInLruYoungGen() {
-		return (hits & IN_LRU_OLD_GEN_MASK) == 0; 
+		return (hits & TOGGLE_OLD_GEN_BIT) == 0;
 	}
 
 	void setInLruYoungGen(boolean inLruYoungGen) {
-		hits = inLruYoungGen 
-		this.inLruYoungGen = inLruYoungGen;
+		hits = inLruYoungGen ? (hits & NO_OLD_GEN_BITMASK) : (hits | TOGGLE_OLD_GEN_BIT);
 	}
 }

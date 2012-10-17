@@ -97,6 +97,29 @@ public class ClusteredHashIndexTest {
 		}
 	}
 
+	@Test
+	public void sameHashcode() {
+		// all keys will land in the exact same position
+		// effectively a linked list)
+
+		ClusteredHashIndex<Key, Entry<Key>> index = new ClusteredHashIndex<Key, Entry<Key>>(64);
+		Key[] keys = new Key[1024];
+		@SuppressWarnings("unchecked")
+		Entry<Key>[] entries = new Entry[keys.length];
+		for (int i = 0, l = keys.length; i < l; i++) {
+			Key k = new Key(1);
+			Entry<Key> e = new Entry<Key>(k);
+			keys[i] = k;
+			entries[i] = e;
+			index.add(e);
+		}
+		assertNull(index.get(new Key(1)));
+		for (int i = 0, l = keys.length; i < l; i++) {
+			Entry<Key> e = entries[i];
+			assertTrue(index.get(e.getKey()) == e);
+		}
+	}
+
 	private static final class Entry<K> implements ClusteredIndexEntry<K> {
 
 		private final K key;
@@ -132,6 +155,25 @@ public class ClusteredHashIndexTest {
 		public boolean equals(Object obj) {
 			fail();
 			return false;
+		}
+	}
+
+	private static final class Key {
+		private final int hash;
+
+		private Key(int hash) {
+			super();
+			this.hash = hash;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return obj == this;
 		}
 	}
 }

@@ -26,6 +26,7 @@ import java.util.Random;
 
 import ch.bind.philib.cache.lru.newimpl.Cache;
 import ch.bind.philib.cache.lru.newimpl.SimpleCache;
+import ch.bind.philib.cache.lru.newimpl.StagedCache;
 
 public final class Benchmark {
 
@@ -51,9 +52,8 @@ public final class Benchmark {
 	}
 
 	void staged() {
-		// Cache<Integer, String> cache = new StagedCache<Integer,
-		// String>(COUNT);
-		// benchNormal(cache);
+		Cache<Integer, String> cache = new StagedCache<Integer, String>(COUNT);
+		benchNormal(cache);
 	}
 
 	void parallelSimple() {
@@ -118,7 +118,7 @@ public final class Benchmark {
 		public int misses;
 
 		private final int loops;
-		
+
 		private final Random random = new Random();
 
 		Runner(Cache<Integer, String> cache, int loops) {

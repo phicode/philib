@@ -23,7 +23,8 @@ package ch.bind.philib.lang;
 
 /**
  * Provides helper methods for hash-code generation.<br/>
- * Hash methods for handling all primitive types as well as <code>Object</code>s are provided.<br/>
+ * Hash methods for handling all primitive types as well as <code>Object</code>s
+ * are provided.<br/>
  * 
  * <b>Usage:</b>
  * 
@@ -44,7 +45,8 @@ package ch.bind.philib.lang;
  */
 public final class HashUtil {
 
-	private HashUtil() {}
+	private HashUtil() {
+	}
 
 	public static final int startHash(final boolean value) {
 		return nextHash(MurmurHash.MURMUR2_32_SEED, value);
@@ -116,7 +118,7 @@ public final class HashUtil {
 
 	public static final int nextHash(int hash, final Object obj) {
 		int objHash = ((obj == null) ? 0 : obj.hashCode());
-		return MurmurHash.murmur2a_8bit(hash, objHash);
+		return MurmurHash.murmur2a_32bit(hash, objHash);
 	}
 
 	public static final int fromFloat(final float value) {
