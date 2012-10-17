@@ -25,29 +25,28 @@ package ch.bind.philib.cache.lru.newimpl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-import java.security.SecureRandom;
-
 import org.testng.annotations.Test;
 
-import ch.bind.philib.TestUtil;
+public class SimpleCacheTest extends CacheTestBase {
 
-public class SimpleCacheTest {
+	@Override
+	<K, V> Cache<K, V> create() {
+		return new SimpleCache<K, V>();
+	}
 
-	@Test
-	public void capacity() {
-		Cache<Integer, Integer> cache;
+	@Override
+	<K, V> Cache<K, V> create(int capacity) {
+		return new SimpleCache<K, V>(capacity);
+	}
 
-		cache = new SimpleCache<Integer, Integer>();
-		assertEquals(cache.capacity(), SimpleCache.DEFAULT_CACHE_CAPACITY);
+	@Override
+	int getMinCapacity() {
+		return SimpleCache.MIN_CACHE_CAPACITY;
+	}
 
-		cache = new SimpleCache<Integer, Integer>(SimpleCache.DEFAULT_CACHE_CAPACITY * 4);
-		assertEquals(cache.capacity(), SimpleCache.DEFAULT_CACHE_CAPACITY * 4);
-
-		cache = new SimpleCache<Integer, Integer>(SimpleCache.MIN_CACHE_CAPACITY - 1);
-		assertEquals(cache.capacity(), SimpleCache.MIN_CACHE_CAPACITY);
-
-		cache = new SimpleCache<Integer, Integer>(0);
-		assertEquals(cache.capacity(), SimpleCache.MIN_CACHE_CAPACITY);
+	@Override
+	int getDefaultCapacity() {
+		return SimpleCache.DEFAULT_CACHE_CAPACITY;
 	}
 
 	@Test
@@ -153,87 +152,5 @@ public class SimpleCacheTest {
 		for (int i = 100001; i <= 150000; i++) {
 			assertEquals(cache.get(itos(i)), itos(i * i));
 		}
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void getNullKey() {
-		Cache<String, String> cache = new SimpleCache<String, String>();
-		cache.get(null);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void addNullKey() {
-		Cache<String, String> cache = new SimpleCache<String, String>();
-		cache.add(null, "abc");
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void removeNullKey() {
-		Cache<String, String> cache = new SimpleCache<String, String>();
-		cache.remove(null);
-	}
-
-	@Test
-	public void get() {
-		Cache<String, String> cache = new SimpleCache<String, String>();
-
-		assertNull(cache.get("1"));
-		cache.add("1", "one");
-		assertEquals(cache.get("1"), "one");
-
-		cache.remove("2");
-		assertEquals(cache.get("1"), "one");
-
-		cache.remove("1");
-		assertNull(cache.get("1"));
-	}
-
-	@Test
-	public void overwrite() {
-		Cache<String, String> cache = new SimpleCache<String, String>();
-		cache.add("1", "version 1");
-		cache.add("1", "version 2");
-		assertEquals(cache.get("1"), "version 2");
-		cache.add("1", null);
-		assertNull(cache.get("1"));
-		// overwrite again for full branch-coverage
-		cache.add("1", null);
-		assertNull(cache.get("1"));
-	}
-
-	@Test
-	public void softReferences() {
-		byte[] data = new byte[512 * 1024]; // 512KiB
-		new SecureRandom().nextBytes(data);
-
-		// Make the cache hold on to more data than it possibly can
-		// 16GiB if the vm has no specified upper limit
-		// otherwise double the amount that the vm can use
-		long vmmax = Runtime.getRuntime().maxMemory();
-		vmmax = vmmax == Long.MAX_VALUE ? 16L * 1024 * 1024 * 1024 : vmmax * 2;
-		final int cap = (int) (vmmax / data.length);
-		long t0 = System.nanoTime();
-		Cache<Integer, byte[]> cache = new SimpleCache<Integer, byte[]>(cap);
-		long t1 = System.nanoTime() - t0;
-		for (int i = 0; i < cap; i++) {
-			cache.add(i, data.clone());
-		}
-		long t2 = System.nanoTime() - t0 - t1;
-		int inMem = 0;
-		for (int i = 0; i < cap; i++) {
-			if (cache.get(i) != null) {
-				inMem++;
-			}
-		}
-		long t3 = System.nanoTime() - t0 - t1 - t2;
-		cache.clear();
-		TestUtil.gcAndSleep(100);
-		System.out.printf("JVM held on to %d out of %d cached elements => %dMiB\n", inMem, cap, inMem / 2);
-		System.out.printf("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
-				t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f);
-	}
-
-	private static String itos(int i) {
-		return Integer.toString(i);
 	}
 }

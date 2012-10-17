@@ -48,7 +48,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public void add(K key, V value) {
+	public void add(final K key, final V value) {
 		Validation.notNull(key);
 		SimpleCacheEntry<K, V> entry = index.get(key);
 		if (value == null) {
@@ -71,7 +71,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public V get(K key) {
+	public V get(final K key) {
 		Validation.notNull(key);
 		SimpleCacheEntry<K, V> entry = index.get(key);
 		if (entry == null) {
@@ -88,7 +88,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public void remove(K key) {
+	public void remove(final K key) {
 		Validation.notNull(key);
 		removeLruAndIndex(index.get(key));
 	}
@@ -104,7 +104,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 		index.clear();
 	}
 
-	private void removeLruAndIndex(SimpleCacheEntry<K, V> entry) {
+	private void removeLruAndIndex(final SimpleCacheEntry<K, V> entry) {
 		if (entry != null) {
 			index.remove(entry);
 			lru.remove(entry);

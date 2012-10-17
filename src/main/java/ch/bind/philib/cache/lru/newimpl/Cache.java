@@ -32,7 +32,7 @@ public interface Cache<K, V> {
 	 * Add a key-value-pair to the cache.
 	 * @throws IllegalArgumentException if the key is {@code null}.
 	 */
-	public void add(K key, V value);
+	void add(K key, V value);
 
 	/**
 	 * Query a value from the cache by its key.
@@ -40,19 +40,19 @@ public interface Cache<K, V> {
 	 * @return null if no value for the given key was found. Otherwise the value
 	 *         for this key.
 	 */
-	public V get(K key);
+	V get(K key);
 
 	/**
 	 * Remove a key-value-pair from the cache.
 	 * @throws IllegalArgumentException if the key is {@code null}.
 	 */
-	public void remove(K key);
+	void remove(K key);
 
 	/**
 	 * @return the capacity of this cache.
 	 */
-	public int capacity();
+	int capacity();
 
 	/** Remove all elements from the cache. */
-	public void clear();
+	void clear();
 }
