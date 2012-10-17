@@ -35,7 +35,7 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	/** The default capacity of an object cache. */
 	public static final double DEFAULT_OLD_GEN_RATIO = 0.25;
 
-	public static final long DEFAULT_OLD_GEN_AFTER_HITS = 10;
+	public static final int DEFAULT_OLD_GEN_AFTER_HITS = 10;
 
 	private static final double MIN_OLD_GEN_RATIO = 0.1;
 
@@ -47,7 +47,7 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 
 	private final ClusteredHashIndex<K, StagedCacheEntry<K, V>> index;
 
-	private final long oldGenAfterHits;
+	private final int oldGenAfterHits;
 
 	private final int capacity;
 
@@ -63,13 +63,12 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 		this(capacity, oldGenRatio, DEFAULT_OLD_GEN_AFTER_HITS);
 	}
 
-	public StagedCache(int capacity, double oldGenRatio, long oldGenAfterHits) {
+	public StagedCache(int capacity, double oldGenRatio, int oldGenAfterHits) {
 		this.capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
-		this.oldGenAfterHits = oldGenAfterHits;
+		this.oldGenAfterHits = oldGenAfterHits < 1 ? 1 : oldGenAfterHits;
 		oldGenRatio = clip(oldGenRatio, MIN_OLD_GEN_RATIO, MAX_OLD_GEN_RATIO);
 		int oldCap = (int) (this.capacity * oldGenRatio);
 		int youngCap = this.capacity - oldCap;
-		// TODO: >=10 % && <= 90%
 		lruYoungGen = new LruList<StagedCacheEntry<K, V>>(youngCap);
 		lruOldGen = new LruList<StagedCacheEntry<K, V>>(oldCap);
 		index = new ClusteredHashIndex<K, StagedCacheEntry<K, V>>(capacity);
