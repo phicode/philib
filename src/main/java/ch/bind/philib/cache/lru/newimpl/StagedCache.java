@@ -22,6 +22,7 @@
 
 package ch.bind.philib.cache.lru.newimpl;
 
+import ch.bind.philib.math.RangeUtil;
 import ch.bind.philib.validation.Validation;
 
 public final class StagedCache<K, V> implements Cache<K, V> {
@@ -66,17 +67,12 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	public StagedCache(int capacity, double oldGenRatio, int oldGenAfterHits) {
 		this.capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
 		this.oldGenAfterHits = oldGenAfterHits < 1 ? 1 : oldGenAfterHits;
-		oldGenRatio = clip(oldGenRatio, MIN_OLD_GEN_RATIO, MAX_OLD_GEN_RATIO);
+		oldGenRatio = RangeUtil.clip(oldGenRatio, MIN_OLD_GEN_RATIO, MAX_OLD_GEN_RATIO);
 		int oldCap = (int) (this.capacity * oldGenRatio);
 		int youngCap = this.capacity - oldCap;
 		lruYoungGen = new LruList<StagedCacheEntry<K, V>>(youngCap);
 		lruOldGen = new LruList<StagedCacheEntry<K, V>>(oldCap);
 		index = new ClusteredHashIndex<K, StagedCacheEntry<K, V>>(capacity);
-	}
-
-	// TODO: move to a utility class
-	private static double clip(double value, double min, double max) {
-		return value < min ? min : (value > max ? max : value);
 	}
 
 	// TODO: remove code duplication
@@ -94,7 +90,8 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 			entry = new StagedCacheEntry<K, V>(key, value);
 			index.add(entry);
 			addYoungGen(entry, false);
-		} else {
+		}
+		else {
 			entry.setValue(value);
 		}
 	}
@@ -118,10 +115,12 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 				entry.resetHits();
 				lruYoungGen.remove(entry);
 				addOldGen(entry);
-			} else {
+			}
+			else {
 				lruYoungGen.moveToHead(entry);
 			}
-		} else {
+		}
+		else {
 			lruOldGen.moveToHead(entry);
 		}
 		return value;
@@ -150,7 +149,8 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 			index.remove(entry);
 			if (entry.isInLruYoungGen()) {
 				lruYoungGen.remove(entry);
-			} else {
+			}
+			else {
 				lruOldGen.remove(entry);
 			}
 		}
@@ -160,7 +160,8 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 		if (entry != null) {
 			if (checkValue && entry.getValue() == null) {
 				index.remove(entry);
-			} else {
+			}
+			else {
 				entry.setInYoungGen();
 				StagedCacheEntry<K, V> removed = lruYoungGen.add(entry);
 				if (removed != null) {
@@ -175,7 +176,8 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 		if (entry != null) {
 			if (entry.getValue() == null) {
 				index.remove(entry);
-			} else {
+			}
+			else {
 				entry.setInOldGen();
 				StagedCacheEntry<K, V> removed = lruOldGen.add(entry);
 				if (removed != null) {
