@@ -42,7 +42,8 @@ public final class LruList<E extends LruNode> {
 	/**
 	 * Add a new {@code LruNode} to the head of the LRU.
 	 * 
-	 * @param node The new head of the {@code LruList}.
+	 * @param node
+	 *            The new head of the {@code LruList}.
 	 * @return {@code null} if the the size after adding the new {@code LruNode}
 	 *         does not exceed this list's {@code capacity}. Otherwise the list
 	 *         will remove the tail (the element which wasn't accessed for the
@@ -56,8 +57,7 @@ public final class LruList<E extends LruNode> {
 			// empty LRU
 			head = node;
 			tail = node;
-		}
-		else {
+		} else {
 			assert (tail != null);
 			// non-empty LRU
 			node.setLruNext(head);
@@ -85,22 +85,19 @@ public final class LruList<E extends LruNode> {
 				// this was the only element in the LRU
 				head = null;
 				tail = null;
-			}
-			else {
+			} else {
 				assert (prev == null && next.getLruPrev() == node);
 				// node is at the head of the LRU
 				next.setLruPrev(null);
 				head = next;
 			}
-		}
-		else {
+		} else {
 			if (tail == node) {
 				assert (next == null && prev.getLruNext() == node);
 				// node is at the tail of the LRU
 				prev.setLruNext(null);
 				tail = prev;
-			}
-			else {
+			} else {
 				assert (prev != null && next != null && prev.getLruNext() == node && next.getLruPrev() == node);
 				// node is is the middle of the LRU
 				prev.setLruNext(next);
@@ -121,8 +118,7 @@ public final class LruList<E extends LruNode> {
 			tail = null;
 			head = null;
 			size = 0;
-		}
-		else {
+		} else {
 			@SuppressWarnings("unchecked")
 			final E prev = (E) node.getLruPrev();
 			prev.setLruNext(null);
@@ -156,12 +152,8 @@ public final class LruList<E extends LruNode> {
 			node.setLruNext(head);
 			head = node;
 			tail = prev;
-		}
-		else {
-			assert (prev != null && //
-					next != null && //
-					prev.getLruNext() == node && //
-			next.getLruPrev() == node);
+		} else {
+			assert (prev != null && next != null && prev.getLruNext() == node && next.getLruPrev() == node);
 			// node is is the middle of the LRU -> unlink
 			prev.setLruNext(next);
 			next.setLruPrev(prev);

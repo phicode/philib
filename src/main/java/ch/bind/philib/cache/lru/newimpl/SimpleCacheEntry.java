@@ -64,18 +64,22 @@ class SimpleCacheEntry<K, V> implements ClusteredIndexEntry<K>, LruNode {
 		this.nextIndexEntry = nextIndexEntry;
 	}
 
+	@Override
 	public LruNode getLruNext() {
 		return lruNext;
 	}
 
+	@Override
 	public void setLruNext(LruNode lruNext) {
 		this.lruNext = lruNext;
 	}
 
+	@Override
 	public LruNode getLruPrev() {
 		return lruPrev;
 	}
 
+	@Override
 	public void setLruPrev(LruNode lruPrev) {
 		this.lruPrev = lruPrev;
 	}
