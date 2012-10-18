@@ -116,7 +116,7 @@ public final class HashUtil {
 
 	public static final int nextHash(int hash, final Object obj) {
 		int objHash = ((obj == null) ? 0 : obj.hashCode());
-		return MurmurHash.murmur2a_8bit(hash, objHash);
+		return MurmurHash.murmur2a_32bit(hash, objHash);
 	}
 
 	public static final int fromFloat(final float value) {
