@@ -39,7 +39,8 @@ public final class ThreadUtil {
 
 	public static final long DEFAULT_JOIN_TIMEOUT_MS = 1000L;
 
-	private ThreadUtil() {}
+	private ThreadUtil() {
+	}
 
 	public static void sleepUntilMs(long time) throws InterruptedException {
 		long diff = time - System.currentTimeMillis();
@@ -50,7 +51,9 @@ public final class ThreadUtil {
 	}
 
 	/**
-	 * @param t the thread which must be interrupted and joined with a default timeout
+	 * @param t
+	 *            the thread which must be interrupted and joined with a default
+	 *            timeout
 	 * @return {@code true} for OK, {@code false} in case of an error.
 	 */
 	public static boolean interruptAndJoin(Thread t) {
@@ -58,8 +61,10 @@ public final class ThreadUtil {
 	}
 
 	/**
-	 * @param t the thread which must be interrupted
-	 * @param waitTime a specific timeout for the join operation
+	 * @param t
+	 *            the thread which must be interrupted
+	 * @param waitTime
+	 *            a specific timeout for the join operation
 	 * @return {@code true} for OK, {@code false} in case of an error.
 	 */
 	public static boolean interruptAndJoin(Thread t, long waitTime) {

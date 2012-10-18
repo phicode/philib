@@ -44,7 +44,8 @@ public final class RangeUtil {
 	 * f(100) = 5050<br/>
 	 * </code>
 	 * 
-	 * @param end The end value of the sum-range.
+	 * @param end
+	 *            The end value of the sum-range.
 	 * @return The sum of all values from 1 to <code>end</code>, including.
 	 */
 	public static long sumOfRange(long end) {
@@ -59,8 +60,10 @@ public final class RangeUtil {
 	 * Calculates the sum of all values from <code>start</code> to
 	 * <code>end</code>, including.
 	 * 
-	 * @param start The start value of the sum-range.
-	 * @param end The end value of the sum-range.
+	 * @param start
+	 *            The start value of the sum-range.
+	 * @param end
+	 *            The end value of the sum-range.
 	 * @return The sum of all values from <code>start</code> to <code>end</code>
 	 *         , including.
 	 */

@@ -28,7 +28,8 @@ package ch.bind.philib.lang;
  */
 public final class ExceptionUtil {
 
-	private ExceptionUtil() {}
+	private ExceptionUtil() {
+	}
 
 	public static String buildMessageChain(Throwable t) {
 		if (t == null) {

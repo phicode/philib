@@ -31,15 +31,17 @@ public interface ObjectCache<E> {
 	/**
 	 * Acquire an object from the object-cache.
 	 * 
-	 * @return A free and usable object from the cache if one exists. Otherwise a new object is created from the
-	 *         underlying factory.
+	 * @return A free and usable object from the cache if one exists. Otherwise
+	 *         a new object is created from the underlying factory.
 	 */
 	E acquire();
 
 	/**
-	 * Release an object to the object-cache. The caller must not use this object after calling this method.
+	 * Release an object to the object-cache. The caller must not use this
+	 * object after calling this method.
 	 * 
-	 * @param e The object to be released.
+	 * @param e
+	 *            The object to be released.
 	 */
 	void release(E e);
 

@@ -24,7 +24,6 @@ package ch.bind.philib.cache.lru;
 
 import java.util.Random;
 
-
 public final class Benchmark {
 
 	private Benchmark() {
@@ -133,8 +132,7 @@ public final class Benchmark {
 				String v = cache.get(rand);
 				if (v != null) {
 					hits++;
-				}
-				else {
+				} else {
 					misses++;
 					cache.add(rand, Integer.toString(rand));
 				}

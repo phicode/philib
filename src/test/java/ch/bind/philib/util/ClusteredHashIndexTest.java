@@ -85,15 +85,13 @@ public class ClusteredHashIndexTest {
 					if (inMap.contains(key)) {
 						assertFalse(index.add(e));
 						assertNotNull(index.get(key));
-					}
-					else {
+					} else {
 						assertNull(index.get(key));
 						assertTrue(index.add(e));
 						assertNotNull(index.get(key));
 						inMap.add(key);
 					}
-				}
-				else {
+				} else {
 					assertFalse(index.remove(e));
 				}
 			}

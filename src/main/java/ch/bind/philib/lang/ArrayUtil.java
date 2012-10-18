@@ -25,7 +25,8 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 /**
- * Various functions for dealing with arrays which are not present in the standard {@link java.util.Arrays} class.
+ * Various functions for dealing with arrays which are not present in the
+ * standard {@link java.util.Arrays} class.
  * 
  * @author Philipp Meinen
  * @since 2009-06-10
@@ -34,21 +35,27 @@ public final class ArrayUtil {
 
 	public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-	private ArrayUtil() {}
+	private ArrayUtil() {
+	}
 
 	// java.util.Random is updated atomically => this is thread-safe
 	private static final Random rand = new Random();
 
 	/**
-	 * Fills the <code>destination</code> array with randomly picked values from the <code>source</code> array. No value
-	 * will be picked twice.
+	 * Fills the <code>destination</code> array with randomly picked values from
+	 * the <code>source</code> array. No value will be picked twice.
 	 * 
-	 * @param source The array from which random values must be picked. The content of this array will not be altered.
-	 * @param destination The array which must be filled with random values. Previous values within this array will be
-	 *            overwritten.
-	 * @throws NullPointerException If either of the two parameters is null.
-	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller then the <code>destination</code>
-	 *             -array.
+	 * @param source
+	 *            The array from which random values must be picked. The content
+	 *            of this array will not be altered.
+	 * @param destination
+	 *            The array which must be filled with random values. Previous
+	 *            values within this array will be overwritten.
+	 * @throws NullPointerException
+	 *             If either of the two parameters is null.
+	 * @throws IllegalArgumentException
+	 *             If the <code>source</code>-array is smaller then the
+	 *             <code>destination</code> -array.
 	 */
 	public static <T> void pickRandom(final T[] source, final T[] destination) {
 		if (source == null)
@@ -150,6 +157,5 @@ public final class ArrayUtil {
 		sb.append(TO_HEX[v & 15]);
 	}
 
-	private static final char[] TO_HEX = {
-			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	private static final char[] TO_HEX = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 }

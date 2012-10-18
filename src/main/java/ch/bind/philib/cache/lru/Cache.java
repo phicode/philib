@@ -24,19 +24,24 @@ package ch.bind.philib.cache.lru;
 
 /**
  * The base interface for a cache implementation.
+ * 
  * @author Philipp Meinen
  */
 public interface Cache<K, V> {
 
 	/**
 	 * Add a key-value-pair to the cache.
-	 * @throws IllegalArgumentException if the key is {@code null}.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the key is {@code null}.
 	 */
 	void add(K key, V value);
 
 	/**
 	 * Query a value from the cache by its key.
-	 * @throws IllegalArgumentException if the key is {@code null}.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the key is {@code null}.
 	 * @return null if no value for the given key was found. Otherwise the value
 	 *         for this key.
 	 */
@@ -44,7 +49,9 @@ public interface Cache<K, V> {
 
 	/**
 	 * Remove a key-value-pair from the cache.
-	 * @throws IllegalArgumentException if the key is {@code null}.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the key is {@code null}.
 	 */
 	void remove(K key);
 

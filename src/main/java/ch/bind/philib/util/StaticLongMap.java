@@ -46,8 +46,10 @@ public final class StaticLongMap<T> {
 	 * 
 	 * @param elements
 	 * @return A fully initialized {@code StaticLongMap}.
-	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i>, contains
-	 *             {@code null LongPair}s or contains duplicate keys.
+	 * @throws IllegalArgumentException
+	 *             If the {@code elements} parameter is {@code null},
+	 *             <i>empty</i>, contains {@code null LongPair}s or contains
+	 *             duplicate keys.
 	 */
 	public static <T> StaticLongMap<T> create(Collection<LongPair<T>> elements) {
 		if (elements == null || elements.isEmpty()) {
@@ -63,14 +65,17 @@ public final class StaticLongMap<T> {
 	 * 
 	 * @param elements
 	 * @return A fully initialized {@code StaticLongMap}.
-	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i>, contains
-	 *             {@code null LongPair}s or contains duplicate keys.
+	 * @throws IllegalArgumentException
+	 *             If the {@code elements} parameter is {@code null},
+	 *             <i>empty</i>, contains {@code null LongPair}s or contains
+	 *             duplicate keys.
 	 */
 	public static <T> StaticLongMap<T> create(LongPair<T>... elements) {
 		if (elements == null || elements.length == 0) {
 			throw new IllegalArgumentException("null or empty collection provided");
 		}
-		// make a copy which we can sort so that we do not disturb the caller's array
+		// make a copy which we can sort so that we do not disturb the caller's
+		// array
 		elements = elements.clone();
 		return init(elements);
 	}
@@ -107,7 +112,8 @@ public final class StaticLongMap<T> {
 
 	/**
 	 * @param key
-	 * @return The value associated with {@code key}, {@code defaultVal} otherwise.
+	 * @return The value associated with {@code key}, {@code defaultVal}
+	 *         otherwise.
 	 */
 	@SuppressWarnings("unchecked")
 	public T getOrElse(long key, T defaultVal) {
@@ -118,7 +124,8 @@ public final class StaticLongMap<T> {
 	/**
 	 * @param key
 	 * @return The value associated with {@code key}, which may be {@code null}.
-	 * @throws NoSuchElementException If no value is associated with {@code key}.
+	 * @throws NoSuchElementException
+	 *             If no value is associated with {@code key}.
 	 */
 	@SuppressWarnings("unchecked")
 	public T getOrThrow(long key) throws NoSuchElementException {

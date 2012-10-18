@@ -66,8 +66,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 			if (removed != null) {
 				index.remove(removed);
 			}
-		}
-		else {
+		} else {
 			entry.setValue(value);
 		}
 	}

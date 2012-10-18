@@ -90,7 +90,8 @@ public final class ByteBufferCache extends SpecificCacheBase<ByteBuffer> {
 
 		@Override
 		public boolean canReuse(ByteBuffer e) {
-			// this is a buffer, not a connection that might have timed out, so it can always be reused
+			// this is a buffer, not a connection that might have timed out, so
+			// it can always be reused
 			return true;
 		}
 	}

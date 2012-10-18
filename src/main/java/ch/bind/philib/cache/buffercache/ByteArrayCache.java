@@ -105,7 +105,8 @@ public final class ByteArrayCache extends SpecificCacheBase<byte[]> {
 
 		@Override
 		public boolean canReuse(byte[] e) {
-			// this is a buffer, not a connection that might have timed out, so it can always be reused
+			// this is a buffer, not a connection that might have timed out, so
+			// it can always be reused
 			return true;
 		}
 	}
