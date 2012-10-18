@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.lru.newimpl;
+package ch.bind.philib.util;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -34,6 +34,9 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import org.testng.annotations.Test;
+
+import ch.bind.philib.util.ClusteredHashIndex;
+import ch.bind.philib.util.ClusteredIndexEntry;
 
 public class ClusteredHashIndexTest {
 

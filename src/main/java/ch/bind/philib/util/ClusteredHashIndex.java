@@ -20,11 +20,11 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.lru.newimpl;
+package ch.bind.philib.util;
 
 import java.util.Arrays;
 
-final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
+public final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 
 	private final ClusteredIndexEntry<K>[] table;
 
@@ -33,7 +33,7 @@ final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 		table = new ClusteredIndexEntry[capacity];
 	}
 
-	boolean add(final T entry) {
+	public 	boolean add(final T entry) {
 		assert (entry != null && entry.getNextIndexEntry() == null && entry.getKey() != null);
 
 		final K key = entry.getKey();
@@ -62,7 +62,7 @@ final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 		}
 	}
 
-	boolean remove(final T entry) {
+	public boolean remove(final T entry) {
 		assert (entry != null);
 
 		final K key = entry.getKey();
@@ -92,7 +92,7 @@ final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 
 	// returns null if a pair does not exist
 	@SuppressWarnings("unchecked")
-	T get(final K key) {
+	public T get(final K key) {
 		assert (key != null);
 
 		final int hash = key.hashCode();

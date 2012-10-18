@@ -1,4 +1,4 @@
-package ch.bind.philib.cache.lru.newimpl;
+package ch.bind.philib.cache.lru;
 
 public class StagedCacheTest extends CacheTestBase {
 

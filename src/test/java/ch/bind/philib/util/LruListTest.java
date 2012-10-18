@@ -20,9 +20,12 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.lru.newimpl;
+package ch.bind.philib.util;
 
 import org.testng.annotations.Test;
+
+import ch.bind.philib.util.LruList;
+import ch.bind.philib.util.LruNode;
 import static org.testng.Assert.*;
 
 public class LruListTest {

@@ -1,6 +1,7 @@
-package ch.bind.philib.cache.lru.newimpl;
+package ch.bind.philib.cache.lru;
 
 import org.testng.annotations.Test;
+
 import static org.testng.Assert.*;
 
 public class StagedCacheEntryTest {

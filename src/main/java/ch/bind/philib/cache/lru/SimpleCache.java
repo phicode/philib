@@ -20,8 +20,10 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.lru.newimpl;
+package ch.bind.philib.cache.lru;
 
+import ch.bind.philib.util.ClusteredHashIndex;
+import ch.bind.philib.util.LruList;
 import ch.bind.philib.validation.Validation;
 
 //TODO: concurrent access

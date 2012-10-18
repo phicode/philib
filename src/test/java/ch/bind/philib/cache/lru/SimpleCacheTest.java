@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.lru.newimpl;
+package ch.bind.philib.cache.lru;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;

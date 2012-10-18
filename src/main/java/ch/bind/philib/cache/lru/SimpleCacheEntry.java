@@ -20,9 +20,12 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.lru.newimpl;
+package ch.bind.philib.cache.lru;
 
 import java.lang.ref.SoftReference;
+
+import ch.bind.philib.util.ClusteredIndexEntry;
+import ch.bind.philib.util.LruNode;
 
 class SimpleCacheEntry<K, V> implements ClusteredIndexEntry<K>, LruNode {
 

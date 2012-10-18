@@ -24,9 +24,6 @@ package ch.bind.philib.cache.lru;
 
 import java.util.Random;
 
-import ch.bind.philib.cache.lru.newimpl.Cache;
-import ch.bind.philib.cache.lru.newimpl.SimpleCache;
-import ch.bind.philib.cache.lru.newimpl.StagedCache;
 
 public final class Benchmark {
 
