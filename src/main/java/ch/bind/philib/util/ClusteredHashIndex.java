@@ -24,6 +24,8 @@ package ch.bind.philib.util;
 
 import java.util.Arrays;
 
+//TODO: round tablesize up (2^x) and use bitmasks
+//TODO: strengthen hashcodes through an avalanche phase
 public final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 
 	private final ClusteredIndexEntry<K>[] table;
@@ -44,7 +46,8 @@ public final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 		if (scanNow == null) {
 			table[position] = entry;
 			return true;
-		} else {
+		}
+		else {
 			ClusteredIndexEntry<K> scanPrev = null;
 			while (scanNow != null) {
 				K nowKey = scanNow.getKey();
@@ -79,7 +82,8 @@ public final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 			if (scanPrev == null) {
 				// first entry in the table
 				table[position] = scanNow.getNextIndexEntry();
-			} else {
+			}
+			else {
 				// there are entries before this one
 				scanPrev.setNextIndexEntry(scanNow.getNextIndexEntry());
 			}

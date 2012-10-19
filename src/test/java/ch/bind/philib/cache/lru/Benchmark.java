@@ -53,17 +53,15 @@ public final class Benchmark {
 	}
 
 	void parallelSimple() {
-		// Cache<Integer, String> cache = new SimpleCache<Integer,
-		// String>(COUNT);
-		// cache = new SynchronizedCache<Integer, String>(cache);
-		// benchThreaded(cache, 4);
+		Cache<Integer, String> cache = new SimpleCache<Integer, String>(COUNT);
+		cache = new SyncCache<Integer, String>(cache);
+		benchThreaded(cache, 4);
 	}
 
 	void parallelStaged() {
-		// Cache<Integer, String> cache = new StagedCache<Integer,
-		// String>(COUNT);
-		// cache = new MutexLockedCache<Integer, String>(cache);
-		// benchThreaded(cache, 4);
+		Cache<Integer, String> cache = new StagedCache<Integer, String>(COUNT);
+		cache = new SyncCache<Integer, String>(cache);
+		benchThreaded(cache, 4);
 	}
 
 	void benchNormal(Cache<Integer, String> cache) {
@@ -132,7 +130,8 @@ public final class Benchmark {
 				String v = cache.get(rand);
 				if (v != null) {
 					hits++;
-				} else {
+				}
+				else {
 					misses++;
 					cache.add(rand, Integer.toString(rand));
 				}

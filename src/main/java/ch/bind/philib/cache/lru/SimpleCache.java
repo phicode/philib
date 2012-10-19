@@ -26,7 +26,6 @@ import ch.bind.philib.util.ClusteredHashIndex;
 import ch.bind.philib.util.LruList;
 import ch.bind.philib.validation.Validation;
 
-//TODO: concurrent access
 public final class SimpleCache<K, V> implements Cache<K, V> {
 
 	/** The minimum capacity of a cache. */
@@ -39,14 +38,21 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 
 	private final ClusteredHashIndex<K, SimpleCacheEntry<K, V>> index;
 
+	private final Cloner<V> cloner;
+
 	public SimpleCache() {
 		this(DEFAULT_CACHE_CAPACITY);
 	}
 
 	public SimpleCache(int capacity) {
+		this(capacity, null);
+	}
+
+	public SimpleCache(int capacity, Cloner<V> cloner) {
 		capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
-		lru = new LruList<SimpleCacheEntry<K, V>>(capacity);
-		index = new ClusteredHashIndex<K, SimpleCacheEntry<K, V>>(capacity);
+		this.lru = new LruList<SimpleCacheEntry<K, V>>(capacity);
+		this.index = new ClusteredHashIndex<K, SimpleCacheEntry<K, V>>(capacity);
+		this.cloner = cloner;
 	}
 
 	@Override
@@ -66,7 +72,8 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 			if (removed != null) {
 				index.remove(removed);
 			}
-		} else {
+		}
+		else {
 			entry.setValue(value);
 		}
 	}
@@ -85,7 +92,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 			return null;
 		}
 		lru.moveToHead(entry);
-		return value;
+		return cloner == null ? value : cloner.cloneValue(value);
 	}
 
 	@Override
