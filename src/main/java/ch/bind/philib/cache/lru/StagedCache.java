@@ -24,6 +24,7 @@ package ch.bind.philib.cache.lru;
 
 import ch.bind.philib.math.RangeUtil;
 import ch.bind.philib.util.ClusteredHashIndex;
+import ch.bind.philib.util.ClusteredIndex;
 import ch.bind.philib.util.LruList;
 import ch.bind.philib.validation.Validation;
 
@@ -48,7 +49,7 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 
 	private final LruList<StagedCacheEntry<K, V>> lruOldGen;
 
-	private final ClusteredHashIndex<K, StagedCacheEntry<K, V>> index;
+	private final ClusteredIndex<K, StagedCacheEntry<K, V>> index;
 
 	private final int oldGenAfterHits;
 

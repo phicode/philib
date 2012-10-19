@@ -23,6 +23,7 @@
 package ch.bind.philib.cache.lru;
 
 import ch.bind.philib.util.ClusteredHashIndex;
+import ch.bind.philib.util.ClusteredIndex;
 import ch.bind.philib.util.LruList;
 import ch.bind.philib.validation.Validation;
 
@@ -33,7 +34,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 
 	private final LruList<SimpleCacheEntry<K, V>> lru;
 
-	private final ClusteredHashIndex<K, SimpleCacheEntry<K, V>> index;
+	private final ClusteredIndex<K, SimpleCacheEntry<K, V>> index;
 
 	private final Cloner<V> cloner;
 

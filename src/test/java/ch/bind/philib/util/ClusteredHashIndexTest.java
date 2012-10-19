@@ -35,34 +35,33 @@ import java.util.Random;
 
 import org.testng.annotations.Test;
 
-import ch.bind.philib.util.ClusteredHashIndex;
-import ch.bind.philib.util.ClusteredIndexEntry;
+import ch.bind.philib.util.ClusteredIndex.Entry;
 
 public class ClusteredHashIndexTest {
 
 	@Test
 	public void noDoubleAdds() {
-		ClusteredHashIndex<Long, Entry<Long>> index = new ClusteredHashIndex<Long, Entry<Long>>(64);
+		ClusteredHashIndex<Long, TestEntry<Long>> index = new ClusteredHashIndex<Long, TestEntry<Long>>(64);
 
 		for (int i = 0; i < 128; i++) {
-			Entry<Long> e = new Entry<Long>(Long.valueOf(i));
+			TestEntry<Long> e = new TestEntry<Long>(Long.valueOf(i));
 			assertTrue(index.add(e));
 		}
 
 		for (int i = 0; i < 128; i++) {
-			Entry<Long> e = new Entry<Long>(Long.valueOf(i));
+			TestEntry<Long> e = new TestEntry<Long>(Long.valueOf(i));
 			assertFalse(index.add(e));
 		}
 	}
 
 	@Test
 	public void addRemove() {
-		ClusteredHashIndex<Long, Entry<Long>> index = new ClusteredHashIndex<Long, Entry<Long>>(64);
+		ClusteredHashIndex<Long, TestEntry<Long>> index = new ClusteredHashIndex<Long, TestEntry<Long>>(64);
 
 		LinkedList<Long> inMap = new LinkedList<Long>();
 		for (int i = 0; i < 128; i++) {
 			Long key = Long.valueOf(i);
-			Entry<Long> e = new Entry<Long>(key);
+			TestEntry<Long> e = new TestEntry<Long>(key);
 			assertTrue(index.add(e));
 			inMap.add(key);
 		}
@@ -73,14 +72,14 @@ public class ClusteredHashIndexTest {
 
 			for (int i = 0; i < 64; i++) {
 				Long key = inMap.poll();
-				Entry<Long> e = index.get(key);
+				TestEntry<Long> e = index.get(key);
 				assertNotNull(e);
 				assertTrue(index.remove(e));
 			}
 
 			for (int i = -100; i < 200; i++) {
 				Long key = Long.valueOf(i);
-				Entry<Long> e = new Entry<Long>(key);
+				TestEntry<Long> e = new TestEntry<Long>(key);
 				if (i >= 0 && i < 128) {
 					if (inMap.contains(key)) {
 						assertFalse(index.add(e));
@@ -103,31 +102,31 @@ public class ClusteredHashIndexTest {
 		// all keys will land in the exact same position
 		// effectively a linked list)
 
-		ClusteredHashIndex<Key, Entry<Key>> index = new ClusteredHashIndex<Key, Entry<Key>>(64);
+		ClusteredHashIndex<Key, TestEntry<Key>> index = new ClusteredHashIndex<Key, TestEntry<Key>>(64);
 		Key[] keys = new Key[1024];
 		@SuppressWarnings("unchecked")
-		Entry<Key>[] entries = new Entry[keys.length];
+		TestEntry<Key>[] entries = new TestEntry[keys.length];
 		for (int i = 0, l = keys.length; i < l; i++) {
 			Key k = new Key(1);
-			Entry<Key> e = new Entry<Key>(k);
+			TestEntry<Key> e = new TestEntry<Key>(k);
 			keys[i] = k;
 			entries[i] = e;
 			index.add(e);
 		}
 		assertNull(index.get(new Key(1)));
 		for (int i = 0, l = keys.length; i < l; i++) {
-			Entry<Key> e = entries[i];
+			TestEntry<Key> e = entries[i];
 			assertTrue(index.get(e.getKey()) == e);
 		}
 	}
 
-	private static final class Entry<K> implements ClusteredIndexEntry<K> {
+	private static final class TestEntry<K> implements Entry<K> {
 
 		private final K key;
 
-		private ClusteredIndexEntry<K> nextHashEntry;
+		private Entry<K> nextHashEntry;
 
-		public Entry(K key) {
+		public TestEntry(K key) {
 			this.key = key;
 		}
 
@@ -137,12 +136,12 @@ public class ClusteredHashIndexTest {
 		}
 
 		@Override
-		public ClusteredIndexEntry<K> getNextIndexEntry() {
+		public Entry<K> getNextIndexEntry() {
 			return nextHashEntry;
 		}
 
 		@Override
-		public void setNextIndexEntry(ClusteredIndexEntry<K> nextHashEntry) {
+		public void setNextIndexEntry(Entry<K> nextHashEntry) {
 			this.nextHashEntry = nextHashEntry;
 		}
 

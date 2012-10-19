@@ -22,12 +22,25 @@
 
 package ch.bind.philib.util;
 
-public interface ClusteredIndexEntry<K> {
+import ch.bind.philib.util.ClusteredIndex.Entry;
 
-	K getKey();
+public interface ClusteredIndex<K, T extends Entry<K>> {
 
-	ClusteredIndexEntry<K> getNextIndexEntry();
+	boolean add(final T entry);
 
-	void setNextIndexEntry(ClusteredIndexEntry<K> nextHashEntry);
+	boolean remove(T entry);
+
+	T get(K key);
+
+	void clear();
+
+	public interface Entry<K> {
+
+		K getKey();
+
+		Entry<K> getNextIndexEntry();
+
+		void setNextIndexEntry(Entry<K> nextHashEntry);
+	}
 
 }

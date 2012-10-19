@@ -23,16 +23,17 @@
 package ch.bind.philib.util;
 
 import java.util.Arrays;
+import ch.bind.philib.util.ClusteredIndex.Entry;
 
-//TODO: round tablesize up (2^x) and use bitmasks
-//TODO: strengthen hashcodes through an avalanche phase
-public final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
+// TODO: round tablesize up (2^x) and use bitmasks
+// TODO: strengthen hashcodes through an avalanche phase
+public final class ClusteredHashIndex<K, T extends Entry<K>> implements ClusteredIndex<K, T> {
 
-	private final ClusteredIndexEntry<K>[] table;
+	private final Entry<K>[] table;
 
 	@SuppressWarnings("unchecked")
 	public ClusteredHashIndex(int capacity) {
-		table = new ClusteredIndexEntry[capacity];
+		table = new Entry[capacity];
 	}
 
 	public boolean add(final T entry) {
@@ -42,13 +43,12 @@ public final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 		final int hash = key.hashCode();
 		final int position = hashPosition(hash);
 
-		ClusteredIndexEntry<K> scanNow = table[position];
+		Entry<K> scanNow = table[position];
 		if (scanNow == null) {
 			table[position] = entry;
 			return true;
-		}
-		else {
-			ClusteredIndexEntry<K> scanPrev = null;
+		} else {
+			Entry<K> scanPrev = null;
 			while (scanNow != null) {
 				K nowKey = scanNow.getKey();
 				if (hash == nowKey.hashCode() && key.equals(nowKey)) {
@@ -71,8 +71,8 @@ public final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 		final int hash = key.hashCode();
 		final int position = hashPosition(hash);
 
-		ClusteredIndexEntry<K> scanPrev = null;
-		ClusteredIndexEntry<K> scanNow = table[position];
+		Entry<K> scanPrev = null;
+		Entry<K> scanNow = table[position];
 		while (scanNow != null && scanNow != entry) {
 			scanPrev = scanNow;
 			scanNow = scanNow.getNextIndexEntry();
@@ -82,8 +82,7 @@ public final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 			if (scanPrev == null) {
 				// first entry in the table
 				table[position] = scanNow.getNextIndexEntry();
-			}
-			else {
+			} else {
 				// there are entries before this one
 				scanPrev.setNextIndexEntry(scanNow.getNextIndexEntry());
 			}
@@ -100,7 +99,7 @@ public final class ClusteredHashIndex<K, T extends ClusteredIndexEntry<K>> {
 		final int hash = key.hashCode();
 		final int position = hashPosition(hash);
 
-		ClusteredIndexEntry<K> entry = table[position];
+		Entry<K> entry = table[position];
 		while (entry != null) {
 			K entryKey = entry.getKey();
 			if (hash == entryKey.hashCode() && key.equals(entryKey)) {
