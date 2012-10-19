@@ -154,7 +154,7 @@ public final class ThreadUtil {
 					// regular shutdown
 					return;
 				} catch (Exception e) {
-					LOG.info("runnable crashed, restarting it. thread-name=" + threadName, e);
+					LOG.warn("runnable crashed, restarting it. thread-name=" + threadName, e);
 				}
 			}
 		}
