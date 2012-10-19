@@ -1,0 +1,12 @@
+
+    Changelog for philib
+      F = feature
+      B = bugfix
+
+=== 0.3.0 ===
+
+ F: added LruList
+ F: many more unit tests
+
+=== 0.2.0 ===
+ + initial public release

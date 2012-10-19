@@ -32,6 +32,8 @@ import java.util.Random;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.TestUtil;
+
 public class RingBufferTest {
 
 	private final Random rand = new Random();
@@ -127,7 +129,7 @@ public class RingBufferTest {
 	}
 
 	private void doPerfTest() {
-		final long start = System.currentTimeMillis();
+		final long start = System.nanoTime();
 		RingBuffer ringBuf = new RingBuffer();
 		byte[] buf = new byte[PERF_CHUNKSIZE];
 		rand.nextBytes(buf);
@@ -146,11 +148,9 @@ public class RingBufferTest {
 			performed += (PERF_CHUNKSIZE * 10);
 			assertEquals(0, ringBuf.available());
 		}
-		final long time = System.currentTimeMillis() - start;
-		double mb = ((double) performed / MB);
-		double mbPerSec = mb / (time / 1000f);
-		System.out.printf("%s - %d MB in %dms = %.1fMB/s%n", //
-				getClass().getSimpleName(), performed / MB, time, mbPerSec);
+		final long timeNs = System.nanoTime() - start;
+		double mib = ((double) performed / MB);
+		TestUtil.printBenchResults(RingBuffer.class, "MiB","MiB", timeNs, mib);
 	}
 
 	private static void verifyReadBack(byte[] bs, LinkedList<Byte> bufExp) {

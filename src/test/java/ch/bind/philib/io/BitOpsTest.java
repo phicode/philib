@@ -30,6 +30,8 @@ import java.util.Random;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.TestUtil;
+
 public class BitOpsTest {
 
 	private static final int TEST_LOOPS = 20000;
@@ -67,7 +69,7 @@ public class BitOpsTest {
 		// searching for the uppermost bit is the slowest operation
 		long v = 1L << 63;
 		assertEquals(63, findLowestSetBitIdx64(v));
-		long tStart = System.currentTimeMillis();
+		long tStart = System.nanoTime();
 		long total = 0;
 		long expected = 0;
 		for (long i = 0; i < SPEED_LOOPS; i += 10) {
@@ -84,10 +86,9 @@ public class BitOpsTest {
 			expected += (63 * 10);
 		}
 		assertEquals(expected, total);
-		long tEnd = System.currentTimeMillis();
-		long tTotal = tEnd - tStart;
-		double perMsec = SPEED_LOOPS / ((double) tTotal);
-		System.out.printf("%d bit ops in %dms %.1fops/ms %n", SPEED_LOOPS, tTotal, perMsec);
+		long tTotal = System.nanoTime() - tStart;
+
+		TestUtil.printBenchResults(BitOps.class, "lowestSetBit", "lsb", tTotal, SPEED_LOOPS);
 	}
 
 	@Test
