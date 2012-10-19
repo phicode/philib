@@ -1,7 +1,5 @@
 Release checklist
 
-These goals are for 0.3.0 
-
 Code:
  - >60% unit test coverage
  - basic documentation for major packages/utilities

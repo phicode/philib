@@ -19,26 +19,65 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.impl;
+package ch.bind.philib.cache.buffercache.impl;
+
+import ch.bind.philib.cache.buffercache.CacheStats;
+import ch.bind.philib.cache.buffercache.ObjectCache;
+import ch.bind.philib.validation.Validation;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class NoopObjectCache<E> extends ObjectCacheBase<E> {
+public abstract class ObjectCacheBase<E> implements ObjectCache<E> {
 
-	public NoopObjectCache(ObjectFactory<E> factory) {
-		super(factory);
+	private final ObjectFactory<E> factory;
+
+	private final SimpleCacheStats stats = new SimpleCacheStats();
+
+	public ObjectCacheBase(ObjectFactory<E> factory) {
+		Validation.notNull(factory);
+		this.factory = factory;
 	}
 
 	@Override
-	protected E tryAcquire() {
-		return null;
+	public final E acquire() {
+		stats.incrementAcquires();
+		do {
+			E e = tryAcquire();
+			if (e == null) {
+				stats.incrementCreates();
+				return factory.create();
+			}
+			if (factory.canReuse(e)) {
+				return e;
+			}
+			stats.incrementDestroyed();
+			factory.destroy(e);
+		} while (true);
 	}
 
 	@Override
-	protected boolean tryRelease(E e) {
-		return false;
+	public final void release(final E e) {
+		if (e != null) {
+			if (factory.prepareForReuse(e)) {
+				if (tryRelease(e)) {
+					stats.incrementReleases();
+					return;
+				}
+			}
+			stats.incrementDestroyed();
+			factory.destroy(e);
+		}
 	}
+
+	@Override
+	public final CacheStats getCacheStats() {
+		return stats;
+	}
+
+	protected abstract E tryAcquire();
+
+	protected abstract boolean tryRelease(E e);
 }

@@ -25,34 +25,34 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-public class RangeSumTest {
+public class RangeUtilTest {
 
 	@Test
 	public void sumOfRange1() {
-		assertEquals(0, RangeSum.sumOfRange(-9999));
-		assertEquals(0, RangeSum.sumOfRange(-1));
-		assertEquals(1, RangeSum.sumOfRange(1));
-		assertEquals(3, RangeSum.sumOfRange(2));
-		assertEquals(6, RangeSum.sumOfRange(3));
-		assertEquals(5050, RangeSum.sumOfRange(100));
+		assertEquals(0, RangeUtil.sumOfRange(-9999));
+		assertEquals(0, RangeUtil.sumOfRange(-1));
+		assertEquals(1, RangeUtil.sumOfRange(1));
+		assertEquals(3, RangeUtil.sumOfRange(2));
+		assertEquals(6, RangeUtil.sumOfRange(3));
+		assertEquals(5050, RangeUtil.sumOfRange(100));
 	}
 
 	@Test
 	public void sumOfRange2() {
-		assertEquals(0, RangeSum.sumOfRange(10, 9));
-		assertEquals(0, RangeSum.sumOfRange(1, 0));
-		assertEquals(0, RangeSum.sumOfRange(-9999, -9998));
-		assertEquals(0, RangeSum.sumOfRange(-1, 0));
-		assertEquals(1, RangeSum.sumOfRange(1, 1));
-		assertEquals(3, RangeSum.sumOfRange(1, 2));
-		assertEquals(2, RangeSum.sumOfRange(2, 2));
-		assertEquals(6, RangeSum.sumOfRange(1, 3));
-		assertEquals(5, RangeSum.sumOfRange(2, 3));
-		assertEquals(3, RangeSum.sumOfRange(3, 3));
-		assertEquals(5050, RangeSum.sumOfRange(1, 100));
-		assertEquals(5049, RangeSum.sumOfRange(2, 100));
-		assertEquals(5047, RangeSum.sumOfRange(3, 100));
-		assertEquals(5044, RangeSum.sumOfRange(4, 100));
-		assertEquals(5040, RangeSum.sumOfRange(5, 100));
+		assertEquals(0, RangeUtil.sumOfRange(10, 9));
+		assertEquals(0, RangeUtil.sumOfRange(1, 0));
+		assertEquals(0, RangeUtil.sumOfRange(-9999, -9998));
+		assertEquals(0, RangeUtil.sumOfRange(-1, 0));
+		assertEquals(1, RangeUtil.sumOfRange(1, 1));
+		assertEquals(3, RangeUtil.sumOfRange(1, 2));
+		assertEquals(2, RangeUtil.sumOfRange(2, 2));
+		assertEquals(6, RangeUtil.sumOfRange(1, 3));
+		assertEquals(5, RangeUtil.sumOfRange(2, 3));
+		assertEquals(3, RangeUtil.sumOfRange(3, 3));
+		assertEquals(5050, RangeUtil.sumOfRange(1, 100));
+		assertEquals(5049, RangeUtil.sumOfRange(2, 100));
+		assertEquals(5047, RangeUtil.sumOfRange(3, 100));
+		assertEquals(5044, RangeUtil.sumOfRange(4, 100));
+		assertEquals(5040, RangeUtil.sumOfRange(5, 100));
 	}
 }

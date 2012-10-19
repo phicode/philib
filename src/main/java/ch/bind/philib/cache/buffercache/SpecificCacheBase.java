@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 Philipp Meinen <philipp@bind.ch>
+ * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
@@ -19,24 +19,36 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib;
+package ch.bind.philib.cache.buffercache;
+
+import ch.bind.philib.validation.Validation;
 
 /**
- * Public constants like the library version.
+ * TODO
  * 
  * @author Philipp Meinen
  */
-public final class Constants {
+public abstract class SpecificCacheBase<E> implements ObjectCache<E> {
 
-	private Constants() {
+	private final ObjectCache<E> cache;
+
+	protected SpecificCacheBase(ObjectCache<E> cache) {
+		Validation.notNull(cache);
+		this.cache = cache;
 	}
 
-	public static final int PHILIB_VERSION_MAJOR = 0;
+	@Override
+	public final E acquire() {
+		return cache.acquire();
+	}
 
-	public static final int PHILIB_VERSION_MINOR = 3;
+	@Override
+	public final void release(E e) {
+		cache.release(e);
+	}
 
-	public static final int PHILIB_VERSION_PATCH = 0;
-
-	public static final String PHILIB_VERSION = PHILIB_VERSION_MAJOR + "." + PHILIB_VERSION_MINOR + "." + PHILIB_VERSION_PATCH;
-
+	@Override
+	public final CacheStats getCacheStats() {
+		return cache.getCacheStats();
+	}
 }

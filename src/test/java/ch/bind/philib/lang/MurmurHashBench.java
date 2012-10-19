@@ -23,7 +23,7 @@ package ch.bind.philib.lang;
 
 import java.util.Random;
 
-public class MurmurHashTest {
+public class MurmurHashBench {
 
 	private static final Random r = new Random();
 

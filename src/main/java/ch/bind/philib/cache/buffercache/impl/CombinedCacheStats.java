@@ -19,9 +19,9 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.impl;
+package ch.bind.philib.cache.buffercache.impl;
 
-import ch.bind.philib.cache.CacheStats;
+import ch.bind.philib.cache.buffercache.CacheStats;
 
 /**
  * TODO

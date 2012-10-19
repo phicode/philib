@@ -30,7 +30,8 @@ import java.util.Collection;
  */
 public final class Validation {
 
-	private Validation() {}
+	private Validation() {
+	}
 
 	public static void notNegative(int value) {
 		if (value < 0) {

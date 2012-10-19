@@ -69,7 +69,8 @@ public final class StaticLongMap<T> {
 	 */
 	public static <T> StaticLongMap<T> create(LongPair<T>[] elements) {
 		Validation.notNullOrEmpty(elements);
-		// make a copy which we can sort so that we do not disturb the caller's array
+		// make a copy which we can sort so that we do not disturb the caller's
+		// array
 		elements = elements.clone();
 		return init(elements);
 	}
@@ -106,7 +107,8 @@ public final class StaticLongMap<T> {
 
 	/**
 	 * @param key
-	 * @return The value associated with {@code key}, {@code defaultVal} otherwise.
+	 * @return The value associated with {@code key}, {@code defaultVal}
+	 *         otherwise.
 	 */
 	@SuppressWarnings("unchecked")
 	public T getOrElse(long key, T defaultVal) {
@@ -117,7 +119,8 @@ public final class StaticLongMap<T> {
 	/**
 	 * @param key
 	 * @return The value associated with {@code key}, which may be {@code null}.
-	 * @throws NoSuchElementException If no value is associated with {@code key}.
+	 * @throws NoSuchElementException
+	 *             If no value is associated with {@code key}.
 	 */
 	@SuppressWarnings("unchecked")
 	public T getOrThrow(long key) throws NoSuchElementException {

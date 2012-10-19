@@ -19,66 +19,26 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.impl;
-
-import java.util.concurrent.atomic.AtomicLong;
-
-import ch.bind.philib.cache.CacheStats;
+package ch.bind.philib.cache.buffercache.impl;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class SimpleCacheStats implements CacheStats {
+public final class NoopObjectCache<E> extends ObjectCacheBase<E> {
 
-	private final AtomicLong acquires = new AtomicLong(0);
-
-	private final AtomicLong creates = new AtomicLong(0);
-
-	private final AtomicLong releases = new AtomicLong(0);
-
-	private final AtomicLong destroyed = new AtomicLong(0);
-
-	void incrementAcquires() {
-		acquires.incrementAndGet();
-	}
-
-	void incrementCreates() {
-		creates.incrementAndGet();
-	}
-
-	void incrementReleases() {
-		releases.incrementAndGet();
-	}
-
-	void incrementDestroyed() {
-		destroyed.incrementAndGet();
+	public NoopObjectCache(ObjectFactory<E> factory) {
+		super(factory);
 	}
 
 	@Override
-	public long getAcquires() {
-		return acquires.get();
+	protected E tryAcquire() {
+		return null;
 	}
 
 	@Override
-	public long getCreates() {
-		return creates.get();
-	}
-
-	@Override
-	public long getReleases() {
-		return releases.get();
-	}
-
-	@Override
-	public long getDestroyed() {
-		return destroyed.get();
-	}
-
-	@Override
-	public String toString() {
-		return String.format("acquires=%d, creates=%d, releases=%d, destroyed=%d",//
-				acquires.get(), creates.get(), releases.get(), destroyed.get());
+	protected boolean tryRelease(E e) {
+		return false;
 	}
 }

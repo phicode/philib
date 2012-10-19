@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 Philipp Meinen <philipp@bind.ch>
+ * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
@@ -19,24 +19,15 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib;
 
-/**
- * Public constants like the library version.
- * 
- * @author Philipp Meinen
- */
-public final class Constants {
+package ch.bind.philib.util;
 
-	private Constants() {
-	}
+public interface ClusteredIndexEntry<K> {
 
-	public static final int PHILIB_VERSION_MAJOR = 0;
+	K getKey();
 
-	public static final int PHILIB_VERSION_MINOR = 3;
+	ClusteredIndexEntry<K> getNextIndexEntry();
 
-	public static final int PHILIB_VERSION_PATCH = 0;
-
-	public static final String PHILIB_VERSION = PHILIB_VERSION_MAJOR + "." + PHILIB_VERSION_MINOR + "." + PHILIB_VERSION_PATCH;
+	void setNextIndexEntry(ClusteredIndexEntry<K> nextHashEntry);
 
 }
