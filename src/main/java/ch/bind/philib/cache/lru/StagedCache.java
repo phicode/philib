@@ -30,10 +30,10 @@ import ch.bind.philib.validation.Validation;
 public final class StagedCache<K, V> implements Cache<K, V> {
 
 	/** The minimum capacity of a staged cache. */
-	public static final int MIN_CACHE_CAPACITY = 128;
+	public static final int MIN_CACHE_CAPACITY = 64;
 
 	/** The default capacity of an object cache. */
-	public static final int DEFAULT_CACHE_CAPACITY = 1024;
+	public static final int DEFAULT_CACHE_CAPACITY = 256;
 
 	/** The default capacity of an object cache. */
 	public static final double DEFAULT_OLD_GEN_RATIO = 0.25;

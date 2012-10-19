@@ -31,9 +31,6 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	/** The minimum capacity of a cache. */
 	public static final int MIN_CACHE_CAPACITY = 8;
 
-	/** The default capacity of an object cache. */
-	public static final int DEFAULT_CACHE_CAPACITY = 1024;
-
 	private final LruList<SimpleCacheEntry<K, V>> lru;
 
 	private final ClusteredHashIndex<K, SimpleCacheEntry<K, V>> index;
