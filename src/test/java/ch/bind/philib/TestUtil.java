@@ -23,8 +23,6 @@ package ch.bind.philib;
 
 import static org.testng.Assert.assertTrue;
 
-import java.util.concurrent.TimeUnit;
-
 public class TestUtil {
 
 	private static final long DEFAULT_SLEEPTIME_MS = 500;
