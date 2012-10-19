@@ -48,7 +48,7 @@ final class StagedCacheEntry<K, V> extends SimpleCacheEntry<K, V> {
 		hits = hits & TOGGLE_OLD_GEN_BIT;
 	}
 
-	boolean isInLruYoungGen() {
+	boolean isInYoungGen() {
 		return (hits & TOGGLE_OLD_GEN_BIT) == 0;
 	}
 

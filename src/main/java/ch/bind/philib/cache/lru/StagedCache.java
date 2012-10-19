@@ -110,7 +110,7 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 			removeLruAndIndex(entry);
 			return null;
 		}
-		if (entry.isInLruYoungGen()) {
+		if (entry.isInYoungGen()) {
 			int hits = entry.recordHit();
 			if (hits >= oldGenAfterHits) {
 				entry.resetHits();
@@ -146,7 +146,7 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	private void removeLruAndIndex(final StagedCacheEntry<K, V> entry) {
 		if (entry != null) {
 			index.remove(entry);
-			if (entry.isInLruYoungGen()) {
+			if (entry.isInYoungGen()) {
 				lruYoungGen.remove(entry);
 			} else {
 				lruOldGen.remove(entry);
