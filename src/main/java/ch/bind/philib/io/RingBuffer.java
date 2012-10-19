@@ -28,6 +28,7 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
+//TODO: max-capacity
 public final class RingBuffer implements DoubleSidedBuffer {
 
 	public static final int DEFAULT_CAPACITY = 8192;

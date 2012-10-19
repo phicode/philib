@@ -42,7 +42,10 @@ public class ThreadUtilTest {
 		assertFalse(r.wasInterrupted);
 	}
 
-	@Test(timeOut = 1000)
+	// slower machines require a large amount of time to load all the classes
+	// which are pulled in by this test, so the timeout needs to be way higher
+	// then on faster machines
+	@Test(timeOut = 2000)
 	public void interruptShutdown() throws Exception {
 		DelayRunnable r = new DelayRunnable(5000000, 0);
 		Thread t = ThreadUtil.createAndStartForeverRunner(r);

@@ -20,35 +20,10 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib;
+package ch.bind.philib.cache.lru;
 
-import static org.testng.Assert.assertTrue;
+public interface Cloner<V> {
 
-public class TestUtil {
+	V cloneValue(V value);
 
-	private static final long DEFAULT_SLEEPTIME_MS = 500;
-
-	private TestUtil() {
-	}
-
-	public static void gcAndSleep() {
-		gcAndSleep(DEFAULT_SLEEPTIME_MS);
-	}
-
-	public static void gcAndSleep(long sleepTime) {
-		System.gc();
-		try {
-			Thread.sleep(sleepTime);
-		} catch (InterruptedException e) {
-			throw new RuntimeException("interrupted while sleeping for a test!");
-		}
-	}
-
-	public static void printBenchResults(Class<?> clazz, String longUnit, String shortUnit, long timeNs, double amount) {
-		assertTrue(timeNs > 0);
-		double perS = amount / (timeNs / 1000000000f);
-		double perMs = amount / (timeNs / 1000000f);
-		System.out.printf("Bench [%-20s]: %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms\n", //
-		        clazz.getSimpleName(), amount, longUnit, timeNs, perS, shortUnit, perMs, shortUnit);
-	}
 }

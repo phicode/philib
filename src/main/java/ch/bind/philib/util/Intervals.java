@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
+ * Copyright (c) 2009-2011 Philipp Meinen <philipp@bind.ch>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
@@ -19,36 +19,52 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package ch.bind.philib.util;
 
-package ch.bind.philib;
+/**
+ * TODO
+ * 
+ * @author Philipp Meinen
+ */
+public final class Intervals {
 
-import static org.testng.Assert.assertTrue;
-
-public class TestUtil {
-
-	private static final long DEFAULT_SLEEPTIME_MS = 500;
-
-	private TestUtil() {
+	private Intervals() {
 	}
 
-	public static void gcAndSleep() {
-		gcAndSleep(DEFAULT_SLEEPTIME_MS);
-	}
+	private static final double[] COEFFS = { 1.0, 2.5, 5.0 };
 
-	public static void gcAndSleep(long sleepTime) {
-		System.gc();
-		try {
-			Thread.sleep(sleepTime);
-		} catch (InterruptedException e) {
-			throw new RuntimeException("interrupted while sleeping for a test!");
+	public static int chooseInterval(int maxValue, int maxSegments) {
+		// try to bring maxSegments or less lines on to the chart
+		int interval = 1;
+		int segments = maxValue;
+
+		// use these intervals:
+		// 1, 2, 5,
+		// 10, 25, 50
+		// 100, 250, 500
+		// ... and so on
+		int intervalNum = 0;
+		while (segments > maxSegments) {
+			intervalNum++;
+
+			// 0 for 1, 2, 5
+			// 1 for 10, 25, 50
+			// 2 for 100, 250, 500
+			int power = (intervalNum / 3);
+			double multiply = Math.pow(10, power);
+			int num = intervalNum % 3;
+			double coeff = COEFFS[num];
+
+			// for num=0: 1, 10, 100, 100, ...
+			// for num=1: 2, 25, 250, 2500, ...
+			// for num=2: 5, 50, 500, 5000, ...
+			interval = (int) (coeff * multiply);
+
+			segments = maxValue / interval;
+			if (segments * interval < maxValue)
+				segments++;
 		}
-	}
 
-	public static void printBenchResults(Class<?> clazz, String longUnit, String shortUnit, long timeNs, double amount) {
-		assertTrue(timeNs > 0);
-		double perS = amount / (timeNs / 1000000000f);
-		double perMs = amount / (timeNs / 1000000f);
-		System.out.printf("Bench [%-20s]: %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms\n", //
-		        clazz.getSimpleName(), amount, longUnit, timeNs, perS, shortUnit, perMs, shortUnit);
+		return interval;
 	}
 }

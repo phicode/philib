@@ -26,9 +26,10 @@ package ch.bind.philib.lang;
  * 
  * @author Philipp Meinen
  */
-public final class ExceptionUtil {
+public abstract class ExceptionUtil {
 
-	private ExceptionUtil() {}
+	protected ExceptionUtil() {
+	}
 
 	public static String buildMessageChain(Throwable t) {
 		if (t == null) {

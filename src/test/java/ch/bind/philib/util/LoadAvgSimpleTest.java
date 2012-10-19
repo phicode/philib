@@ -23,11 +23,13 @@ package ch.bind.philib.util;
 
 import static org.testng.Assert.assertTrue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 public class LoadAvgSimpleTest {
 
-	private static final boolean debug = false;
+	private static final Logger LOG = LoggerFactory.getLogger(LoadAvgSimpleTest.class);
 
 	@Test
 	public void withMillis() {
@@ -85,8 +87,6 @@ public class LoadAvgSimpleTest {
 			}
 			la.logWorkNs(logWorkEveryMs);
 		}
-		if (debug) {
-			System.out.printf("after %3d%% load: %f\n", work, la.getLoadAvgAsFactor());
-		}
+		LOG.debug(String.format("after %3d%% load: %f\n", work, la.getLoadAvgAsFactor()));
 	}
 }

@@ -19,30 +19,71 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache;
 
-/**
- * TODO
- * 
- * @author Philipp Meinen
- */
-public interface ObjectCache<E> {
+package ch.bind.philib.cache.lru;
 
-	/**
-	 * Acquire an object from the object-cache.
-	 * 
-	 * @return A free and usable object from the cache if one exists. Otherwise a new object is created from the
-	 *         underlying factory.
-	 */
-	E acquire();
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-	/**
-	 * Release an object to the object-cache. The caller must not use this object after calling this method.
-	 * 
-	 * @param e The object to be released.
-	 */
-	void release(E e);
+import ch.bind.philib.validation.Validation;
 
-	CacheStats getCacheStats();
+public final class SyncCache<K, V> implements Cache<K, V> {
 
+	private final Lock lock = new ReentrantLock();
+
+	private final Cache<K, V> cache;
+
+	public SyncCache(Cache<K, V> cache) {
+		Validation.notNull(cache);
+		this.cache = cache;
+	}
+
+	public static final <K, V> Cache<K, V> wrap(Cache<K, V> cache) {
+		return new SyncCache<K, V>(cache);
+	}
+
+	@Override
+	public void add(K key, V value) {
+		lock.lock();
+		try {
+			cache.add(key, value);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public V get(K key) {
+		lock.lock();
+		try {
+			return cache.get(key);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void remove(K key) {
+		lock.lock();
+		try {
+			cache.remove(key);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public int capacity() {
+		return cache.capacity();
+	}
+
+	@Override
+	public void clear() {
+		lock.lock();
+		try {
+			cache.clear();
+		} finally {
+			lock.unlock();
+		}
+	}
 }

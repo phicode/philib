@@ -187,7 +187,8 @@ public class HashUtilTest {
 		// }
 		// }
 		// final long t3 = System.currentTimeMillis() - tStart - t0 - t1 - t2;
-		// System.out.printf("t0=%d, t1=%d, t2=%d,t3=%d, collisions=%d/%d\n", t0, t1, t2, t3, colls, n);
+		// System.out.printf("t0=%d, t1=%d, t2=%d,t3=%d, collisions=%d/%d\n",
+		// t0, t1, t2, t3, colls, n);
 	}
 
 	private static final int hash(long a, int b, short c, byte d) {

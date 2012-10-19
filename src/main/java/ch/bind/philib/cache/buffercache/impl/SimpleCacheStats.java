@@ -19,65 +19,66 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.impl;
+package ch.bind.philib.cache.buffercache.impl;
 
-import ch.bind.philib.cache.CacheStats;
-import ch.bind.philib.cache.ObjectCache;
-import ch.bind.philib.validation.Validation;
+import java.util.concurrent.atomic.AtomicLong;
+
+import ch.bind.philib.cache.buffercache.CacheStats;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public abstract class ObjectCacheBase<E> implements ObjectCache<E> {
+public final class SimpleCacheStats implements CacheStats {
 
-	private final ObjectFactory<E> factory;
+	private final AtomicLong acquires = new AtomicLong(0);
 
-	private final SimpleCacheStats stats = new SimpleCacheStats();
+	private final AtomicLong creates = new AtomicLong(0);
 
-	public ObjectCacheBase(ObjectFactory<E> factory) {
-		Validation.notNull(factory);
-		this.factory = factory;
+	private final AtomicLong releases = new AtomicLong(0);
+
+	private final AtomicLong destroyed = new AtomicLong(0);
+
+	void incrementAcquires() {
+		acquires.incrementAndGet();
+	}
+
+	void incrementCreates() {
+		creates.incrementAndGet();
+	}
+
+	void incrementReleases() {
+		releases.incrementAndGet();
+	}
+
+	void incrementDestroyed() {
+		destroyed.incrementAndGet();
 	}
 
 	@Override
-	public final E acquire() {
-		stats.incrementAcquires();
-		do {
-			E e = tryAcquire();
-			if (e == null) {
-				stats.incrementCreates();
-				return factory.create();
-			}
-			if (factory.canReuse(e)) {
-				return e;
-			}
-			stats.incrementDestroyed();
-			factory.destroy(e);
-		} while (true);
+	public long getAcquires() {
+		return acquires.get();
 	}
 
 	@Override
-	public final void release(final E e) {
-		if (e != null) {
-			if (factory.prepareForReuse(e)) {
-				if (tryRelease(e)) {
-					stats.incrementReleases();
-					return;
-				}
-			}
-			stats.incrementDestroyed();
-			factory.destroy(e);
-		}
+	public long getCreates() {
+		return creates.get();
 	}
 
 	@Override
-	public final CacheStats getCacheStats() {
-		return stats;
+	public long getReleases() {
+		return releases.get();
 	}
 
-	protected abstract E tryAcquire();
+	@Override
+	public long getDestroyed() {
+		return destroyed.get();
+	}
 
-	protected abstract boolean tryRelease(E e);
+	@Override
+	public String toString() {
+		return String.format("acquires=%d, creates=%d, releases=%d, destroyed=%d",//
+				acquires.get(), creates.get(), releases.get(), destroyed.get());
+	}
 }

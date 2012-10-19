@@ -20,35 +20,43 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib;
+package ch.bind.philib.cache.lru;
 
-import static org.testng.Assert.assertTrue;
+final class StagedCacheEntry<K, V> extends SimpleCacheEntry<K, V> {
 
-public class TestUtil {
+	private static final int TOGGLE_OLD_GEN_BIT = 0x40000000;
 
-	private static final long DEFAULT_SLEEPTIME_MS = 500;
+	private static final int NO_OLD_GEN_BITMASK = 0x3FFFFFFF;
 
-	private TestUtil() {
+	// bits 0-29 are for the hit-counter, bit 30 is the old-gen toggle
+	// and bit 31 is the 'unused' sign-extension
+	private int hits;
+
+	StagedCacheEntry(K key, V value) {
+		super(key, value);
 	}
 
-	public static void gcAndSleep() {
-		gcAndSleep(DEFAULT_SLEEPTIME_MS);
+	int recordHit() {
+		// hits are only recorded for young-generation objects
+		// so we do not have to worry about an integer overflow
+		// additionally the hits are reset to zero once an entry
+		// moves back down from the old generation
+		return (++hits & NO_OLD_GEN_BITMASK);
 	}
 
-	public static void gcAndSleep(long sleepTime) {
-		System.gc();
-		try {
-			Thread.sleep(sleepTime);
-		} catch (InterruptedException e) {
-			throw new RuntimeException("interrupted while sleeping for a test!");
-		}
+	void resetHits() {
+		hits = hits & TOGGLE_OLD_GEN_BIT;
 	}
 
-	public static void printBenchResults(Class<?> clazz, String longUnit, String shortUnit, long timeNs, double amount) {
-		assertTrue(timeNs > 0);
-		double perS = amount / (timeNs / 1000000000f);
-		double perMs = amount / (timeNs / 1000000f);
-		System.out.printf("Bench [%-20s]: %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms\n", //
-		        clazz.getSimpleName(), amount, longUnit, timeNs, perS, shortUnit, perMs, shortUnit);
+	boolean isInYoungGen() {
+		return (hits & TOGGLE_OLD_GEN_BIT) == 0;
+	}
+
+	void setInYoungGen() {
+		hits = (hits & NO_OLD_GEN_BITMASK);
+	}
+
+	void setInOldGen() {
+		hits = (hits | TOGGLE_OLD_GEN_BIT);
 	}
 }

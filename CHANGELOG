@@ -1,0 +1,13 @@
+
+    Changelog for philib
+      F = feature
+      B = bugfix
+
+=== 0.3.0 ===
+ F: added a simple and a staged cache implementation
+ F: added util.LruList
+ F: added util.ClusteredIndex
+ F: more unit tests
+
+=== 0.2.0 ===
+ + initial public release

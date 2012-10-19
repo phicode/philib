@@ -26,9 +26,10 @@ package ch.bind.philib.lang;
  * 
  * @author Philipp Meinen
  */
-public final class CompareUtil {
+public abstract class CompareUtil {
 
-	private CompareUtil() {}
+	protected CompareUtil() {
+	}
 
 	/**
 	 * A null-safe equality checking method.<br/>
@@ -41,8 +42,10 @@ public final class CompareUtil {
 	 *     b  | false | a.equals(b) |
 	 * </pre>
 	 * 
-	 * @param a -
-	 * @param b -
+	 * @param a
+	 *            -
+	 * @param b
+	 *            -
 	 * @return see above
 	 */
 	public static boolean equals(final Object a, final Object b) {

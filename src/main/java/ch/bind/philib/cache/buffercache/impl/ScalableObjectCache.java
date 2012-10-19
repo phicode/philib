@@ -19,12 +19,12 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.impl;
+package ch.bind.philib.cache.buffercache.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import ch.bind.philib.cache.CacheStats;
-import ch.bind.philib.cache.ObjectCache;
+import ch.bind.philib.cache.buffercache.CacheStats;
+import ch.bind.philib.cache.buffercache.ObjectCache;
 import ch.bind.philib.validation.Validation;
 
 /**

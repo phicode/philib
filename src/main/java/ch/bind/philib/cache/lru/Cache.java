@@ -19,36 +19,48 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache;
 
-import ch.bind.philib.validation.Validation;
+package ch.bind.philib.cache.lru;
 
 /**
- * TODO
+ * The base interface for a cache implementation.
  * 
  * @author Philipp Meinen
  */
-public abstract class SpecificCacheBase<E> implements ObjectCache<E> {
+public interface Cache<K, V> {
 
-	private final ObjectCache<E> cache;
+	/** The default capacity of an object cache. */
+	public static final int DEFAULT_CACHE_CAPACITY = 256;
 
-	protected SpecificCacheBase(ObjectCache<E> cache) {
-		Validation.notNull(cache);
-		this.cache = cache;
-	}
+	/**
+	 * Add a key-value-pair to the cache.
+	 * 
+	 * @throws IllegalArgumentException if the key is {@code null}.
+	 */
+	void add(K key, V value);
 
-	@Override
-	public final E acquire() {
-		return cache.acquire();
-	}
+	/**
+	 * Query a value from the cache by its key.
+	 * 
+	 * @throws IllegalArgumentException if the key is {@code null}.
+	 * @return null if no value for the given key was found. Otherwise the value
+	 *         for this key.
+	 */
+	V get(K key);
 
-	@Override
-	public final void release(E e) {
-		cache.release(e);
-	}
+	/**
+	 * Remove a key-value-pair from the cache.
+	 * 
+	 * @throws IllegalArgumentException if the key is {@code null}.
+	 */
+	void remove(K key);
 
-	@Override
-	public final CacheStats getCacheStats() {
-		return cache.getCacheStats();
-	}
+	/**
+	 * @return the capacity of this cache.
+	 */
+	int capacity();
+
+	/** Remove all elements from the cache. */
+	void clear();
+
 }

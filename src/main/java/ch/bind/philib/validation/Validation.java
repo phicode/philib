@@ -21,14 +21,17 @@
  */
 package ch.bind.philib.validation;
 
+import java.util.Collection;
+
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class Validation {
+public abstract class Validation {
 
-	private Validation() {}
+	protected Validation() {
+	}
 
 	public static void notNegative(int value) {
 		if (value < 0) {
@@ -86,6 +89,26 @@ public final class Validation {
 
 	public static void isFalse(boolean value, String message) {
 		if (value) {
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	public static void notNullOrEmpty(Collection<?> value) {
+		notNullOrEmpty(value, "null or empty collection provided");
+	}
+
+	public static void notNullOrEmpty(Collection<?> value, String message) {
+		if (value == null || value.isEmpty()) {
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	public static <T> void notNullOrEmpty(T[] value) {
+		notNullOrEmpty(value, "null or empty array provided");
+	}
+
+	public static <T> void notNullOrEmpty(T[] value, String message) {
+		if (value == null || value.length == 0) {
 			throw new IllegalArgumentException(message);
 		}
 	}

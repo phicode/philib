@@ -19,66 +19,35 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.impl;
-
-import java.util.concurrent.atomic.AtomicLong;
-
-import ch.bind.philib.cache.CacheStats;
+package ch.bind.philib.cache.buffercache.impl;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class SimpleCacheStats implements CacheStats {
+public interface ObjectFactory<E> {
 
-	private final AtomicLong acquires = new AtomicLong(0);
+	E create();
 
-	private final AtomicLong creates = new AtomicLong(0);
+	void destroy(E e);
 
-	private final AtomicLong releases = new AtomicLong(0);
+	/**
+	 * Prepare an object to be reused by a different user. Implementors of this
+	 * method must make sure that any data from previous users is cleared.
+	 * 
+	 * @param e
+	 *            The object which must be prepared for reuse.
+	 * @return {@code true} if this object can be reused, {@code false}
+	 *         otherwise.
+	 */
+	boolean prepareForReuse(E e);
 
-	private final AtomicLong destroyed = new AtomicLong(0);
-
-	void incrementAcquires() {
-		acquires.incrementAndGet();
-	}
-
-	void incrementCreates() {
-		creates.incrementAndGet();
-	}
-
-	void incrementReleases() {
-		releases.incrementAndGet();
-	}
-
-	void incrementDestroyed() {
-		destroyed.incrementAndGet();
-	}
-
-	@Override
-	public long getAcquires() {
-		return acquires.get();
-	}
-
-	@Override
-	public long getCreates() {
-		return creates.get();
-	}
-
-	@Override
-	public long getReleases() {
-		return releases.get();
-	}
-
-	@Override
-	public long getDestroyed() {
-		return destroyed.get();
-	}
-
-	@Override
-	public String toString() {
-		return String.format("acquires=%d, creates=%d, releases=%d, destroyed=%d",//
-				acquires.get(), creates.get(), releases.get(), destroyed.get());
-	}
+	/**
+	 * 
+	 * @param e
+	 * @return {@code true} if this cached object is can be reused,
+	 *         {@code false} otherwise.
+	 */
+	boolean canReuse(E e);
 }

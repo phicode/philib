@@ -27,16 +27,17 @@ import java.util.NoSuchElementException;
 
 /**
  * An {@code Iterator} over an array.
+ * 
  * @author Philipp Meinen
  */
-public class ArrayIterator<E> implements Iterator<E> {
+public final class ArrayIterator<E> implements Iterator<E> {
 
 	private final E[] data;
 
 	private int nextIdx;
 
 	public ArrayIterator(E[] data) {
-		this.data = data;
+		this.data = data == null ? null : data.clone();
 	}
 
 	@Override

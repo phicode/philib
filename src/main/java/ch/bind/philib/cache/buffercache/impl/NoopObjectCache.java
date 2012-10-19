@@ -19,21 +19,26 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache;
+package ch.bind.philib.cache.buffercache.impl;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public interface CacheStats {
+public final class NoopObjectCache<E> extends ObjectCacheBase<E> {
 
-	long getCreates();
+	public NoopObjectCache(ObjectFactory<E> factory) {
+		super(factory);
+	}
 
-	long getAcquires();
+	@Override
+	protected E tryAcquire() {
+		return null;
+	}
 
-	long getReleases();
-
-	long getDestroyed();
-
+	@Override
+	protected boolean tryRelease(E e) {
+		return false;
+	}
 }

@@ -19,32 +19,21 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.impl;
+package ch.bind.philib.cache.buffercache;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public interface ObjectFactory<E> {
+public interface CacheStats {
 
-	E create();
+	long getCreates();
 
-	void destroy(E e);
+	long getAcquires();
 
-	/**
-	 * Prepare an object to be reused by a different user. Implementors of this method must make sure that any data from
-	 * previous users is cleared.
-	 * 
-	 * @param e The object which must be prepared for reuse.
-	 * @return {@code true} if this object can be reused, {@code false} otherwise.
-	 */
-	boolean prepareForReuse(E e);
+	long getReleases();
 
-	/**
-	 * 
-	 * @param e
-	 * @return
-	 */
-	boolean canReuse(E e);
+	long getDestroyed();
+
 }

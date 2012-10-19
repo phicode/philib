@@ -27,20 +27,22 @@ import ch.bind.philib.io.EndianConverter;
 /**
  * Implementation of the murmur hashing functions.
  * <p>
- * Based on Austin Appleby's <a href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
+ * Based on Austin Appleby's <a
+ * href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
  * </p>
  * 
  * @author Philipp Meinen
  */
 public final class MurmurHash {
 
-	private MurmurHash() {}
+	private MurmurHash() {
+	}
+
+	static final int MURMUR2_32_SEED = 0x9747B28C;
 
 	private static final int MURMUR2_32_M = 0x5BD1E995;
 
 	private static final int MURMUR2_32_R = 24;
-
-	static final int MURMUR2_32_SEED = 0x9747B28C;
 
 	private static final int MURMUR3_32_C1 = 0xCC9E2D51;
 
@@ -138,8 +140,7 @@ public final class MurmurHash {
 	}
 
 	public static final long optimize() {
-		byte[] b = {
-				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+		byte[] b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 		final long s = System.nanoTime();
 		for (int i = 0; i < 12000; i++) {
 			murmur2(b);
