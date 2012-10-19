@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
  * 
  * @author Philipp Meinen
  */
-public class ArrayIterator<E> implements Iterator<E> {
+public final class ArrayIterator<E> implements Iterator<E> {
 
 	private final E[] data;
 

@@ -49,9 +49,9 @@ import static ch.bind.philib.lang.MurmurHash.murmur2a_8bit;
  * 
  * @author Philipp Meinen
  */
-public final class HashUtil {
+public abstract class HashUtil {
 
-	private HashUtil() {
+	protected HashUtil() {
 	}
 
 	public static final int startHash(final boolean value) {

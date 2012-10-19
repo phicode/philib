@@ -26,9 +26,9 @@ package ch.bind.philib.math;
  * 
  * @author Philipp Meinen
  */
-public final class RangeUtil {
+public abstract class RangeUtil {
 
-	private RangeUtil() {
+	protected RangeUtil() {
 	}
 
 	/**

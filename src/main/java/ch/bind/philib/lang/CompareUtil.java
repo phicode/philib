@@ -26,9 +26,9 @@ package ch.bind.philib.lang;
  * 
  * @author Philipp Meinen
  */
-public final class CompareUtil {
+public abstract class CompareUtil {
 
-	private CompareUtil() {
+	protected CompareUtil() {
 	}
 
 	/**

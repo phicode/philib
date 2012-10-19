@@ -28,9 +28,9 @@ import java.util.Collection;
  * 
  * @author Philipp Meinen
  */
-public final class Validation {
+public abstract class Validation {
 
-	private Validation() {
+	protected Validation() {
 	}
 
 	public static void notNegative(int value) {

@@ -26,9 +26,9 @@ package ch.bind.philib.lang;
  * 
  * @author Philipp Meinen
  */
-public final class ToStringUtil {
+public abstract class ToStringUtil {
 
-	private ToStringUtil() {
+	protected ToStringUtil() {
 	}
 
 	/**

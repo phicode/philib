@@ -33,13 +33,13 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public final class ThreadUtil {
+public abstract class ThreadUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ThreadUtil.class);
 
 	public static final long DEFAULT_JOIN_TIMEOUT_MS = 1000L;
 
-	private ThreadUtil() {
+	protected ThreadUtil() {
 	}
 
 	public static void sleepUntilMs(long time) throws InterruptedException {
