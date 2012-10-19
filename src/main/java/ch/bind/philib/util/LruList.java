@@ -178,4 +178,8 @@ public final class LruList<E extends LruNode> {
 	public int capacity() {
 		return capacity;
 	}
+	
+	public boolean hasSpace() {
+	    return size < capacity;
+	}
 }
