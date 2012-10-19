@@ -21,11 +21,16 @@
  */
 package ch.bind.philib;
 
+import static org.testng.Assert.assertTrue;
+
+import java.util.concurrent.TimeUnit;
+
 public class TestUtil {
 
 	private static final long DEFAULT_SLEEPTIME_MS = 500;
 
-	private TestUtil() {}
+	private TestUtil() {
+	}
 
 	public static void gcAndSleep() {
 		gcAndSleep(DEFAULT_SLEEPTIME_MS);
@@ -38,5 +43,13 @@ public class TestUtil {
 		} catch (InterruptedException e) {
 			throw new RuntimeException("interrupted while sleeping for a test!");
 		}
+	}
+
+	public static void printBenchResults(Class<?> clazz, String longUnit, String shortUnit, long timeNs, double amount) {
+		assertTrue(timeNs > 0);
+		double perS = amount / (timeNs / 1000000000f);
+		double perMs = amount / (timeNs / 1000000f);
+		System.out.printf("Bench [%-20s]: %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms\n", //
+		        clazz.getSimpleName(), amount, longUnit, timeNs, perS, shortUnit, perMs, shortUnit);
 	}
 }

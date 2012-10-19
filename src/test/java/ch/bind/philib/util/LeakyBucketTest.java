@@ -117,13 +117,10 @@ public class LeakyBucketTest {
 		long min = 2 * 1000 * 1000 * 1000 - delta;
 		long max = 2 * 1000 * 1000 * 1000 + delta;
 		assertTrue(totalTime >= min && totalTime <= max, "total: " + totalTime);
-		System.out.println("time: " + totalTime);
 	}
 
 	@Test
 	public void exactRelease() {
-		final long tStart = System.nanoTime();
-
 		long intervalNs = 100000000L; // 100ms
 		long i3 = intervalNs * 3;
 		long i4 = intervalNs * 4;
@@ -144,7 +141,5 @@ public class LeakyBucketTest {
 		}
 		assertTrue(bc.canFill(i4 + 1) == 1);
 		assertTrue(bc.nextFillNano(i4 + 1) == 0);
-
-		System.out.printf("time for exact-release: %.3fsec%n", ((System.nanoTime() - tStart) / 1000000000f));
 	}
 }
