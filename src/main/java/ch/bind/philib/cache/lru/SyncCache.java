@@ -16,6 +16,10 @@ public final class SyncCache<K, V> implements Cache<K, V> {
 		this.cache = cache;
 	}
 
+	public static final <K, V> Cache<K, V> wrap(Cache<K, V> cache) {
+		return new SyncCache<K, V>(cache);
+	}
+
 	@Override
 	public void add(K key, V value) {
 		lock.lock();
