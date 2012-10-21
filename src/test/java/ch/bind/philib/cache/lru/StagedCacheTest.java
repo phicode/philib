@@ -22,7 +22,8 @@
 
 package ch.bind.philib.cache.lru;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
 

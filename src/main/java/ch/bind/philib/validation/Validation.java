@@ -30,8 +30,7 @@ import java.util.Collection;
  */
 public abstract class Validation {
 
-	protected Validation() {
-	}
+	protected Validation() {}
 
 	public static void notNegative(int value) {
 		if (value < 0) {

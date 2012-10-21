@@ -25,8 +25,6 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-import ch.bind.philib.util.Intervals;
-
 public class IntervalsTest {
 
 	@Test

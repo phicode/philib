@@ -30,8 +30,7 @@ import java.nio.ByteBuffer;
  */
 public final class BufferOps {
 
-	private BufferOps() {
-	}
+	private BufferOps() {}
 
 	public static void memsetZero(ByteBuffer buf) {
 		if (buf == null) {

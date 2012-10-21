@@ -46,12 +46,12 @@ public class SimpleCacheTest extends CacheTestBase {
 
 	@Override
 	int getDefaultCapacity() {
-		return SimpleCache.DEFAULT_CACHE_CAPACITY;
+		return Cache.DEFAULT_CACHE_CAPACITY;
 	}
 
 	@Test
 	public void fullCacheWhereOldObjectGetRemoved() {
-		final int testSize = SimpleCache.DEFAULT_CACHE_CAPACITY;
+		final int testSize = Cache.DEFAULT_CACHE_CAPACITY;
 
 		SimpleCache<String, String> cache = new SimpleCache<String, String>(testSize);
 

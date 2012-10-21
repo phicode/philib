@@ -28,14 +28,12 @@ package ch.bind.philib.lang;
  */
 public abstract class ToStringUtil {
 
-	protected ToStringUtil() {
-	}
+	protected ToStringUtil() {}
 
 	/**
 	 * Pretty-prints a matrix.
 	 * 
-	 * @param matrix
-	 *            The matrix which must be printed in a friendly way.
+	 * @param matrix The matrix which must be printed in a friendly way.
 	 * @return The result of the matrix pretty-printing.
 	 */
 	public static String matrixOutput(String[][] matrix) {

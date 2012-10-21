@@ -23,6 +23,7 @@
 package ch.bind.philib.util;
 
 import java.util.Arrays;
+
 import ch.bind.philib.util.ClusteredIndex.Entry;
 
 // TODO: round tablesize up (2^x) and use bitmasks
@@ -36,6 +37,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 		table = new Entry[capacity];
 	}
 
+	@Override
 	public boolean add(final T entry) {
 		assert (entry != null && entry.getNextIndexEntry() == null && entry.getKey() != null);
 
@@ -64,6 +66,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 		}
 	}
 
+	@Override
 	public boolean remove(final T entry) {
 		assert (entry != null);
 
@@ -92,6 +95,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 	}
 
 	// returns null if a pair does not exist
+	@Override
 	@SuppressWarnings("unchecked")
 	public T get(final K key) {
 		assert (key != null);
@@ -115,6 +119,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 		return Math.abs(p);
 	}
 
+	@Override
 	public void clear() {
 		Arrays.fill(table, null);
 	}

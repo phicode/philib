@@ -28,8 +28,7 @@ package ch.bind.philib.io;
  */
 public final class EndianConverter {
 
-	private EndianConverter() {
-	}
+	private EndianConverter() {}
 
 	// #################
 	// # ENCODE INT 64 #

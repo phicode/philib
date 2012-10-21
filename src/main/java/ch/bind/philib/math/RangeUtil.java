@@ -28,12 +28,11 @@ package ch.bind.philib.math;
  */
 public abstract class RangeUtil {
 
-	protected RangeUtil() {
-	}
+	protected RangeUtil() {}
 
 	/**
-	 * Calculate the sum of all values from 1 to <code>end</code>, including.
-	 * That is: <code>sum = 1 + 2 + 3 + ... + (end-1) + end</code> <br/>
+	 * Calculate the sum of all values from 1 to <code>end</code>, including. That is:
+	 * <code>sum = 1 + 2 + 3 + ... + (end-1) + end</code> <br/>
 	 * Examples:<br/>
 	 * <code>
 	 * f(0) = 0<br/>
@@ -44,8 +43,7 @@ public abstract class RangeUtil {
 	 * f(100) = 5050<br/>
 	 * </code>
 	 * 
-	 * @param end
-	 *            The end value of the sum-range.
+	 * @param end The end value of the sum-range.
 	 * @return The sum of all values from 1 to <code>end</code>, including.
 	 */
 	public static long sumOfRange(long end) {
@@ -57,15 +55,11 @@ public abstract class RangeUtil {
 	}
 
 	/**
-	 * Calculates the sum of all values from <code>start</code> to
-	 * <code>end</code>, including.
+	 * Calculates the sum of all values from <code>start</code> to <code>end</code>, including.
 	 * 
-	 * @param start
-	 *            The start value of the sum-range.
-	 * @param end
-	 *            The end value of the sum-range.
-	 * @return The sum of all values from <code>start</code> to <code>end</code>
-	 *         , including.
+	 * @param start The start value of the sum-range.
+	 * @param end The end value of the sum-range.
+	 * @return The sum of all values from <code>start</code> to <code>end</code> , including.
 	 */
 
 	public static long sumOfRange(long start, long end) {
