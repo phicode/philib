@@ -113,7 +113,7 @@ public abstract class ToStringUtil {
 		return sb;
 	}
 
-	public static String finish(StringBuilder sb) {
+	public static String end(StringBuilder sb) {
 		return sb.append(']').toString();
 	}
 
