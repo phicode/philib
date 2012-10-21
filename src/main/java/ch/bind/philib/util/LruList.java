@@ -72,9 +72,7 @@ public final class LruList<E extends LruNode> {
 	public void remove(final E node) {
 		assert (head != null && tail != null);
 
-		@SuppressWarnings("unchecked")
 		final E prev = (E) node.getLruPrev();
-		@SuppressWarnings("unchecked")
 		final E next = (E) node.getLruNext();
 
 		if (head == node) {
@@ -117,7 +115,6 @@ public final class LruList<E extends LruNode> {
 			head = null;
 			size = 0;
 		} else {
-			@SuppressWarnings("unchecked")
 			final E prev = (E) node.getLruPrev();
 			prev.setLruNext(null);
 			tail = prev;
@@ -134,9 +131,7 @@ public final class LruList<E extends LruNode> {
 			// LRU with size 1 or the the node is already in head position
 			return;
 		}
-		@SuppressWarnings("unchecked")
 		final E prev = (E) node.getLruPrev();
-		@SuppressWarnings("unchecked")
 		final E next = (E) node.getLruNext();
 
 		// since this node is not the head there are 2
