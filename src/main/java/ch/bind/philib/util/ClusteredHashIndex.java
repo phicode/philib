@@ -49,21 +49,20 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 		if (scanNow == null) {
 			table[position] = entry;
 			return true;
-		} else {
-			Entry<K> scanPrev = null;
-			while (scanNow != null) {
-				K nowKey = scanNow.getKey();
-				if (hash == nowKey.hashCode() && key.equals(nowKey)) {
-					// key is already in the table
-					return false;
-				}
-				scanPrev = scanNow;
-				scanNow = scanNow.getNextIndexEntry();
-			}
-			assert (scanPrev != null);
-			scanPrev.setNextIndexEntry(entry);
-			return true;
 		}
+		Entry<K> scanPrev = null;
+		do {
+			K nowKey = scanNow.getKey();
+			if (hash == nowKey.hashCode() && key.equals(nowKey)) {
+				// key is already in the table
+				return false;
+			}
+			scanPrev = scanNow;
+			scanNow = scanNow.getNextIndexEntry();
+		} while (scanNow != null);
+		assert (scanPrev != null);
+		scanPrev.setNextIndexEntry(entry);
+		return true;
 	}
 
 	@Override
