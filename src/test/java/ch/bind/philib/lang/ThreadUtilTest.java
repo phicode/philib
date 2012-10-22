@@ -25,6 +25,7 @@ package ch.bind.philib.lang;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import org.testng.annotations.Test;
 
@@ -71,6 +72,12 @@ public class ThreadUtilTest {
 		assertFalse(t.isAlive());
 		assertEquals(r.numStarts, 6);
 		assertFalse(r.wasInterrupted);
+	}
+	
+	@Test
+	public void f() {
+		// test other methods
+		fail();
 	}
 
 	private static final class DelayRunnable implements Runnable {

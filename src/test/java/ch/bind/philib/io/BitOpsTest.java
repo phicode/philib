@@ -26,6 +26,7 @@ import static ch.bind.philib.io.BitOps.findLowestSetBitIdx64;
 import static ch.bind.philib.io.BitOps.rotl32;
 import static ch.bind.philib.io.BitOps.rotr32;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import java.util.Random;
 
@@ -129,4 +130,9 @@ public class BitOpsTest {
 		assertEquals(0xAAAAAAAA, rotr32(0x55555555, 1));
 		assertEquals(0x55555555, rotr32(0xAAAAAAAA, 1));
 	}
+	
+	  @Test
+	  public void f() {
+		  fail();
+	  }
 }

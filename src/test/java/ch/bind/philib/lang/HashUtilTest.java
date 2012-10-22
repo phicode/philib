@@ -26,6 +26,7 @@ import static ch.bind.philib.lang.HashUtil.nextHash;
 import static ch.bind.philib.lang.HashUtil.startHash;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 
@@ -121,6 +122,12 @@ public class HashUtilTest {
 		hash = HashUtil.nextHash(hash, value);
 		expected = HashUtil.nextHash(expected, Double.doubleToLongBits(value));
 		assertEquals(expected, hash);
+	}
+	
+	@Test
+	public void f() {
+		// test other methods
+		fail();
 	}
 
 	@Test(enabled = false)

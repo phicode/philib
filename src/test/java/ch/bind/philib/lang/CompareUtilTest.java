@@ -27,6 +27,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
+import static org.testng.Assert.*;
 
 public class CompareUtilTest {
 
@@ -142,5 +143,11 @@ public class CompareUtilTest {
 		}
 		assertEquals(-1L, CompareUtil.normalize(Long.MIN_VALUE));
 		assertEquals(1L, CompareUtil.normalize(Long.MAX_VALUE));
+	}
+	
+	@Test
+	public void f() {
+		// test other methods
+		fail();
 	}
 }
