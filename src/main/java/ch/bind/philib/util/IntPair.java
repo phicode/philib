@@ -31,18 +31,18 @@ import ch.bind.philib.lang.CompareUtil;
  * 
  * @author Philipp Meinen
  */
-public interface LongPair<T> {
+public interface IntPair<T> {
 
-	long getKey();
+	int getKey();
 
 	T getValue();
 
-	public static final Comparator<LongPair<?>> KEY_COMPARATOR = new Comparator<LongPair<?>>() {
+	public static final Comparator<IntPair<?>> KEY_COMPARATOR = new Comparator<IntPair<?>>() {
 
 		@Override
-		public int compare(LongPair<?> a, LongPair<?> b) {
+		public int compare(IntPair<?> a, IntPair<?> b) {
 			if (a == null || b == null) {
-				throw new NullPointerException("LongPair.KEY_COMPARATOR does not support null-values");
+				throw new NullPointerException("IntPair.KEY_COMPARATOR does not support null-values");
 			}
 			return CompareUtil.diff(a.getKey(), b.getKey());
 		}

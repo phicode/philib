@@ -55,18 +55,18 @@ public class LeakyBucketTest {
 		long time = SEC;
 		long interval = 400000; // SEC / 2500
 		assertEquals(2500, bc.canFill(time));
-		assertEquals(0, bc.nextFillNano(time));
+		assertEquals(0, bc.nextFillNs(time));
 		// simulate one whole day
 		for (int numSeconds = 0; numSeconds < 86400; numSeconds++) {
 			assertEquals(2500, bc.canFill(time));
-			assertEquals(0, bc.nextFillNano(time));
+			assertEquals(0, bc.nextFillNs(time));
 
 			bc.fill(2500, time);
 			assertEquals(0, bc.canFill(time));
-			assertEquals(interval, bc.nextFillNano(time));
+			assertEquals(interval, bc.nextFillNs(time));
 			time++; // x sec + 1 nano
 			assertEquals(0, bc.canFill(time));
-			assertEquals(interval - 1, bc.nextFillNano(time));
+			assertEquals(interval - 1, bc.nextFillNs(time));
 
 			// x.5 sec - 1 nano
 			time += (SEC / 2 - 2);
@@ -99,7 +99,7 @@ public class LeakyBucketTest {
 		long moreAcquired = 0;
 		while (moreAcquired < 5000) {
 			long time = System.nanoTime();
-			long nextAvail = bc.nextFillNano(time);
+			long nextAvail = bc.nextFillNs(time);
 			long a = bc.canFill(time);
 			if (a > 0) {
 				assertEquals(nextAvail, 0); // available now
@@ -121,25 +121,26 @@ public class LeakyBucketTest {
 
 	@Test
 	public void exactRelease() {
-		long intervalNs = 100000000L; // 100ms
+		long intervalMs = 100;
+		long intervalNs = intervalMs * 1000000L;
 		long i3 = intervalNs * 3;
 		long i4 = intervalNs * 4;
-		LeakyBucket bc = LeakyBucket.withLeakIntervalNano(intervalNs, 1);
+		LeakyBucket bc = LeakyBucket.withLeakIntervalMs(intervalMs, 1);
 		bc.fill(1);
 		for (long t = 0; t < intervalNs; t += 10) {
 			assertTrue(bc.canFill(t) == 0);
-			assertTrue(bc.nextFillNano(t) == intervalNs - t);
+			assertTrue(bc.nextFillNs(t) == intervalNs - t);
 		}
 		for (long t = intervalNs; t < i3; t += 10) {
 			assertTrue(bc.canFill(t) == 1);
-			assertTrue(bc.nextFillNano(t) == 0);
+			assertTrue(bc.nextFillNs(t) == 0);
 		}
 		bc.fill(1, i3);
 		for (long t = i3; t < i4; t += 10) {
 			assertTrue(bc.canFill(t) == 0);
-			assertTrue(bc.nextFillNano(t) == i4 - t);
+			assertTrue(bc.nextFillNs(t) == i4 - t);
 		}
 		assertTrue(bc.canFill(i4 + 1) == 1);
-		assertTrue(bc.nextFillNano(i4 + 1) == 0);
+		assertTrue(bc.nextFillNs(i4 + 1) == 0);
 	}
 }

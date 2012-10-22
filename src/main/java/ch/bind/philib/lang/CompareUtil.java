@@ -28,7 +28,8 @@ package ch.bind.philib.lang;
  */
 public abstract class CompareUtil {
 
-	protected CompareUtil() {}
+	protected CompareUtil() {
+	}
 
 	/**
 	 * A null-safe equality checking method.<br/>
@@ -85,5 +86,33 @@ public abstract class CompareUtil {
 
 	public static final int normalize(long diff) {
 		return (diff < 0 ? -1 : (diff == 0 ? 0 : 1));
+	}
+
+	public static final int diff(byte a, byte b) {
+		return diff(a & 0xFF, b & 0xFF);
+	}
+
+	public static final int diff(char a, char b) {
+		return a == b ? 0 : (a < b ? -1 : 1);
+	}
+
+	public static final int diff(short a, short b) {
+		return a == b ? 0 : (a < b ? -1 : 1);
+	}
+
+	public static final int diff(int a, int b) {
+		return a == b ? 0 : (a < b ? -1 : 1);
+	}
+
+	public static final int diff(long a, long b) {
+		return a == b ? 0 : (a < b ? -1 : 1);
+	}
+
+	public static final int diff(float a, float b) {
+		return a == b ? 0 : (a < b ? -1 : 1);
+	}
+
+	public static final int diff(double a, double b) {
+		return a == b ? 0 : (a < b ? -1 : 1);
 	}
 }
