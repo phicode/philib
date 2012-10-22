@@ -144,10 +144,59 @@ public class CompareUtilTest {
 		assertEquals(-1L, CompareUtil.normalize(Long.MIN_VALUE));
 		assertEquals(1L, CompareUtil.normalize(Long.MAX_VALUE));
 	}
-	
+
 	@Test
-	public void f() {
-		// test other methods
+	public void diffBool() {
+		assertEquals(CompareUtil.diff(true, true), 0);
+		assertEquals(CompareUtil.diff(true, false), 1);
+		assertEquals(CompareUtil.diff(false, true), -1);
+		assertEquals(CompareUtil.diff(false, false), 0);
+	}
+
+	@Test
+	public void diffByte() {
+		for (int a = 0; a < 255; a++) {
+			byte x = (byte) a;
+			for (int b = 0; b < 255; b++) {
+				byte y = (byte) b;
+				if (a == b) {
+					assertEquals(CompareUtil.diff(x, y), 0);
+				} else if (a < b) {
+					assertEquals(CompareUtil.diff(true, false), -1);
+				} else {
+					assertEquals(CompareUtil.diff(false, true), 1);
+				}
+			}
+		}
+	}
+
+	@Test
+	public void diffShort() {
+		fail();
+	}
+
+	@Test
+	public void diffChar() {
+		fail();
+	}
+
+	@Test
+	public void diffInt() {
+		fail();
+	}
+
+	@Test
+	public void diffLong() {
+		fail();
+	}
+
+	@Test
+	public void diffFloat() {
+		fail();
+	}
+
+	@Test
+	public void diffDouble() {
 		fail();
 	}
 }

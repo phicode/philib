@@ -105,7 +105,7 @@ public abstract class ArrayUtil {
 	}
 
 	public static String formatShortHex(byte[] data, int off, int len) {
-		if (data == null) {
+		if (data == null || data.length == 0) {
 			return "";
 		}
 		final int l = data.length;
@@ -152,5 +152,8 @@ public abstract class ArrayUtil {
 	}
 
 	private static final char[] TO_HEX = {
-			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+			'0', '1', '2', '3', //
+			'4', '5', '6', '7', //
+			'8', '9', 'A', 'B', //
+			'C', 'D', 'E', 'F' };
 }

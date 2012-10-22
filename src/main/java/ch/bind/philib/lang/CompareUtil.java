@@ -76,16 +76,16 @@ public abstract class CompareUtil {
 		return a.compareTo(b);
 	}
 
-	public static int compareBool(boolean a, boolean b) {
-		return (a == b ? 0 : (a ? 1 : -1));
-	}
-
 	public static final int normalize(int diff) {
 		return diff < 0 ? -1 : (diff == 0 ? 0 : 1);
 	}
 
 	public static final int normalize(long diff) {
 		return (diff < 0 ? -1 : (diff == 0 ? 0 : 1));
+	}
+
+	public static int diff(boolean a, boolean b) {
+		return (a == b ? 0 : (a ? 1 : -1));
 	}
 
 	public static final int diff(byte a, byte b) {

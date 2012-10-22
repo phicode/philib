@@ -34,6 +34,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.testng.annotations.Test;
@@ -159,15 +160,40 @@ public class ArrayUtilTest {
 	}
 
 	@Test
-	public void testFormatShortHex() {
-		byte[] a = "abcd".getBytes();
+	public void testFormatShortHexArray() {
+		assertEquals(formatShortHex((byte[]) null), "");
 		assertEquals(formatShortHex(EMPTY_BYTE_ARRAY), "");
+
+		byte[] a = "abcd".getBytes();
 		assertEquals(formatShortHex(a), "61626364");
 	}
-	
+
 	@Test
-	public void f() {
-		// test other methods
-		fail();
+	public void testFormatShortHexArrayExtended() {
+		assertEquals(formatShortHex((byte[]) null, 0, 1), "");
+		assertEquals(formatShortHex(EMPTY_BYTE_ARRAY, 1, 2), "");
+
+		byte[] a = "abcd".getBytes();
+		assertEquals(formatShortHex(a, 1, 2), "6263");
+		assertEquals(formatShortHex(a, 1, 5555), "626364");
+	}
+
+	@Test
+	public void testFormatShortHexByteBuffer() {
+		assertEquals(formatShortHex((ByteBuffer) null), "");
+		assertEquals(formatShortHex(ByteBuffer.wrap(EMPTY_BYTE_ARRAY)), "");
+
+		byte[] a = "\u0002abcd".getBytes();
+		ByteBuffer arrayBb = ByteBuffer.wrap(a);
+		assertEquals(arrayBb.remaining(), 5);
+		assertEquals(formatShortHex(arrayBb), "0261626364");
+		assertEquals(arrayBb.remaining(), 5);
+
+		ByteBuffer directBb = ByteBuffer.allocateDirect(5);
+		directBb.put(a);
+		directBb.clear();
+		assertEquals(directBb.remaining(), 5);
+		assertEquals(formatShortHex(directBb), "0261626364");
+		assertEquals(directBb.remaining(), 5);
 	}
 }
