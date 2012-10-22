@@ -162,9 +162,9 @@ public class CompareUtilTest {
 				if (a == b) {
 					assertEquals(CompareUtil.diff(x, y), 0);
 				} else if (a < b) {
-					assertEquals(CompareUtil.diff(true, false), -1);
+					assertEquals(CompareUtil.diff(x, y), -1);
 				} else {
-					assertEquals(CompareUtil.diff(false, true), 1);
+					assertEquals(CompareUtil.diff(x, y), 1);
 				}
 			}
 		}
@@ -192,11 +192,13 @@ public class CompareUtilTest {
 
 	@Test
 	public void diffFloat() {
+		// TODO: pay attention to NaN, -Inf, +Inf
 		fail();
 	}
 
 	@Test
 	public void diffDouble() {
+		// TODO: pay attention to NaN, -Inf, +Inf
 		fail();
 	}
 }
