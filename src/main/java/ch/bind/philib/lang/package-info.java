@@ -25,4 +25,5 @@
  * 
  * @author Philipp Meinen
  */
+
 package ch.bind.philib.lang;

@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.lang;
 
 /**
@@ -28,8 +29,7 @@ package ch.bind.philib.lang;
  */
 public abstract class CompareUtil {
 
-	protected CompareUtil() {
-	}
+	protected CompareUtil() {}
 
 	/**
 	 * A null-safe equality checking method.<br/>
