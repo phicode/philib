@@ -6,7 +6,7 @@
 
 === 0.4.0 ===
  F: StaticIntMap and IntPair
- G: Test-coverage increased from 64.4% to 68.5%, 71.2%, 76.2%, 81.4x%
+ G: Test-coverage increased from 64.4% to 81.4x%
 
 === 0.3.0 ===
  F: added a simple and a staged cache implementation
