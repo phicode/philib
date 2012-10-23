@@ -26,7 +26,7 @@ import ch.bind.philib.cache.buffercache.impl.LinkedObjectCache;
 import ch.bind.philib.cache.buffercache.impl.NoopObjectCache;
 import ch.bind.philib.cache.buffercache.impl.ObjectFactory;
 import ch.bind.philib.cache.buffercache.impl.ScalableObjectCache;
-import ch.bind.philib.io.BufferOps;
+import ch.bind.philib.lang.ArrayUtil;
 
 /**
  * TODO
@@ -98,7 +98,7 @@ public final class ByteArrayCache extends SpecificCacheBase<byte[]> {
 		@Override
 		public boolean prepareForReuse(byte[] e) {
 			if (e.length == bufferSize) {
-				BufferOps.memsetZero(e);
+				ArrayUtil.memsetZero(e);
 				return true;
 			}
 			return false;

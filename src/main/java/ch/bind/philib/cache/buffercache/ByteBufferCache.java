@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
 import ch.bind.philib.cache.buffercache.impl.LinkedObjectCache;
 import ch.bind.philib.cache.buffercache.impl.ObjectFactory;
 import ch.bind.philib.cache.buffercache.impl.ScalableObjectCache;
-import ch.bind.philib.io.BufferOps;
+import ch.bind.philib.lang.ArrayUtil;
 
 /**
  * TODO
@@ -83,7 +83,7 @@ public final class ByteBufferCache extends SpecificCacheBase<ByteBuffer> {
 		@Override
 		public boolean prepareForReuse(ByteBuffer e) {
 			if (e.capacity() == bufferSize) {
-				BufferOps.memsetZero(e);
+				ArrayUtil.memsetZero(e);
 				return true;
 			}
 			return false;
