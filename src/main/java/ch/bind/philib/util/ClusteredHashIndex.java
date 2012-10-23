@@ -28,6 +28,7 @@ import ch.bind.philib.util.ClusteredIndex.Entry;
 
 // TODO: round tablesize up (2^x) and use bitmasks
 // TODO: strengthen hashcodes through an avalanche phase
+// TODO: concurrent version
 public final class ClusteredHashIndex<K, T extends Entry<K>> implements ClusteredIndex<K, T> {
 
 	private final Entry<K>[] table;
