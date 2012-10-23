@@ -28,11 +28,11 @@ import static ch.bind.philib.lang.ArrayUtil.extractBack;
 import static ch.bind.philib.lang.ArrayUtil.extractFront;
 import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
 import static ch.bind.philib.lang.ArrayUtil.pickRandom;
+import static ch.bind.philib.lang.ArrayUtil.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -137,6 +137,72 @@ public class ArrayUtilTest {
 		assertNotNull(c);
 		assertEquals(6, c.length);
 		assertTrue(Arrays.equals(ce, c));
+	}
+
+	@Test
+	public void appendEnoughCap() {
+		byte[] a = "123".getBytes();
+		byte[] b = "abc".getBytes();
+		byte[] c = append(a, b, 8);
+		byte[] ce = "123abc".getBytes();
+		assertNotNull(c);
+		assertEquals(6, c.length);
+		assertTrue(Arrays.equals(ce, c));
+	}
+
+	@Test
+	public void appendCapped() {
+		byte[] a = "123".getBytes();
+		byte[] b = "abc".getBytes();
+
+		byte[] c = append(a, b, 5);
+		assertNotNull(c);
+		assertEquals(5, c.length);
+		assertTrue(Arrays.equals("123ab".getBytes(), c));
+
+		c = append(a, b, 4);
+		assertNotNull(c);
+		assertEquals(4, c.length);
+		assertTrue(Arrays.equals("123a".getBytes(), c));
+
+		c = append(a, b, 3);
+		assertNotNull(c);
+		assertEquals(3, c.length);
+		assertTrue(Arrays.equals("123".getBytes(), c));
+
+		c = append(a, b, 2);
+		assertNotNull(c);
+		assertEquals(2, c.length);
+		assertTrue(Arrays.equals("12".getBytes(), c));
+
+		c = append(a, b, 1);
+		assertNotNull(c);
+		assertEquals(1, c.length);
+		assertTrue(Arrays.equals("1".getBytes(), c));
+
+		c = append(a, b, 0);
+		assertNotNull(c);
+		assertEquals(0, c.length);
+
+		c = append(a, b, -1);
+		assertNotNull(c);
+		assertEquals(0, c.length);
+	}
+
+	@Test
+	public void appendNull() {
+		byte[] a = "123".getBytes();
+		byte[] b = "abc".getBytes();
+
+		byte[] c = append(null, b, 4);
+		assertNotNull(c);
+		assertEquals(3, c.length);
+		assertTrue(Arrays.equals(b, c));
+
+		c = append(a, null, 4);
+		assertNotNull(c);
+		assertEquals(3, c.length);
+		assertTrue(Arrays.equals(a, c));
 	}
 
 	@Test

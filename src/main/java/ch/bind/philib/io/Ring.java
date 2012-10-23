@@ -35,8 +35,6 @@ public interface Ring<T> {
 
 	T poll();
 
-	T pollNext(final T value);
-
 	boolean isEmpty();
 
 	int size();

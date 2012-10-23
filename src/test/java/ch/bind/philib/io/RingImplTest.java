@@ -26,8 +26,39 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 public class RingImplTest {
-  @Test
-  public void f() {
-	  fail();
-  }
+
+	@Test
+	public void f() {
+		Ring<Integer> ring = new RingImpl<Integer>();
+
+		// 0..999
+		for (int i = 0; i < 1000; i++) {
+			ring.addBack(i);
+		}
+		// 1999..1234,0..999
+		for (int i = 1234; i < 2000; i++) {
+			ring.addFront(i);
+		}
+		// 1999..1234,0..999,-1..-99
+		for (int i = -1; i > -100; i--) {
+			ring.addBack(i);
+		}
+
+		// reduce to 0..999,-1..-99
+		for (int i = 1999; i >= 1234; i--) {
+			assertEquals(ring.poll(), Integer.valueOf(i));
+		}
+
+		// reduce to -1..-99
+		for (int i = 0; i < 1000; i++) {
+			assertEquals(ring.poll(), Integer.valueOf(i));
+		}
+
+		// reduce to empty
+		for (int i = -1; i > -100; i--) {
+			assertEquals(ring.poll(), Integer.valueOf(i));
+		}
+
+		assertNull(ring.poll());
+	}
 }

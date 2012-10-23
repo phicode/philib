@@ -27,7 +27,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
-import static org.testng.Assert.*;
 
 public class CompareUtilTest {
 
@@ -172,33 +171,88 @@ public class CompareUtilTest {
 
 	@Test
 	public void diffShort() {
-		fail();
+		assertEquals(CompareUtil.diff((short) 1, (short) 1), 0);
+		assertEquals(CompareUtil.diff((short) 5, (short) 1), 1);
+		assertEquals(CompareUtil.diff((short) 1, (short) 5), -1);
+
+		assertEquals(CompareUtil.diff((short) Short.MIN_VALUE, (short) Short.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff((short) Short.MIN_VALUE + 2, (short) Short.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff((short) Short.MIN_VALUE, (short) Short.MIN_VALUE + 2), -1);
+
+		assertEquals(CompareUtil.diff((short) Short.MAX_VALUE, (short) Short.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff((short) Short.MAX_VALUE, (short) Short.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff((short) Short.MAX_VALUE - 2, (short) Short.MAX_VALUE), -1);
 	}
 
 	@Test
 	public void diffChar() {
-		fail();
+		assertEquals(CompareUtil.diff((char) 1, (char) 1), 0);
+		assertEquals(CompareUtil.diff((char) 5, (char) 1), 1);
+		assertEquals(CompareUtil.diff((char) 1, (char) 5), -1);
+
+		assertEquals(CompareUtil.diff((char) Character.MIN_VALUE, (char) Character.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff((char) Character.MIN_VALUE + 2, (char) Character.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff((char) Character.MIN_VALUE, (char) Character.MIN_VALUE + 2), -1);
+
+		assertEquals(CompareUtil.diff((char) Character.MAX_VALUE, (char) Character.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff((char) Character.MAX_VALUE, (char) Character.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff((char) Character.MAX_VALUE - 2, (char) Character.MAX_VALUE), -1);
 	}
 
 	@Test
 	public void diffInt() {
-		fail();
+		assertEquals(CompareUtil.diff(1, 1), 0);
+		assertEquals(CompareUtil.diff(5, 1), 1);
+		assertEquals(CompareUtil.diff(1, 5), -1);
+
+		assertEquals(CompareUtil.diff(Integer.MIN_VALUE, Integer.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff(Integer.MIN_VALUE + 2, Integer.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff(Integer.MIN_VALUE, Integer.MIN_VALUE + 2), -1);
+
+		assertEquals(CompareUtil.diff(Integer.MAX_VALUE, Integer.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff(Integer.MAX_VALUE, Integer.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff(Integer.MAX_VALUE - 2, Integer.MAX_VALUE), -1);
 	}
 
 	@Test
 	public void diffLong() {
-		fail();
+		assertEquals(CompareUtil.diff(1L, 1L), 0);
+		assertEquals(CompareUtil.diff(5L, 1L), 1);
+		assertEquals(CompareUtil.diff(1L, 5L), -1);
+
+		assertEquals(CompareUtil.diff(Long.MIN_VALUE, Long.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff(Long.MIN_VALUE + 2, Long.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff(Long.MIN_VALUE, Long.MIN_VALUE + 2), -1);
+
+		assertEquals(CompareUtil.diff(Long.MAX_VALUE, Long.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff(Long.MAX_VALUE, Long.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff(Long.MAX_VALUE - 2, Long.MAX_VALUE), -1);
 	}
 
 	@Test
 	public void diffFloat() {
-		// TODO: pay attention to NaN, -Inf, +Inf
-		fail();
+		assertEquals(CompareUtil.diff(1f, 1f), 0);
+		assertEquals(CompareUtil.diff(5f, 1f), 1);
+		assertEquals(CompareUtil.diff(1f, 5f), -1);
+
+		//		assertEquals(CompareUtil.diff(Float.NaN, Float.NaN), 0);
+		assertEquals(CompareUtil.diff(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY), 0);
+		assertEquals(CompareUtil.diff(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY), 0);
+
+		assertEquals(CompareUtil.diff(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY), -1);
+		assertEquals(CompareUtil.diff(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY), 1);
 	}
 
 	@Test
 	public void diffDouble() {
-		// TODO: pay attention to NaN, -Inf, +Inf
-		fail();
+		assertEquals(CompareUtil.diff((double) 1f, (double) 1f), 0);
+		assertEquals(CompareUtil.diff((double) 5f, (double) 1f), 1);
+		assertEquals(CompareUtil.diff((double) 1f, (double) 5f), -1);
+
+		assertEquals(CompareUtil.diff(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), 0);
+		assertEquals(CompareUtil.diff(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY), 0);
+
+		assertEquals(CompareUtil.diff(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), -1);
+		assertEquals(CompareUtil.diff(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY), 1);
 	}
 }

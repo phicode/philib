@@ -27,84 +27,25 @@ package ch.bind.philib.lang;
  * 
  * @author Philipp Meinen
  */
-public abstract class ToStringUtil {
+public abstract class StringUtil {
 
-	protected ToStringUtil() {}
-
-	/**
-	 * Pretty-prints a matrix.
-	 * 
-	 * @param matrix The matrix which must be printed in a friendly way.
-	 * @return The result of the matrix pretty-printing.
-	 */
-	public static String matrixOutput(String[][] matrix) {
-		checkMatrix(matrix);
-		StringBuilder sb = new StringBuilder();
-		final int N = matrix.length;
-		if (N == 0)
-			return "";
-		final int M = matrix[0].length;
-
-		int max = 0;
-		for (int x = 0; x < N; x++) {
-			for (int y = 0; y < M; y++) {
-				final String str = matrix[x][y];
-				if (str != null) {
-					int len = matrix[x][y].length();
-					if (len > max) {
-						max = len;
-					}
-				}
-			}
-		}
-		// N * <max length> + (N-1) * " | "
-		int linelen = N * max + (N - 1) * 3;
-		char[] linepad = new char[linelen + 2];
-		for (int x = 1; x <= linelen; x++)
-			linepad[x] = '-';
-		linepad[0] = linepad[linelen + 1] = '\n';
-
-		for (int y = 0; y < M; y++) {
-			for (int x = 0; x < N; x++) {
-				if (x != 0)
-					sb.append(' ');
-				String val = matrix[x][y];
-				if (val == null)
-					val = "";
-				int len = val.length();
-				int pad = max - len;
-				for (int p = 0; p < pad; p++)
-					sb.append(' ');
-
-				sb.append(val);
-
-				if (x < (N - 1))
-					sb.append(" |");
-			}
-			sb.append(linepad);
-		}
-
-		return sb.toString();
+	protected StringUtil() {
 	}
 
-	private static void checkMatrix(String[][] matrix) {
-		if (matrix == null) {
-			throw new IllegalArgumentException("matrix == null");
+	public static String extractBack(String s, char delim) {
+		if (s == null || s.isEmpty()) {
+			return "";
 		}
-		final int N = matrix.length;
-		if (N > 0) {
-			final String[] first = matrix[0];
-			if (first == null)
-				throw new IllegalArgumentException("matrix[0] == null");
-			final int M = first.length;
-			for (int i = 1; i < N; i++) {
-				final String[] cur = matrix[i];
-				if (cur == null)
-					throw new IllegalArgumentException("matrix[" + i + "] == null");
-				if (cur.length != M)
-					throw new IllegalArgumentException("matrix[" + i + "].length != matrix[0].length");
+		StringBuilder sb = new StringBuilder();
+		for (int l = s.length(), i = 0; i < l; i++) {
+			char c = s.charAt(i);
+			if (c == delim) {
+				sb.setLength(0);
+			} else {
+				sb.append(c);
 			}
 		}
+		return sb.toString();
 	}
 
 	public static StringBuilder start(Object obj) {
@@ -162,22 +103,6 @@ public abstract class ToStringUtil {
 	}
 
 	public static void addLong(StringBuilder sb, long v) {
-		sb.append(", ");
-		sb.append(v);
-	}
-
-	public static void firstStr(StringBuilder sb, String name, String v) {
-		sb.append(name);
-		sb.append('=');
-		sb.append(v);
-	}
-
-	public static void addStr(StringBuilder sb, String name, String v) {
-		sb.append(", ");
-		firstStr(sb, name, v);
-	}
-
-	public static void addStr(StringBuilder sb, String v) {
 		sb.append(", ");
 		sb.append(v);
 	}

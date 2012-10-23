@@ -29,8 +29,28 @@ package ch.bind.philib.lang;
  */
 public abstract class ExceptionUtil {
 
-	protected ExceptionUtil() {}
+	protected ExceptionUtil() {
+	}
 
+	/**
+	 * Returns a one-line representation of an exception.
+	 * The goal of this method is to provide messages which are log-friendly.
+	 * 
+	 * The format of these messages looks like:
+	 * 
+	 * <pre>
+	 * className.method:line#exceptionClassName(message) => causingClassName.method:line#exceptionClassName(message) => ... so on, up to the root-exception
+	 * </pre>
+	 * 
+	 * if no line-information is available:
+	 * 
+	 * <pre>
+	 * className.method#exceptionClassName(message) => causingClassName.method#exceptionClassName(message) => ... so on, up to the root-exception
+	 * </pre>
+	 * 
+	 * @param t
+	 * @return a message of the format which is described above.
+	 */
 	public static String buildMessageChain(Throwable t) {
 		if (t == null) {
 			return "";
@@ -48,14 +68,18 @@ public abstract class ExceptionUtil {
 	}
 
 	private static void add(StringBuilder sb, Throwable t) {
-		sb.append(t.getClass().getSimpleName());
 		StackTraceElement[] trace = t.getStackTrace();
-		if (trace != null && trace.length > 0) {
-			sb.append('@');
-			sb.append(trace[0].toString());
-		} else {
-			sb.append("@no-stack-trace");
+		if (trace != null && trace.length > 0 && trace[0] != null) {
+			StackTraceElement ste = trace[0];
+			int line = ste.getLineNumber();
+			String simpleName = StringUtil.extractBack(ste.getClassName(), '.');
+			sb.append(simpleName).append('.').append(ste.getMethodName());
+			if (line >= 0) {
+				sb.append(':').append(line);
+			}
+			sb.append('#');
 		}
+		sb.append(t.getClass().getSimpleName());
 		String msg = t.getMessage();
 		if (msg == null) {
 			sb.append("()");

@@ -22,13 +22,28 @@
 
 package ch.bind.philib;
 
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.ref.SoftReference;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import ch.bind.philib.io.SafeCloseUtil;
 
 public class TestUtil {
 
 	private static final long DEFAULT_SLEEPTIME_MS = 500;
 
-	private TestUtil() {}
+	private TestUtil() {
+	}
 
 	public static void gcAndSleep() {
 		gcAndSleep(DEFAULT_SLEEPTIME_MS);
@@ -48,6 +63,36 @@ public class TestUtil {
 		double perS = amount / (timeNs / 1000000000f);
 		double perMs = amount / (timeNs / 1000000f);
 		System.out.printf("Bench [%-20s]: %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms\n", //
-				clazz.getSimpleName(), amount, longUnit, timeNs, perS, shortUnit, perMs, shortUnit);
+		        clazz.getSimpleName(), amount, longUnit, timeNs, perS, shortUnit, perMs, shortUnit);
+	}
+
+	private static volatile SoftReference<List<String>> wordlist;
+
+	public static List<String> getWordlist() {
+		List<String> wl = wordlist == null ? null : wordlist.get();
+		if (wl != null) {
+			return wl;
+		}
+		ArrayList<String> words = new ArrayList<String>(256 * 1024);
+		InputStream is = TestUtil.class.getResourceAsStream("/en_words");
+		assertNotNull(is);
+		try {
+			InputStreamReader isr = new InputStreamReader(is, Charset.forName("US-ASCII"));
+			BufferedReader rdr = new BufferedReader(isr, 32 * 1024);
+			String line;
+			while ((line = rdr.readLine()) != null) {
+				words.add(line);
+			}
+			words.trimToSize();
+			wl = Collections.unmodifiableList(words);
+			wordlist = new SoftReference<List<String>>(wl);
+			return wl;
+		} catch (IOException e) {
+			fail(e.getMessage());
+		} finally {
+			SafeCloseUtil.close(is);
+		}
+		fail();
+		return null;
 	}
 }

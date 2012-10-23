@@ -79,20 +79,6 @@ public final class RingImpl<T> implements Ring<T> {
 	}
 
 	@Override
-	public T pollNext(final T value) {
-		assert (size >= 0 && (ring == null || size <= ring.length));
-		if (size == 0) {
-			return value;
-		}
-		final T rv = poll();
-		if (value != null) {
-			addBack(value);
-		}
-		assert (rv != null);
-		return rv;
-	}
-
-	@Override
 	public boolean isEmpty() {
 		assert (size >= 0 && (ring == null || size <= ring.length));
 		return size == 0;
@@ -152,8 +138,8 @@ public final class RingImpl<T> implements Ring<T> {
 
 	private static final void copyRingData(Object[] oldRing, int off, int used, Object[] newRing) {
 		assert (oldRing != null && newRing != null && //
-				off >= 0 && off < oldRing.length && //
-				used >= 0 && used <= oldRing.length && newRing.length >= used);
+		        off >= 0 && off < oldRing.length && //
+		        used >= 0 && used <= oldRing.length && newRing.length >= used);
 
 		if (off == 0) {
 			System.arraycopy(oldRing, 0, newRing, 0, used);

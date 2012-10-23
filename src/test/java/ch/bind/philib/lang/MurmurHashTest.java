@@ -22,12 +22,46 @@
 
 package ch.bind.philib.lang;
 
+import static org.testng.Assert.assertTrue;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
-import static org.testng.Assert.*;
+
+import ch.bind.philib.TestUtil;
 
 public class MurmurHashTest {
-  @Test
-  public void f() {
-	  fail();
-  }
+
+	private static final Logger LOG = LoggerFactory.getLogger(MurmurHashTest.class);
+
+	@Test
+	public void murmurWordlist() {
+		MurmurHash.optimize();
+		List<String> wordlist = TestUtil.getWordlist();
+		Map<Integer, String> murmur2hashes = new HashMap<Integer, String>(wordlist.size(), 1f);
+		Map<Integer, String> murmur3hashes = new HashMap<Integer, String>(wordlist.size(), 1f);
+		List<String> dups2 = new LinkedList<String>();
+		List<String> dups3 = new LinkedList<String>();
+		for (String s : wordlist) {
+			int m2 = MurmurHash.murmur2(s.getBytes());
+			int m3 = MurmurHash.murmur3(s.getBytes());
+			String existing2 = murmur2hashes.put(m2, s);
+			String existing3 = murmur3hashes.put(m3, s);
+			if (existing2 != null) {
+				dups2.add(String.format("%d => '%s' & '%s'", m2, existing2, s));
+			}
+			if (existing3 != null) {
+				dups3.add(String.format("%d => '%s' & '%s'", m3, existing3, s));
+			}
+		}
+		assertTrue(dups2.size() < 3);
+		assertTrue(dups3.size() < 3);
+		LOG.debug("murmur2 duplicates: " + dups2);
+		LOG.debug("murmur3 duplicates: " + dups3);
+	}
 }

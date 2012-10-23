@@ -22,12 +22,73 @@
 
 package ch.bind.philib.lang;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
 import org.testng.annotations.Test;
-import static org.testng.Assert.*;
 
 public class ServiceStateTest {
-  @Test
-  public void f() {
-	  fail();
-  }
+
+	@Test
+	public void stateSequence() {
+		ServiceState state = new ServiceState();
+		verify(state, true, false, false, false);
+
+		state.setOpen();
+		verify(state, false, true, false, false);
+		state.setOpen();
+		verify(state, false, true, false, false);
+
+		state.setClosing();
+		verify(state, false, false, true, false);
+		state.setClosing();
+		verify(state, false, false, true, false);
+
+		state.setClosed();
+		verify(state, false, false, false, true);
+		state.setClosed();
+		verify(state, false, false, false, true);
+	}
+
+	@Test
+	public void onlyForward() {
+		ServiceState state = new ServiceState();
+		verify(state, true, false, false, false);
+
+		state.setClosing();
+		verify(state, false, false, true, false);
+
+		try {
+			state.setOpen();
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalStateException);
+			verify(state, false, false, true, false);
+		}
+
+		state.setClosed();
+		verify(state, false, false, false, true);
+
+		try {
+			state.setOpen();
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalStateException);
+			verify(state, false, false, false, true);
+		}
+	}
+
+	private static void verify(ServiceState state, boolean uninit, boolean open, boolean closing, boolean closed) {
+		assertEquals(state.isUninitialized(), uninit);
+		assertEquals(state.isOpen(), open);
+		assertEquals(state.isClosing(), closing);
+		assertEquals(state.isClosed(), closed);
+		if (closing || closed) {
+			assertTrue(state.isClosingOrClosed());
+		} else {
+			assertFalse(state.isClosingOrClosed());
+		}
+	}
 }

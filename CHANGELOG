@@ -2,6 +2,11 @@
     Changelog for philib
       F = feature
       B = bugfix
+      G = general
+
+=== 0.4.0 ===
+ F: StaticIntMap and IntPair
+ G: Test-coverage: 64.4%, 68.5%, 71.2%, 76.2%
 
 === 0.3.0 ===
  F: added a simple and a staged cache implementation

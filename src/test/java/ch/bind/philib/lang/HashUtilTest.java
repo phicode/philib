@@ -25,12 +25,16 @@ package ch.bind.philib.lang;
 import static ch.bind.philib.lang.HashUtil.nextHash;
 import static ch.bind.philib.lang.HashUtil.startHash;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.testng.annotations.Test;
+
+import ch.bind.philib.TestUtil;
 
 public class HashUtilTest {
 
@@ -58,6 +62,17 @@ public class HashUtilTest {
 				}
 			}
 		}
+	}
+
+	@Test
+	public void simpleChar() {
+		int a = nextHash(startHash('a'), 'a');
+		int b = nextHash(startHash('a'), 'b');
+		int c = nextHash(startHash('b'), 'a');
+		int d = nextHash(startHash('b'), 'b');
+		assertTrue(a != b && a != c && a != d);
+		assertTrue(b != c && b != d);
+		assertTrue(c != d);
 	}
 
 	@Test
@@ -123,11 +138,51 @@ public class HashUtilTest {
 		expected = HashUtil.nextHash(expected, Double.doubleToLongBits(value));
 		assertEquals(expected, hash);
 	}
-	
+
 	@Test
-	public void f() {
-		// test other methods
-		fail();
+	public void bool() {
+		int a = nextHash(startHash(true), true);
+		int b = nextHash(startHash(true), false);
+		int c = nextHash(startHash(false), true);
+		int d = nextHash(startHash(false), false);
+		assertTrue(a != b && a != c && a != d);
+		assertTrue(b != c && b != d);
+		assertTrue(c != d);
+	}
+
+	@Test
+	public void nullObj() {
+		String s = "a";
+		int a = nextHash(startHash(s), null);
+		int b = nextHash(startHash(s), s);
+		int c = nextHash(startHash(null), null);
+		int d = nextHash(startHash(null), s);
+		assertTrue(a != b && a != c && a != d);
+		assertTrue(b != c && b != d);
+		assertTrue(c != d);
+	}
+
+	@Test
+	public void naiveStrings() {
+		List<String> wordlist = TestUtil.getWordlist();
+		String a = null;
+		for (String b : wordlist) {
+			if (a != null) {
+				naiveString(a, b);
+			}
+			a = b;
+		}
+	}
+
+	private void naiveString(String a, String b) {
+		assertNotNull(a);
+		assertNotNull(b);
+		assertFalse(a.isEmpty());
+		assertFalse(b.isEmpty());
+
+		int h1 = nextHash(startHash(a), b);
+		int h2 = nextHash(startHash(b), a);
+		assertTrue(h1 != h2);
 	}
 
 	@Test(enabled = false)

@@ -113,14 +113,13 @@ public final class MurmurHash {
 			k ^= (key[off] & 0xFF);
 
 			hash ^= murmur3_round32(k);
+			System.out.println("!!!!!");
 		}
 
 		hash ^= len;
 		hash = murmur3_fmix32(hash);
 		return hash;
 	}
-
-	// murmur3_start_8bit(byte v)
 
 	private static final int murmur3_round32(int k) {
 		k *= MURMUR3_32_C1;
@@ -221,7 +220,7 @@ public final class MurmurHash {
 		hash = murmur2_mmix(hash, msb);
 
 		hash = murmur2_mmix(hash, 0); // t==0
-		hash = murmur2_mmix(hash, 4); // len==4
+		hash = murmur2_mmix(hash, 8); // len==8
 
 		return murmur2_finalize(hash);
 	}
