@@ -35,8 +35,7 @@ public abstract class ArrayUtil {
 
 	public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-	protected ArrayUtil() {
-	}
+	protected ArrayUtil() {}
 
 	// java.util.Random is updated atomically => this is thread-safe
 	private static final Random rand = new Random();
@@ -45,10 +44,8 @@ public abstract class ArrayUtil {
 	 * Fills the <code>destination</code> array with randomly picked values from the <code>source</code> array. No value
 	 * will be picked twice.
 	 * 
-	 * @param source The array from which random values must be picked. The content of this array
-	 *            will not be altered.
-	 * @param destination The array which must be filled with random values. Previous values within
-	 *            this array will be
+	 * @param source The array from which random values must be picked. The content of this array will not be altered.
+	 * @param destination The array which must be filled with random values. Previous values within this array will be
 	 *            overwritten.
 	 * @throws NullPointerException If either of the two parameters is null.
 	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller then the <code>destination</code>
@@ -79,8 +76,7 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a
-	 *         copy of their content.
+	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
 	 */
 	public static byte[] concat(byte[] a, byte[] b) {
 		// override null arrays
@@ -103,9 +99,9 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a
-	 *         copy of their content. if the combined length exceeds {@code capacity} the returned
-	 *         array {@code a} will have {@code a.length == capacity}.
+	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
+	 *         if the combined length exceeds {@code capacity} the returned array {@code a} will have
+	 *         {@code a.length == capacity}.
 	 */
 	public static byte[] append(byte[] a, byte[] b, int capacity) {
 		// override null arrays
@@ -197,10 +193,11 @@ public abstract class ArrayUtil {
 		sb.append(TO_HEX[v & 15]);
 	}
 
-	private static final char[] TO_HEX = { '0', '1', '2', '3', //
-	        '4', '5', '6', '7', //
-	        '8', '9', 'A', 'B', //
-	        'C', 'D', 'E', 'F' };
+	private static final char[] TO_HEX = {
+			'0', '1', '2', '3', //
+			'4', '5', '6', '7', //
+			'8', '9', 'A', 'B', //
+			'C', 'D', 'E', 'F' };
 
 	public static void memsetZero(ByteBuffer buf) {
 		if (buf == null) {

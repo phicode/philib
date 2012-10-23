@@ -142,7 +142,7 @@ public abstract class CacheTestBase {
 		TestUtil.gcAndSleep(100);
 		System.out.printf("JVM held on to %d out of %d cached elements => %dMiB\n", inMem, cap, inMem / 2);
 		System.out.printf("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
-		        t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f);
+				t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f);
 	}
 
 	public static String itos(int i) {

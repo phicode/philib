@@ -235,7 +235,7 @@ public class CompareUtilTest {
 		assertEquals(CompareUtil.diff(5f, 1f), 1);
 		assertEquals(CompareUtil.diff(1f, 5f), -1);
 
-		//		assertEquals(CompareUtil.diff(Float.NaN, Float.NaN), 0);
+		// assertEquals(CompareUtil.diff(Float.NaN, Float.NaN), 0);
 		assertEquals(CompareUtil.diff(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY), 0);
 		assertEquals(CompareUtil.diff(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY), 0);
 

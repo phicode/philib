@@ -28,8 +28,7 @@ import ch.bind.philib.TestUtil;
 
 public final class Benchmark {
 
-	private Benchmark() {
-	}
+	private Benchmark() {}
 
 	private static final int COUNT = 512 * 1024;
 

@@ -31,8 +31,7 @@ public class TableFormatter {
 	/**
 	 * Pretty-prints a table.
 	 * 
-	 * @param table The table which must be printed in a friendly way. The first row is considered
-	 *            the 'title' row.
+	 * @param table The table which must be printed in a friendly way. The first row is considered the 'title' row.
 	 * @return The result of the table pretty-printing.
 	 */
 	public static String formatTable(Object[][] table) {

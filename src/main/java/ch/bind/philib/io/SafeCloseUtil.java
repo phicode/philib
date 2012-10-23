@@ -37,8 +37,7 @@ public abstract class SafeCloseUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SafeCloseUtil.class);
 
-	protected SafeCloseUtil() {
-	}
+	protected SafeCloseUtil() {}
 
 	public static void close(Closeable closeable) {
 		close(closeable, null);

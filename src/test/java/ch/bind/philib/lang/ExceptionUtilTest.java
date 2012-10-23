@@ -46,7 +46,7 @@ public class ExceptionUtilTest {
 		}
 		assertNotNull(e);
 		String p = "^ExceptionUtilTest\\.buildMessageChain:[0-9]+#IllegalArgumentException\\(IAE\\) => " + //
-		        "ExceptionUtilTest\\.buildMessageChain:[0-9]+#NullPointerException\\(NPE\\)$";
+				"ExceptionUtilTest\\.buildMessageChain:[0-9]+#NullPointerException\\(NPE\\)$";
 		String out = ExceptionUtil.buildMessageChain(e);
 		assertTrue(Pattern.matches(p, out));
 	}

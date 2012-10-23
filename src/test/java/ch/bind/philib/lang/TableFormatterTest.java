@@ -37,60 +37,74 @@ public class TableFormatterTest {
 
 		assertEquals(formatTable(new Object[0][]), NULL_TABLE);
 
-		Object[][] empty = { null, {} };
+		Object[][] empty = {
+				null, {} };
 		assertEquals(formatTable(empty), NULL_TABLE);
 	}
 
 	@Test
 	public void unevenTable() {
-		Object[][] table = { { "a", 1 }, //
-		        { "b", "foo", 2, null }, //
-		        { null, null, new Evil() }, // empty
-		        {}, // also empty
-		        null, // empty again
-		        { "c", "baz5", null, "qed" }, //
+		Object[][] table = {
+				{
+						"a", 1 }, //
+				{
+						"b", "foo", 2, null }, //
+				{
+						null, null, new Evil() }, // empty
+				{}, // also empty
+				null, // empty again
+				{
+						"c", "baz5", null, "qed" }, //
 		};
 		String exp = "+---+------+---+-----+\n" + //
-		        "| a | 1    |   |     |\n" + //
-		        "+---+------+---+-----+\n" + //
-		        "| b | foo  | 2 |     |\n" + //
-		        "|   |      |   |     |\n" + //
-		        "|   |      |   |     |\n" + //
-		        "|   |      |   |     |\n" + //
-		        "| c | baz5 |   | qed |\n" + //
-		        "+---+------+---+-----+";
+				"| a | 1    |   |     |\n" + //
+				"+---+------+---+-----+\n" + //
+				"| b | foo  | 2 |     |\n" + //
+				"|   |      |   |     |\n" + //
+				"|   |      |   |     |\n" + //
+				"|   |      |   |     |\n" + //
+				"| c | baz5 |   | qed |\n" + //
+				"+---+------+---+-----+";
 		assertEquals(formatTable(table), exp);
 	}
 
 	@Test
 	public void emptyColumn() {
-		Object[][] table = { { "a", null, 1 }, //
-		        { "b", null, 2 }, //
-		        { "c", null, 3 }, //
+		Object[][] table = {
+				{
+						"a", null, 1 }, //
+				{
+						"b", null, 2 }, //
+				{
+						"c", null, 3 }, //
 		};
 		String exp = "+---+-+---+\n" + //
-		        "| a | | 1 |\n" + //
-		        "+---+-+---+\n" + //
-		        "| b | | 2 |\n" + //
-		        "| c | | 3 |\n" + //
-		        "+---+-+---+";
+				"| a | | 1 |\n" + //
+				"+---+-+---+\n" + //
+				"| b | | 2 |\n" + //
+				"| c | | 3 |\n" + //
+				"+---+-+---+";
 		assertEquals(formatTable(table), exp);
 	}
 
 	@Test
 	public void changingLength() {
-		Object[][] table = { { new LongerStr(), new ShorterStr() }, //
-		        { new ShorterStr(), new LongerStr() }, //
+		Object[][] table = {
+				{
+						new LongerStr(), new ShorterStr() }, //
+				{
+						new ShorterStr(), new LongerStr() }, //
 		};
 		String exp = "+------+------+\n" + //
-		        "| abcd | xyz  |\n" + //
-		        "+------+------+\n" + //
-		        "| xyz  | abcd |\n" + //
-		        "+------+------+";
+				"| abcd | xyz  |\n" + //
+				"+------+------+\n" + //
+				"| xyz  | abcd |\n" + //
+				"+------+------+";
 		assertEquals(formatTable(table), exp);
 	}
 
 	private static class Evil {
+
 		@Override
 		public String toString() {
 			return null;

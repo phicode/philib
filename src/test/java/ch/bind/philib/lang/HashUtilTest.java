@@ -174,7 +174,7 @@ public class HashUtilTest {
 		}
 	}
 
-	private void naiveString(String a, String b) {
+	private static void naiveString(String a, String b) {
 		assertNotNull(a);
 		assertNotNull(b);
 		assertFalse(a.isEmpty());
