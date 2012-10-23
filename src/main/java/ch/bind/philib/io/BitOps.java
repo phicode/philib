@@ -29,7 +29,8 @@ package ch.bind.philib.io;
  */
 public final class BitOps {
 
-	private BitOps() {}
+	private BitOps() {
+	}
 
 	public static final int findLowestSetBitIdx64(final long v) {
 		if (v == 0) {
@@ -62,29 +63,5 @@ public final class BitOps {
 			shift += 1;
 		}
 		return shift;
-	}
-
-	public static final boolean checkMask(int bitset, int mask) {
-		return (bitset & mask) == mask;
-	}
-
-	public static final int rotl32(final int value, final int r) {
-		assert (r >= 0 && r <= 32);
-		return (value << r) | (value >>> (32 - r));
-	}
-
-	public static final long rotl64(final long value, final int r) {
-		assert (r >= 0 && r <= 64);
-		return (value << r) | (value >>> (64 - r));
-	}
-
-	public static final int rotr32(final int value, final int r) {
-		assert (r >= 0 && r <= 32);
-		return (value >>> r) | (value << (32 - r));
-	}
-
-	public static final long rotr64(final long value, final int r) {
-		assert (r >= 0 && r <= 64);
-		return (value >>> r) | (value << (64 - r));
 	}
 }

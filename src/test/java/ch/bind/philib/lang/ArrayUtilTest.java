@@ -23,12 +23,13 @@
 package ch.bind.philib.lang;
 
 import static ch.bind.philib.lang.ArrayUtil.EMPTY_BYTE_ARRAY;
+import static ch.bind.philib.lang.ArrayUtil.append;
 import static ch.bind.philib.lang.ArrayUtil.concat;
 import static ch.bind.philib.lang.ArrayUtil.extractBack;
 import static ch.bind.philib.lang.ArrayUtil.extractFront;
 import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
+import static ch.bind.philib.lang.ArrayUtil.memsetZero;
 import static ch.bind.philib.lang.ArrayUtil.pickRandom;
-import static ch.bind.philib.lang.ArrayUtil.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -36,6 +37,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.testng.annotations.Test;
 
@@ -261,5 +263,55 @@ public class ArrayUtilTest {
 		assertEquals(directBb.remaining(), 5);
 		assertEquals(formatShortHex(directBb), "0261626364");
 		assertEquals(directBb.remaining(), 5);
+	}
+	
+	@Test
+	public void dontCareAboutNulls() {
+		memsetZero((byte[]) null);
+		memsetZero((ByteBuffer) null);
+	}
+
+	@Test
+	public void memsetArray() {
+		Random rand = new Random();
+		for (int i = 0; i < 9999; i++) {
+			byte[] b = new byte[i];
+			rand.nextBytes(b);
+			memsetZero(b);
+			for (int j = 0; j < i; j++) {
+				assertTrue(b[j] == 0);
+			}
+		}
+	}
+
+	@Test
+	public void memsetArrayByteBuffer() {
+		Random rand = new Random();
+		for (int i = 0; i < 9999; i++) {
+			byte[] b = new byte[i];
+			rand.nextBytes(b);
+			ByteBuffer bb = ByteBuffer.wrap(b);
+			memsetZero(bb);
+			for (int j = 0; j < i; j++) {
+				assertTrue(b[j] == 0);
+			}
+		}
+	}
+
+	@Test
+	public void memsetDirectByteBuffer() {
+		Random rand = new Random();
+		for (int i = 0; i < 9999; i++) {
+			byte[] b = new byte[i];
+			rand.nextBytes(b);
+			ByteBuffer bb = ByteBuffer.allocateDirect(i);
+			bb.put(b);
+			bb.clear();
+			memsetZero(bb);
+			bb.get(b);
+			for (int j = 0; j < i; j++) {
+				assertTrue(b[j] == 0);
+			}
+		}
 	}
 }
