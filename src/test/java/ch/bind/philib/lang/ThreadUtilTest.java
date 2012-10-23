@@ -73,12 +73,6 @@ public class ThreadUtilTest {
 		assertEquals(r.numStarts, 6);
 		assertFalse(r.wasInterrupted);
 	}
-	
-	@Test
-	public void f() {
-		// test other methods
-		fail();
-	}
 
 	private static final class DelayRunnable implements Runnable {
 
