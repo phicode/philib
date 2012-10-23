@@ -79,7 +79,7 @@ public class MurmurHashBench {
 		double mbPerSec = total / (time / 1000000000f) / (1024f * 1024f);
 		double nsPerByte = ((double) time) / ((double) total);
 		System.out.printf("murmur2 size=%5d total=%6d sum=%20d %5.3fms %3.3fmb/sec %.3fns/byte%n", //
-				size, total, sum, (time / 1000000f), mbPerSec, nsPerByte);
+		        size, total, sum, (time / 1000000f), mbPerSec, nsPerByte);
 	}
 
 	private static void testSpeed3(final int size) {
@@ -109,6 +109,6 @@ public class MurmurHashBench {
 		double mbPerSec = total / (time / 1000000000f) / (1024f * 1024f);
 		double nsPerByte = ((double) time) / ((double) total);
 		System.out.printf("murmur3 size=%5d total=%6d sum=%20d %5.3fms %3.3fmb/sec %.3fns/byte%n", //
-				size, total, sum, (time / 1000000f), mbPerSec, nsPerByte);
+		        size, total, sum, (time / 1000000f), mbPerSec, nsPerByte);
 	}
 }

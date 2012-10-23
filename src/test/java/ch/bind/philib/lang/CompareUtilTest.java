@@ -175,13 +175,13 @@ public class CompareUtilTest {
 		assertEquals(CompareUtil.diff((short) 5, (short) 1), 1);
 		assertEquals(CompareUtil.diff((short) 1, (short) 5), -1);
 
-		assertEquals(CompareUtil.diff((short) Short.MIN_VALUE, (short) Short.MIN_VALUE), 0);
-		assertEquals(CompareUtil.diff((short) Short.MIN_VALUE + 2, (short) Short.MIN_VALUE), 1);
-		assertEquals(CompareUtil.diff((short) Short.MIN_VALUE, (short) Short.MIN_VALUE + 2), -1);
+		assertEquals(CompareUtil.diff(Short.MIN_VALUE, Short.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff(Short.MIN_VALUE + 2, Short.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff(Short.MIN_VALUE, Short.MIN_VALUE + 2), -1);
 
-		assertEquals(CompareUtil.diff((short) Short.MAX_VALUE, (short) Short.MAX_VALUE), 0);
-		assertEquals(CompareUtil.diff((short) Short.MAX_VALUE, (short) Short.MAX_VALUE - 2), 1);
-		assertEquals(CompareUtil.diff((short) Short.MAX_VALUE - 2, (short) Short.MAX_VALUE), -1);
+		assertEquals(CompareUtil.diff(Short.MAX_VALUE, Short.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff(Short.MAX_VALUE, Short.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff(Short.MAX_VALUE - 2, Short.MAX_VALUE), -1);
 	}
 
 	@Test
@@ -190,13 +190,13 @@ public class CompareUtilTest {
 		assertEquals(CompareUtil.diff((char) 5, (char) 1), 1);
 		assertEquals(CompareUtil.diff((char) 1, (char) 5), -1);
 
-		assertEquals(CompareUtil.diff((char) Character.MIN_VALUE, (char) Character.MIN_VALUE), 0);
-		assertEquals(CompareUtil.diff((char) Character.MIN_VALUE + 2, (char) Character.MIN_VALUE), 1);
-		assertEquals(CompareUtil.diff((char) Character.MIN_VALUE, (char) Character.MIN_VALUE + 2), -1);
+		assertEquals(CompareUtil.diff(Character.MIN_VALUE, Character.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff(Character.MIN_VALUE + 2, Character.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff(Character.MIN_VALUE, Character.MIN_VALUE + 2), -1);
 
-		assertEquals(CompareUtil.diff((char) Character.MAX_VALUE, (char) Character.MAX_VALUE), 0);
-		assertEquals(CompareUtil.diff((char) Character.MAX_VALUE, (char) Character.MAX_VALUE - 2), 1);
-		assertEquals(CompareUtil.diff((char) Character.MAX_VALUE - 2, (char) Character.MAX_VALUE), -1);
+		assertEquals(CompareUtil.diff(Character.MAX_VALUE, Character.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff(Character.MAX_VALUE, Character.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff(Character.MAX_VALUE - 2, Character.MAX_VALUE), -1);
 	}
 
 	@Test

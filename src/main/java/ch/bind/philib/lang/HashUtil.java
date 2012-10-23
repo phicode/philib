@@ -51,7 +51,8 @@ import static ch.bind.philib.lang.MurmurHash.murmur2a_8bit;
  */
 public abstract class HashUtil {
 
-	protected HashUtil() {}
+	protected HashUtil() {
+	}
 
 	public static final int startHash(final boolean value) {
 		return nextHash(MURMUR2_32_SEED, value);

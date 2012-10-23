@@ -24,7 +24,8 @@ package ch.bind.philib.math;
 
 public abstract class PhiMath {
 
-	protected PhiMath() {}
+	protected PhiMath() {
+	}
 
 	public static long ceilDiv(long num, long divisor) {
 		long res = num / divisor;

@@ -264,7 +264,7 @@ public class ArrayUtilTest {
 		assertEquals(formatShortHex(directBb), "0261626364");
 		assertEquals(directBb.remaining(), 5);
 	}
-	
+
 	@Test
 	public void dontCareAboutNulls() {
 		memsetZero((byte[]) null);

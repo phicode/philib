@@ -29,7 +29,8 @@ package ch.bind.philib.io;
  */
 public final class EndianConverter {
 
-	private EndianConverter() {}
+	private EndianConverter() {
+	}
 
 	// #################
 	// # ENCODE INT 64 #
@@ -78,24 +79,24 @@ public final class EndianConverter {
 
 	public static long decodeInt64BE(byte[] input, int offset) {
 		return ((long) (input[offset + 0] & 0xFF) << 56) | //
-				((long) (input[offset + 1] & 0xFF) << 48) | //
-				((long) (input[offset + 2] & 0xFF) << 40) | //
-				((long) (input[offset + 3] & 0xFF) << 32) | //
-				((long) (input[offset + 4] & 0xFF) << 24) | //
-				((long) (input[offset + 5] & 0xFF) << 16) | //
-				((long) (input[offset + 6] & 0xFF) << 8) | //
-				(input[offset + 7] & 0xFF);
+		        ((long) (input[offset + 1] & 0xFF) << 48) | //
+		        ((long) (input[offset + 2] & 0xFF) << 40) | //
+		        ((long) (input[offset + 3] & 0xFF) << 32) | //
+		        ((long) (input[offset + 4] & 0xFF) << 24) | //
+		        ((long) (input[offset + 5] & 0xFF) << 16) | //
+		        ((long) (input[offset + 6] & 0xFF) << 8) | //
+		        (input[offset + 7] & 0xFF);
 	}
 
 	public static long decodeInt64LE(byte[] input, int offset) {
 		return ((long) input[offset + 0] & 0xFF) | //
-				((long) (input[offset + 1] & 0xFF) << 8) | //
-				((long) (input[offset + 2] & 0xFF) << 16) | //
-				((long) (input[offset + 3] & 0xFF) << 24) | //
-				((long) (input[offset + 4] & 0xFF) << 32) | //
-				((long) (input[offset + 5] & 0xFF) << 40) | //
-				((long) (input[offset + 6] & 0xFF) << 48) | //
-				((long) (input[offset + 7] & 0xFF)) << 56;
+		        ((long) (input[offset + 1] & 0xFF) << 8) | //
+		        ((long) (input[offset + 2] & 0xFF) << 16) | //
+		        ((long) (input[offset + 3] & 0xFF) << 24) | //
+		        ((long) (input[offset + 4] & 0xFF) << 32) | //
+		        ((long) (input[offset + 5] & 0xFF) << 40) | //
+		        ((long) (input[offset + 6] & 0xFF) << 48) | //
+		        ((long) (input[offset + 7] & 0xFF)) << 56;
 	}
 
 	// #################
@@ -137,16 +138,16 @@ public final class EndianConverter {
 
 	public static int decodeInt32BE(byte[] input, int offset) {
 		return ((input[offset + 0] & 0xFF) << 24) | //
-				((input[offset + 1] & 0xFF) << 16) | //
-				((input[offset + 2] & 0xFF) << 8) | //
-				(input[offset + 3] & 0xFF);
+		        ((input[offset + 1] & 0xFF) << 16) | //
+		        ((input[offset + 2] & 0xFF) << 8) | //
+		        (input[offset + 3] & 0xFF);
 	}
 
 	public static int decodeInt32LE(byte[] input, int offset) {
 		return (input[offset + 0] & 0xFF) | //
-				((input[offset + 1] & 0xFF) << 8) | //
-				((input[offset + 2] & 0xFF) << 16) | //
-				((input[offset + 3] & 0xFF)) << 24;
+		        ((input[offset + 1] & 0xFF) << 8) | //
+		        ((input[offset + 2] & 0xFF) << 16) | //
+		        ((input[offset + 3] & 0xFF)) << 24;
 	}
 
 	// #################
@@ -184,12 +185,12 @@ public final class EndianConverter {
 
 	public static int decodeInt16BE(byte[] input, int offset) {
 		return ((input[offset + 0] & 0xFF) << 8) | //
-				(input[offset + 1] & 0xFF);
+		        (input[offset + 1] & 0xFF);
 	}
 
 	public static int decodeInt16LE(byte[] input, int offset) {
 		return (input[offset + 0] & 0xFF) | //
-				((input[offset + 1] & 0xFF) << 8);
+		        ((input[offset + 1] & 0xFF) << 8);
 	}
 
 	// ################

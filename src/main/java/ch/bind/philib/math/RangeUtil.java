@@ -29,7 +29,8 @@ package ch.bind.philib.math;
  */
 public abstract class RangeUtil {
 
-	protected RangeUtil() {}
+	protected RangeUtil() {
+	}
 
 	/**
 	 * Calculate the sum of all values from 1 to <code>end</code>, including. That is:

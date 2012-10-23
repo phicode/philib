@@ -22,11 +22,18 @@
 
 package ch.bind.philib.lang;
 
+import static ch.bind.philib.lang.StringUtil.addInt;
+import static ch.bind.philib.lang.StringUtil.addLong;
+import static ch.bind.philib.lang.StringUtil.addObj;
+import static ch.bind.philib.lang.StringUtil.end;
+import static ch.bind.philib.lang.StringUtil.extractBack;
+import static ch.bind.philib.lang.StringUtil.firstInt;
+import static ch.bind.philib.lang.StringUtil.firstLong;
+import static ch.bind.philib.lang.StringUtil.firstObj;
+import static ch.bind.philib.lang.StringUtil.start;
+import static org.testng.Assert.assertEquals;
+
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.*;
-
-import static ch.bind.philib.lang.StringUtil.*;
 
 public class StringUtilTest {
 

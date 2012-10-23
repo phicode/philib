@@ -28,7 +28,8 @@ import ch.bind.philib.TestUtil;
 
 public final class Benchmark {
 
-	private Benchmark() {}
+	private Benchmark() {
+	}
 
 	private static final int COUNT = 512 * 1024;
 
@@ -135,8 +136,7 @@ public final class Benchmark {
 				String v = cache.get(rand);
 				if (v != null) {
 					hits++;
-				}
-				else {
+				} else {
 					misses++;
 					cache.add(rand, Integer.toString(rand));
 				}

@@ -27,8 +27,7 @@ import ch.bind.philib.io.EndianConverter;
 /**
  * Implementation of the murmur hashing functions.
  * <p>
- * Based on Austin Appleby's <a href="http://code.google.com/p/smhasher">smhasher</a> public domain
- * code.
+ * Based on Austin Appleby's <a href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
  * </p>
  * 
  * @author Philipp Meinen

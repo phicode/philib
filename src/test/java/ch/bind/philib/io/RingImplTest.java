@@ -22,8 +22,10 @@
 
 package ch.bind.philib.io;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+
 import org.testng.annotations.Test;
-import static org.testng.Assert.*;
 
 public class RingImplTest {
 
