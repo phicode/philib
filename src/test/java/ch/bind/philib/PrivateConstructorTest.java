@@ -22,7 +22,6 @@
 
 package ch.bind.philib;
 
-import static ch.bind.philib.io.BitOps.checkMask;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
@@ -129,7 +128,7 @@ public class PrivateConstructorTest {
 				// ctor.toString());
 			} else {
 				int modifiers = ctor.getModifiers();
-				if (checkMask(modifiers, Modifier.PRIVATE)) {
+				if ((modifiers & Modifier.PRIVATE) != 0) {
 					int numParams = ctor.getParameterTypes().length;
 					if (numParams == 0) {
 						testCtor(ctor);
