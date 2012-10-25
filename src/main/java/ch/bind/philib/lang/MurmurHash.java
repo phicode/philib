@@ -112,7 +112,6 @@ public final class MurmurHash {
 			k ^= (key[off] & 0xFF);
 
 			hash ^= murmur3_round32(k);
-			System.out.println("!!!!!");
 		}
 
 		hash ^= len;
