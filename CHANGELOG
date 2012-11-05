@@ -2,6 +2,15 @@
     Changelog for philib
       F = feature
       B = bugfix
+      G = general
+
+=== 0.5.0 ===
+
+
+=== 0.4.0 ===
+ G: Test-coverage increased from 64.4% to 81.4x%
+ F: StaticIntMap and IntPair
+ F: Extracted StringUtil.matrixOutput(String[][]) to its own class: TableFormatter 
 
 === 0.3.0 ===
  F: added a simple and a staged cache implementation

@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.lang;
 
 import static org.testng.Assert.assertEquals;
@@ -141,5 +142,117 @@ public class CompareUtilTest {
 		}
 		assertEquals(-1L, CompareUtil.normalize(Long.MIN_VALUE));
 		assertEquals(1L, CompareUtil.normalize(Long.MAX_VALUE));
+	}
+
+	@Test
+	public void diffBool() {
+		assertEquals(CompareUtil.diff(true, true), 0);
+		assertEquals(CompareUtil.diff(true, false), 1);
+		assertEquals(CompareUtil.diff(false, true), -1);
+		assertEquals(CompareUtil.diff(false, false), 0);
+	}
+
+	@Test
+	public void diffByte() {
+		for (int a = 0; a < 255; a++) {
+			byte x = (byte) a;
+			for (int b = 0; b < 255; b++) {
+				byte y = (byte) b;
+				if (a == b) {
+					assertEquals(CompareUtil.diff(x, y), 0);
+				} else if (a < b) {
+					assertEquals(CompareUtil.diff(x, y), -1);
+				} else {
+					assertEquals(CompareUtil.diff(x, y), 1);
+				}
+			}
+		}
+	}
+
+	@Test
+	public void diffShort() {
+		assertEquals(CompareUtil.diff((short) 1, (short) 1), 0);
+		assertEquals(CompareUtil.diff((short) 5, (short) 1), 1);
+		assertEquals(CompareUtil.diff((short) 1, (short) 5), -1);
+
+		assertEquals(CompareUtil.diff(Short.MIN_VALUE, Short.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff(Short.MIN_VALUE + 2, Short.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff(Short.MIN_VALUE, Short.MIN_VALUE + 2), -1);
+
+		assertEquals(CompareUtil.diff(Short.MAX_VALUE, Short.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff(Short.MAX_VALUE, Short.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff(Short.MAX_VALUE - 2, Short.MAX_VALUE), -1);
+	}
+
+	@Test
+	public void diffChar() {
+		assertEquals(CompareUtil.diff((char) 1, (char) 1), 0);
+		assertEquals(CompareUtil.diff((char) 5, (char) 1), 1);
+		assertEquals(CompareUtil.diff((char) 1, (char) 5), -1);
+
+		assertEquals(CompareUtil.diff(Character.MIN_VALUE, Character.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff(Character.MIN_VALUE + 2, Character.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff(Character.MIN_VALUE, Character.MIN_VALUE + 2), -1);
+
+		assertEquals(CompareUtil.diff(Character.MAX_VALUE, Character.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff(Character.MAX_VALUE, Character.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff(Character.MAX_VALUE - 2, Character.MAX_VALUE), -1);
+	}
+
+	@Test
+	public void diffInt() {
+		assertEquals(CompareUtil.diff(1, 1), 0);
+		assertEquals(CompareUtil.diff(5, 1), 1);
+		assertEquals(CompareUtil.diff(1, 5), -1);
+
+		assertEquals(CompareUtil.diff(Integer.MIN_VALUE, Integer.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff(Integer.MIN_VALUE + 2, Integer.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff(Integer.MIN_VALUE, Integer.MIN_VALUE + 2), -1);
+
+		assertEquals(CompareUtil.diff(Integer.MAX_VALUE, Integer.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff(Integer.MAX_VALUE, Integer.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff(Integer.MAX_VALUE - 2, Integer.MAX_VALUE), -1);
+	}
+
+	@Test
+	public void diffLong() {
+		assertEquals(CompareUtil.diff(1L, 1L), 0);
+		assertEquals(CompareUtil.diff(5L, 1L), 1);
+		assertEquals(CompareUtil.diff(1L, 5L), -1);
+
+		assertEquals(CompareUtil.diff(Long.MIN_VALUE, Long.MIN_VALUE), 0);
+		assertEquals(CompareUtil.diff(Long.MIN_VALUE + 2, Long.MIN_VALUE), 1);
+		assertEquals(CompareUtil.diff(Long.MIN_VALUE, Long.MIN_VALUE + 2), -1);
+
+		assertEquals(CompareUtil.diff(Long.MAX_VALUE, Long.MAX_VALUE), 0);
+		assertEquals(CompareUtil.diff(Long.MAX_VALUE, Long.MAX_VALUE - 2), 1);
+		assertEquals(CompareUtil.diff(Long.MAX_VALUE - 2, Long.MAX_VALUE), -1);
+	}
+
+	@Test
+	public void diffFloat() {
+		assertEquals(CompareUtil.diff(1f, 1f), 0);
+		assertEquals(CompareUtil.diff(5f, 1f), 1);
+		assertEquals(CompareUtil.diff(1f, 5f), -1);
+
+		// assertEquals(CompareUtil.diff(Float.NaN, Float.NaN), 0);
+		assertEquals(CompareUtil.diff(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY), 0);
+		assertEquals(CompareUtil.diff(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY), 0);
+
+		assertEquals(CompareUtil.diff(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY), -1);
+		assertEquals(CompareUtil.diff(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY), 1);
+	}
+
+	@Test
+	public void diffDouble() {
+		assertEquals(CompareUtil.diff((double) 1f, (double) 1f), 0);
+		assertEquals(CompareUtil.diff((double) 5f, (double) 1f), 1);
+		assertEquals(CompareUtil.diff((double) 1f, (double) 5f), -1);
+
+		assertEquals(CompareUtil.diff(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), 0);
+		assertEquals(CompareUtil.diff(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY), 0);
+
+		assertEquals(CompareUtil.diff(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), -1);
+		assertEquals(CompareUtil.diff(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY), 1);
 	}
 }

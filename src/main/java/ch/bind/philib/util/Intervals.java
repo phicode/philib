@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.util;
 
 /**
@@ -28,10 +29,10 @@ package ch.bind.philib.util;
  */
 public final class Intervals {
 
-	private Intervals() {
-	}
+	private Intervals() {}
 
-	private static final double[] COEFFS = { 1.0, 2.5, 5.0 };
+	private static final double[] COEFFS = {
+			1.0, 2.5, 5.0 };
 
 	public static int chooseInterval(int maxValue, int maxSegments) {
 		// try to bring maxSegments or less lines on to the chart

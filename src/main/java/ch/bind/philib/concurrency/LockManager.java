@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.concurrency;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -30,8 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class LockManager {
 
-	private LockManager() {
-	}
+	private LockManager() {}
 
 	private static final AtomicLong LOCK_ID_SEQUENCES = new AtomicLong(0);
 

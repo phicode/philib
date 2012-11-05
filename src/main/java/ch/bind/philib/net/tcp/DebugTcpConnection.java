@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.bind.philib.io.BitOps;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventUtil;
@@ -67,7 +66,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 
 	@Override
 	public int handle(int ops) throws IOException {
-		lastHandleSendable = BitOps.checkMask(ops, EventUtil.WRITE);
+		lastHandleSendable = (ops & EventUtil.WRITE) != 0;
 		numHandles.incrementAndGet();
 		long r = readOps.get();
 		long s = sendOps.get();
@@ -78,7 +77,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			long rdiff = readOps.get() - r;
 			long sdiff = sendOps.get() - s;
 			LOG.debug(String.format("handle took %.6fms, read-iops=%d, send-iops=%d, rx=%d, tx=%d%n", //
-			        (t / 1000000f), rdiff, sdiff, getRx(), getTx()));
+					(t / 1000000f), rdiff, sdiff, getRx(), getTx()));
 		}
 		return rv;
 	}
@@ -123,7 +122,7 @@ public final class DebugTcpConnection extends TcpConnectionBase {
 			String sOps = EventUtil.opsToString(ops);
 			String m = "ops=%s, readOps=%s, sendOps=%s, reg4send=%s, lastHandleSendable=%s, numHandles=%s, rx=%d, tx=%d, tcp-no-delay=%s, rcvBuf=%d, sndBuf=%d";
 			return String.format(m, sOps, readOps, sendOps, isRegisteredForWriteEvents(), lastHandleSendable, numHandles, getRx(), getTx(),
-			        sock.getTcpNoDelay(), sock.getReceiveBufferSize(), sock.getSendBufferSize());
+					sock.getTcpNoDelay(), sock.getReceiveBufferSize(), sock.getSendBufferSize());
 		} catch (SocketException e) {
 			return "error: " + ExceptionUtil.buildMessageChain(e);
 		}

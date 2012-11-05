@@ -32,8 +32,8 @@ import java.nio.channels.SelectableChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.bind.philib.io.BufferOps;
 import ch.bind.philib.io.SafeCloseUtil;
+import ch.bind.philib.lang.ArrayUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.DatagramSession;
 import ch.bind.philib.net.NetServer;
@@ -136,9 +136,10 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 		while (totalRead < IO_READ_LIMIT_PER_ROUND) {
 			if (totalRead > 0) {
 				// clear the data from the first read
-				BufferOps.memsetZero(rbuf);
+				ArrayUtil.memsetZero(rbuf);
 			}
-			// TODO: jumbo-frames could be bigger then the default read-buffer size (8192), detect that or expose a
+			// TODO: jumbo-frames could be bigger then the default read-buffer
+			// size (8192), detect that or expose a
 			// NetContext configuration parameter which allows for jumbo-frames
 
 			SocketAddress addr;

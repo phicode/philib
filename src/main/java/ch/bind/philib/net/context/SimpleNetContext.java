@@ -21,7 +21,7 @@
  */
 package ch.bind.philib.net.context;
 
-import ch.bind.philib.cache.ByteBufferCache;
+import ch.bind.philib.cache.buffercache.ByteBufferCache;
 import ch.bind.philib.net.events.SimpleEventDispatcher;
 
 /**

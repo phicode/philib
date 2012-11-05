@@ -24,10 +24,11 @@ package ch.bind.philib.cache.lru;
 
 import java.util.Random;
 
+import ch.bind.philib.TestUtil;
+
 public final class Benchmark {
 
-	private Benchmark() {
-	}
+	private Benchmark() {}
 
 	private static final int COUNT = 512 * 1024;
 
@@ -42,35 +43,39 @@ public final class Benchmark {
 	// 70/30%
 	// ...
 
-	void simple() {
+	private static void simple() {
 		Cache<Integer, String> cache = new SimpleCache<Integer, String>(COUNT);
+		TestUtil.gcAndSleep();
 		benchNormal(cache);
 	}
 
-	void staged() {
+	private static void staged() {
 		Cache<Integer, String> cache = new StagedCache<Integer, String>(COUNT);
+		TestUtil.gcAndSleep();
 		benchNormal(cache);
 	}
 
-	void parallelSimple() {
+	private static void parallelSimple() {
 		Cache<Integer, String> cache = new SimpleCache<Integer, String>(COUNT);
+		TestUtil.gcAndSleep();
 		cache = new SyncCache<Integer, String>(cache);
 		benchThreaded(cache, 4);
 	}
 
-	void parallelStaged() {
+	private static void parallelStaged() {
 		Cache<Integer, String> cache = new StagedCache<Integer, String>(COUNT);
+		TestUtil.gcAndSleep();
 		cache = new SyncCache<Integer, String>(cache);
 		benchThreaded(cache, 4);
 	}
 
-	void benchNormal(Cache<Integer, String> cache) {
+	private static void benchNormal(Cache<Integer, String> cache) {
 		Runner r = new Runner(cache, LOOPCOUNT);
 		r.run();
 		printStats(r.time, r.hits, r.misses);
 	}
 
-	void benchThreaded(Cache<Integer, String> cache, int num) {
+	private static void benchThreaded(Cache<Integer, String> cache, int num) {
 		Runner[] rs = new Runner[num];
 		Thread[] ts = new Thread[num];
 		for (int i = 0; i < num; i++) {
@@ -89,11 +94,11 @@ public final class Benchmark {
 		}
 		final long tEnd = System.currentTimeMillis();
 		final long realTime = tEnd - tStart;
-		int time = 0;
+		// int time = 0;
 		int hit = 0;
 		int miss = 0;
 		for (Runner r : rs) {
-			time += r.time;
+			// time += r.time;
 			hit += r.hits;
 			miss += r.misses;
 		}
@@ -130,8 +135,7 @@ public final class Benchmark {
 				String v = cache.get(rand);
 				if (v != null) {
 					hits++;
-				}
-				else {
+				} else {
 					misses++;
 					cache.add(rand, Integer.toString(rand));
 				}
@@ -141,7 +145,7 @@ public final class Benchmark {
 		}
 	}
 
-	void printStats(long time, int hit, int miss) {
+	private static void printStats(long time, int hit, int miss) {
 		System.out.println("time: " + time + "ms");
 		double hps = hit / (time / 1000.0);
 		double mps = miss / (time / 1000.0);
@@ -151,10 +155,9 @@ public final class Benchmark {
 	}
 
 	public static void main(String[] args) {
-		Benchmark b = new Benchmark();
-		b.simple();
-		b.staged();
-		b.parallelSimple();
-		b.parallelStaged();
+		simple();
+		staged();
+		parallelSimple();
+		parallelStaged();
 	}
 }

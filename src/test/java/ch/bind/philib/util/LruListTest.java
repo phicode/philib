@@ -22,11 +22,10 @@
 
 package ch.bind.philib.util;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
-import ch.bind.philib.util.LruList;
-import ch.bind.philib.util.LruNode;
-import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 public class LruListTest {
 
@@ -65,6 +64,7 @@ public class LruListTest {
 		assertEquals(lru.size(), 0);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ctorValidation() {
 		new LruList<Node>(0);

@@ -19,24 +19,22 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.lang;
 
-import ch.bind.philib.io.BitOps;
 import ch.bind.philib.io.EndianConverter;
 
 /**
  * Implementation of the murmur hashing functions.
  * <p>
- * Based on Austin Appleby's <a
- * href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
+ * Based on Austin Appleby's <a href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
  * </p>
  * 
  * @author Philipp Meinen
  */
 public final class MurmurHash {
 
-	private MurmurHash() {
-	}
+	private MurmurHash() {}
 
 	static final int MURMUR2_32_SEED = 0x9747B28C;
 
@@ -100,7 +98,7 @@ public final class MurmurHash {
 
 			hash ^= murmur3_round32(k);
 
-			hash = BitOps.rotl32(hash, 13);
+			hash = Integer.rotateLeft(hash, 13);
 			hash = (hash * 5) + 0xE6546B64;
 		}
 
@@ -121,11 +119,9 @@ public final class MurmurHash {
 		return hash;
 	}
 
-	// murmur3_start_8bit(byte v)
-
 	private static final int murmur3_round32(int k) {
 		k *= MURMUR3_32_C1;
-		k = BitOps.rotl32(k, 15);
+		k = Integer.rotateLeft(k, 15);
 		k *= MURMUR3_32_C2;
 		return k;
 	}
@@ -140,7 +136,8 @@ public final class MurmurHash {
 	}
 
 	public static final long optimize() {
-		byte[] b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+		byte[] b = {
+				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 		final long s = System.nanoTime();
 		for (int i = 0; i < 12000; i++) {
 			murmur2(b);
@@ -149,9 +146,13 @@ public final class MurmurHash {
 		return (System.nanoTime() - s);
 	}
 
+	public static final int murmur2a(byte[] key) {
+		return murmur2a(key, MURMUR2_32_SEED);
+	}
+
 	// This is a variant of MurmurHash2 modified to use the Merkle-Damgard
 	// construction.
-	public static int murmur2a(int hash, byte[] key) {
+	public static int murmur2a(byte[] key, int hash) {
 		final int len = key.length;
 		final int limitOffset = len & 0xFFFFFFFC;
 
@@ -221,7 +222,7 @@ public final class MurmurHash {
 		hash = murmur2_mmix(hash, msb);
 
 		hash = murmur2_mmix(hash, 0); // t==0
-		hash = murmur2_mmix(hash, 4); // len==4
+		hash = murmur2_mmix(hash, 8); // len==8
 
 		return murmur2_finalize(hash);
 	}

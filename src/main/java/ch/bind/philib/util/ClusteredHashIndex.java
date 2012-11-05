@@ -23,10 +23,12 @@
 package ch.bind.philib.util;
 
 import java.util.Arrays;
+
 import ch.bind.philib.util.ClusteredIndex.Entry;
 
 // TODO: round tablesize up (2^x) and use bitmasks
 // TODO: strengthen hashcodes through an avalanche phase
+// TODO: concurrent version
 public final class ClusteredHashIndex<K, T extends Entry<K>> implements ClusteredIndex<K, T> {
 
 	private final Entry<K>[] table;
@@ -36,6 +38,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 		table = new Entry[capacity];
 	}
 
+	@Override
 	public boolean add(final T entry) {
 		assert (entry != null && entry.getNextIndexEntry() == null && entry.getKey() != null);
 
@@ -47,23 +50,23 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 		if (scanNow == null) {
 			table[position] = entry;
 			return true;
-		} else {
-			Entry<K> scanPrev = null;
-			while (scanNow != null) {
-				K nowKey = scanNow.getKey();
-				if (hash == nowKey.hashCode() && key.equals(nowKey)) {
-					// key is already in the table
-					return false;
-				}
-				scanPrev = scanNow;
-				scanNow = scanNow.getNextIndexEntry();
-			}
-			assert (scanPrev != null);
-			scanPrev.setNextIndexEntry(entry);
-			return true;
 		}
+		Entry<K> scanPrev = null;
+		do {
+			K nowKey = scanNow.getKey();
+			if (hash == nowKey.hashCode() && key.equals(nowKey)) {
+				// key is already in the table
+				return false;
+			}
+			scanPrev = scanNow;
+			scanNow = scanNow.getNextIndexEntry();
+		} while (scanNow != null);
+		assert (scanPrev != null);
+		scanPrev.setNextIndexEntry(entry);
+		return true;
 	}
 
+	@Override
 	public boolean remove(final T entry) {
 		assert (entry != null);
 
@@ -92,6 +95,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 	}
 
 	// returns null if a pair does not exist
+	@Override
 	@SuppressWarnings("unchecked")
 	public T get(final K key) {
 		assert (key != null);
@@ -115,6 +119,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 		return Math.abs(p);
 	}
 
+	@Override
 	public void clear() {
 		Arrays.fill(table, null);
 	}

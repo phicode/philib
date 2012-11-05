@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.validation;
 
 import java.util.Collection;
@@ -30,8 +31,7 @@ import java.util.Collection;
  */
 public abstract class Validation {
 
-	protected Validation() {
-	}
+	protected Validation() {}
 
 	public static void notNegative(int value) {
 		if (value < 0) {

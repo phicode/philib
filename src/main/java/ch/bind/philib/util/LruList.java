@@ -42,11 +42,9 @@ public final class LruList<E extends LruNode> {
 	/**
 	 * Add a new {@code LruNode} to the head of the LRU.
 	 * 
-	 * @param node
-	 *            The new head of the {@code LruList}.
-	 * @return {@code null} if the the size after adding the new {@code LruNode}
-	 *         does not exceed this list's {@code capacity}. Otherwise the list
-	 *         will remove the tail (the element which wasn't accessed for the
+	 * @param node The new head of the {@code LruList}.
+	 * @return {@code null} if the the size after adding the new {@code LruNode} does not exceed this list's
+	 *         {@code capacity}. Otherwise the list will remove the tail (the element which wasn't accessed for the
 	 *         longest amount of time) and return it.
 	 */
 	public E add(final E node) {
@@ -74,9 +72,7 @@ public final class LruList<E extends LruNode> {
 	public void remove(final E node) {
 		assert (head != null && tail != null);
 
-		@SuppressWarnings("unchecked")
 		final E prev = (E) node.getLruPrev();
-		@SuppressWarnings("unchecked")
 		final E next = (E) node.getLruNext();
 
 		if (head == node) {
@@ -119,7 +115,6 @@ public final class LruList<E extends LruNode> {
 			head = null;
 			size = 0;
 		} else {
-			@SuppressWarnings("unchecked")
 			final E prev = (E) node.getLruPrev();
 			prev.setLruNext(null);
 			tail = prev;
@@ -136,9 +131,7 @@ public final class LruList<E extends LruNode> {
 			// LRU with size 1 or the the node is already in head position
 			return;
 		}
-		@SuppressWarnings("unchecked")
 		final E prev = (E) node.getLruPrev();
-		@SuppressWarnings("unchecked")
 		final E next = (E) node.getLruNext();
 
 		// since this node is not the head there are 2
@@ -178,8 +171,8 @@ public final class LruList<E extends LruNode> {
 	public int capacity() {
 		return capacity;
 	}
-	
+
 	public boolean hasSpace() {
-	    return size < capacity;
+		return size < capacity;
 	}
 }

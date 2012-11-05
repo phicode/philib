@@ -22,7 +22,8 @@
 
 package ch.bind.philib.cache.lru;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
 
@@ -97,6 +98,28 @@ public class StagedCacheTest extends CacheTestBase {
 		add(cache, 125000, 175000);
 		getNull(cache, 0, 75000);
 		touch(cache, 75000, 175000);
+	}
+
+	@Test
+	public void removeOldEntry() {
+		// 1 entry old gen & 1 young gen
+		Cache<Integer, Integer> cache = new StagedCache<Integer, Integer>(StagedCache.MIN_CACHE_CAPACITY, 0.5, 2);
+		cache.add(1, 1);
+
+		// 'elevate' 1 to old-gen
+		cache.get(1);
+		cache.get(1);
+
+		for (int i = 2; i < 100000; i++) {
+			assertNull(cache.get(i));
+			cache.add(i, i * i);
+			// 1 hit
+			assertEquals(cache.get(i), Integer.valueOf(i * i));
+		}
+
+		assertEquals(cache.get(1), Integer.valueOf(1));
+		cache.remove(1);
+		assertNull(cache.get(1));
 	}
 
 	private static void add(Cache<Integer, Integer> cache, int from, int to) {

@@ -159,6 +159,7 @@ public class ClusteredHashIndexTest {
 	}
 
 	private static final class Key {
+
 		private final int hash;
 
 		private Key(int hash) {

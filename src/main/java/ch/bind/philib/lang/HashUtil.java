@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.lang;
 
 import static ch.bind.philib.lang.MurmurHash.MURMUR2_32_SEED;
@@ -29,8 +30,7 @@ import static ch.bind.philib.lang.MurmurHash.murmur2a_8bit;
 
 /**
  * Provides helper methods for hash-code generation.<br/>
- * Hash methods for handling all primitive types as well as <code>Object</code>s
- * are provided.<br/>
+ * Hash methods for handling all primitive types as well as <code>Object</code>s are provided.<br/>
  * 
  * <b>Usage:</b>
  * 
@@ -51,8 +51,7 @@ import static ch.bind.philib.lang.MurmurHash.murmur2a_8bit;
  */
 public abstract class HashUtil {
 
-	protected HashUtil() {
-	}
+	protected HashUtil() {}
 
 	public static final int startHash(final boolean value) {
 		return nextHash(MURMUR2_32_SEED, value);

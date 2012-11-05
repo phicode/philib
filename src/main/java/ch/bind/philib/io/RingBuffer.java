@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.io;
 
 import ch.bind.philib.validation.Validation;
@@ -28,7 +29,7 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-//TODO: max-capacity
+// TODO: max-capacity
 public final class RingBuffer implements DoubleSidedBuffer {
 
 	public static final int DEFAULT_CAPACITY = 8192;

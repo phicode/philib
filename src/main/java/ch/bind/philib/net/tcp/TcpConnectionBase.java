@@ -114,7 +114,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		}
 		if (oldHandler != null) {
 			context.getEventDispatcher().changeHandler(oldHandler, this, EventUtil.READ, false);
-		} else {
+		}
+		else {
 			context.getEventDispatcher().register(this, EventUtil.READ);
 		}
 		return session;
@@ -130,7 +131,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		// only the read and/or write flags may be set
 		assert ((ops & EventUtil.READ_WRITE) != 0 && (ops & ~EventUtil.READ_WRITE) == 0);
 
-		if (BitOps.checkMask(ops, EventUtil.READ) || r_partialConsume != null) {
+		if (((ops & EventUtil.READ) != 0) || r_partialConsume != null) {
 			handleRead();
 		}
 
@@ -139,7 +140,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		// did not request the writable flag to be set => last write didn't
 		// block
 		boolean finishedWrite = true;
-		if (BitOps.checkMask(ops, EventUtil.WRITE) || !registeredForWriteEvt) {
+		if (((ops & EventUtil.WRITE) != 0) || !registeredForWriteEvt) {
 			synchronized (w_writeBacklog) {
 				finishedWrite = sendPendingAsync();
 			}
@@ -195,7 +196,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 
 			if (data.hasRemaining()) {
 				registerForWriteEvents();
-			} else {
+			}
+			else {
 				// backlog and input buffer written
 				unregisterFromWriteEvents();
 			}
@@ -252,7 +254,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		}
 	}
 
-	// package private so that the DebugTcpConnection subclass can override this method and gather additional
+	// package private so that the DebugTcpConnection subclass can override this
+	// method and gather additional
 	// information
 	// holding the sendLock is required
 	int channelWrite(final ByteBuffer data) throws IOException {
@@ -264,7 +267,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 		return num;
 	}
 
-	// package private so that the DebugTcpConnection subclass can override this method and gather additional
+	// package private so that the DebugTcpConnection subclass can override this
+	// method and gather additional
 	// information
 	int channelRead(final ByteBuffer rbuf) throws IOException {
 		int num = channel.read(rbuf);
@@ -295,7 +299,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				if (externBufReleased) {
 					w_writeBacklog.notifyAll();
 				}
-			} else {
+			}
+			else {
 				// write channel is blocked
 				w_writeBacklog.addFront(pending);
 				break;
@@ -334,7 +339,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			}
 			if (bb.hasRemaining()) {
 				totalRead += numChanRead;
-			} else {
+			}
+			else {
 				// if the read buffer is full we cant continue reading until
 				// the client has consumed its pending data.
 				break;
@@ -349,7 +355,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				registerForDeliverPartialReads();
 			}
 			r_partialConsume = bb;
-		} else {
+		}
+		else {
 			if (r_partialConsume != null) {
 				// registered for partial consume events
 				unregisterFromDeliverPartialReads();
@@ -368,7 +375,8 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			// switch back to write mode
 			if (bb.hasRemaining()) {
 				bb.compact();
-			} else {
+			}
+			else {
 				bb.clear();
 			}
 		}

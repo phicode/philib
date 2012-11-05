@@ -24,6 +24,8 @@ package ch.bind.philib.util;
 
 import java.util.Comparator;
 
+import ch.bind.philib.lang.CompareUtil;
+
 /**
  * A key value pair who's key is of type long.
  * 
@@ -42,12 +44,7 @@ public interface LongPair<T> {
 			if (a == null || b == null) {
 				throw new NullPointerException("LongPair.KEY_COMPARATOR does not support null-values");
 			}
-			long ka = a.getKey();
-			long kb = b.getKey();
-			if (ka == kb) {
-				return 0;
-			}
-			return ka < kb ? -1 : 1;
+			return CompareUtil.diff(a.getKey(), b.getKey());
 		}
 	};
 }

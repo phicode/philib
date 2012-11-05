@@ -2,6 +2,8 @@ rename all "selectable" to "event-handler" specific names
 
 100% RingBuffer test coverage
 
+hit/miss statistics into the LRU caches
+
 PRIO TASK
   2  ThreadUtil unit-tests
   2  ThreadUtil: boolean hasThread(String name, boolean alive)

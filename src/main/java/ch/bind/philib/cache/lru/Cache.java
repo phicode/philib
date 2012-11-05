@@ -43,8 +43,7 @@ public interface Cache<K, V> {
 	 * Query a value from the cache by its key.
 	 * 
 	 * @throws IllegalArgumentException if the key is {@code null}.
-	 * @return null if no value for the given key was found. Otherwise the value
-	 *         for this key.
+	 * @return null if no value for the given key was found. Otherwise the value for this key.
 	 */
 	V get(K key);
 

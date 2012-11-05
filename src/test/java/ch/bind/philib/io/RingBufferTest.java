@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.io;
 
 import static org.testng.Assert.assertEquals;
@@ -150,7 +151,7 @@ public class RingBufferTest {
 		}
 		final long timeNs = System.nanoTime() - start;
 		double mib = ((double) performed / MB);
-		TestUtil.printBenchResults(RingBuffer.class, "MiB","MiB", timeNs, mib);
+		TestUtil.printBenchResults(RingBuffer.class, "MiB", "MiB", timeNs, mib);
 	}
 
 	private static void verifyReadBack(byte[] bs, LinkedList<Byte> bufExp) {
@@ -241,7 +242,8 @@ public class RingBufferTest {
 	@Test
 	public void clear() {
 		RingBuffer buf = new RingBuffer();
-		byte[] a = { 0, 1, 2, 3 };
+		byte[] a = {
+				0, 1, 2, 3 };
 		buf.write(a);
 		assertEquals(a.length, buf.available());
 		buf.clear();

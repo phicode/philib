@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.util;
 
 import java.util.ArrayList;
@@ -36,8 +37,7 @@ public final class CounterRepo {
 
 	private final ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<String, Counter>();
 
-	public CounterRepo() {
-	}
+	public CounterRepo() {}
 
 	public Counter forClass(Class<?> clazz) {
 		return forClass(clazz, null);

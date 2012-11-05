@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib.io;
 
 /**
@@ -75,20 +76,6 @@ public final class RingImpl<T> implements Ring<T> {
 		size--;
 		assert (value != null);
 		return (T) value;
-	}
-
-	@Override
-	public T pollNext(final T value) {
-		assert (size >= 0 && (ring == null || size <= ring.length));
-		if (size == 0) {
-			return value;
-		}
-		final T rv = poll();
-		if (value != null) {
-			addBack(value);
-		}
-		assert (rv != null);
-		return rv;
 	}
 
 	@Override

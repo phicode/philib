@@ -21,6 +21,7 @@
  */
 package ch.bind.philib.util;
 
+import ch.bind.philib.math.PhiMath;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -49,12 +50,19 @@ public final class LeakyBucket {
 
 	public static LeakyBucket withLeakPerSecond(double leakPerSecond, long capacity) {
 		Validation.isTrue(leakPerSecond >= 0.000001, "leakPerSecond must be >= 0.000001");
-		Validation.isTrue(capacity >= 1, "capacity must be >= 1");
 		long leakIntervalNs = (long) Math.ceil(1000000000f / leakPerSecond);
-		return new LeakyBucket(leakIntervalNs, capacity);
+		return withLeakIntervalNs(leakIntervalNs, capacity);
 	}
 
-	public static LeakyBucket withLeakIntervalNano(long leakIntervalNs, long capacity) {
+	public static LeakyBucket withLeakIntervalMs(long leakIntervalMs, long capacity) {
+		return withLeakIntervalNs(leakIntervalMs * 1000000L, capacity);
+	}
+
+	public static LeakyBucket withLeakIntervalUs(long leakIntervalUs, long capacity) {
+		return withLeakIntervalNs(leakIntervalUs * 1000L, capacity);
+	}
+
+	public static LeakyBucket withLeakIntervalNs(long leakIntervalNs, long capacity) {
 		Validation.isTrue(leakIntervalNs > 0, "leakIntervalNs must be > 0");
 		Validation.isTrue(capacity >= 1, "capacity must be >= 1");
 		return new LeakyBucket(leakIntervalNs, capacity);
@@ -82,11 +90,11 @@ public final class LeakyBucket {
 		return capacity - current;
 	}
 
-	public long nextFillNano() {
-		return nextFillNano(System.nanoTime());
+	public long nextFillNs() {
+		return nextFillNs(System.nanoTime());
 	}
 
-	public long nextFillNano(long timeNs) {
+	public long nextFillNs(long timeNs) {
 		leak(timeNs);
 		if (current < capacity) {
 			// available immediately
@@ -96,9 +104,17 @@ public final class LeakyBucket {
 		return nextLeakNano - timeNs;
 	}
 
+	public long nextFillUs() {
+		return PhiMath.ceilDiv(nextFillNs(), 1000L);
+	}
+
+	public long nextFillMs() {
+		return PhiMath.ceilDiv(nextFillNs(), 1000000L);
+	}
+
 	public void sleepWhileNotFillable() throws InterruptedException {
 		long nextFillNano;
-		while ((nextFillNano = nextFillNano()) > 0) {
+		while ((nextFillNano = nextFillNs()) > 0) {
 			long sleepMs = nextFillNano / 1000000L;
 			int sleepNano = (int) (nextFillNano % 1000000L);
 			Thread.sleep(sleepMs, sleepNano);

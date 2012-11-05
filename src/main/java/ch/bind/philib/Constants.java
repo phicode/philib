@@ -19,6 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package ch.bind.philib;
 
 /**
@@ -28,12 +29,11 @@ package ch.bind.philib;
  */
 public final class Constants {
 
-	private Constants() {
-	}
+	private Constants() {}
 
 	public static final int PHILIB_VERSION_MAJOR = 0;
 
-	public static final int PHILIB_VERSION_MINOR = 3;
+	public static final int PHILIB_VERSION_MINOR = 5;
 
 	public static final int PHILIB_VERSION_PATCH = 0;
 
