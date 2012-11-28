@@ -29,7 +29,8 @@ package ch.bind.philib.math;
  */
 public abstract class RangeUtil {
 
-	protected RangeUtil() {}
+	protected RangeUtil() {
+	}
 
 	/**
 	 * Calculate the sum of all values from 1 to <code>end</code>, including. That is:
@@ -75,11 +76,12 @@ public abstract class RangeUtil {
 	// throw new ArithmeticException("start is bigger then end");
 	// if (start % increment)
 	// }
-	public static double clip(int value, int min, int max) {
+
+	public static int clip(int value, int min, int max) {
 		return value < min ? min : (value > max ? max : value);
 	}
 
-	public static double clip(long value, long min, long max) {
+	public static long clip(long value, long min, long max) {
 		return value < min ? min : (value > max ? max : value);
 	}
 
