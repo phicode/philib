@@ -30,6 +30,8 @@ import java.util.concurrent.Semaphore;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
+import ch.bind.philib.cache.buf.BufCache;
+import ch.bind.philib.cache.buf.ByteArrayCache;
 import ch.bind.philib.validation.Validation;
 
 public class ByteArrayCacheTest {
@@ -37,8 +39,8 @@ public class ByteArrayCacheTest {
 	@Test
 	public void testMaxEntries() {
 		int maxEntries = 1;
-		int bufferSize = ByteArrayCache.DEFAULT_BUFFER_SIZE;
-		ByteArrayCache bp = ByteArrayCache.createSimple(bufferSize, maxEntries);
+		int bufferSize = 8192;
+		BufCache<byte[]> bp = ByteArrayCache.createSimple(bufferSize, maxEntries);
 
 		byte[] in1 = new byte[bufferSize];
 		byte[] in2 = new byte[bufferSize];

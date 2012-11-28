@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.buffercache;
+package ch.bind.philib.cache.buf;
 
 /**
  * The base interface for buffer caches.
@@ -29,7 +29,7 @@ package ch.bind.philib.cache.buffercache;
  * 
  * @param <E> The type of buffers which are managed by this cache.
  */
-public interface BufferCache<E> {
+public interface BufCache<E> {
 
 	/**
 	 * Acquire an object from the object-cache.
@@ -52,6 +52,6 @@ public interface BufferCache<E> {
 	 *         {@code acquire} and {@code free} calls to the cache are visible
 	 *         to successive calls to this statics-object's methods.
 	 */
-	BufferCacheStats getCacheStats();
+	Stats getCacheStats();
 
 }

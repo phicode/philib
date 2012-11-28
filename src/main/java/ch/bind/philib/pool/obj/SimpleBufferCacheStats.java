@@ -19,65 +19,66 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.buffercache.impl;
+package ch.bind.philib.pool.obj;
 
-import ch.bind.philib.cache.buffercache.BufferCacheStats;
-import ch.bind.philib.cache.buffercache.BufferCache;
-import ch.bind.philib.validation.Validation;
+import java.util.concurrent.atomic.AtomicLong;
+
+import ch.bind.philib.cache.buf.Stats;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public abstract class ObjectCacheBase<E> implements BufferCache<E> {
+public final class SimpleBufferCacheStats implements Stats {
 
-	private final BufferFactory<E> factory;
+	private final AtomicLong acquires = new AtomicLong(0);
 
-	private final SimpleBufferCacheStats stats = new SimpleBufferCacheStats();
+	private final AtomicLong creates = new AtomicLong(0);
 
-	public ObjectCacheBase(BufferFactory<E> factory) {
-		Validation.notNull(factory);
-		this.factory = factory;
+	private final AtomicLong freed = new AtomicLong(0);
+
+	private final AtomicLong discarded = new AtomicLong(0);
+
+	void incrementAcquires() {
+		acquires.incrementAndGet();
+	}
+
+	void incrementCreates() {
+		creates.incrementAndGet();
+	}
+
+	void incrementFreed() {
+		freed.incrementAndGet();
+	}
+
+	void incrementDiscarded() {
+		discarded.incrementAndGet();
 	}
 
 	@Override
-	public final E acquire() {
-		stats.incrementAcquires();
-		do {
-			E e = tryAcquire();
-			if (e == null) {
-				stats.incrementCreates();
-				return factory.create();
-			}
-			// if (factory.canReuse(e)) {
-			// return e;
-			// }
-			stats.incrementDiscarded();
-			// factory.destroy(e);
-		} while (true);
+	public long getAcquires() {
+		return acquires.get();
 	}
 
 	@Override
-	public final void free(final E e) {
-		if (e != null) {
-			if (factory.prepareForReuse(e)) {
-				if (tryRelease(e)) {
-					stats.incrementFreed();
-					return;
-				}
-			}
-			stats.incrementDiscarded();
-			// factory.destroy(e);
-		}
+	public long getCreates() {
+		return creates.get();
 	}
 
 	@Override
-	public final BufferCacheStats getCacheStats() {
-		return stats;
+	public long getFreed() {
+		return freed.get();
 	}
 
-	protected abstract E tryAcquire();
+	@Override
+	public long getDiscarded() {
+		return discarded.get();
+	}
 
-	protected abstract boolean tryRelease(E e);
+	@Override
+	public String toString() {
+		return String.format("acquires=%d, creates=%d, freed=%d, discarded=%d",//
+				acquires.get(), creates.get(), freed.get(), discarded.get());
+	}
 }

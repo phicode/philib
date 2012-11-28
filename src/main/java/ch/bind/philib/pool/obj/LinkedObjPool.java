@@ -20,11 +20,12 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.buffercache.impl;
+package ch.bind.philib.pool.obj;
 
 import java.lang.ref.SoftReference;
 import java.util.concurrent.atomic.AtomicReference;
 
+import ch.bind.philib.cache.buf.factory.BufferFactory;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -32,7 +33,7 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
+public final class LinkedObjPool<E> extends ObjectCacheBase<E> {
 
 	private final AtomicReference<Node<E>> freeList;
 
@@ -40,7 +41,7 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 
 	private final Node<E> LOCK_DUMMY = new Node<E>();
 
-	public LinkedObjectCache(BufferFactory<E> factory, int maxEntries) {
+	public LinkedObjPool(BufferFactory<E> factory, int maxEntries) {
 		super(factory);
 		Validation.isTrue(maxEntries > 0);
 		this.freeList = new AtomicReference<Node<E>>();

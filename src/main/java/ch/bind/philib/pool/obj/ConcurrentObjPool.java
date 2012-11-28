@@ -20,12 +20,14 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.buffercache.impl;
+package ch.bind.philib.pool.obj;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import ch.bind.philib.cache.buffercache.BufferCacheStats;
-import ch.bind.philib.cache.buffercache.BufferCache;
+import ch.bind.philib.cache.buf.BufCache;
+import ch.bind.philib.cache.buf.Stats;
+import ch.bind.philib.cache.buf.factory.BufferFactory;
+import ch.bind.philib.math.PhiMath;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -33,7 +35,7 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public final class ConcurrentBufferCache<E> implements BufferCache<E> {
+public final class ConcurrentObjPool<E> implements BufCache<E> {
 
 	private final CacheThreadLocal cacheByThread = new CacheThreadLocal();
 
@@ -41,26 +43,24 @@ public final class ConcurrentBufferCache<E> implements BufferCache<E> {
 
 	private final AtomicLong usageCount = new AtomicLong(0);
 
-	private final CombinedBufferCacheStats stats;
-
-	public ConcurrentBufferCache(BufferFactory<E> factory, int maxEntries) {
-		this(factory, maxEntries, Runtime.getRuntime().availableProcessors());
-	}
+	private final MultiStats stats;
 
 	@SuppressWarnings("unchecked")
-	public ConcurrentBufferCache(BufferFactory<E> factory, int maxEntries, int numBuckets) {
-		Validation.notNull(factory);
-		int entriesPerBucket = maxEntries / numBuckets;
-		if (maxEntries % numBuckets != 0) {
-			entriesPerBucket++;
+	public ConcurrentObjPool(BufferFactory<E> factory, int maxEntries, int concurrencyLevel) {
+		Validation.notNull(factory, "no buffer factory provided");
+		Validation.isTrue(maxEntries > 0, "wont create an empty buffer cache");
+		if (concurrencyLevel < 2) {
+			concurrencyLevel = 2;
 		}
-		this.caches = new LinkedObjectCache[numBuckets];
-		BufferCacheStats[] s = new BufferCacheStats[numBuckets];
-		for (int i = 0; i < numBuckets; i++) {
-			caches[i] = new LinkedObjectCache<E>(factory, entriesPerBucket);
+
+		int entriesPerCache = (int) PhiMath.ceilDiv(maxEntries, concurrencyLevel);
+		this.caches = new LinkedObjectCache[concurrencyLevel];
+		Stats[] s = new Stats[concurrencyLevel];
+		for (int i = 0; i < concurrencyLevel; i++) {
+			caches[i] = new LinkedObjectCache<E>(factory, entriesPerCache);
 			s[i] = caches[i].getCacheStats();
 		}
-		this.stats = new CombinedBufferCacheStats(s);
+		this.stats = new MultiStats(s);
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public final class ConcurrentBufferCache<E> implements BufferCache<E> {
 	}
 
 	@Override
-	public BufferCacheStats getCacheStats() {
+	public Stats getCacheStats() {
 		return stats;
 	}
 

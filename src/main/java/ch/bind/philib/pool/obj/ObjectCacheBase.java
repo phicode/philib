@@ -19,66 +19,66 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.buffercache.impl;
+package ch.bind.philib.pool.obj;
 
-import java.util.concurrent.atomic.AtomicLong;
-
-import ch.bind.philib.cache.buffercache.BufferCacheStats;
+import ch.bind.philib.cache.buf.BufCache;
+import ch.bind.philib.cache.buf.Stats;
+import ch.bind.philib.cache.buf.factory.BufferFactory;
+import ch.bind.philib.validation.Validation;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class SimpleBufferCacheStats implements BufferCacheStats {
+public abstract class ObjectCacheBase<E> implements BufCache<E> {
 
-	private final AtomicLong acquires = new AtomicLong(0);
+	private final BufferFactory<E> factory;
 
-	private final AtomicLong creates = new AtomicLong(0);
+	private final SimpleBufferCacheStats stats = new SimpleBufferCacheStats();
 
-	private final AtomicLong freed = new AtomicLong(0);
-
-	private final AtomicLong discarded = new AtomicLong(0);
-
-	void incrementAcquires() {
-		acquires.incrementAndGet();
-	}
-
-	void incrementCreates() {
-		creates.incrementAndGet();
-	}
-
-	void incrementFreed() {
-		freed.incrementAndGet();
-	}
-
-	void incrementDiscarded() {
-		discarded.incrementAndGet();
+	public ObjectCacheBase(BufferFactory<E> factory) {
+		Validation.notNull(factory);
+		this.factory = factory;
 	}
 
 	@Override
-	public long getAcquires() {
-		return acquires.get();
+	public final E acquire() {
+		stats.incrementAcquires();
+		do {
+			E e = tryAcquire();
+			if (e == null) {
+				stats.incrementCreates();
+				return factory.create();
+			}
+			// if (factory.canReuse(e)) {
+			// return e;
+			// }
+			stats.incrementDiscarded();
+			// factory.destroy(e);
+		} while (true);
 	}
 
 	@Override
-	public long getCreates() {
-		return creates.get();
+	public final void free(final E e) {
+		if (e != null) {
+			if (factory.prepareForReuse(e)) {
+				if (tryRelease(e)) {
+					stats.incrementFreed();
+					return;
+				}
+			}
+			stats.incrementDiscarded();
+			// factory.destroy(e);
+		}
 	}
 
 	@Override
-	public long getFreed() {
-		return freed.get();
+	public final Stats getCacheStats() {
+		return stats;
 	}
 
-	@Override
-	public long getDiscarded() {
-		return discarded.get();
-	}
+	protected abstract E tryAcquire();
 
-	@Override
-	public String toString() {
-		return String.format("acquires=%d, creates=%d, freed=%d, discarded=%d",//
-				acquires.get(), creates.get(), freed.get(), discarded.get());
-	}
+	protected abstract boolean tryRelease(E e);
 }

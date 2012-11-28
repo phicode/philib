@@ -19,26 +19,24 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.buffercache.impl;
+package ch.bind.philib.cache.buf.factory;
 
 /**
- * TODO
- * 
+ * A factory for buffers.
  * @author Philipp Meinen
  */
-public final class NoopObjectCache<E> extends ObjectCacheBase<E> {
+public interface BufferFactory<E> {
 
-	public NoopObjectCache(BufferFactory<E> factory) {
-		super(factory);
-	}
+	E create();
 
-	@Override
-	protected E tryAcquire() {
-		return null;
-	}
-
-	@Override
-	protected boolean tryRelease(E e) {
-		return false;
-	}
+	/**
+	 * Prepare a buffer to be reused by a different user. Implementors of this
+	 * method must make sure that any data from previous users is cleared.
+	 * 
+	 * @param e The buffer which must be prepared for reuse.
+	 * @return {@code true} if this buffer can be reused, {@code false}
+	 *         otherwise (for example if the size of the offered buffer is too
+	 *         small).
+	 */
+	boolean prepareForReuse(E e);
 }

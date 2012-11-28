@@ -19,24 +19,35 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.buffercache.impl;
+package ch.bind.philib.cache.buf;
 
 /**
- * A factory for buffers.
+ * Statistics about a buffer cache.
+ * 
  * @author Philipp Meinen
  */
-public interface BufferFactory<E> {
-
-	E create();
+public interface Stats {
 
 	/**
-	 * Prepare a buffer to be reused by a different user. Implementors of this
-	 * method must make sure that any data from previous users is cleared.
-	 * 
-	 * @param e The buffer which must be prepared for reuse.
-	 * @return {@code true} if this buffer can be reused, {@code false}
-	 *         otherwise (for example if the size of the offered buffer is too
-	 *         small).
+	 * @return The number of buffers which were created.
 	 */
-	boolean prepareForReuse(E e);
+	long getCreates();
+
+	/**
+	 * @return The number of buffers which have been acquired by client-code.
+	 */
+	long getAcquires();
+
+	/**
+	 * @return The number of buffers which have been freed by client-code.
+	 */
+	long getFreed();
+
+	/**
+	 * @return The number of buffers which have been released/discarded because
+	 *         they were no longer needed or because the garbage collector
+	 *         collected a stand-by buffer.
+	 */
+	long getDiscarded();
+
 }

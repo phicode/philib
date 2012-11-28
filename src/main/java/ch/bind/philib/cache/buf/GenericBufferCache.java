@@ -20,36 +20,10 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache.buffercache;
+package ch.bind.philib.cache.buf;
 
+import ch.bind.philib.cache.buf.factory.BufferFactory;
+import ch.bind.philib.pool.obj.ConcurrentBufferCache;
+import ch.bind.philib.pool.obj.LinkedObjectCache;
 import ch.bind.philib.validation.Validation;
 
-/**
- * TODO
- * 
- * @author Philipp Meinen
- */
-public abstract class SpecificCacheBase<E> implements BufferCache<E> {
-
-	private final BufferCache<E> cache;
-
-	protected SpecificCacheBase(BufferCache<E> cache) {
-		Validation.notNull(cache);
-		this.cache = cache;
-	}
-
-	@Override
-	public final E acquire() {
-		return cache.acquire();
-	}
-
-	@Override
-	public final void free(E e) {
-		cache.free(e);
-	}
-
-	@Override
-	public final BufferCacheStats getCacheStats() {
-		return cache.getCacheStats();
-	}
-}

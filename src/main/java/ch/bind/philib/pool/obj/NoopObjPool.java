@@ -19,35 +19,28 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.buffercache;
+package ch.bind.philib.pool.obj;
+
+import ch.bind.philib.cache.buf.factory.BufferFactory;
 
 /**
- * Statistics about a buffer cache.
+ * TODO
  * 
  * @author Philipp Meinen
  */
-public interface BufferCacheStats {
+public final class NoopObjPool<E> extends ObjectCacheBase<E> {
 
-	/**
-	 * @return The number of buffers which were created.
-	 */
-	long getCreates();
+	public NoopObjPool(BufferFactory<E> factory) {
+		super(factory);
+	}
 
-	/**
-	 * @return The number of buffers which have been acquired by client-code.
-	 */
-	long getAcquires();
+	@Override
+	protected E tryAcquire() {
+		return null;
+	}
 
-	/**
-	 * @return The number of buffers which have been freed by client-code.
-	 */
-	long getFreed();
-
-	/**
-	 * @return The number of buffers which have been released/discarded because
-	 *         they were no longer needed or because the garbage collector
-	 *         collected a stand-by buffer.
-	 */
-	long getDiscarded();
-
+	@Override
+	protected boolean tryRelease(E e) {
+		return false;
+	}
 }

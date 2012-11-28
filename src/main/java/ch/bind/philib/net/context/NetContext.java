@@ -27,7 +27,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-import ch.bind.philib.cache.buffercache.ByteBufferCache;
+import ch.bind.philib.cache.buf.ByteBufferCache;
 import ch.bind.philib.net.events.EventDispatcher;
 
 /**

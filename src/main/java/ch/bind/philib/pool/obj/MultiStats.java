@@ -19,9 +19,9 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.cache.buffercache.impl;
+package ch.bind.philib.pool.obj;
 
-import ch.bind.philib.cache.buffercache.BufferCacheStats;
+import ch.bind.philib.cache.buf.Stats;
 
 /**
  * Collects buffer statistics from multiple buffer-caches in a concurrent
@@ -29,18 +29,18 @@ import ch.bind.philib.cache.buffercache.BufferCacheStats;
  * 
  * @author Philipp Meinen
  */
-final class CombinedBufferCacheStats implements BufferCacheStats {
+final class MultiStats implements Stats {
 
-	private BufferCacheStats[] stats;
+	private Stats[] stats;
 
-	CombinedBufferCacheStats(BufferCacheStats[] stats) {
+	MultiStats(Stats[] stats) {
 		this.stats = stats;
 	}
 
 	@Override
 	public long getAcquires() {
 		long a = 0;
-		for (BufferCacheStats s : stats) {
+		for (Stats s : stats) {
 			a += s.getAcquires();
 		}
 		return a;
@@ -49,7 +49,7 @@ final class CombinedBufferCacheStats implements BufferCacheStats {
 	@Override
 	public long getCreates() {
 		long c = 0;
-		for (BufferCacheStats s : stats) {
+		for (Stats s : stats) {
 			c += s.getCreates();
 		}
 		return c;
@@ -58,7 +58,7 @@ final class CombinedBufferCacheStats implements BufferCacheStats {
 	@Override
 	public long getFreed() {
 		long r = 0;
-		for (BufferCacheStats s : stats) {
+		for (Stats s : stats) {
 			r += s.getFreed();
 		}
 		return r;
@@ -67,7 +67,7 @@ final class CombinedBufferCacheStats implements BufferCacheStats {
 	@Override
 	public long getDiscarded() {
 		long d = 0;
-		for (BufferCacheStats s : stats) {
+		for (Stats s : stats) {
 			d += s.getDiscarded();
 		}
 		return d;

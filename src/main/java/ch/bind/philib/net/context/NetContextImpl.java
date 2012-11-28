@@ -30,7 +30,7 @@ import java.net.SocketException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.bind.philib.cache.buffercache.ByteBufferCache;
+import ch.bind.philib.cache.buf.ByteBufferCache;
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.events.EventDispatcher;
