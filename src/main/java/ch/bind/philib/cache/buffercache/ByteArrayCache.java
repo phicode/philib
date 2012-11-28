@@ -22,10 +22,10 @@
 
 package ch.bind.philib.cache.buffercache;
 
+import ch.bind.philib.cache.buffercache.impl.BufferFactory;
+import ch.bind.philib.cache.buffercache.impl.ConcurrentBufferCache;
 import ch.bind.philib.cache.buffercache.impl.LinkedObjectCache;
 import ch.bind.philib.cache.buffercache.impl.NoopObjectCache;
-import ch.bind.philib.cache.buffercache.impl.ObjectFactory;
-import ch.bind.philib.cache.buffercache.impl.ScalableObjectCache;
 import ch.bind.philib.lang.ArrayUtil;
 
 /**
@@ -40,54 +40,48 @@ public final class ByteArrayCache extends SpecificCacheBase<byte[]> {
 	// 1 mb of buffers with the default buffer size of 8k
 	public static final int DEFAULT_NUM_BUFFERS = 128;
 
-	private ByteArrayCache(ObjectCache<byte[]> cache) {
+	private ByteArrayCache(BufferCache<byte[]> cache) {
 		super(cache);
 	}
 
 	public static ByteArrayCache createSimple(int bufferSize) {
-		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, DEFAULT_NUM_BUFFERS);
-		return new ByteArrayCache(cache);
+		return createSimple(bufferSize, DEFAULT_NUM_BUFFERS);
 	}
 
 	public static ByteArrayCache createSimple(int bufferSize, int maxEntries) {
-		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, maxEntries);
+		BufferFactory<byte[]> factory = createFactory(bufferSize);
+		BufferCache<byte[]> cache = new LinkedObjectCache<byte[]>(factory, maxEntries);
 		return new ByteArrayCache(cache);
 	}
 
-	public static ByteArrayCache createScalable(int bufferSize, int maxEntries) {
-		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new ScalableObjectCache<byte[]>(factory, maxEntries);
+	public static ByteArrayCache createConcurrent(int bufferSize, int maxEntries) {
+		BufferFactory<byte[]> factory = createFactory(bufferSize);
+		BufferCache<byte[]> cache = new ConcurrentBufferCache<byte[]>(factory, maxEntries);
 		return new ByteArrayCache(cache);
 	}
 
-	public static ByteArrayCache createScalable(int bufferSize, int maxEntries, int bufferBuckets) {
-		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new ScalableObjectCache<byte[]>(factory, maxEntries, bufferBuckets);
+	public static ByteArrayCache createConcurrent(int bufferSize, int maxEntries, int bufferBuckets) {
+		BufferFactory<byte[]> factory = createFactory(bufferSize);
+		BufferCache<byte[]> cache = new ConcurrentBufferCache<byte[]>(factory, maxEntries, bufferBuckets);
 		return new ByteArrayCache(cache);
 	}
 
 	public static ByteArrayCache createNoop(int bufferSize) {
-		ObjectFactory<byte[]> factory = createFactory(bufferSize);
-		ObjectCache<byte[]> cache = new NoopObjectCache<byte[]>(factory);
+		BufferFactory<byte[]> factory = createFactory(bufferSize);
+		BufferCache<byte[]> cache = new NoopObjectCache<byte[]>(factory);
 		return new ByteArrayCache(cache);
 	}
 
-	public static ObjectFactory<byte[]> createFactory(int bufferSize) {
+	public static BufferFactory<byte[]> createFactory(int bufferSize) {
 		return new ByteArrayFactory(bufferSize);
 	}
 
-	private static final class ByteArrayFactory implements ObjectFactory<byte[]> {
+	public static final class ByteArrayFactory implements BufferFactory<byte[]> {
 
 		private final int bufferSize;
 
 		public ByteArrayFactory(int bufSize) {
 			this.bufferSize = bufSize;
-		}
-
-		@Override
-		public void destroy(byte[] e) { /* the GC takes care of cleaning up */
 		}
 
 		@Override
@@ -102,13 +96,6 @@ public final class ByteArrayCache extends SpecificCacheBase<byte[]> {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public boolean canReuse(byte[] e) {
-			// this is a buffer, not a connection that might have timed out, so
-			// it can always be reused
-			return true;
 		}
 	}
 }

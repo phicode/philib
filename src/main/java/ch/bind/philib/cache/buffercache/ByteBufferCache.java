@@ -25,8 +25,8 @@ package ch.bind.philib.cache.buffercache;
 import java.nio.ByteBuffer;
 
 import ch.bind.philib.cache.buffercache.impl.LinkedObjectCache;
-import ch.bind.philib.cache.buffercache.impl.ObjectFactory;
-import ch.bind.philib.cache.buffercache.impl.ScalableObjectCache;
+import ch.bind.philib.cache.buffercache.impl.BufferFactory;
+import ch.bind.philib.cache.buffercache.impl.ConcurrentBufferCache;
 import ch.bind.philib.lang.ArrayUtil;
 
 /**
@@ -36,33 +36,33 @@ import ch.bind.philib.lang.ArrayUtil;
  */
 public final class ByteBufferCache extends SpecificCacheBase<ByteBuffer> {
 
-	private ByteBufferCache(ObjectCache<ByteBuffer> cache) {
+	private ByteBufferCache(BufferCache<ByteBuffer> cache) {
 		super(cache);
 	}
 
 	public static ByteBufferCache createSimple(int bufferSize, int maxEntries) {
-		ObjectFactory<ByteBuffer> factory = createFactory(bufferSize);
-		ObjectCache<ByteBuffer> cache = new LinkedObjectCache<ByteBuffer>(factory, maxEntries);
+		BufferFactory<ByteBuffer> factory = createFactory(bufferSize);
+		BufferCache<ByteBuffer> cache = new LinkedObjectCache<ByteBuffer>(factory, maxEntries);
 		return new ByteBufferCache(cache);
 	}
 
 	public static ByteBufferCache createScalable(int bufferSize, int maxEntries) {
-		ObjectFactory<ByteBuffer> factory = createFactory(bufferSize);
-		ObjectCache<ByteBuffer> cache = new ScalableObjectCache<ByteBuffer>(factory, maxEntries);
+		BufferFactory<ByteBuffer> factory = createFactory(bufferSize);
+		BufferCache<ByteBuffer> cache = new ConcurrentBufferCache<ByteBuffer>(factory, maxEntries);
 		return new ByteBufferCache(cache);
 	}
 
 	public static ByteBufferCache createScalable(int bufferSize, int maxEntries, int bufferBuckets) {
-		ObjectFactory<ByteBuffer> factory = createFactory(bufferSize);
-		ObjectCache<ByteBuffer> cache = new ScalableObjectCache<ByteBuffer>(factory, maxEntries, bufferBuckets);
+		BufferFactory<ByteBuffer> factory = createFactory(bufferSize);
+		BufferCache<ByteBuffer> cache = new ConcurrentBufferCache<ByteBuffer>(factory, maxEntries, bufferBuckets);
 		return new ByteBufferCache(cache);
 	}
 
-	public static ObjectFactory<ByteBuffer> createFactory(int bufferSize) {
+	public static BufferFactory<ByteBuffer> createFactory(int bufferSize) {
 		return new ByteBufferFactory(bufferSize);
 	}
 
-	private static final class ByteBufferFactory implements ObjectFactory<ByteBuffer> {
+	private static final class ByteBufferFactory implements BufferFactory<ByteBuffer> {
 
 		private final int bufferSize;
 
@@ -77,23 +77,12 @@ public final class ByteBufferCache extends SpecificCacheBase<ByteBuffer> {
 		}
 
 		@Override
-		public void destroy(ByteBuffer e) { /* the GC takes care of cleaning up */
-		}
-
-		@Override
 		public boolean prepareForReuse(ByteBuffer e) {
 			if (e.capacity() == bufferSize) {
 				ArrayUtil.memsetZero(e);
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public boolean canReuse(ByteBuffer e) {
-			// this is a buffer, not a connection that might have timed out, so
-			// it can always be reused
-			return true;
 		}
 	}
 }

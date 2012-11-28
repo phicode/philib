@@ -21,64 +21,76 @@
  */
 package ch.bind.philib.cache.buffercache.impl;
 
-import java.util.concurrent.atomic.AtomicLong;
-
-import ch.bind.philib.cache.buffercache.CacheStats;
+import ch.bind.philib.cache.buffercache.BufferCacheStats;
 
 /**
- * TODO
+ * Collects buffer statistics from multiple buffer-caches in a concurrent
+ * environment.
  * 
  * @author Philipp Meinen
  */
-public final class SimpleCacheStats implements CacheStats {
+final class CombinedBufferCacheStats implements BufferCacheStats {
 
-	private final AtomicLong acquires = new AtomicLong(0);
+	private BufferCacheStats[] stats;
 
-	private final AtomicLong creates = new AtomicLong(0);
-
-	private final AtomicLong releases = new AtomicLong(0);
-
-	private final AtomicLong destroyed = new AtomicLong(0);
-
-	void incrementAcquires() {
-		acquires.incrementAndGet();
-	}
-
-	void incrementCreates() {
-		creates.incrementAndGet();
-	}
-
-	void incrementReleases() {
-		releases.incrementAndGet();
-	}
-
-	void incrementDestroyed() {
-		destroyed.incrementAndGet();
+	CombinedBufferCacheStats(BufferCacheStats[] stats) {
+		this.stats = stats;
 	}
 
 	@Override
 	public long getAcquires() {
-		return acquires.get();
+		long a = 0;
+		for (BufferCacheStats s : stats) {
+			a += s.getAcquires();
+		}
+		return a;
 	}
 
 	@Override
 	public long getCreates() {
-		return creates.get();
+		long c = 0;
+		for (BufferCacheStats s : stats) {
+			c += s.getCreates();
+		}
+		return c;
 	}
 
 	@Override
-	public long getReleases() {
-		return releases.get();
+	public long getFreed() {
+		long r = 0;
+		for (BufferCacheStats s : stats) {
+			r += s.getFreed();
+		}
+		return r;
 	}
 
 	@Override
-	public long getDestroyed() {
-		return destroyed.get();
+	public long getDiscarded() {
+		long d = 0;
+		for (BufferCacheStats s : stats) {
+			d += s.getDiscarded();
+		}
+		return d;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("acquires=%d, creates=%d, releases=%d, destroyed=%d",//
-				acquires.get(), creates.get(), releases.get(), destroyed.get());
+		StringBuilder sb = new StringBuilder(256);
+		sb.append("cache-total: acquires=");
+		sb.append(getAcquires());
+		sb.append(", creates=");
+		sb.append(getCreates());
+		sb.append(", freed=");
+		sb.append(getFreed());
+		sb.append(", discarded=");
+		sb.append(getDiscarded());
+		for (int i = 0; i < stats.length; i++) {
+			sb.append("\n");
+			sb.append("  bucket-");
+			sb.append(i);
+			sb.append(": ");
+			sb.append(stats[i]);
+		}
+		return sb.toString();
 	}
 }

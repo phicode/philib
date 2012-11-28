@@ -161,7 +161,7 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 			totalRead += rbuf.remaining();
 			notifyReceive(addr, rbuf);
 		}
-		releaseBuffer(rbuf);
+		freeBuffer(rbuf);
 		return EventUtil.READ;
 	}
 

@@ -28,7 +28,7 @@ package ch.bind.philib.cache.buffercache.impl;
  */
 public final class NoopObjectCache<E> extends ObjectCacheBase<E> {
 
-	public NoopObjectCache(ObjectFactory<E> factory) {
+	public NoopObjectCache(BufferFactory<E> factory) {
 		super(factory);
 	}
 

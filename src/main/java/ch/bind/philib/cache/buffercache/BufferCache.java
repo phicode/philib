@@ -23,27 +23,35 @@
 package ch.bind.philib.cache.buffercache;
 
 /**
- * TODO
+ * The base interface for buffer caches.
  * 
  * @author Philipp Meinen
+ * 
+ * @param <E> The type of buffers which are managed by this cache.
  */
-public interface ObjectCache<E> {
+public interface BufferCache<E> {
 
 	/**
 	 * Acquire an object from the object-cache.
 	 * 
-	 * @return A free and usable object from the cache if one exists. Otherwise a new object is created from the
-	 *         underlying factory.
+	 * @return A free and usable buffer from the cache if one exists. Otherwise
+	 *         a new buffer is created from the underlying factory.
 	 */
 	E acquire();
 
 	/**
-	 * Release an object to the object-cache. The caller must not use this object after calling this method.
+	 * Free a buffer to the cache. The caller must not use this buffer after
+	 * calling this method.
 	 * 
-	 * @param e The object to be released.
+	 * @param e The buffer to be released.
 	 */
-	void release(E e);
+	void free(E e);
 
-	CacheStats getCacheStats();
+	/**
+	 * @return The cache-statistics object for this buffer-cache.
+	 *         {@code acquire} and {@code free} calls to the cache are visible
+	 *         to successive calls to this statics-object's methods.
+	 */
+	BufferCacheStats getCacheStats();
 
 }

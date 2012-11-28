@@ -21,75 +21,64 @@
  */
 package ch.bind.philib.cache.buffercache.impl;
 
-import ch.bind.philib.cache.buffercache.CacheStats;
+import java.util.concurrent.atomic.AtomicLong;
+
+import ch.bind.philib.cache.buffercache.BufferCacheStats;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public final class CombinedCacheStats implements CacheStats {
+public final class SimpleBufferCacheStats implements BufferCacheStats {
 
-	private CacheStats[] stats;
+	private final AtomicLong acquires = new AtomicLong(0);
 
-	CombinedCacheStats(CacheStats[] stats) {
-		this.stats = stats;
+	private final AtomicLong creates = new AtomicLong(0);
+
+	private final AtomicLong freed = new AtomicLong(0);
+
+	private final AtomicLong discarded = new AtomicLong(0);
+
+	void incrementAcquires() {
+		acquires.incrementAndGet();
+	}
+
+	void incrementCreates() {
+		creates.incrementAndGet();
+	}
+
+	void incrementFreed() {
+		freed.incrementAndGet();
+	}
+
+	void incrementDiscarded() {
+		discarded.incrementAndGet();
 	}
 
 	@Override
 	public long getAcquires() {
-		long a = 0;
-		for (CacheStats s : stats) {
-			a += s.getAcquires();
-		}
-		return a;
+		return acquires.get();
 	}
 
 	@Override
 	public long getCreates() {
-		long c = 0;
-		for (CacheStats s : stats) {
-			c += s.getCreates();
-		}
-		return c;
+		return creates.get();
 	}
 
 	@Override
-	public long getReleases() {
-		long r = 0;
-		for (CacheStats s : stats) {
-			r += s.getReleases();
-		}
-		return r;
+	public long getFreed() {
+		return freed.get();
 	}
 
 	@Override
-	public long getDestroyed() {
-		long d = 0;
-		for (CacheStats s : stats) {
-			d += s.getDestroyed();
-		}
-		return d;
+	public long getDiscarded() {
+		return discarded.get();
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(256);
-		sb.append("cache-total: acquires=");
-		sb.append(getAcquires());
-		sb.append(", creates=");
-		sb.append(getCreates());
-		sb.append(", releases=");
-		sb.append(getReleases());
-		sb.append(", destroyed=");
-		sb.append(getDestroyed());
-		for (int i = 0; i < stats.length; i++) {
-			sb.append("\n");
-			sb.append("  bucket-");
-			sb.append(i);
-			sb.append(": ");
-			sb.append(stats[i]);
-		}
-		return sb.toString();
+		return String.format("acquires=%d, creates=%d, freed=%d, discarded=%d",//
+				acquires.get(), creates.get(), freed.get(), discarded.get());
 	}
 }

@@ -22,6 +22,7 @@
 
 package ch.bind.philib.cache.buffercache.impl;
 
+import java.lang.ref.SoftReference;
 import java.util.concurrent.atomic.AtomicReference;
 
 import ch.bind.philib.validation.Validation;
@@ -39,7 +40,7 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 
 	private final Node<E> LOCK_DUMMY = new Node<E>();
 
-	public LinkedObjectCache(ObjectFactory<E> factory, int maxEntries) {
+	public LinkedObjectCache(BufferFactory<E> factory, int maxEntries) {
 		super(factory);
 		Validation.isTrue(maxEntries > 0);
 		this.freeList = new AtomicReference<Node<E>>();
@@ -109,7 +110,7 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 
 		private volatile Node<E> tail;
 
-		private volatile E entry;
+		private volatile SoftReference<E> entry;
 
 		void setTail(Node<E> t) {
 			this.tail = t;
@@ -121,13 +122,13 @@ public final class LinkedObjectCache<E> extends ObjectCacheBase<E> {
 
 		void setEntry(E e) {
 			assert (e != null);
-			this.entry = e;
+			this.entry = new SoftReference<E>(e);
 		}
 
 		E unsetEntry() {
-			E e = this.entry;
+			SoftReference<E> ref = this.entry;
 			this.entry = null;
-			return e;
+			return ref.get();
 		}
 	}
 }

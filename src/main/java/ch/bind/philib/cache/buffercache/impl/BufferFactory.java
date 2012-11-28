@@ -22,29 +22,21 @@
 package ch.bind.philib.cache.buffercache.impl;
 
 /**
- * TODO
- * 
+ * A factory for buffers.
  * @author Philipp Meinen
  */
-public interface ObjectFactory<E> {
+public interface BufferFactory<E> {
 
 	E create();
 
-	void destroy(E e);
-
 	/**
-	 * Prepare an object to be reused by a different user. Implementors of this method must make sure that any data from
-	 * previous users is cleared.
+	 * Prepare a buffer to be reused by a different user. Implementors of this
+	 * method must make sure that any data from previous users is cleared.
 	 * 
-	 * @param e The object which must be prepared for reuse.
-	 * @return {@code true} if this object can be reused, {@code false} otherwise.
+	 * @param e The buffer which must be prepared for reuse.
+	 * @return {@code true} if this buffer can be reused, {@code false}
+	 *         otherwise (for example if the size of the offered buffer is too
+	 *         small).
 	 */
 	boolean prepareForReuse(E e);
-
-	/**
-	 * 
-	 * @param e
-	 * @return {@code true} if this cached object is can be reused, {@code false} otherwise.
-	 */
-	boolean canReuse(E e);
 }

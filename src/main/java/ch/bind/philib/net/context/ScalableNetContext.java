@@ -22,7 +22,7 @@
 package ch.bind.philib.net.context;
 
 import ch.bind.philib.cache.buffercache.ByteBufferCache;
-import ch.bind.philib.net.events.ScalableEventDispatcher;
+import ch.bind.philib.net.events.ConcurrentEventDispatcher;
 
 /**
  * TODO
@@ -34,12 +34,12 @@ public class ScalableNetContext extends NetContextImpl {
 	public ScalableNetContext() {
 		// multi threaded net selector and buffer cache
 		super(ByteBufferCache.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
-		        ScalableEventDispatcher.open());
+		        ConcurrentEventDispatcher.open());
 	}
 
 	public ScalableNetContext(int concurrency) {
 		// multi threaded net selector and buffer cache
 		super(ByteBufferCache.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS, concurrency), //
-		        ScalableEventDispatcher.open(concurrency));
+		        ConcurrentEventDispatcher.open(concurrency));
 	}
 }

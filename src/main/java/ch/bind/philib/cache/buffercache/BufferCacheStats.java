@@ -22,18 +22,32 @@
 package ch.bind.philib.cache.buffercache;
 
 /**
- * TODO
+ * Statistics about a buffer cache.
  * 
  * @author Philipp Meinen
  */
-public interface CacheStats {
+public interface BufferCacheStats {
 
+	/**
+	 * @return The number of buffers which were created.
+	 */
 	long getCreates();
 
+	/**
+	 * @return The number of buffers which have been acquired by client-code.
+	 */
 	long getAcquires();
 
-	long getReleases();
+	/**
+	 * @return The number of buffers which have been freed by client-code.
+	 */
+	long getFreed();
 
-	long getDestroyed();
+	/**
+	 * @return The number of buffers which have been released/discarded because
+	 *         they were no longer needed or because the garbage collector
+	 *         collected a stand-by buffer.
+	 */
+	long getDiscarded();
 
 }

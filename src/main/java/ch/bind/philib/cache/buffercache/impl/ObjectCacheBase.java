@@ -21,8 +21,8 @@
  */
 package ch.bind.philib.cache.buffercache.impl;
 
-import ch.bind.philib.cache.buffercache.CacheStats;
-import ch.bind.philib.cache.buffercache.ObjectCache;
+import ch.bind.philib.cache.buffercache.BufferCacheStats;
+import ch.bind.philib.cache.buffercache.BufferCache;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -30,13 +30,13 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public abstract class ObjectCacheBase<E> implements ObjectCache<E> {
+public abstract class ObjectCacheBase<E> implements BufferCache<E> {
 
-	private final ObjectFactory<E> factory;
+	private final BufferFactory<E> factory;
 
-	private final SimpleCacheStats stats = new SimpleCacheStats();
+	private final SimpleBufferCacheStats stats = new SimpleBufferCacheStats();
 
-	public ObjectCacheBase(ObjectFactory<E> factory) {
+	public ObjectCacheBase(BufferFactory<E> factory) {
 		Validation.notNull(factory);
 		this.factory = factory;
 	}
@@ -50,30 +50,30 @@ public abstract class ObjectCacheBase<E> implements ObjectCache<E> {
 				stats.incrementCreates();
 				return factory.create();
 			}
-			if (factory.canReuse(e)) {
-				return e;
-			}
-			stats.incrementDestroyed();
-			factory.destroy(e);
+			// if (factory.canReuse(e)) {
+			// return e;
+			// }
+			stats.incrementDiscarded();
+			// factory.destroy(e);
 		} while (true);
 	}
 
 	@Override
-	public final void release(final E e) {
+	public final void free(final E e) {
 		if (e != null) {
 			if (factory.prepareForReuse(e)) {
 				if (tryRelease(e)) {
-					stats.incrementReleases();
+					stats.incrementFreed();
 					return;
 				}
 			}
-			stats.incrementDestroyed();
-			factory.destroy(e);
+			stats.incrementDiscarded();
+			// factory.destroy(e);
 		}
 	}
 
 	@Override
-	public final CacheStats getCacheStats() {
+	public final BufferCacheStats getCacheStats() {
 		return stats;
 	}
 

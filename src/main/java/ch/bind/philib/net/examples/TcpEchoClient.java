@@ -61,7 +61,8 @@ public class TcpEchoClient {
 		if (args.length > 1) {
 			System.out.println("only one parameter may be specified");
 			System.exit(1);
-		} else if (args.length == 1) {
+		}
+		else if (args.length == 1) {
 			try {
 				numClients = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -109,10 +110,13 @@ public class TcpEchoClient {
 		}
 
 		// context = new SimpleNetContext();
-		context = new ScalableNetContext(2);
-		context.setTcpNoDelay(true);
-		context.setSndBufSize(64 * 1024);
-		context.setRcvBufSize(64 * 1024);
+		context = new ScalableNetContext(16);
+		// context.setTcpNoDelay(true);
+		// context.setSndBufSize(64 * 1024);
+		// context.setRcvBufSize(64 * 1024);
+		context.setTcpNoDelay(false);
+		context.setSndBufSize(512);
+		context.setRcvBufSize(512);
 		context.setDebugMode(DEBUG_MODE);
 
 		final long printStatsIntervalMs = 10000;
@@ -195,7 +199,7 @@ public class TcpEchoClient {
 				double rxMb = rxDiff / ((double) (1024 * 1024f));
 				double txMb = txDiff / ((double) (1024 * 1024f));
 				System.out.printf("last %dsec rx=%.3fM, tx=%.3fM bytes => %.5f mbit/sec rxTx=%d timeDiff=%d%n", //
-				        intervalMs / 1000, rxMb, txMb, mbit, (rxDiff + txDiff), timeDiff);
+						intervalMs / 1000, rxMb, txMb, mbit, (rxDiff + txDiff), timeDiff);
 			}
 		}
 		if (num > 1) {
@@ -203,7 +207,7 @@ public class TcpEchoClient {
 			double txMb = totalTx / ((double) (1024 * 1024f));
 			double mbit = ((totalRx + totalTx) * 8) / 1e6 / (timeDiff / 1000f);
 			System.out.printf("last %dsec total-rx=%.3fM, total-tx=%.3fM bytes => %.5f mbit/sec, #connections: %d, connecting: %d%n", //
-			        intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size());
+					intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size());
 		}
 		if (sessions.isEmpty() && connecting.isEmpty()) {
 			System.out.println("no active or connecting sessions!");

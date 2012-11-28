@@ -35,7 +35,7 @@ import ch.bind.philib.lang.ServiceState;
  * 
  * @author Philipp Meinen
  */
-public class ScalableEventDispatcher implements EventDispatcher {
+public class ConcurrentEventDispatcher implements EventDispatcher {
 
 	public enum ScaleStrategy {
 		ROUND_ROBIN, //
@@ -56,7 +56,7 @@ public class ScalableEventDispatcher implements EventDispatcher {
 
 	private final AtomicLong nextRoundRobinIdx = new AtomicLong(0);
 
-	private ScalableEventDispatcher(RichEventDispatcher[] dispatchers, long[] threadIds, ScaleStrategy scaleStrategy) {
+	private ConcurrentEventDispatcher(RichEventDispatcher[] dispatchers, long[] threadIds, ScaleStrategy scaleStrategy) {
 		this.dispatchers = dispatchers;
 		this.threadIds = threadIds;
 		this.scaleStrategy = scaleStrategy;
@@ -95,7 +95,7 @@ public class ScalableEventDispatcher implements EventDispatcher {
 				throw new EventDispatcherCreationException("could not start " + concurrency + " dispatchers", e);
 			}
 		}
-		return new ScalableEventDispatcher(dispatchers, threadIds, scaleStrategy);
+		return new ConcurrentEventDispatcher(dispatchers, threadIds, scaleStrategy);
 	}
 
 	@Override
@@ -196,9 +196,17 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		EventDispatcher disp = findMapping(eventHandler);
 		if (disp != null) {
 			disp.changeOps(eventHandler, ops, asap);
-		} else {
+		}
+		else {
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				e.printStackTrace(System.err);
+			}
+			System.exit(1);
 			// TODO: notify listener
-			System.out.println("event handler is not registered: " + eventHandler);
+			// System.out.println("event handler is not registered: " +
+			// eventHandler);
 		}
 	}
 
@@ -215,8 +223,9 @@ public class ScalableEventDispatcher implements EventDispatcher {
 			map.put(newId, disp);
 			disp.changeHandler(oldHandler, newHandler, ops, asap);
 			map.remove(oldId);
-		} else {
-			//TODO: error and stuff
+		}
+		else {
+			// TODO: error and stuff
 			System.out.println("handler has no dispatcher: " + oldHandler);
 		}
 	}
@@ -227,7 +236,8 @@ public class ScalableEventDispatcher implements EventDispatcher {
 			EventDispatcher disp = map.remove(eventHandler.getEventHandlerId());
 			if (disp != null) {
 				disp.unregister(eventHandler);
-			} else {
+			}
+			else {
 				// TODO: notify listener
 				System.out.println("event handler is not registered: " + eventHandler);
 			}
@@ -244,7 +254,8 @@ public class ScalableEventDispatcher implements EventDispatcher {
 		EventDispatcher disp = findMapping(eventHandler);
 		if (disp != null) {
 			disp.registerForRedeliverPartialReads(eventHandler);
-		} else {
+		}
+		else {
 			// TODO: notify listener
 			System.out.println("event handler is not registered: " + eventHandler);
 		}

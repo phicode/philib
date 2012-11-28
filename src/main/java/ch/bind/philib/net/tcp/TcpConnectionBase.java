@@ -164,7 +164,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 			w_writeBacklog.notifyAll();
 		}
 		if (r_partialConsume != null) {
-			releaseBuffer(r_partialConsume);
+			freeBuffer(r_partialConsume);
 			r_partialConsume = null;
 			unregisterFromDeliverPartialReads();
 		}
@@ -330,7 +330,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				}
 				// connection closed
 				r_partialConsume = null;
-				releaseBuffer(bb);
+				freeBuffer(bb);
 				close();
 				return;
 			}
@@ -362,7 +362,7 @@ abstract class TcpConnectionBase extends EventHandlerBase implements Connection 
 				unregisterFromDeliverPartialReads();
 			}
 			r_partialConsume = null;
-			releaseBuffer(bb);
+			freeBuffer(bb);
 		}
 		Validation.isTrue((r_partialConsume == null) || (r_partialConsume.position() > 0));
 	}

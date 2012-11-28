@@ -24,8 +24,8 @@ package ch.bind.philib.cache.buffercache.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import ch.bind.philib.cache.buffercache.CacheStats;
-import ch.bind.philib.cache.buffercache.ObjectCache;
+import ch.bind.philib.cache.buffercache.BufferCacheStats;
+import ch.bind.philib.cache.buffercache.BufferCache;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -33,7 +33,7 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public final class ScalableObjectCache<E> implements ObjectCache<E> {
+public final class ConcurrentBufferCache<E> implements BufferCache<E> {
 
 	private final CacheThreadLocal cacheByThread = new CacheThreadLocal();
 
@@ -41,26 +41,26 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 
 	private final AtomicLong usageCount = new AtomicLong(0);
 
-	private final CombinedCacheStats stats;
+	private final CombinedBufferCacheStats stats;
 
-	public ScalableObjectCache(ObjectFactory<E> factory, int maxEntries) {
+	public ConcurrentBufferCache(BufferFactory<E> factory, int maxEntries) {
 		this(factory, maxEntries, Runtime.getRuntime().availableProcessors());
 	}
 
 	@SuppressWarnings("unchecked")
-	public ScalableObjectCache(ObjectFactory<E> factory, int maxEntries, int numBuckets) {
+	public ConcurrentBufferCache(BufferFactory<E> factory, int maxEntries, int numBuckets) {
 		Validation.notNull(factory);
 		int entriesPerBucket = maxEntries / numBuckets;
 		if (maxEntries % numBuckets != 0) {
 			entriesPerBucket++;
 		}
 		this.caches = new LinkedObjectCache[numBuckets];
-		CacheStats[] s = new CacheStats[numBuckets];
+		BufferCacheStats[] s = new BufferCacheStats[numBuckets];
 		for (int i = 0; i < numBuckets; i++) {
 			caches[i] = new LinkedObjectCache<E>(factory, entriesPerBucket);
 			s[i] = caches[i].getCacheStats();
 		}
-		this.stats = new CombinedCacheStats(s);
+		this.stats = new CombinedBufferCacheStats(s);
 	}
 
 	@Override
@@ -69,12 +69,12 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 	}
 
 	@Override
-	public void release(E e) {
-		cacheByThread.get().release(e);
+	public void free(E e) {
+		cacheByThread.get().free(e);
 	}
 
 	@Override
-	public CacheStats getCacheStats() {
+	public BufferCacheStats getCacheStats() {
 		return stats;
 	}
 
@@ -90,7 +90,7 @@ public final class ScalableObjectCache<E> implements ObjectCache<E> {
 
 		@Override
 		protected LinkedObjectCache<E> initialValue() {
-			return ScalableObjectCache.this.bind();
+			return ConcurrentBufferCache.this.bind();
 		}
 	}
 }

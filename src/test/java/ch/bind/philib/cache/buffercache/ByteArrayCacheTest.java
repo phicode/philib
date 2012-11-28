@@ -44,9 +44,9 @@ public class ByteArrayCacheTest {
 		byte[] in2 = new byte[bufferSize];
 
 		// the cache must accept this one because it is empty
-		bp.release(in1);
+		bp.free(in1);
 		// but it must ignore this entry because it is full
-		bp.release(in2);
+		bp.free(in2);
 
 		byte[] out1 = bp.acquire();
 		byte[] out2 = bp.acquire();
@@ -63,7 +63,7 @@ public class ByteArrayCacheTest {
 		ByteArrayCache bp = ByteArrayCache.createSimple(bufferSize);
 		byte[] in = new byte[bufferSize];
 
-		bp.release(in);
+		bp.free(in);
 
 		byte[] out = bp.acquire();
 		byte[] outNew = bp.acquire();
@@ -78,7 +78,7 @@ public class ByteArrayCacheTest {
 		ByteArrayCache bp = ByteArrayCache.createSimple(bufferSize);
 		byte[] b = new byte[bufferSize / 2];
 
-		bp.release(b);
+		bp.free(b);
 
 		byte[] b2 = bp.acquire();
 
@@ -138,11 +138,11 @@ public class ByteArrayCacheTest {
 			bpName = "normal";
 			break;
 		case 1:
-			bp = ByteArrayCache.createScalable(bufferSize, numBufs, 4);
+			bp = ByteArrayCache.createConcurrent(bufferSize, numBufs, 4);
 			bpName = "scalable-4";
 			break;
 		case 2:
-			bp = ByteArrayCache.createScalable(bufferSize, numBufs, 32);
+			bp = ByteArrayCache.createConcurrent(bufferSize, numBufs, 32);
 			bpName = "scalable-32";
 			break;
 		case 3:
@@ -238,7 +238,7 @@ public class ByteArrayCacheTest {
 					}
 					for (int i = 0; i < putOps; i++) {
 						assertNotNull(bufs[i]);
-						bp.release(bufs[i]);
+						bp.free(bufs[i]);
 					}
 					ops += getOps;
 					ops += putOps;
