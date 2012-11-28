@@ -35,6 +35,23 @@ public class LoadAvgSimpleTest {
 	@Test
 	public void withMillis() {
 		LoadAvg la = LoadAvgSimple.forMillis(250);
+		runTest(la);
+	}
+
+	@Test
+	public void withMicros() {
+		LoadAvg la = LoadAvgSimple.forMicros(250 * 1000);
+		runTest(la);
+	}
+
+	@Test
+	public void withNanos() {
+		LoadAvg la = LoadAvgSimple.forNanos(250 * 1000 * 1000);
+		runTest(la);
+	}
+
+	// assumes a 250 millis load-avg object
+	private static void runTest(final LoadAvg la) {
 		verify(la, 0, 0.01);
 
 		// 0 load
