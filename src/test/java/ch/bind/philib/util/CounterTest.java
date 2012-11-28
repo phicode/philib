@@ -81,4 +81,25 @@ public class CounterTest {
 		pm.reset();
 		assertEquals(pm.toString(), EXPECT_ZERO);
 	}
+
+	@Test
+	public void noName() {
+		Counter pm = CounterRepo.DEFAULT.forName(null, "ms");
+		assertEquals(pm.getName(), "default");
+		assertEquals(pm.getUnit(), "ms");
+	}
+
+	@Test
+	public void noUnit() {
+		Counter pm = new Counter("a", null);
+		assertEquals(pm.getName(), "a");
+		assertEquals(pm.getUnit(), "unknown");
+	}
+
+	@Test
+	public void noNameNoUnit() {
+		Counter pm = new Counter(null, null);
+		assertEquals(pm.getName(), "unknown");
+		assertEquals(pm.getUnit(), "unknown");
+	}
 }
