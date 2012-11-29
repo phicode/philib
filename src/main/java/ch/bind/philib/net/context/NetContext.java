@@ -27,8 +27,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-import ch.bind.philib.cache.buf.ByteBufferCache;
 import ch.bind.philib.net.events.EventDispatcher;
+import ch.bind.philib.pool.buffer.ByteBufferPool;
 
 /**
  * TODO
@@ -38,7 +38,7 @@ import ch.bind.philib.net.events.EventDispatcher;
 // TODO: socket keep-alive options and others
 public interface NetContext extends Closeable {
 
-	ByteBufferCache getBufferCache();
+	ByteBufferPool getBufferCache();
 
 	EventDispatcher getEventDispatcher();
 

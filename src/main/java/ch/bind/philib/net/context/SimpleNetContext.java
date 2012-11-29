@@ -21,8 +21,8 @@
  */
 package ch.bind.philib.net.context;
 
-import ch.bind.philib.cache.buf.ByteBufferCache;
 import ch.bind.philib.net.events.SimpleEventDispatcher;
+import ch.bind.philib.pool.buffer.ByteBufferPool;
 
 /**
  * TODO
@@ -33,7 +33,7 @@ public final class SimpleNetContext extends NetContextImpl {
 
 	public SimpleNetContext() {
 		// single threaded net selector and buffer cache
-		super(ByteBufferCache.createSimple(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
+		super(ByteBufferPool.createSimple(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
 		        SimpleEventDispatcher.open());
 	}
 }

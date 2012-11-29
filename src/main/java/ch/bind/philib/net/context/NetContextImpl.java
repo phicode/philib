@@ -30,10 +30,10 @@ import java.net.SocketException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.bind.philib.cache.buf.ByteBufferCache;
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.events.EventDispatcher;
+import ch.bind.philib.pool.buffer.ByteBufferPool;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -51,7 +51,7 @@ public class NetContextImpl implements NetContext {
 
 	public static final int DEFAULT_TCP_SERVER_SOCKET_BACKLOG = 25;
 
-	private final ByteBufferCache bufferCache;
+	private final ByteBufferPool bufferCache;
 
 	private final EventDispatcher eventDispatcher;
 
@@ -69,7 +69,7 @@ public class NetContextImpl implements NetContext {
 
 	private ServiceState serviceState = new ServiceState();
 
-	public NetContextImpl(ByteBufferCache bufferCache, EventDispatcher eventDispatcher) {
+	public NetContextImpl(ByteBufferPool bufferCache, EventDispatcher eventDispatcher) {
 		Validation.notNull(bufferCache);
 		Validation.notNull(eventDispatcher);
 		this.bufferCache = bufferCache;
@@ -93,7 +93,7 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
-	public final ByteBufferCache getBufferCache() {
+	public final ByteBufferPool getBufferCache() {
 		return bufferCache;
 	}
 

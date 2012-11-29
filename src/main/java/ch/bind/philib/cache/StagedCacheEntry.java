@@ -19,27 +19,44 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.context;
 
-import ch.bind.philib.net.events.ConcurrentEventDispatcher;
-import ch.bind.philib.pool.buffer.ByteBufferPool;
+package ch.bind.philib.cache;
 
-/**
- * TODO
- * 
- * @author Philipp Meinen
- */
-public class ScalableNetContext extends NetContextImpl {
+final class StagedCacheEntry<K, V> extends SimpleCacheEntry<K, V> {
 
-	public ScalableNetContext() {
-		// multi threaded net selector and buffer cache
-		super(ByteBufferPool.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
-		        ConcurrentEventDispatcher.open());
+	private static final int TOGGLE_OLD_GEN_BIT = 0x40000000;
+
+	private static final int NO_OLD_GEN_BITMASK = 0x3FFFFFFF;
+
+	// bits 0-29 are for the hit-counter, bit 30 is the old-gen toggle
+	// and bit 31 is the 'unused' sign-extension
+	private int hits;
+
+	StagedCacheEntry(K key, V value) {
+		super(key, value);
 	}
 
-	public ScalableNetContext(int concurrency) {
-		// multi threaded net selector and buffer cache
-		super(ByteBufferPool.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS, concurrency), //
-		        ConcurrentEventDispatcher.open(concurrency));
+	int recordHit() {
+		// hits are only recorded for young-generation objects
+		// so we do not have to worry about an integer overflow
+		// additionally the hits are reset to zero once an entry
+		// moves back down from the old generation
+		return (++hits & NO_OLD_GEN_BITMASK);
+	}
+
+	void resetHits() {
+		hits = hits & TOGGLE_OLD_GEN_BIT;
+	}
+
+	boolean isInYoungGen() {
+		return (hits & TOGGLE_OLD_GEN_BIT) == 0;
+	}
+
+	void setInYoungGen() {
+		hits = (hits & NO_OLD_GEN_BITMASK);
+	}
+
+	void setInOldGen() {
+		hits = (hits | TOGGLE_OLD_GEN_BIT);
 	}
 }

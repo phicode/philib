@@ -19,27 +19,38 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.context;
 
-import ch.bind.philib.net.events.ConcurrentEventDispatcher;
-import ch.bind.philib.pool.buffer.ByteBufferPool;
+package ch.bind.philib.pool;
 
 /**
- * TODO
+ * The base interface for object pools.
  * 
  * @author Philipp Meinen
+ * 
+ * @param <T> The type of object which are managed by this pool.
  */
-public class ScalableNetContext extends NetContextImpl {
+public interface Pool<T> {
 
-	public ScalableNetContext() {
-		// multi threaded net selector and buffer cache
-		super(ByteBufferPool.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
-		        ConcurrentEventDispatcher.open());
-	}
+	/**
+	 * Take an object from the object-pool.
+	 * 
+	 * @return A free and usable object from the pool if one exists. Otherwise a
+	 *         new object is created from the underlying manager.
+	 */
+	T take();
 
-	public ScalableNetContext(int concurrency) {
-		// multi threaded net selector and buffer cache
-		super(ByteBufferPool.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS, concurrency), //
-		        ConcurrentEventDispatcher.open(concurrency));
-	}
+	/**
+	 * Recycles an object which might be reused. The caller must not use this
+	 * object after calling this method.
+	 * 
+	 * @param value The object to be recycled.
+	 */
+	void recycle(T value);
+
+	/**
+	 * @return This pool's statistics object. Calls to this pool's methods are
+	 *         visible to successive calls to this statics-object's methods.
+	 */
+	PoolStats getPoolStats();
+
 }

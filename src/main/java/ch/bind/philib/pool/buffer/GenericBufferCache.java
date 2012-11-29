@@ -19,27 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.context;
 
-import ch.bind.philib.net.events.ConcurrentEventDispatcher;
-import ch.bind.philib.pool.buffer.ByteBufferPool;
+package ch.bind.philib.pool.buffer;
 
-/**
- * TODO
- * 
- * @author Philipp Meinen
- */
-public class ScalableNetContext extends NetContextImpl {
 
-	public ScalableNetContext() {
-		// multi threaded net selector and buffer cache
-		super(ByteBufferPool.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
-		        ConcurrentEventDispatcher.open());
-	}
-
-	public ScalableNetContext(int concurrency) {
-		// multi threaded net selector and buffer cache
-		super(ByteBufferPool.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS, concurrency), //
-		        ConcurrentEventDispatcher.open(concurrency));
-	}
-}

@@ -36,7 +36,7 @@ public abstract class CompareUtil {
 	 * results:
 	 * 
 	 * <pre>
-	 *  a / b | null  | a         |
+	 *  a / b | null  | a           |
 	 * ------------------------------
 	 *  null  | true  | false       |
 	 *     b  | false | a.equals(b) |

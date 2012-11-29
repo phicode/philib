@@ -68,7 +68,7 @@ public class TcpEchoServer implements SessionFactory {
 					long now = System.nanoTime();
 					long tooFarAgo = now - 10000000L; // 10ms
 					Iterator<EchoServerSession> iter = sessions.iterator();
-					System.out.println(server.getContext().getBufferCache().getCacheStats().toString());
+					System.out.println(server.getContext().getBufferCache().getPoolStats().toString());
 					System.out.println("sessions: " + sessions.size());
 					while (iter.hasNext()) {
 						EchoServerSession s = iter.next();

@@ -19,27 +19,41 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.context;
 
-import ch.bind.philib.net.events.ConcurrentEventDispatcher;
-import ch.bind.philib.pool.buffer.ByteBufferPool;
+package ch.bind.philib.cache;
 
-/**
- * TODO
- * 
- * @author Philipp Meinen
- */
-public class ScalableNetContext extends NetContextImpl {
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
-	public ScalableNetContext() {
-		// multi threaded net selector and buffer cache
-		super(ByteBufferPool.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS), //
-		        ConcurrentEventDispatcher.open());
-	}
+import org.testng.annotations.Test;
 
-	public ScalableNetContext(int concurrency) {
-		// multi threaded net selector and buffer cache
-		super(ByteBufferPool.createScalable(DEFAULT_BUFFER_SIZE, DEFAULT_NUM_BUFFERS, concurrency), //
-		        ConcurrentEventDispatcher.open(concurrency));
+import ch.bind.philib.cache.StagedCacheEntry;
+
+public class StagedCacheEntryTest {
+
+	@Test
+	public void toggleOldGenBit() {
+		StagedCacheEntry<Integer, Integer> x = new StagedCacheEntry<Integer, Integer>(1, 2);
+		assertTrue(x.isInYoungGen());
+		x.setInYoungGen();
+		assertTrue(x.isInYoungGen());
+
+		x.setInOldGen();
+		assertFalse(x.isInYoungGen());
+		x.setInOldGen();
+		assertFalse(x.isInYoungGen());
+
+		x.setInYoungGen();
+		assertTrue(x.isInYoungGen());
+
+		assertEquals(x.recordHit(), 1);
+		assertTrue(x.isInYoungGen());
+
+		x.setInOldGen();
+		assertFalse(x.isInYoungGen());
+
+		assertEquals(x.recordHit(), 2);
+		assertFalse(x.isInYoungGen());
 	}
 }
