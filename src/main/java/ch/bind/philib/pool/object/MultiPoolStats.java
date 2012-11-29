@@ -81,7 +81,7 @@ final class MultiPoolStats implements PoolStats {
 		sb.append(", released=").append(getReleased());
 		for (int i = 0; i < stats.length; i++) {
 			sb.append("\n");
-			sb.append("  bucket-");
+			sb.append("  pool-");
 			sb.append(i);
 			sb.append(": ");
 			sb.append(stats[i]);
