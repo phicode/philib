@@ -12,6 +12,7 @@ import ch.bind.philib.TestUtil;
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.validation.Validation;
 
+//TODO: log a summary
 public abstract class BufferPoolTestBase<T> {
 
 	private static final boolean executeBenchmark = true;
