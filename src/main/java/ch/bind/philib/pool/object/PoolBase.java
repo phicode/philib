@@ -46,7 +46,7 @@ public abstract class PoolBase<T> implements Pool<T> {
 	public final T take() {
 		stats.incrementTakes();
 		do {
-			T e = tryGetOne();
+			T e = poll();
 			if (e == null) {
 				stats.incrementCreates();
 				return manager.create();
@@ -63,7 +63,7 @@ public abstract class PoolBase<T> implements Pool<T> {
 	public final void recycle(final T value) {
 		if (value != null) {
 			if (manager.prepareForRecycle(value)) {
-				if (tryPutOne(value)) {
+				if (offer(value)) {
 					stats.incrementRecycled();
 					return;
 				}
@@ -78,7 +78,7 @@ public abstract class PoolBase<T> implements Pool<T> {
 		return stats;
 	}
 
-	protected abstract T tryGetOne();
+	protected abstract T poll();
 
-	protected abstract boolean tryPutOne(T value);
+	protected abstract boolean offer(T value);
 }

@@ -28,7 +28,7 @@ import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.PoolStats;
 import ch.bind.philib.pool.manager.ByteBufferManager;
 import ch.bind.philib.pool.object.ConcurrentPool;
-import ch.bind.philib.pool.object.LinkedPool;
+import ch.bind.philib.pool.object.LeakyPool;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -62,13 +62,13 @@ public final class ByteBufferPool implements Pool<ByteBuffer> {
 
 	public static ByteBufferPool create(int bufferSize, int maxEntries) {
 		ByteBufferManager manager = new ByteBufferManager(bufferSize);
-		return new ByteBufferPool(new LinkedPool<ByteBuffer>(manager, maxEntries, true));
+		return new ByteBufferPool(new LeakyPool<ByteBuffer>(manager, maxEntries));
 	}
 
 	public static ByteBufferPool create(int bufferSize, int maxEntries, int concurrencyLevel) {
 		ByteBufferManager manager = new ByteBufferManager(bufferSize);
 		if (concurrencyLevel < 2) {
-			return new ByteBufferPool(new LinkedPool<ByteBuffer>(manager, maxEntries, true));
+			return new ByteBufferPool(new LeakyPool<ByteBuffer>(manager, maxEntries));
 		}
 		return new ByteBufferPool(new ConcurrentPool<ByteBuffer>(manager, maxEntries, true, concurrencyLevel));
 	}

@@ -39,7 +39,7 @@ public final class ConcurrentPool<T> implements Pool<T> {
 
 	private final PoolThreadLocal poolByThread = new PoolThreadLocal();
 
-	private final LinkedPool<T>[] pools;
+	private final PoolBase<T>[] pools;
 
 	private final AtomicLong usageCount = new AtomicLong(0);
 
@@ -54,10 +54,15 @@ public final class ConcurrentPool<T> implements Pool<T> {
 		}
 
 		int maxPerPool = (int) PhiMath.ceilDiv(maxEntries, concurrencyLevel);
-		this.pools = new LinkedPool[concurrencyLevel];
+		this.pools = new PoolBase[concurrencyLevel];
 		PoolStats[] s = new PoolStats[concurrencyLevel];
 		for (int i = 0; i < concurrencyLevel; i++) {
-			pools[i] = new LinkedPool<T>(manager, maxPerPool, allowLeaks);
+			if (allowLeaks) {
+				pools[i] = new LeakyPool<T>(manager, maxPerPool);
+			}
+			else {
+				pools[i] = new StrongPool<T>(manager, maxPerPool);
+			}
 			s[i] = pools[i].getPoolStats();
 		}
 		this.stats = new MultiPoolStats(s);
@@ -78,7 +83,7 @@ public final class ConcurrentPool<T> implements Pool<T> {
 		return stats;
 	}
 
-	LinkedPool<T> bindToThread() {
+	PoolBase<T> bindToThread() {
 		// round robin distribution in the order the
 		// threads first access the pool
 		long v = usageCount.getAndIncrement();
@@ -86,10 +91,10 @@ public final class ConcurrentPool<T> implements Pool<T> {
 		return pools[poolIdx];
 	}
 
-	private final class PoolThreadLocal extends ThreadLocal<LinkedPool<T>> {
+	private final class PoolThreadLocal extends ThreadLocal<PoolBase<T>> {
 
 		@Override
-		protected LinkedPool<T> initialValue() {
+		protected PoolBase<T> initialValue() {
 			return ConcurrentPool.this.bindToThread();
 		}
 	}

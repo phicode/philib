@@ -6,8 +6,8 @@ public final class ByteArrayManager implements ObjectManager<byte[]> {
 
 	private final int bufferSize;
 
-	public ByteArrayManager(int bufSize) {
-		this.bufferSize = bufSize;
+	public ByteArrayManager(int bufferSize) {
+		this.bufferSize = bufferSize;
 	}
 
 	@Override

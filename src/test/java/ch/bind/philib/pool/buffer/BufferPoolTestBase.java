@@ -1,12 +1,22 @@
 package ch.bind.philib.pool.buffer;
 
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.util.concurrent.Semaphore;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.TestUtil;
 import ch.bind.philib.pool.Pool;
+import ch.bind.philib.validation.Validation;
 
 public abstract class BufferPoolTestBase<T> {
+
+	private static final boolean executeBenchmark = true;
+
+	private static final boolean printBenchmarkResults = true;
 
 	abstract Pool<T> createPool(int bufferSize, int maxEntries);
 
@@ -64,5 +74,122 @@ public abstract class BufferPoolTestBase<T> {
 		T b2 = pool.take();
 
 		assertTrue(b != b2);
+	}
+
+	@Test(enabled = executeBenchmark)
+	public void benchmark() throws Exception {
+		long numOps = 8L * 1024L * 1024L;
+		int getOps = 1000;
+		int putOps = 950;
+		boolean firstRun = true;
+		int numRuns = 1;
+		for (int i = 1; i <= 32; i *= 2) {
+			// long total = 0;
+			for (int r = 0; r < numRuns; r++) {
+				// total +=
+				benchmark(firstRun, i, numOps, getOps, putOps);
+				firstRun = false;
+			}
+			// long average = total / numRuns;
+		}
+	}
+
+	public long benchmark(boolean firstRun, int numThreads, long numOps, int getOps, int putOps) throws Exception {
+		TestUtil.gcAndSleep();
+
+		int totalbufferSize = 32 * 1024 * 1024;
+		int bufferSize = 1024;
+		int maxEntries = totalbufferSize / bufferSize;
+		// System.out.printf("using at most %d buffers%n", maxEntries);
+
+		Pool<T> pool = createPool(bufferSize, maxEntries);
+		String name = getClass().getSimpleName();
+		Thread[] ts = new Thread[numThreads];
+		long numOpsPerThread = numOps / numThreads;
+		Semaphore ready = new Semaphore(0);
+		Semaphore go = new Semaphore(0);
+		Semaphore end = new Semaphore(0);
+		for (int i = 0; i < numThreads; i++) {
+			StressTester<T> st = new StressTester<T>(ready, go, end, pool, numOpsPerThread, getOps, putOps);
+			ts[i] = new Thread(st);
+			ts[i].start();
+		}
+		// wait until all threads are started and waiting on the semaphore
+		ready.acquire(numThreads);
+		long tStart = System.currentTimeMillis();
+		// let the threads run
+		go.release(numThreads);
+		// wait again until all threads have finished
+		end.acquire(numThreads);
+		long tEnd = System.currentTimeMillis();
+		for (Thread t : ts) {
+			t.join();
+		}
+		long time = tEnd - tStart;
+
+		double opsPerMs = numOps / ((double) time);
+		if (printBenchmarkResults) {
+			long bufsCreated = pool.getPoolStats().getCreates();
+			if (firstRun) {
+				System.out.println(name + " #threads; #ops ; #new bufs ; time(ms); ops/msec");
+			}
+			System.out.printf("%2d ; %9d ; %9d ; %4d ; %.3f%n", numThreads, numOps, bufsCreated, time, opsPerMs);
+		}
+		return time;
+	}
+
+	private static final class StressTester<T> implements Runnable {
+
+		private final Semaphore ready;
+
+		private final Semaphore go;
+
+		private final Semaphore end;
+
+		private final Pool<T> pool;
+
+		private final long numOps;
+
+		private final int getOps;
+
+		private final int putOps;
+
+		public StressTester(Semaphore ready, Semaphore go, Semaphore end, Pool<T> pool, long numOps, int getOps, int putOps) {
+			Validation.isTrue(getOps >= putOps);
+			this.ready = ready;
+			this.go = go;
+			this.end = end;
+			this.pool = pool;
+			this.numOps = numOps;
+			this.getOps = getOps;
+			this.putOps = putOps;
+		}
+
+		@Override
+		public void run() {
+			ready.release();
+			try {
+				go.acquire();
+				long ops = 0;
+				Object[] bufs = new Object[getOps];
+				while (ops < numOps) {
+					for (int i = 0; i < getOps; i++) {
+						T b = pool.take();
+						assertNotNull(b);
+						bufs[i] = b;
+					}
+					for (int i = 0; i < putOps; i++) {
+						assertNotNull(bufs[i]);
+						pool.recycle((T) bufs[i]);
+					}
+					ops += getOps;
+					ops += putOps;
+				}
+			} catch (InterruptedException e) {
+				fail("test was interrupted");
+			} finally {
+				end.release();
+			}
+		}
 	}
 }
