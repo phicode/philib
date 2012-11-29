@@ -135,6 +135,7 @@ public abstract class BufferPoolTestBase<T> {
 			}
 			System.out.printf("%2d ; %9d ; %9d ; %4d ; %.3f%n", numThreads, numOps, bufsCreated, time, opsPerMs);
 		}
+		System.out.println("pool-stats: " + pool.getPoolStats());
 		return time;
 	}
 
