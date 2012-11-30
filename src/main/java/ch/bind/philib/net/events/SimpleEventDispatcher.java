@@ -200,7 +200,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			Validation.notNull(key);
 			int interestedOps = key.interestOps();
 			int newInterestedOps = handler.handle(events);
-			if (newInterestedOps != interestedOps) {
+			if (newInterestedOps != interestedOps && newInterestedOps != Event.DONT_CHANGE) {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
@@ -239,26 +239,6 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			}
 		}
 	}
-
-	// @Override
-	// public void changeHandler(EventHandler oldHandler, EventHandler
-	// newHandler, int ops, boolean asap) {
-	// // TODO Auto-generated method stub
-	// SelectableChannel channel = oldHandler.getChannel();
-	// Validation.isTrue(channel == newHandler.getChannel());
-	// SelectionKey key = channel.keyFor(selector);
-	// if (key == null) {
-	// System.err.println("cannot change handlers for a channel which is not yet registered, handler: "
-	// + oldHandler);
-	// }
-	// else {
-	// key.interestOps(ops);
-	// key.attach(newHandler);
-	// if (asap) {
-	// wakeup();
-	// }
-	// }
-	// }
 
 	@Override
 	public void unregister(EventHandler eventHandler) {

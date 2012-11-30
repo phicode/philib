@@ -35,9 +35,9 @@ import ch.bind.philib.net.context.NetContext;
  */
 public interface Connection extends Closeable {
 
-	int write(ByteBuffer data) throws IOException;
+	int send(ByteBuffer data) throws IOException;
 
-	void setEvents(int events);
+	void setEvents(InterestedEvents interestedEvents);
 	
 	boolean isConnected();
 

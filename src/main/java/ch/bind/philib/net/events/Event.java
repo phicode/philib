@@ -43,6 +43,8 @@ public final class Event {
 
 	public static final int CONNECT = SelectionKey.OP_CONNECT;
 
+	public static final int DONT_CHANGE = -1;
+
 	public static String eventToString(int event) {
 		switch (event) {
 		case READ:
@@ -59,7 +61,7 @@ public final class Event {
 			return Integer.toString(event);
 		}
 	}
-	
+
 	public static boolean hasRead(int events) {
 		return (events & READ) == READ;
 	}

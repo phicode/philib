@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 
 import ch.bind.philib.io.BufferUtil;
 import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.InterestedEvents;
 import ch.bind.philib.net.Session;
 
 /**
@@ -47,30 +48,28 @@ public class EchoServerSession implements Session {
 	}
 
 	@Override
-	public void receive(Connection conn, ByteBuffer data) throws IOException {
+	public InterestedEvents receive(Connection conn, ByteBuffer data) throws IOException {
 		assert (data.position() == 0 && data.hasRemaining());
 		lastInteractionNs = System.nanoTime();
 		conn.send(data);
 		if (data.hasRemaining()) {
 			backlog = BufferUtil.append(backlog, data);
 			// disable receiving more data until we have written the backlog
-			conn.disableReceive();
-			conn.notifyWhenWritable(true);
+			return InterestedEvents.SENDABLE;
 		}
+		return InterestedEvents.RECEIVE;
 	}
 
 	@Override
-	public void writable(Connection conn) throws IOException {
+	public InterestedEvents sendable(Connection conn) throws IOException {
 		lastInteractionNs = System.nanoTime();
 		if (backlog.hasRemaining()) {
 			conn.send(backlog);
 		}
 		if (backlog.hasRemaining()) {
-			conn.notifyWhenWritable(false);
+			return InterestedEvents.SENDABLE;
 		}
-		else {
-			conn.enableReceive();
-		}
+		return InterestedEvents.RECEIVE;
 	}
 
 	@Override

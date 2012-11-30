@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.InterestedEvents;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.Event;
@@ -53,17 +54,19 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 
 	private final SocketChannel channel;
 
-	private volatile boolean receiveEnabled = true;
+	private final SocketAddress remoteAddress;
 
-	private volatile boolean notifyWhenWritable = false;
+	private volatile InterestedEvents interestedEvents = InterestedEvents.SENDABLE_RECEIVE;
 
-	private volatile boolean registerForWrite = false;
+	// private volatile boolean receiveEnabled = true;
+
+	// private volatile boolean notifyWhenWritable = false;
+
+	// private volatile boolean registerForWrite = false;
 
 	// private boolean lastWriteBlocked = false;
 
 	private Session session;
-
-	private final SocketAddress remoteAddress;
 
 	private TcpConnection(NetContext context, SocketChannel channel, SocketAddress remoteAddress) {
 		super(context);
@@ -89,6 +92,24 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 			throw new IOException("session-creation failed", e);
 		}
 		context.getEventDispatcher().register(this, Event.READ);
+	}
+
+	@Override
+	public void setEvents(InterestedEvents interestedEvents) {
+		this.interestedEvents = interestedEvents;
+		private void registerForWriteEvents() {
+			if (!registeredForWriteEvt) {
+				context.getEventDispatcher().changeOps(this, Event.READ_WRITE, true);
+				registeredForWriteEvt = true;
+			}
+		}
+
+		private void unregisterFromWriteEvents() {
+			if (registeredForWriteEvt) {
+				context.getEventDispatcher().changeOps(this, Event.READ, false);
+				registeredForWriteEvt = false;
+			}
+		}
 	}
 
 	@Override
@@ -121,23 +142,16 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 		// only the read and/or write flags may be set
 		assert ((events & Event.READ_WRITE) != 0 && (events & ~Event.READ_WRITE) == 0);
 
-		if (Event.hasRead(events) && receiveEnabled) {
+		if (Event.hasRead(events) && interestedEvents.hasReceive()) {
 			handleRead();
 		}
 
-		if (Event.hasWrite(events) && notifyWhenWritable) {
-			notifyWhenWritable = false;
-			session.writable(this);
+		if (Event.hasWrite(events) && interestedEvents.hasSendable()) {
+			interestedEvents = session.sendable(this);
 		}
 
-		int newEvents = 0;
-		if (receiveEnabled) {
-			newEvents |= Event.READ;
-		}
-		if (registerForWrite) {
-			newEvents |= Event.WRITE;
-		}
-		return newEvents;
+		InterestedEvents ie = interestedEvents;
+		return ie == null ? Event.DONT_CHANGE : ie.getEventMask();
 	}
 
 	@Override
@@ -145,9 +159,9 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 		context.getEventDispatcher().unregister(this);
 		if (channel.isOpen()) {
 			SafeCloseUtil.close(channel);
-			if (session != null) {
-				session.closed(this);
-			}
+		}
+		if (session != null) {
+			session.closed(this);
 		}
 	}
 
@@ -185,88 +199,33 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 	private void handleRead() throws IOException {
 		final ByteBuffer bb = takeBuffer();
 		int totalRead = 0;
-		while (totalRead < IO_READ_LIMIT_PER_ROUND) {
-			int numChanRead = 0;
-			if (bb.hasRemaining()) {
-				// lets try to fill this buffer
-				numChanRead = channelRead(bb);
-			}
+		while (totalRead < IO_READ_LIMIT_PER_ROUND && interestedEvents.hasReceive()) {
+			final int n = channelRead(bb);
 			// deliver data regardless of whether the channel is closed or not
-			deliverReadData(bb);
-			if (numChanRead == -1) {
-				if (bb.position() > 0) {
-					System.err.println("connection was closed and the corresponding session did not consume all read data");
-				}
+			if (n == -1) {
 				// connection closed
-				r_partialConsume = null;
-				freeBuffer(bb);
 				close();
 				return;
 			}
-			if (numChanRead == 0) {
-				break;
-			}
-			if (bb.hasRemaining()) {
-				totalRead += numChanRead;
-			}
 			else {
-				// if the read buffer is full we cant continue reading until
-				// the client has consumed its pending data.
-				break;
+				if (n == 0) {
+					break;
+				}
+				totalRead += n;
+				deliverReadData(bb);
 			}
 		}
-		if (bb.position() > 0) {
-			// the client did not consume all the data, therefore we do not
-			// release this buffer but store it so that we can try to have
-			// the client consume it later on
-			if (r_partialConsume == null) {
-				// not registered for partial consume events
-				registerForDeliverPartialReads();
-			}
-			r_partialConsume = bb;
-		}
-		else {
-			if (r_partialConsume != null) {
-				// registered for partial consume events
-				unregisterFromDeliverPartialReads();
-			}
-			r_partialConsume = null;
-			freeBuffer(bb);
-		}
-		Validation.isTrue((r_partialConsume == null) || (r_partialConsume.position() > 0));
 	}
 
 	private void deliverReadData(final ByteBuffer data) throws IOException {
 		if (data.position() > 0) {
 			// switch from write mode to read
 			data.flip();
-			session.receive(this, data);
+			interestedEvents = session.receive(this, data);
 			// switch back to write mode
 			data.clear();
 		}
 	}
-
-	private void registerForWriteEvents() {
-		if (!registeredForWriteEvt) {
-			context.getEventDispatcher().changeOps(this, Event.READ_WRITE, true);
-			registeredForWriteEvt = true;
-		}
-	}
-
-	private void unregisterFromWriteEvents() {
-		if (registeredForWriteEvt) {
-			context.getEventDispatcher().changeOps(this, Event.READ, false);
-			registeredForWriteEvt = false;
-		}
-	}
-
-	// private void registerForDeliverPartialReads() {
-	// context.getEventDispatcher().registerForRedeliverPartialReads(this);
-	// }
-	//
-	// private void unregisterFromDeliverPartialReads() {
-	// context.getEventDispatcher().unregisterFromRedeliverPartialReads(this);
-	// }
 
 	@Override
 	public long getRx() {
@@ -276,32 +235,5 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 	@Override
 	public long getTx() {
 		return tx.get();
-	}
-
-	boolean isRegisteredForWriteEvents() {
-		return registeredForWriteEvt;
-	}
-
-	@Override
-	public void notifyWhenNextWritable() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void disableReceive() {
-		receiveEnabled = false;
-	}
-
-	@Override
-	public void enableReceive() {
-		receiveEnabled = true;
-		boolean asap = !context.getEventDispatcher().isEventDispatcherThread();
-		context.getEventDispatcher().changeOps(this, calcOps(), asap);
-	}
-
-	@Override
-	public boolean isReceiveEnabled() {
-		return receiveEnabled;
 	}
 }
