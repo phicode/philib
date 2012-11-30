@@ -30,7 +30,7 @@ import ch.bind.philib.net.context.NetContext;
  * 
  * @author Philipp Meinen
  */
-public interface NetServer extends Closeable {
+public interface NetListener extends Closeable {
 
 	NetContext getContext();
 

@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ServiceState;
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 import ch.bind.philib.validation.Validation;
@@ -51,7 +52,9 @@ public class NetContextImpl implements NetContext {
 
 	public static final int DEFAULT_TCP_SERVER_SOCKET_BACKLOG = 25;
 
-	private final ByteBufferPool bufferCache;
+	private final SessionFactory sessionFactory;
+
+	private final ByteBufferPool bufferPool;
 
 	private final EventDispatcher eventDispatcher;
 
@@ -63,16 +66,16 @@ public class NetContextImpl implements NetContext {
 
 	private Boolean broadcastDatagram;
 
-	private boolean debugMode;
-
 	private int tcpServerSocketBacklog = DEFAULT_TCP_SERVER_SOCKET_BACKLOG;
 
 	private ServiceState serviceState = new ServiceState();
 
-	public NetContextImpl(ByteBufferPool bufferCache, EventDispatcher eventDispatcher) {
-		Validation.notNull(bufferCache);
+	public NetContextImpl(SessionFactory sessionFactory, ByteBufferPool bufferPool, EventDispatcher eventDispatcher) {
+		Validation.notNull(sessionFactory);
+		Validation.notNull(bufferPool);
 		Validation.notNull(eventDispatcher);
-		this.bufferCache = bufferCache;
+		this.sessionFactory = sessionFactory;
+		this.bufferPool = bufferPool;
 		this.eventDispatcher = eventDispatcher;
 		serviceState.setOpen();
 	}
@@ -93,8 +96,13 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
-	public final ByteBufferPool getBufferCache() {
-		return bufferCache;
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
+	}
+
+	@Override
+	public final ByteBufferPool getBufferPool() {
+		return bufferPool;
 	}
 
 	@Override
@@ -151,7 +159,8 @@ public class NetContextImpl implements NetContext {
 	public void getTcpServerSocketBacklog(int tcpServerSocketBacklog) {
 		if (tcpServerSocketBacklog < 1) {
 			this.tcpServerSocketBacklog = 1;
-		} else {
+		}
+		else {
 			this.tcpServerSocketBacklog = tcpServerSocketBacklog;
 		}
 	}
@@ -189,15 +198,5 @@ public class NetContextImpl implements NetContext {
 		if (rcvBufSize != null) {
 			socket.setReceiveBufferSize(sndBufSize);
 		}
-	}
-
-	@Override
-	public boolean isDebugMode() {
-		return debugMode;
-	}
-
-	@Override
-	public void setDebugMode(boolean debugMode) {
-		this.debugMode = debugMode;
 	}
 }

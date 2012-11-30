@@ -21,7 +21,9 @@
  */
 package ch.bind.philib.net.events;
 
-public class EventDispatcherCreationException extends RuntimeException {
+import java.io.IOException;
+
+public class EventDispatcherCreationException extends IOException {
 
 	private static final long serialVersionUID = -3578944194975399253L;
 

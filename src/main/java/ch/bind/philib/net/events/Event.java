@@ -28,9 +28,9 @@ import java.nio.channels.SelectionKey;
  * 
  * @author Philipp Meinen
  */
-public final class EventUtil {
+public final class Event {
 
-	private EventUtil() {
+	private Event() {
 	}
 
 	public static final int READ = SelectionKey.OP_READ;
@@ -43,10 +43,8 @@ public final class EventUtil {
 
 	public static final int CONNECT = SelectionKey.OP_CONNECT;
 
-	public static final int OP_DONT_CHANGE = Integer.MAX_VALUE;
-
-	public static String opsToString(int ops) {
-		switch (ops) {
+	public static String eventToString(int event) {
+		switch (event) {
 		case READ:
 			return "r";
 		case WRITE:
@@ -58,8 +56,16 @@ public final class EventUtil {
 		case CONNECT:
 			return "c";
 		default:
-			return Integer.toString(ops);
+			return Integer.toString(event);
 		}
+	}
+	
+	public static boolean hasRead(int events) {
+		return (events & READ) == READ;
+	}
+
+	public static boolean hasWrite(int events) {
+		return (events & WRITE) == WRITE;
 	}
 
 	// public static void writeAllBlocking(final Connection connection, final

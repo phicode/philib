@@ -39,7 +39,7 @@ import ch.bind.philib.net.DatagramSession;
 import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
-import ch.bind.philib.net.events.EventUtil;
+import ch.bind.philib.net.events.Event;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -73,7 +73,7 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 		channel.configureBlocking(false);
 		context.setSocketOptions(channel.socket());
 		serviceState.setOpen();
-		context.getEventDispatcher().register(this, EventUtil.READ);
+		context.getEventDispatcher().register(this, Event.READ);
 	}
 
 	static UdpServer open(NetContext context, DatagramSession session, SocketAddress bindAddress) throws IOException {
@@ -155,14 +155,14 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 			if (addr == null) {
 				// no more data to read
 				assert (rbuf.position() == 0 && rbuf.limit() == rbuf.capacity());
-				return EventUtil.READ;
+				return Event.READ;
 			}
 			rbuf.flip();
 			totalRead += rbuf.remaining();
 			notifyReceive(addr, rbuf);
 		}
 		freeBuffer(rbuf);
-		return EventUtil.READ;
+		return Event.READ;
 	}
 
 	void sendSync(final SocketAddress addr, final ByteBuffer data) throws IOException {

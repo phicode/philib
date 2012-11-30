@@ -30,9 +30,7 @@ import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -53,7 +51,7 @@ import ch.bind.philib.validation.Validation;
  * @author Philipp Meinen
  */
 // TODO: thread safe
-public final class SimpleEventDispatcher implements RichEventDispatcher, Runnable {
+public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SimpleEventDispatcher.class);
 
@@ -64,7 +62,9 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<NewRegistration>();
 
 	// TODO: use a long->object map
-	private final ConcurrentMap<Long, EventHandler> handlersWithUndeliveredData = new ConcurrentHashMap<Long, EventHandler>();
+	// private final ConcurrentMap<Long, EventHandler>
+	// handlersWithUndeliveredData = new ConcurrentHashMap<Long,
+	// EventHandler>();
 
 	private final ServiceState serviceState = new ServiceState();
 
@@ -72,16 +72,19 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 
 	private final LoadAvg loadAvg;
 
-	private Thread dispatchThread;
+	private final Thread dispatchThread;
 
-	private long dispatchThreadId;
+	private final long dispatchThreadId;
 
 	private SimpleEventDispatcher(Selector selector, LoadAvg loadAvg) {
 		this.selector = selector;
 		this.loadAvg = loadAvg;
+		String threadName = getClass().getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
+		this.dispatchThread = ThreadUtil.createAndStartForeverRunner(this, threadName);
+		this.dispatchThreadId = dispatchThread.getId();
 	}
 
-	public static SimpleEventDispatcher open(boolean collectLoadAverage) {
+	public static SimpleEventDispatcher open(boolean collectLoadAverage) throws SelectorCreationException {
 		Selector selector;
 		try {
 			selector = Selector.open();
@@ -89,19 +92,14 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 			throw new SelectorCreationException(e);
 		}
 		LoadAvg loadAvg = collectLoadAverage ? LoadAvgSimple.forSeconds(LOAD_AVG_SECONDS) : LoadAvgNoop.INSTANCE;
-		SimpleEventDispatcher dispatcher = new SimpleEventDispatcher(selector, loadAvg);
-		String threadName = SimpleEventDispatcher.class.getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
-		Thread dispatchThread = ThreadUtil.createAndStartForeverRunner(dispatcher, threadName);
-		dispatcher.dispatchThread = dispatchThread;
-		dispatcher.dispatchThreadId = dispatchThread.getId();
-		return dispatcher;
+		return new SimpleEventDispatcher(selector, loadAvg);
 	}
 
-	public static SimpleEventDispatcher open() {
+	public static SimpleEventDispatcher open() throws SelectorCreationException {
 		return open(false);
 	}
 
-	long getDispatcherThreadId() {
+	long getDispatchThreadId() {
 		return dispatchThreadId;
 	}
 
@@ -112,7 +110,8 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 
 	@Override
 	public int getNumEventHandlers() {
-		// this is actually not thread safe but we access the information in read-only mode
+		// this is actually not thread safe but we access the information in
+		// read-only mode
 		return selector.keys().size();
 	}
 
@@ -121,64 +120,21 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 		return loadAvg.getLoadAvg();
 	}
 
-	@Override
-	public void run() {
-		if (serviceState.isUninitialized()) {
-			serviceState.setOpen();
-		}
-		try {
-			int selectIoeInArow = 0;
-			while (serviceState.isOpen() && selectIoeInArow < 5) {
-				// TODO: start to sleep with an exponential backoff when select
-				// fails ... why can it fail anyway?
-				int num;
-				try {
-					num = select();
-					selectIoeInArow = 0;
-				} catch (IOException e) {
-					selectIoeInArow++;
-					LOG.error("IOException in Selector.select(): " + ExceptionUtil.buildMessageChain(e));
-					continue;
-				}
-				long tStartNs = System.nanoTime();
-				if (num > 0) {
-					Set<SelectionKey> selected = selector.selectedKeys();
-					for (SelectionKey key : selected) {
-						handleReadyKey(key);
-					}
-					selected.clear();
-				}
-
-				if (!handlersWithUndeliveredData.isEmpty()) {
-					// TODO: more efficient traversal
-					for (EventHandler eh : handlersWithUndeliveredData.values()) {
-						SelectionKey key = eh.getChannel().keyFor(selector);
-						if (key != null) {
-							handleEvent(eh, key, EventUtil.READ);
-						}
-					}
-				}
-				long tWorkNs = System.nanoTime() - tStartNs;
-				loadAvg.logWorkNs(tWorkNs);
-			}
-		} catch (ClosedSelectorException e) {
-			serviceState.setClosed();
-		}
-	}
-
 	private int select() throws IOException, ClosedSelectorException {
-		int num;
-		boolean longSelect = true;
-		do {
+		int num = 0;
+		// boolean longSelect = true;
+		while (num == 0 && serviceState.isOpen()) {
 			updateRegistrations();
 
-			longSelect = handlersWithUndeliveredData.isEmpty();
-			if (longSelect) {
-				num = selector.select(10000L);
-			} else {
-				num = selector.selectNow();
-			}
-		} while (num == 0 && longSelect && serviceState.isOpen());
+			// longSelect = handlersWithUndeliveredData.isEmpty();
+			// if (longSelect) {
+			num = selector.select(10000L);
+			// }
+			// else {
+			// num = selector.selectNow();
+			// }
+			// } while (num == 0 && longSelect && serviceState.isOpen());
+		}
 		return num;
 	}
 
@@ -198,13 +154,11 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 
 	@Override
 	public void close() {
-		Thread t = dispatchThread;
-		if (t != null && serviceState.isOpen()) {
+		if (serviceState.isOpen()) {
 			// tell the dispatcher to stop processing events
 			serviceState.setClosing();
 			wakeup();
-			ThreadUtil.interruptAndJoin(t);
-			dispatchThread = null;
+			ThreadUtil.interruptAndJoin(dispatchThread);
 
 			for (SelectionKey key : selector.keys()) {
 				if (key.isValid()) {
@@ -234,18 +188,19 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 		}
 		if (key.isValid()) {
 			handleEvent(eventHandler, key, key.readyOps());
-		} else {
+		}
+		else {
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
 	}
 
-	private void handleEvent(final EventHandler handler, final SelectionKey key, final int ops) {
+	private void handleEvent(final EventHandler handler, final SelectionKey key, final int events) {
 		try {
 			Validation.notNull(handler);
 			Validation.notNull(key);
 			int interestedOps = key.interestOps();
-			int newInterestedOps = handler.handle(ops);
-			if (newInterestedOps != EventUtil.OP_DONT_CHANGE && newInterestedOps != interestedOps) {
+			int newInterestedOps = handler.handle(events);
+			if (newInterestedOps != interestedOps) {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
@@ -274,9 +229,10 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 		SelectionKey key = channel.keyFor(selector);
 		if (key == null) {
 			// channel is not registered for this selector
-			//TODO: notify a listener
+			// TODO: notify a listener
 			System.err.println("cannot change ops for a channel which is not yet registered, handler: " + eventHandler);
-		} else {
+		}
+		else {
 			key.interestOps(ops);
 			if (asap) {
 				wakeup();
@@ -284,22 +240,25 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 		}
 	}
 
-	@Override
-	public void changeHandler(EventHandler oldHandler, EventHandler newHandler, int ops, boolean asap) {
-		// TODO Auto-generated method stub
-		SelectableChannel channel = oldHandler.getChannel();
-		Validation.isTrue(channel == newHandler.getChannel());
-		SelectionKey key = channel.keyFor(selector);
-		if (key == null) {
-			System.err.println("cannot change handlers for a channel which is not yet registered, handler: " + oldHandler);
-		} else {
-			key.interestOps(ops);
-			key.attach(newHandler);
-			if (asap) {
-				wakeup();
-			}
-		}
-	}
+	// @Override
+	// public void changeHandler(EventHandler oldHandler, EventHandler
+	// newHandler, int ops, boolean asap) {
+	// // TODO Auto-generated method stub
+	// SelectableChannel channel = oldHandler.getChannel();
+	// Validation.isTrue(channel == newHandler.getChannel());
+	// SelectionKey key = channel.keyFor(selector);
+	// if (key == null) {
+	// System.err.println("cannot change handlers for a channel which is not yet registered, handler: "
+	// + oldHandler);
+	// }
+	// else {
+	// key.interestOps(ops);
+	// key.attach(newHandler);
+	// if (asap) {
+	// wakeup();
+	// }
+	// }
+	// }
 
 	@Override
 	public void unregister(EventHandler eventHandler) {
@@ -309,8 +268,10 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 			key.cancel();
 			key.attach(null);
 			wakeup();
-		} else {
-			// TODO: this could be implemented more efficiently, is it required for high load?
+		}
+		else {
+			// TODO: this could be implemented more efficiently, is it required
+			// for high load?
 			Iterator<NewRegistration> iter = newRegistrations.iterator();
 			while (iter.hasNext()) {
 				NewRegistration newReq = iter.next();
@@ -322,15 +283,17 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 		}
 	}
 
-	@Override
-	public void registerForRedeliverPartialReads(EventHandler eventHandler) {
-		handlersWithUndeliveredData.put(eventHandler.getEventHandlerId(), eventHandler);
-	}
-
-	@Override
-	public void unregisterFromRedeliverPartialReads(EventHandler eventHandler) {
-		handlersWithUndeliveredData.remove(eventHandler.getEventHandlerId());
-	}
+	// @Override
+	// public void registerForRedeliverPartialReads(EventHandler eventHandler) {
+	// handlersWithUndeliveredData.put(eventHandler.getEventHandlerId(),
+	// eventHandler);
+	// }
+	//
+	// @Override
+	// public void unregisterFromRedeliverPartialReads(EventHandler
+	// eventHandler) {
+	// handlersWithUndeliveredData.remove(eventHandler.getEventHandlerId());
+	// }
 
 	@Override
 	public boolean isEventDispatcherThread(final Thread thread) {
@@ -363,6 +326,53 @@ public final class SimpleEventDispatcher implements RichEventDispatcher, Runnabl
 
 		public int getOps() {
 			return ops;
+		}
+	}
+
+	@Override
+	public void run() {
+		if (serviceState.isUninitialized()) {
+			serviceState.setOpen();
+		}
+		try {
+			int selectIoeInArow = 0;
+			while (serviceState.isOpen() && selectIoeInArow < 5) {
+				// TODO: start to sleep with an exponential backoff when
+				// select
+				// fails ... why can it fail anyway?
+				int num;
+				try {
+					num = select();
+					selectIoeInArow = 0;
+				} catch (IOException e) {
+					selectIoeInArow++;
+					LOG.error("IOException in Selector.select(): " + ExceptionUtil.buildMessageChain(e));
+					continue;
+				}
+				long tStartNs = System.nanoTime();
+				if (num > 0) {
+					Set<SelectionKey> selected = selector.selectedKeys();
+					for (SelectionKey key : selected) {
+						handleReadyKey(key);
+					}
+					selected.clear();
+				}
+
+				// if (!handlersWithUndeliveredData.isEmpty()) {
+				// // TODO: more efficient traversal
+				// for (EventHandler eh : handlersWithUndeliveredData.values())
+				// {
+				// SelectionKey key = eh.getChannel().keyFor(selector);
+				// if (key != null) {
+				// handleEvent(eh, key, EventUtil.READ);
+				// }
+				// }
+				// }
+				long tWorkNs = System.nanoTime() - tStartNs;
+				loadAvg.logWorkNs(tWorkNs);
+			}
+		} catch (ClosedSelectorException e) {
+			serviceState.setClosed();
 		}
 	}
 }

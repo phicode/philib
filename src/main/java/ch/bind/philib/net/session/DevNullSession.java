@@ -46,18 +46,19 @@ public class DevNullSession implements Session {
 	}
 
 	@Override
-	public void receive(ByteBuffer data) throws IOException {
+	public void receive(Connection conn, ByteBuffer data) throws IOException {
 		// "consume" all data
-		data.position(data.limit());
+		// data.position(data.limit());
 	}
 
 	@Override
-	public void closed() {
+	public void closed(Connection conn) {
 		serviceState.setClosed();
 	}
 
 	@Override
-	public void writable() { /* there will never be something to write */
+	public void writable(Connection conn) {
+		// there will never be anything to write
 	}
 
 	public Connection getConnection() {

@@ -21,13 +21,15 @@
  */
 package ch.bind.philib.net.events;
 
+import java.io.IOException;
+
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
 
-public class SelectorCreationException extends RuntimeException {
+public class SelectorCreationException extends IOException {
 
 	private static final long serialVersionUID = 1295469328233223946L;
 

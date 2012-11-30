@@ -38,7 +38,6 @@ public abstract class EventHandlerBase implements EventHandler {
 	protected final long eventHandlerId = EventHandlerIdSeq.nextEventHandlerId();
 
 	protected EventHandlerBase(NetContext context) {
-		super();
 		Validation.notNull(context);
 		this.context = context;
 	}
@@ -48,18 +47,18 @@ public abstract class EventHandlerBase implements EventHandler {
 		return eventHandlerId;
 	}
 
-	protected final ByteBuffer acquireBuffer() {
-		return context.getBufferCache().acquire();
+	protected final ByteBuffer takeBuffer() {
+		return context.getBufferPool().take();
 	}
 
-	protected final void freeBuffer(final ByteBuffer buf) {
-		context.getBufferCache().free(buf);
+	protected final void recycleBuffer(final ByteBuffer buf) {
+		context.getBufferPool().recycle(buf);
 	}
 
 	protected final boolean releaseBuffer(final NetBuf buf) {
 		buf.finished();
 		if (buf.isIntern()) {
-			context.getBufferCache().free(buf.getBuffer());
+			context.getBufferPool().recycle(buf.getBuffer());
 			return false;
 		}
 		return true;

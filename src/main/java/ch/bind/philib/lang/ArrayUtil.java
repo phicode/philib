@@ -26,7 +26,8 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 /**
- * Various functions for dealing with arrays which are not present in the standard {@link java.util.Arrays} class.
+ * Various functions for dealing with arrays which are not present in the
+ * standard {@link java.util.Arrays} class.
  * 
  * @author Philipp Meinen
  * @since 2009-06-10
@@ -35,21 +36,23 @@ public abstract class ArrayUtil {
 
 	public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-	protected ArrayUtil() {}
+	protected ArrayUtil() {
+	}
 
 	// java.util.Random is updated atomically => this is thread-safe
 	private static final Random rand = new Random();
 
 	/**
-	 * Fills the <code>destination</code> array with randomly picked values from the <code>source</code> array. No value
-	 * will be picked twice.
+	 * Fills the <code>destination</code> array with randomly picked values from
+	 * the <code>source</code> array. No value will be picked twice.
 	 * 
-	 * @param source The array from which random values must be picked. The content of this array will not be altered.
-	 * @param destination The array which must be filled with random values. Previous values within this array will be
-	 *            overwritten.
+	 * @param source The array from which random values must be picked. The
+	 *            content of this array will not be altered.
+	 * @param destination The array which must be filled with random values.
+	 *            Previous values within this array will be overwritten.
 	 * @throws NullPointerException If either of the two parameters is null.
-	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller then the <code>destination</code>
-	 *             -array.
+	 * @throws IllegalArgumentException If the <code>source</code>-array is
+	 *             smaller then the <code>destination</code> -array.
 	 */
 	public static <T> void pickRandom(final T[] source, final T[] destination) {
 		if (source == null)
@@ -76,7 +79,8 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
+	 * @return a new byte array with the combined length of {@code a} and
+	 *         {@code b}, containing a copy of their content.
 	 */
 	public static byte[] concat(byte[] a, byte[] b) {
 		// override null arrays
@@ -99,9 +103,10 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
-	 *         if the combined length exceeds {@code capacity} the returned array {@code a} will have
-	 *         {@code a.length == capacity}.
+	 * @return a new byte array with the combined length of {@code a} and
+	 *         {@code b}, containing a copy of their content. if the combined
+	 *         length exceeds {@code capacity} the returned array {@code a} will
+	 *         have {@code a.length == capacity}.
 	 */
 	public static byte[] append(byte[] a, byte[] b, int capacity) {
 		// override null arrays
@@ -118,7 +123,8 @@ public abstract class ArrayUtil {
 		byte[] rv = new byte[len];
 		if (la >= capacity) {
 			System.arraycopy(a, 0, rv, 0, capacity);
-		} else {
+		}
+		else {
 			System.arraycopy(a, 0, rv, 0, la);
 			int fromB = Math.min(capacity - la, lb);
 			System.arraycopy(b, 0, rv, la, fromB);
@@ -187,7 +193,8 @@ public abstract class ArrayUtil {
 		assert (v >= 0 && v < 256);
 		if (v < 16) {
 			sb.append('0');
-		} else {
+		}
+		else {
 			sb.append(TO_HEX[v >>> 4]);
 		}
 		sb.append(TO_HEX[v & 15]);
@@ -199,27 +206,32 @@ public abstract class ArrayUtil {
 			'8', '9', 'A', 'B', //
 			'C', 'D', 'E', 'F' };
 
-	public static void memsetZero(ByteBuffer buf) {
+	/**
+	 * Overwrites the buffer's content with zeros. The buffer is cleared.
+	 * @param buf
+	 */
+	public static void memsetZero(final ByteBuffer buf) {
 		if (buf == null) {
 			return;
 		}
 		if (buf.hasArray()) {
 			memsetZero(buf.array());
-		} else {
+		}
+		else {
 			byte[] filler = getFiller();
 			int filLen = filler.length;
 			buf.clear();
-			int rem = buf.remaining();
+			int rem = buf.capacity();
 			while (rem > 0) {
 				int l = Math.min(rem, filLen);
 				buf.put(filler, 0, l);
 				rem -= l;
 			}
-			buf.clear();
 		}
+		buf.clear();
 	}
 
-	public static void memsetZero(byte[] buf) {
+	public static void memsetZero(final byte[] buf) {
 		if (buf == null || buf.length == 0) {
 			return;
 		}

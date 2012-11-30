@@ -34,12 +34,10 @@ import org.slf4j.LoggerFactory;
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ServiceState;
-import ch.bind.philib.net.NetServer;
-import ch.bind.philib.net.Session;
-import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.NetListener;
 import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.net.events.Event;
 import ch.bind.philib.net.events.EventHandlerBase;
-import ch.bind.philib.net.events.EventUtil;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -47,21 +45,17 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public final class TcpServer extends EventHandlerBase implements NetServer {
+public final class TcpServer extends EventHandlerBase implements NetListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
 
 	private final ServiceState serviceState = new ServiceState();
 
-	private final SessionFactory sessionFactory;
-
 	private final ServerSocketChannel channel;
 
-	private TcpServer(NetContext context, SessionFactory sessionFactory, ServerSocketChannel channel) {
+	private TcpServer(NetContext context, ServerSocketChannel channel) {
 		super(context);
-		Validation.notNull(sessionFactory);
 		Validation.notNull(channel);
-		this.sessionFactory = sessionFactory;
 		this.channel = channel;
 	}
 
@@ -76,6 +70,11 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	}
 
 	@Override
+	public SelectableChannel getChannel() {
+		return channel;
+	}
+
+	@Override
 	public void close() {
 		serviceState.setClosing();
 		// the event-dispatcher closes still-open client connections
@@ -85,13 +84,8 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 	}
 
 	@Override
-	public SelectableChannel getChannel() {
-		return channel;
-	}
-
-	@Override
 	public int handle(int ops) throws IOException {
-		assert (ops == EventUtil.ACCEPT);
+		assert (ops == Event.ACCEPT);
 		while (true) {
 			SocketChannel clientChannel = channel.accept();
 			if (clientChannel == null) {
@@ -100,34 +94,45 @@ public final class TcpServer extends EventHandlerBase implements NetServer {
 			}
 			createSession(clientChannel);
 		}
-		return EventUtil.ACCEPT;
+		return Event.ACCEPT;
 	}
 
-	static TcpServer open(NetContext context, SessionFactory sessionFactory, SocketAddress bindAddress) throws IOException {
+	public static TcpServer open(NetContext context, SocketAddress bindAddress) throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		int backlog = context.getTcpServerSocketBacklog();
-		socket.bind(bindAddress, backlog);
+		try {
+			socket.bind(bindAddress, backlog);
+		} catch (IOException e) {
+			SafeCloseUtil.close(channel, LOG);
+			throw new IOException("socket binding failed", e);
+		}
 
-		TcpServer server = new TcpServer(context, sessionFactory, channel);
-		server.setup(context);
-		return server;
+		try {
+			TcpServer server = new TcpServer(context, channel);
+			server.setup(context);
+			return server;
+		} catch (IOException e) {
+			SafeCloseUtil.close(channel);
+			throw new IOException("channel setup failed", e);
+		}
 	}
 
 	private void setup(NetContext context) throws IOException {
 		channel.configureBlocking(false);
 		context.setSocketOptions(channel.socket());
 		serviceState.setOpen();
-		context.getEventDispatcher().register(this, EventUtil.ACCEPT);
+		context.getEventDispatcher().register(this, Event.ACCEPT);
 	}
 
-	private void createSession(SocketChannel clientChannel) {
+	private void createSession(final SocketChannel clientChannel) {
 		try {
-			//TODO:jdk7		SocketAddress remoteAddress = clientChannel.getRemoteAddress();
+			// TODO:jdk7 SocketAddress remoteAddress =
+			// clientChannel.getRemoteAddress();
 			SocketAddress remoteAddress = clientChannel.socket().getRemoteSocketAddress();
-			Session session = TcpNetFactory.create(null, context, clientChannel, remoteAddress, sessionFactory);
-			//TODO
-			//			contextListener.sessionCreated(session, remoteAddress);
+			TcpConnection.create(context, clientChannel, remoteAddress);
+			// TODO
+			// contextListener.connect(connection);
 		} catch (IOException e) {
 			// TODO: notify an error handler
 			LOG.debug("faild to create a tcp connection: " + ExceptionUtil.buildMessageChain(e));

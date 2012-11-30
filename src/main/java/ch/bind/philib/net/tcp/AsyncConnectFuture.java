@@ -44,11 +44,7 @@ import ch.bind.philib.validation.Validation;
  * @author Philipp Meinen
  */
 
-public final class AsyncConnectHandler extends EventHandlerBase implements Future<Session> {
-
-	private SocketChannel channel;
-
-	private SessionFactory sessionFactory;
+public final class AsyncConnectFuture implements Future<Session>, SessionFactory {
 
 	private Session session;
 
@@ -58,19 +54,11 @@ public final class AsyncConnectHandler extends EventHandlerBase implements Futur
 
 	private boolean registered;
 
-	private AsyncConnectHandler(NetContext context, SocketChannel channel, SessionFactory sessionFactory) {
-		super(context);
-		Validation.notNull(channel);
-		Validation.notNull(sessionFactory);
-		this.channel = channel;
-		this.sessionFactory = sessionFactory;
-	}
+	private final NetContext context;
 
-	public static AsyncConnectHandler create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) {
-		AsyncConnectHandler rv = new AsyncConnectHandler(context, channel, sessionFactory);
-		rv.context.getEventDispatcher().register(rv, Event.CONNECT);
-		rv.registered = true;
-		return rv;
+	private AsyncConnectFuture(NetContext context) {
+		Validation.notNull(context);
+		this.context = context;
 	}
 
 	@Override
@@ -117,49 +105,49 @@ public final class AsyncConnectHandler extends EventHandlerBase implements Futur
 		throw new UnsupportedOperationException("TODO");
 	}
 
-	@Override
-	public synchronized void close() throws IOException {
-		// TODO: make get reliable
-		if (context != null && channel != null) {
-			if (registered) {
-				context.getEventDispatcher().unregister(this);
-				registered = false;
-			}
-			sessionFactory = null;
-		}
-		SafeCloseUtil.close(channel);
-		channel = null;
-		notifyAll();
-	}
-
-	@Override
-	public SelectableChannel getChannel() {
-		// no synchronization needed because of the visibility guarantees of constructors
-		return channel;
-	}
-
-	@Override
-	public synchronized int handle(int ops) {
-		Validation.isTrue(ops == Event.CONNECT);
-		if (execException != null || cancelled) {
-			SafeCloseUtil.close(this);
-		} else {
-			try {
-				if (channel.finishConnect()) {
-					this.session = TcpNetFactory.create(this, context, channel, sessionFactory);
-					registered = false;
-					// creating a tcp-connection has changed the interested-ops and handler-attachment of the
-					// registration-key. this async connect handler is no longer registered and must tell the event
-					// handler that it does not want to overwrite its interested-ops
-					notifyAll();
-					return Event.OP_DONT_CHANGE;
-				}
-			} catch (IOException e) {
-				execException = e;
-				SafeCloseUtil.close(channel);
-			}
-		}
-		notifyAll();
-		return Event.CONNECT;
-	}
+//	@Override
+//	public synchronized void close() throws IOException {
+//		// TODO: make get reliable
+//		if (context != null && channel != null) {
+//			if (registered) {
+//				context.getEventDispatcher().unregister(this);
+//				registered = false;
+//			}
+//			sessionFactory = null;
+//		}
+//		SafeCloseUtil.close(channel);
+//		channel = null;
+//		notifyAll();
+//	}
+//
+//	@Override
+//	public SelectableChannel getChannel() {
+//		// no synchronization needed because of the visibility guarantees of constructors
+//		return channel;
+//	}
+//
+//	@Override
+//	public synchronized int handle(int ops) {
+//		Validation.isTrue(ops == Event.CONNECT);
+//		if (execException != null || cancelled) {
+//			SafeCloseUtil.close(this);
+//		} else {
+//			try {
+//				if (channel.finishConnect()) {
+//					this.session = TcpNetFactory.create(this, context, channel, sessionFactory);
+//					registered = false;
+//					// creating a tcp-connection has changed the interested-ops and handler-attachment of the
+//					// registration-key. this async connect handler is no longer registered and must tell the event
+//					// handler that it does not want to overwrite its interested-ops
+//					notifyAll();
+//					return Event.OP_DONT_CHANGE;
+//				}
+//			} catch (IOException e) {
+//				execException = e;
+//				SafeCloseUtil.close(channel);
+//			}
+//		}
+//		notifyAll();
+//		return Event.CONNECT;
+//	}
 }

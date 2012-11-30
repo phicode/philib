@@ -35,10 +35,10 @@ import ch.bind.philib.net.context.NetContext;
  */
 public interface Connection extends Closeable {
 
-	int sendAsync(ByteBuffer data) throws IOException;
+	int write(ByteBuffer data) throws IOException;
 
-	void sendSync(ByteBuffer data) throws IOException, InterruptedException;
-
+	void setEvents(int events);
+	
 	boolean isConnected();
 
 	boolean isOpen();
@@ -48,8 +48,6 @@ public interface Connection extends Closeable {
 	long getRx();
 
 	long getTx();
-
-	String getDebugInformations();
 
 	SocketAddress getRemoteAddress();
 }

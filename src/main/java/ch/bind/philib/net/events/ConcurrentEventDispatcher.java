@@ -48,7 +48,7 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 
 	private final ServiceState serviceState = new ServiceState();
 
-	private final RichEventDispatcher[] dispatchers;
+	private final EventDispatcher[] dispatchers;
 
 	private final long[] threadIds;
 
@@ -56,38 +56,38 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 
 	private final AtomicLong nextRoundRobinIdx = new AtomicLong(0);
 
-	private ConcurrentEventDispatcher(RichEventDispatcher[] dispatchers, long[] threadIds, ScaleStrategy scaleStrategy) {
+	private ConcurrentEventDispatcher(EventDispatcher[] dispatchers, long[] threadIds, ScaleStrategy scaleStrategy) {
 		this.dispatchers = dispatchers;
 		this.threadIds = threadIds;
 		this.scaleStrategy = scaleStrategy;
-		Arrays.sort(threadIds);
+		Arrays.sort(threadIds); // for binary search
 		serviceState.setOpen();
 	}
 
-	public static EventDispatcher open() {
+	public static EventDispatcher open() throws EventDispatcherCreationException {
 		return open(ScaleStrategy.ROUND_ROBIN);
 	}
 
-	public static EventDispatcher open(int concurrency) {
+	public static EventDispatcher open(int concurrency) throws EventDispatcherCreationException {
 		return open(ScaleStrategy.ROUND_ROBIN, concurrency);
 	}
 
-	public static EventDispatcher open(ScaleStrategy scaleStrategy) {
+	public static EventDispatcher open(ScaleStrategy scaleStrategy) throws EventDispatcherCreationException {
 		return open(scaleStrategy, Runtime.getRuntime().availableProcessors());
 	}
 
-	public static EventDispatcher open(ScaleStrategy scaleStrategy, int concurrency) {
+	public static EventDispatcher open(ScaleStrategy scaleStrategy, int concurrency) throws EventDispatcherCreationException {
 		scaleStrategy = scaleStrategy != null ? scaleStrategy : ScaleStrategy.ROUND_ROBIN;
-		concurrency = concurrency >= 2 ? concurrency : 2;
-		RichEventDispatcher[] dispatchers = new RichEventDispatcher[concurrency];
+		concurrency = concurrency < 2 ? 2 : concurrency;
+		EventDispatcher[] dispatchers = new EventDispatcher[concurrency];
 		long[] threadIds = new long[concurrency];
 		boolean collectLoadAverage = scaleStrategy == ScaleStrategy.LEAST_LOAD;
 		for (int i = 0; i < concurrency; i++) {
 			try {
 				SimpleEventDispatcher sed = SimpleEventDispatcher.open(collectLoadAverage);
 				dispatchers[i] = sed;
-				threadIds[i] = sed.getDispatcherThreadId();
-			} catch (Exception e) {
+				threadIds[i] = sed.getDispatchThreadId();
+			} catch (IOException e) {
 				// close all event-dispatchers which have already been created
 				for (int j = 0; j < i; j++) {
 					SafeCloseUtil.close(dispatchers[j]);
@@ -155,12 +155,11 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 		}
 	}
 
-	// TODO: find something more effective then looping over all dispatchers
-	private RichEventDispatcher findLeastConnections() {
-		RichEventDispatcher best = dispatchers[0];
+	private EventDispatcher findLeastConnections() {
+		EventDispatcher best = dispatchers[0];
 		int bestConnections = best.getNumEventHandlers();
 		for (int i = 1; i < dispatchers.length; i++) {
-			RichEventDispatcher disp = dispatchers[i];
+			EventDispatcher disp = dispatchers[i];
 			int numCon = disp.getNumEventHandlers();
 			if (numCon < bestConnections) {
 				best = disp;
@@ -170,12 +169,11 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 		return best;
 	}
 
-	// TODO: find something more effective then looping over all dispatchers
 	private EventDispatcher findLeastLoad() {
-		RichEventDispatcher best = dispatchers[0];
+		EventDispatcher best = dispatchers[0];
 		long bestLoadAvg = best.getLoadAvg();
 		for (int i = 1; i < dispatchers.length; i++) {
-			RichEventDispatcher disp = dispatchers[i];
+			EventDispatcher disp = dispatchers[i];
 			long loadAvg = disp.getLoadAvg();
 			if (loadAvg < bestLoadAvg) {
 				best = disp;
@@ -210,25 +208,27 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 		}
 	}
 
-	@Override
-	public void changeHandler(EventHandler oldHandler, EventHandler newHandler, int ops, boolean asap) {
-		if (findMapping(newHandler) != null) {
-			System.out.println("an event-dispatcher is already registered for " + newHandler);
-			return;
-		}
-		long oldId = oldHandler.getEventHandlerId();
-		long newId = newHandler.getEventHandlerId();
-		EventDispatcher disp = map.get(oldId);
-		if (disp != null) {
-			map.put(newId, disp);
-			disp.changeHandler(oldHandler, newHandler, ops, asap);
-			map.remove(oldId);
-		}
-		else {
-			// TODO: error and stuff
-			System.out.println("handler has no dispatcher: " + oldHandler);
-		}
-	}
+	// @Override
+	// public void changeHandler(EventHandler oldHandler, EventHandler
+	// newHandler, int ops, boolean asap) {
+	// if (findMapping(newHandler) != null) {
+	// System.out.println("an event-dispatcher is already registered for " +
+	// newHandler);
+	// return;
+	// }
+	// long oldId = oldHandler.getEventHandlerId();
+	// long newId = newHandler.getEventHandlerId();
+	// EventDispatcher disp = map.get(oldId);
+	// if (disp != null) {
+	// map.put(newId, disp);
+	// disp.changeHandler(oldHandler, newHandler, ops, asap);
+	// map.remove(oldId);
+	// }
+	// else {
+	// // TODO: error and stuff
+	// System.out.println("handler has no dispatcher: " + oldHandler);
+	// }
+	// }
 
 	@Override
 	public void unregister(EventHandler eventHandler) {
@@ -248,28 +248,28 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 	public boolean isEventDispatcherThread(Thread thread) {
 		return (thread != null) && (Arrays.binarySearch(threadIds, thread.getId()) >= 0);
 	}
-
-	@Override
-	public void registerForRedeliverPartialReads(EventHandler eventHandler) {
-		EventDispatcher disp = findMapping(eventHandler);
-		if (disp != null) {
-			disp.registerForRedeliverPartialReads(eventHandler);
-		}
-		else {
-			// TODO: notify listener
-			System.out.println("event handler is not registered: " + eventHandler);
-		}
-	}
-
-	@Override
-	public void unregisterFromRedeliverPartialReads(EventHandler eventHandler) {
-		EventDispatcher disp = findMapping(eventHandler);
-		if (disp != null) {
-			disp.unregisterFromRedeliverPartialReads(eventHandler);
-		}
-		// TODO: notify listener
-		System.out.println("event handler is not registered: " + eventHandler);
-	}
+//
+//	@Override
+//	public void registerForRedeliverPartialReads(EventHandler eventHandler) {
+//		EventDispatcher disp = findMapping(eventHandler);
+//		if (disp != null) {
+//			disp.registerForRedeliverPartialReads(eventHandler);
+//		}
+//		else {
+//			// TODO: notify listener
+//			System.out.println("event handler is not registered: " + eventHandler);
+//		}
+//	}
+//
+//	@Override
+//	public void unregisterFromRedeliverPartialReads(EventHandler eventHandler) {
+//		EventDispatcher disp = findMapping(eventHandler);
+//		if (disp != null) {
+//			disp.unregisterFromRedeliverPartialReads(eventHandler);
+//		}
+//		// TODO: notify listener
+//		System.out.println("event handler is not registered: " + eventHandler);
+//	}
 
 	@Override
 	public int getRegisteredOps(EventHandler eventHandler) {
@@ -280,5 +280,23 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 		// TODO: notify listener
 		System.out.println("event handler is not registered: " + eventHandler);
 		return 0;
+	}
+
+	@Override
+	public int getNumEventHandlers() {
+		int c = 0;
+		for (EventDispatcher ed : dispatchers) {
+			c += ed.getNumEventHandlers();
+		}
+		return c;
+	}
+
+	@Override
+	public long getLoadAvg() {
+		long load = 0;
+		for (EventDispatcher ed : dispatchers) {
+			load += ed.getLoadAvg();
+		}
+		return load;
 	}
 }

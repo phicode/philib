@@ -27,6 +27,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 
@@ -38,7 +39,9 @@ import ch.bind.philib.pool.buffer.ByteBufferPool;
 // TODO: socket keep-alive options and others
 public interface NetContext extends Closeable {
 
-	ByteBufferPool getBufferCache();
+	SessionFactory getSessionFactory();
+
+	ByteBufferPool getBufferPool();
 
 	EventDispatcher getEventDispatcher();
 
@@ -76,10 +79,6 @@ public interface NetContext extends Closeable {
 	void setSocketOptions(ServerSocket socket) throws SocketException;
 
 	void setSocketOptions(DatagramSocket socket) throws SocketException;
-
-	boolean isDebugMode();
-
-	void setDebugMode(boolean debugMode);
 
 	boolean isOpen();
 }

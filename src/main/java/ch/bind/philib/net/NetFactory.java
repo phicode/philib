@@ -38,6 +38,6 @@ public interface NetFactory {
 
 	Future<Session> asyncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException;
 
-	NetServer openServer(NetContext context, SocketAddress bindAddress, SessionFactory factory) throws IOException;
+	NetListener openListener(NetContext context, SocketAddress bindAddress, SessionFactory factory) throws IOException;
 
 }

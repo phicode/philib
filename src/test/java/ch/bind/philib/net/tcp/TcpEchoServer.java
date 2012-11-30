@@ -19,21 +19,22 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ch.bind.philib.net.examples;
+package ch.bind.philib.net.tcp;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.NetServer;
+import ch.bind.philib.net.NetListener;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.context.ScalableNetContext;
+import ch.bind.philib.net.context.NetContexts;
 import ch.bind.philib.net.session.EchoServerSession;
-import ch.bind.philib.net.tcp.TcpNetFactory;
+import ch.bind.philib.net.tcp.TcpServer;
 
 /**
  * TODO
@@ -42,25 +43,23 @@ import ch.bind.philib.net.tcp.TcpNetFactory;
  */
 public class TcpEchoServer implements SessionFactory {
 
-	private static final boolean DEBUG_MODE = true;
-
 	public static void main(String[] args) throws Exception {
 		new TcpEchoServer().foo();
 	}
 
 	private void foo() throws Exception {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
-		SessionFactory sessionFactory = this;
 		// NetContext context = new SimpleNetContext();
-		NetContext context = new ScalableNetContext(16);
-//		context.setTcpNoDelay(true);
-//		context.setSndBufSize(64 * 1024);
-//		context.setRcvBufSize(64 * 1024);
+		NetContext context = NetContexts.createSimple(this);// new
+															// ScalableNetContext(16);
+		// context.setTcpNoDelay(true);
+		// context.setSndBufSize(64 * 1024);
+		// context.setRcvBufSize(64 * 1024);
 		context.setTcpNoDelay(false);
 		context.setSndBufSize(512);
 		context.setRcvBufSize(512);
-		context.setDebugMode(DEBUG_MODE);
-		NetServer server = TcpNetFactory.openServer(context, bindAddress, sessionFactory);
+		NetListener server = TcpServer.open(context, bindAddress);
+		System.out.println("listening on: " + bindAddress);
 		while (true) {
 			Thread.sleep(20000);
 			synchronized (sessions) {
@@ -68,7 +67,7 @@ public class TcpEchoServer implements SessionFactory {
 					long now = System.nanoTime();
 					long tooFarAgo = now - 10000000L; // 10ms
 					Iterator<EchoServerSession> iter = sessions.iterator();
-					System.out.println(server.getContext().getBufferCache().getPoolStats().toString());
+					System.out.println(server.getContext().getBufferPool().getPoolStats().toString());
 					System.out.println("sessions: " + sessions.size());
 					while (iter.hasNext()) {
 						EchoServerSession s = iter.next();
@@ -80,10 +79,9 @@ public class TcpEchoServer implements SessionFactory {
 							long lastInteractionNs = s.getLastInteractionNs();
 							if (lastInteractionNs < tooFarAgo) {
 								double lastSec = (now - lastInteractionNs) / 1000000000f;
-								System.out.printf("last interaction: %.5fsec => %s, %s%n", //
-										lastSec, s, s.getConnection().getDebugInformations());
+								System.out.printf("last interaction: %.5fsec => %s%n", //
+										lastSec, s);
 							}
-							// System.out.println(s);
 						}
 					}
 				}
@@ -100,5 +98,11 @@ public class TcpEchoServer implements SessionFactory {
 			sessions.add(session);
 		}
 		return session;
+	}
+
+	@Override
+	public void connectFailed(SocketAddress remoteAddress, Throwable cause) {
+		// TODO Auto-generated method stub
+		System.out.println("should never be called on the server side");
 	}
 }

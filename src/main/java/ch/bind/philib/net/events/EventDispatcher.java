@@ -36,16 +36,21 @@ public interface EventDispatcher extends Closeable {
 
 	void changeOps(EventHandler eventHandler, int ops, boolean asap);
 
-	void changeHandler(EventHandler oldHandler, EventHandler newHandler, int ops, boolean asap);
+	// void changeHandler(EventHandler oldHandler, EventHandler newHandler, int
+	// ops, boolean asap);
 
 	void unregister(EventHandler eventHandler);
 
 	boolean isEventDispatcherThread(Thread thread);
 
-	void registerForRedeliverPartialReads(EventHandler eventHandler);
-
-	void unregisterFromRedeliverPartialReads(EventHandler eventHandler);
+//	void registerForRedeliverPartialReads(EventHandler eventHandler);
+//
+//	void unregisterFromRedeliverPartialReads(EventHandler eventHandler);
 
 	int getRegisteredOps(EventHandler eventHandler);
+
+	int getNumEventHandlers();
+
+	long getLoadAvg();
 
 }

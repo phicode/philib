@@ -24,6 +24,7 @@ package ch.bind.philib.net.session;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import ch.bind.philib.io.BufferUtil;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 
@@ -38,26 +39,43 @@ public class EchoServerSession implements Session {
 
 	private final Connection connection;
 
+	private ByteBuffer backlog;
+
 	public EchoServerSession(Connection connection) {
 		this.connection = connection;
+		backlog = connection.getContext().getBufferPool().take();
 	}
 
 	@Override
-	public void receive(ByteBuffer data) throws IOException {
-		assert (data.position() == 0);
-
-		// the server only performs data echoing
-		if (connection.sendAsync(data) > 0) {
-			lastInteractionNs = System.nanoTime();
+	public void receive(Connection conn, ByteBuffer data) throws IOException {
+		assert (data.position() == 0 && data.hasRemaining());
+		lastInteractionNs = System.nanoTime();
+		conn.send(data);
+		if (data.hasRemaining()) {
+			backlog = BufferUtil.append(backlog, data);
+			// disable receiving more data until we have written the backlog
+			conn.disableReceive();
+			conn.notifyWhenWritable(true);
 		}
 	}
 
 	@Override
-	public void writable() throws IOException {
+	public void writable(Connection conn) throws IOException {
+		lastInteractionNs = System.nanoTime();
+		if (backlog.hasRemaining()) {
+			conn.send(backlog);
+		}
+		if (backlog.hasRemaining()) {
+			conn.notifyWhenWritable(false);
+		}
+		else {
+			conn.enableReceive();
+		}
 	}
 
 	@Override
-	public void closed() {
+	public void closed(Connection conn) {
+		connection.getContext().getBufferPool().recycle(backlog);
 	}
 
 	public Connection getConnection() {
@@ -70,6 +88,7 @@ public class EchoServerSession implements Session {
 
 	@Override
 	public String toString() {
-		return String.format("%s[rx=%d, tx=%d, remote=%s]", getClass().getSimpleName(), connection.getRx(), connection.getTx(), connection.getRemoteAddress());
+		return String.format("%s[rx=%d, tx=%d, remote=%s]", getClass().getSimpleName(), connection.getRx(), connection.getTx(),
+				connection.getRemoteAddress());
 	}
 }

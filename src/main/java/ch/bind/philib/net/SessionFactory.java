@@ -22,6 +22,7 @@
 package ch.bind.philib.net;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 
 /**
  * TODO
@@ -31,5 +32,7 @@ import java.io.IOException;
 public interface SessionFactory {
 
 	Session createSession(Connection connection) throws IOException;
+
+	void connectFailed(SocketAddress remoteAddress, Throwable cause);
 
 }
