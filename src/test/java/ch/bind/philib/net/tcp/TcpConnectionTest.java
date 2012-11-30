@@ -41,12 +41,10 @@ import org.testng.annotations.Test;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.context.SimpleNetContext;
 import ch.bind.philib.net.session.DevNullSession;
 
 /**

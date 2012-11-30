@@ -21,13 +21,6 @@
  */
 package ch.bind.philib.net.tcp;
 
-import java.io.IOException;
-import java.net.SocketAddress;
-
-import ch.bind.philib.net.NetListener;
-import ch.bind.philib.net.SessionFactory;
-import ch.bind.philib.net.context.NetContext;
-
 /**
  * TODO
  * 

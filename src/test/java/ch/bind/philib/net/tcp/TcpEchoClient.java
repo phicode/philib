@@ -37,7 +37,6 @@ import ch.bind.philib.net.Session;
 import ch.bind.philib.net.SessionFactory;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.context.ScalableNetContext;
 import ch.bind.philib.net.session.EchoClientSession;
 import ch.bind.philib.net.tcp.TcpNetFactory;
 

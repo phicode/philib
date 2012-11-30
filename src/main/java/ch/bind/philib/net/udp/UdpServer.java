@@ -36,7 +36,6 @@ import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ArrayUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.DatagramSession;
-import ch.bind.philib.net.NetServer;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.Event;
