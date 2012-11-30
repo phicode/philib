@@ -159,8 +159,7 @@ public class NetContextImpl implements NetContext {
 	public void getTcpServerSocketBacklog(int tcpServerSocketBacklog) {
 		if (tcpServerSocketBacklog < 1) {
 			this.tcpServerSocketBacklog = 1;
-		}
-		else {
+		} else {
 			this.tcpServerSocketBacklog = tcpServerSocketBacklog;
 		}
 	}

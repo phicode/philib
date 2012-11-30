@@ -186,6 +186,7 @@ public class EchoClientSession implements Session {
 
 	@Override
 	public String toString() {
-		return String.format("%s[rx=%d, tx=%d, remote=%s]", getClass().getSimpleName(), connection.getRx(), connection.getTx(), connection.getRemoteAddress());
+		return String.format("%s[rx=%d, tx=%d, remote=%s]", getClass().getSimpleName(), connection.getRx(), connection.getTx(),
+				connection.getRemoteAddress());
 	}
 }

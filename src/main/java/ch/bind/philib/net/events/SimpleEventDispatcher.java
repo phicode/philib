@@ -188,8 +188,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		}
 		if (key.isValid()) {
 			handleEvent(eventHandler, key, key.readyOps());
-		}
-		else {
+		} else {
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
 	}
@@ -231,8 +230,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			// channel is not registered for this selector
 			// TODO: notify a listener
 			System.err.println("cannot change ops for a channel which is not yet registered, handler: " + eventHandler);
-		}
-		else {
+		} else {
 			key.interestOps(ops);
 			if (asap) {
 				wakeup();
@@ -248,8 +246,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			key.cancel();
 			key.attach(null);
 			wakeup();
-		}
-		else {
+		} else {
 			// TODO: this could be implemented more efficiently, is it required
 			// for high load?
 			Iterator<NewRegistration> iter = newRegistrations.iterator();

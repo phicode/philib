@@ -134,7 +134,8 @@ public final class AsyncConnectHandler extends EventHandlerBase implements Futur
 
 	@Override
 	public SelectableChannel getChannel() {
-		// no synchronization needed because of the visibility guarantees of constructors
+		// no synchronization needed because of the visibility guarantees of
+		// constructors
 		return channel;
 	}
 
@@ -148,9 +149,12 @@ public final class AsyncConnectHandler extends EventHandlerBase implements Futur
 				if (channel.finishConnect()) {
 					this.session = TcpNetFactory.create(this, context, channel, sessionFactory);
 					registered = false;
-					// creating a tcp-connection has changed the interested-ops and handler-attachment of the
-					// registration-key. this async connect handler is no longer registered and must tell the event
-					// handler that it does not want to overwrite its interested-ops
+					// creating a tcp-connection has changed the interested-ops
+					// and handler-attachment of the
+					// registration-key. this async connect handler is no longer
+					// registered and must tell the event
+					// handler that it does not want to overwrite its
+					// interested-ops
 					notifyAll();
 					return Event.OP_DONT_CHANGE;
 				}

@@ -112,7 +112,8 @@ public class TcpConnectionTest {
 		NetServer netServer = TcpNetFactory.openServer(context, addr, serverSessionFactory);
 		Session clientS = TcpNetFactory.syncOpen(context, addr, clientSessionFactory);
 
-		// give some time for the client and server-side of the connection to establish proper fusion power
+		// give some time for the client and server-side of the connection to
+		// establish proper fusion power
 		Thread.sleep(50);
 
 		DevNullSession server = serverSessionFactory.session;
@@ -150,7 +151,8 @@ public class TcpConnectionTest {
 		NetServer netServer = TcpNetFactory.openServer(context, addr, serverSessionFactory);
 		Session clientS = TcpNetFactory.syncOpen(context, addr, clientSessionFactory);
 
-		// give some time for the client and server-side of the connection to establish proper fusion power
+		// give some time for the client and server-side of the connection to
+		// establish proper fusion power
 		Thread.sleep(50);
 
 		DevNullSession server = serverSessionFactory.session;
@@ -193,7 +195,7 @@ public class TcpConnectionTest {
 		long t = tEndReceive - tStart;
 		double mbPerSec = ((double) size) / (1024f * 1024f) / (t / 1000000000f);
 		System.out.printf("write took %.3fms, write+receive took %.3fms -> %.3fMb/s%n", //
-		        (tEndWrite - tStart) / 1000000f, t / 1000000f, mbPerSec);
+				(tEndWrite - tStart) / 1000000f, t / 1000000f, mbPerSec);
 	}
 
 	private static final class DevNullSessionFactory implements SessionFactory {

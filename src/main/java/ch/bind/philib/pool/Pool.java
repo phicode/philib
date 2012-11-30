@@ -27,7 +27,8 @@ package ch.bind.philib.pool;
  * 
  * @author Philipp Meinen
  * 
- * @param <T> The type of object which are managed by this pool.
+ * @param <T>
+ *            The type of object which are managed by this pool.
  */
 public interface Pool<T> {
 
@@ -43,7 +44,8 @@ public interface Pool<T> {
 	 * Recycles an object which might be reused. The caller must not use this
 	 * object after calling this method.
 	 * 
-	 * @param value The object to be recycled.
+	 * @param value
+	 *            The object to be recycled.
 	 */
 	void recycle(T value);
 

@@ -25,8 +25,7 @@ public final class ByteBufferManager implements ObjectManager<ByteBuffer> {
 	public ByteBuffer create() {
 		if (directBuffer) {
 			return ByteBuffer.allocateDirect(bufferSize);
-		}
-		else {
+		} else {
 			return ByteBuffer.allocate(bufferSize);
 		}
 	}

@@ -42,9 +42,11 @@ public final class LruList<E extends LruNode> {
 	/**
 	 * Add a new {@code LruNode} to the head of the LRU.
 	 * 
-	 * @param node The new head of the {@code LruList}.
-	 * @return {@code null} if the the size after adding the new {@code LruNode} does not exceed this list's
-	 *         {@code capacity}. Otherwise the list will remove the tail (the element which wasn't accessed for the
+	 * @param node
+	 *            The new head of the {@code LruList}.
+	 * @return {@code null} if the the size after adding the new {@code LruNode}
+	 *         does not exceed this list's {@code capacity}. Otherwise the list
+	 *         will remove the tail (the element which wasn't accessed for the
 	 *         longest amount of time) and return it.
 	 */
 	public E add(final E node) {

@@ -105,49 +105,53 @@ public final class AsyncConnectFuture implements Future<Session>, SessionFactory
 		throw new UnsupportedOperationException("TODO");
 	}
 
-//	@Override
-//	public synchronized void close() throws IOException {
-//		// TODO: make get reliable
-//		if (context != null && channel != null) {
-//			if (registered) {
-//				context.getEventDispatcher().unregister(this);
-//				registered = false;
-//			}
-//			sessionFactory = null;
-//		}
-//		SafeCloseUtil.close(channel);
-//		channel = null;
-//		notifyAll();
-//	}
-//
-//	@Override
-//	public SelectableChannel getChannel() {
-//		// no synchronization needed because of the visibility guarantees of constructors
-//		return channel;
-//	}
-//
-//	@Override
-//	public synchronized int handle(int ops) {
-//		Validation.isTrue(ops == Event.CONNECT);
-//		if (execException != null || cancelled) {
-//			SafeCloseUtil.close(this);
-//		} else {
-//			try {
-//				if (channel.finishConnect()) {
-//					this.session = TcpNetFactory.create(this, context, channel, sessionFactory);
-//					registered = false;
-//					// creating a tcp-connection has changed the interested-ops and handler-attachment of the
-//					// registration-key. this async connect handler is no longer registered and must tell the event
-//					// handler that it does not want to overwrite its interested-ops
-//					notifyAll();
-//					return Event.OP_DONT_CHANGE;
-//				}
-//			} catch (IOException e) {
-//				execException = e;
-//				SafeCloseUtil.close(channel);
-//			}
-//		}
-//		notifyAll();
-//		return Event.CONNECT;
-//	}
+	// @Override
+	// public synchronized void close() throws IOException {
+	// // TODO: make get reliable
+	// if (context != null && channel != null) {
+	// if (registered) {
+	// context.getEventDispatcher().unregister(this);
+	// registered = false;
+	// }
+	// sessionFactory = null;
+	// }
+	// SafeCloseUtil.close(channel);
+	// channel = null;
+	// notifyAll();
+	// }
+	//
+	// @Override
+	// public SelectableChannel getChannel() {
+	// // no synchronization needed because of the visibility guarantees of
+	// constructors
+	// return channel;
+	// }
+	//
+	// @Override
+	// public synchronized int handle(int ops) {
+	// Validation.isTrue(ops == Event.CONNECT);
+	// if (execException != null || cancelled) {
+	// SafeCloseUtil.close(this);
+	// } else {
+	// try {
+	// if (channel.finishConnect()) {
+	// this.session = TcpNetFactory.create(this, context, channel,
+	// sessionFactory);
+	// registered = false;
+	// // creating a tcp-connection has changed the interested-ops and
+	// handler-attachment of the
+	// // registration-key. this async connect handler is no longer registered
+	// and must tell the event
+	// // handler that it does not want to overwrite its interested-ops
+	// notifyAll();
+	// return Event.OP_DONT_CHANGE;
+	// }
+	// } catch (IOException e) {
+	// execException = e;
+	// SafeCloseUtil.close(channel);
+	// }
+	// }
+	// notifyAll();
+	// return Event.CONNECT;
+	// }
 }

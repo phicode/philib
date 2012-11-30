@@ -194,8 +194,7 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 		EventDispatcher disp = findMapping(eventHandler);
 		if (disp != null) {
 			disp.changeOps(eventHandler, ops, asap);
-		}
-		else {
+		} else {
 			try {
 				throw new Exception();
 			} catch (Exception e) {
@@ -236,8 +235,7 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 			EventDispatcher disp = map.remove(eventHandler.getEventHandlerId());
 			if (disp != null) {
 				disp.unregister(eventHandler);
-			}
-			else {
+			} else {
 				// TODO: notify listener
 				System.out.println("event handler is not registered: " + eventHandler);
 			}
@@ -248,28 +246,30 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 	public boolean isEventDispatcherThread(Thread thread) {
 		return (thread != null) && (Arrays.binarySearch(threadIds, thread.getId()) >= 0);
 	}
-//
-//	@Override
-//	public void registerForRedeliverPartialReads(EventHandler eventHandler) {
-//		EventDispatcher disp = findMapping(eventHandler);
-//		if (disp != null) {
-//			disp.registerForRedeliverPartialReads(eventHandler);
-//		}
-//		else {
-//			// TODO: notify listener
-//			System.out.println("event handler is not registered: " + eventHandler);
-//		}
-//	}
-//
-//	@Override
-//	public void unregisterFromRedeliverPartialReads(EventHandler eventHandler) {
-//		EventDispatcher disp = findMapping(eventHandler);
-//		if (disp != null) {
-//			disp.unregisterFromRedeliverPartialReads(eventHandler);
-//		}
-//		// TODO: notify listener
-//		System.out.println("event handler is not registered: " + eventHandler);
-//	}
+
+	//
+	// @Override
+	// public void registerForRedeliverPartialReads(EventHandler eventHandler) {
+	// EventDispatcher disp = findMapping(eventHandler);
+	// if (disp != null) {
+	// disp.registerForRedeliverPartialReads(eventHandler);
+	// }
+	// else {
+	// // TODO: notify listener
+	// System.out.println("event handler is not registered: " + eventHandler);
+	// }
+	// }
+	//
+	// @Override
+	// public void unregisterFromRedeliverPartialReads(EventHandler
+	// eventHandler) {
+	// EventDispatcher disp = findMapping(eventHandler);
+	// if (disp != null) {
+	// disp.unregisterFromRedeliverPartialReads(eventHandler);
+	// }
+	// // TODO: notify listener
+	// System.out.println("event handler is not registered: " + eventHandler);
+	// }
 
 	@Override
 	public int getRegisteredOps(EventHandler eventHandler) {

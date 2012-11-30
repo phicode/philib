@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 import ch.bind.philib.pool.Pool;
 
 @Test
-public class ByteArrayPoolTest extends BufferPoolTestBase<byte[]>{
+public class ByteArrayPoolTest extends BufferPoolTestBase<byte[]> {
 
 	@Override
 	Pool<byte[]> createPool(int bufferSize, int maxEntries) {

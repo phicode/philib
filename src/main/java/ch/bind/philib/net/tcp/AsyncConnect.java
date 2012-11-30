@@ -9,11 +9,8 @@ import ch.bind.philib.net.SessionFactory;
 public class AsyncConnect implements SessionFactory {
 
 	private final SessionFactory sessionFactory;
-	
-	private 
-	
-	
-	@Override
+
+	private @Override
 	public Session createSession(Connection connection) throws IOException {
 		// TODO Auto-generated method stub
 		return null;

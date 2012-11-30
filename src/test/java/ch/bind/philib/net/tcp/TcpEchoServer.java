@@ -74,8 +74,7 @@ public class TcpEchoServer implements SessionFactory {
 						if (!s.getConnection().isConnected()) {
 							System.out.println("removeing disconnected session: " + s);
 							iter.remove();
-						}
-						else {
+						} else {
 							long lastInteractionNs = s.getLastInteractionNs();
 							if (lastInteractionNs < tooFarAgo) {
 								double lastSec = (now - lastInteractionNs) / 1000000000f;

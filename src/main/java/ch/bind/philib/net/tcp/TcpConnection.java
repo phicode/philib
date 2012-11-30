@@ -173,8 +173,7 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 		int numWritten = channelWrite(data);
 		if (data.hasRemaining()) {
 			registerForWriteEvents();
-		}
-		else {
+		} else {
 			unregisterFromWriteEvents();
 		}
 		return numWritten;
@@ -206,8 +205,7 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 				// connection closed
 				close();
 				return;
-			}
-			else {
+			} else {
 				if (n == 0) {
 					break;
 				}

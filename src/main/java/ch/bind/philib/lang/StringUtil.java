@@ -29,7 +29,8 @@ package ch.bind.philib.lang;
  */
 public abstract class StringUtil {
 
-	protected StringUtil() {}
+	protected StringUtil() {
+	}
 
 	public static String extractBack(String s, char delim) {
 		if (s == null || s.isEmpty()) {

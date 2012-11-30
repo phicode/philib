@@ -242,8 +242,7 @@ public class RingBufferTest {
 	@Test
 	public void clear() {
 		RingBuffer buf = new RingBuffer();
-		byte[] a = {
-				0, 1, 2, 3 };
+		byte[] a = { 0, 1, 2, 3 };
 		buf.write(a);
 		assertEquals(a.length, buf.available());
 		buf.clear();
