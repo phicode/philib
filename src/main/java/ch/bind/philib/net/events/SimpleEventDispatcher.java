@@ -61,11 +61,6 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	private final Queue<NewRegistration> newRegistrations = new ConcurrentLinkedQueue<NewRegistration>();
 
-	// TODO: use a long->object map
-	// private final ConcurrentMap<Long, EventHandler>
-	// handlersWithUndeliveredData = new ConcurrentHashMap<Long,
-	// EventHandler>();
-
 	private final ServiceState serviceState = new ServiceState();
 
 	private final Selector selector;
@@ -122,18 +117,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	private int select() throws IOException, ClosedSelectorException {
 		int num = 0;
-		// boolean longSelect = true;
 		while (num == 0 && serviceState.isOpen()) {
 			updateRegistrations();
-
-			// longSelect = handlersWithUndeliveredData.isEmpty();
-			// if (longSelect) {
 			num = selector.select(10000L);
-			// }
-			// else {
-			// num = selector.selectNow();
-			// }
-			// } while (num == 0 && longSelect && serviceState.isOpen());
 		}
 		return num;
 	}
@@ -203,7 +189,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
-			// TODO: log as trace?
+			// TODO: notify session-manager
 			LOG.info("closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e), e);
 			SafeCloseUtil.close(handler, LOG);
 		}
@@ -260,21 +246,10 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		}
 	}
 
-	// @Override
-	// public void registerForRedeliverPartialReads(EventHandler eventHandler) {
-	// handlersWithUndeliveredData.put(eventHandler.getEventHandlerId(),
-	// eventHandler);
-	// }
-	//
-	// @Override
-	// public void unregisterFromRedeliverPartialReads(EventHandler
-	// eventHandler) {
-	// handlersWithUndeliveredData.remove(eventHandler.getEventHandlerId());
-	// }
-
 	@Override
-	public boolean isEventDispatcherThread(final Thread thread) {
-		return (thread != null) && (thread.getId() == dispatchThreadId);
+	public boolean isEventDispatcherThread(EventHandler eventHandler) {
+		Thread currentThread = Thread.currentThread();
+		return (currentThread.getId() == dispatchThreadId);
 	}
 
 	@Override
@@ -334,17 +309,6 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 					}
 					selected.clear();
 				}
-
-				// if (!handlersWithUndeliveredData.isEmpty()) {
-				// // TODO: more efficient traversal
-				// for (EventHandler eh : handlersWithUndeliveredData.values())
-				// {
-				// SelectionKey key = eh.getChannel().keyFor(selector);
-				// if (key != null) {
-				// handleEvent(eh, key, EventUtil.READ);
-				// }
-				// }
-				// }
 				long tWorkNs = System.nanoTime() - tStartNs;
 				loadAvg.logWorkNs(tWorkNs);
 			}

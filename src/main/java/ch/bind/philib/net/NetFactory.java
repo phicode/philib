@@ -34,10 +34,10 @@ import ch.bind.philib.net.context.NetContext;
  */
 public interface NetFactory {
 
-	Session syncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException;
+	Session syncOpenClient(NetContext context, SocketAddress endpoint, SessionManager sessionManager) throws IOException;
 
-	Future<Session> asyncOpenClient(NetContext context, SocketAddress endpoint, SessionFactory sessionFactory) throws IOException;
+	Future<Session> asyncOpenClient(NetContext context, SocketAddress endpoint, SessionManager sessionManager) throws IOException;
 
-	NetListener openListener(NetContext context, SocketAddress bindAddress, SessionFactory factory) throws IOException;
+	NetListener openListener(NetContext context, SocketAddress bindAddress, SessionManager factory) throws IOException;
 
 }

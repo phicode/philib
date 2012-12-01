@@ -21,6 +21,16 @@
  */
 package ch.bind.philib.net.tcp;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.channels.SocketChannel;
+import java.util.concurrent.Future;
+
+import ch.bind.philib.io.SafeCloseUtil;
+import ch.bind.philib.net.Session;
+import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.util.FinishedFuture;
+
 /**
  * TODO
  * 
@@ -33,38 +43,51 @@ public final class TcpNetFactory {
 
 	// // TODO: supply session directly!
 	// public static Session syncOpen(NetContext context, SocketAddress
-	// endpoint, SessionFactory sessionFactory) throws IOException {
+	// endpoint, sessionManager sessionManager) throws IOException {
 	// SocketChannel channel = SocketChannel.open();
 	// channel.configureBlocking(true);
 	// context.setSocketOptions(channel.socket());
 	// if (!channel.connect(endpoint)) {
 	// channel.finishConnect();
 	// }
-	// return create(null, context, channel, endpoint, sessionFactory);
+	// return create(null, context, channel, endpoint, sessionManager);
 	// }
 	//
-	// public static Future<Session> asyncOpen(NetContext context, SocketAddress
-	// endpoint, SessionFactory sessionFactory) throws IOException {
-	// SocketChannel channel = SocketChannel.open();
-	// channel.configureBlocking(false);
-	// context.setSocketOptions(channel.socket());
-	//
-	// boolean finished = channel.connect(endpoint);
-	// if (finished) {
-	// Session session = create(null, context, channel, endpoint,
-	// sessionFactory);
-	// return new FinishedFuture<Session>(session);
-	// }
-	// return AsyncConnectHandler.create(context, channel, sessionFactory);
-	// }
+	public static Future<Session> connect(NetContext context, SocketAddress endpoint) throws IOException {
+		SocketChannel channel = SocketChannel.open();
+		try {
+			channel.configureBlocking(false);
+			context.setSocketOptions(channel.socket());
+		} catch (IOException e) {
+			SafeCloseUtil.close(channel);
+			// TODO: merge with other places which do the same exception
+			// catching
+			throw new IOException("see todo", e);
+		}
+
+		try {
+			boolean finished = channel.connect(endpoint);
+			// TODO: implement :)
+			if (finished) {
+				Session session = TcpConnection.create(context, channel, endpoint);
+				return new FinishedFuture<Session>(session);
+			}
+			return AsyncConnectHandler.create(context, channel, sessionManager);
+		} catch (IOException e) {
+			SafeCloseUtil.close(channel);
+			// TODO: merge with other places which do the same exception
+			// catching
+			throw new IOException("see todo", e);
+		}
+	}
 	//
 	//
 	// public static Session create(EventHandler oldHandler, NetContext context,
-	// SocketChannel channel, SessionFactory sessionFactory)
+	// SocketChannel channel, sessionManager sessionManager)
 	// throws IOException {
 	// // TODO:jdk7 SocketAddress remoteAddress = channel.getRemoteAddress();
 	// SocketAddress remoteAddress = channel.socket().getRemoteSocketAddress();
 	// return create(oldHandler, context, channel, remoteAddress,
-	// sessionFactory);
+	// sessionManager);
 	// }
 }

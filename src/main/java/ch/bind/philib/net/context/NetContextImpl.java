@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ServiceState;
-import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.SessionManager;
 import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 import ch.bind.philib.validation.Validation;
@@ -52,7 +52,7 @@ public class NetContextImpl implements NetContext {
 
 	public static final int DEFAULT_TCP_SERVER_SOCKET_BACKLOG = 25;
 
-	private final SessionFactory sessionFactory;
+	private final SessionManager sessionManager;
 
 	private final ByteBufferPool bufferPool;
 
@@ -70,11 +70,11 @@ public class NetContextImpl implements NetContext {
 
 	private ServiceState serviceState = new ServiceState();
 
-	public NetContextImpl(SessionFactory sessionFactory, ByteBufferPool bufferPool, EventDispatcher eventDispatcher) {
-		Validation.notNull(sessionFactory);
+	public NetContextImpl(SessionManager sessionManager, ByteBufferPool bufferPool, EventDispatcher eventDispatcher) {
+		Validation.notNull(sessionManager);
 		Validation.notNull(bufferPool);
 		Validation.notNull(eventDispatcher);
-		this.sessionFactory = sessionFactory;
+		this.sessionManager = sessionManager;
 		this.bufferPool = bufferPool;
 		this.eventDispatcher = eventDispatcher;
 		serviceState.setOpen();
@@ -96,8 +96,8 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
-	public SessionFactory getSessionFactory() {
-		return sessionFactory;
+	public SessionManager getSessionManager() {
+		return sessionManager;
 	}
 
 	@Override

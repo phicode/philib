@@ -22,7 +22,6 @@
 package ch.bind.philib.net.events;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -50,17 +49,13 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 
 	private final EventDispatcher[] dispatchers;
 
-	private final long[] threadIds;
-
 	private final ScaleStrategy scaleStrategy;
 
 	private final AtomicLong nextRoundRobinIdx = new AtomicLong(0);
 
-	private ConcurrentEventDispatcher(EventDispatcher[] dispatchers, long[] threadIds, ScaleStrategy scaleStrategy) {
+	private ConcurrentEventDispatcher(EventDispatcher[] dispatchers, ScaleStrategy scaleStrategy) {
 		this.dispatchers = dispatchers;
-		this.threadIds = threadIds;
 		this.scaleStrategy = scaleStrategy;
-		Arrays.sort(threadIds); // for binary search
 		serviceState.setOpen();
 	}
 
@@ -80,13 +75,10 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 		scaleStrategy = scaleStrategy != null ? scaleStrategy : ScaleStrategy.ROUND_ROBIN;
 		concurrency = concurrency < 2 ? 2 : concurrency;
 		EventDispatcher[] dispatchers = new EventDispatcher[concurrency];
-		long[] threadIds = new long[concurrency];
 		boolean collectLoadAverage = scaleStrategy == ScaleStrategy.LEAST_LOAD;
 		for (int i = 0; i < concurrency; i++) {
 			try {
-				SimpleEventDispatcher sed = SimpleEventDispatcher.open(collectLoadAverage);
-				dispatchers[i] = sed;
-				threadIds[i] = sed.getDispatchThreadId();
+				dispatchers[i] = SimpleEventDispatcher.open(collectLoadAverage);
 			} catch (IOException e) {
 				// close all event-dispatchers which have already been created
 				for (int j = 0; j < i; j++) {
@@ -95,7 +87,7 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 				throw new EventDispatcherCreationException("could not start " + concurrency + " dispatchers", e);
 			}
 		}
-		return new ConcurrentEventDispatcher(dispatchers, threadIds, scaleStrategy);
+		return new ConcurrentEventDispatcher(dispatchers, scaleStrategy);
 	}
 
 	@Override
@@ -207,28 +199,6 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 		}
 	}
 
-	// @Override
-	// public void changeHandler(EventHandler oldHandler, EventHandler
-	// newHandler, int ops, boolean asap) {
-	// if (findMapping(newHandler) != null) {
-	// System.out.println("an event-dispatcher is already registered for " +
-	// newHandler);
-	// return;
-	// }
-	// long oldId = oldHandler.getEventHandlerId();
-	// long newId = newHandler.getEventHandlerId();
-	// EventDispatcher disp = map.get(oldId);
-	// if (disp != null) {
-	// map.put(newId, disp);
-	// disp.changeHandler(oldHandler, newHandler, ops, asap);
-	// map.remove(oldId);
-	// }
-	// else {
-	// // TODO: error and stuff
-	// System.out.println("handler has no dispatcher: " + oldHandler);
-	// }
-	// }
-
 	@Override
 	public void unregister(EventHandler eventHandler) {
 		if (eventHandler != null) {
@@ -243,33 +213,10 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public boolean isEventDispatcherThread(Thread thread) {
-		return (thread != null) && (Arrays.binarySearch(threadIds, thread.getId()) >= 0);
+	public boolean isEventDispatcherThread(EventHandler eventHandler) {
+		EventDispatcher dispatcher = findMapping(eventHandler);
+		return dispatcher == null ? false : dispatcher.isEventDispatcherThread(eventHandler);
 	}
-
-	//
-	// @Override
-	// public void registerForRedeliverPartialReads(EventHandler eventHandler) {
-	// EventDispatcher disp = findMapping(eventHandler);
-	// if (disp != null) {
-	// disp.registerForRedeliverPartialReads(eventHandler);
-	// }
-	// else {
-	// // TODO: notify listener
-	// System.out.println("event handler is not registered: " + eventHandler);
-	// }
-	// }
-	//
-	// @Override
-	// public void unregisterFromRedeliverPartialReads(EventHandler
-	// eventHandler) {
-	// EventDispatcher disp = findMapping(eventHandler);
-	// if (disp != null) {
-	// disp.unregisterFromRedeliverPartialReads(eventHandler);
-	// }
-	// // TODO: notify listener
-	// System.out.println("event handler is not registered: " + eventHandler);
-	// }
 
 	@Override
 	public int getRegisteredOps(EventHandler eventHandler) {

@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 
 import ch.bind.philib.io.EndianConverter;
 import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.InterestedEvents;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.validation.Validation;
 
@@ -72,7 +73,7 @@ public class EchoClientSession implements Session {
 	}
 
 	@Override
-	public void receive(ByteBuffer data) throws IOException {
+	public InterestedEvents receive(ByteBuffer data) throws IOException {
 		lastInteractionNs = System.nanoTime();
 		synchronized (lock) {
 			if (performVerification) {

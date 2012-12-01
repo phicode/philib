@@ -55,6 +55,7 @@ public class EchoServerSession implements Session {
 		if (data.hasRemaining()) {
 			backlog = BufferUtil.append(backlog, data);
 			// disable receiving more data until we have written the backlog
+			System.out.println("switing to sendable mode");
 			return InterestedEvents.SENDABLE;
 		}
 		return InterestedEvents.RECEIVE;
@@ -69,6 +70,7 @@ public class EchoServerSession implements Session {
 		if (backlog.hasRemaining()) {
 			return InterestedEvents.SENDABLE;
 		}
+		System.out.println("switing back to receive mode");
 		return InterestedEvents.RECEIVE;
 	}
 

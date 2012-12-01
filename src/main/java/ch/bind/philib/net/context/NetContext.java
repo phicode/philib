@@ -27,7 +27,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.SessionManager;
 import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 
@@ -39,7 +39,7 @@ import ch.bind.philib.pool.buffer.ByteBufferPool;
 // TODO: socket keep-alive options and others
 public interface NetContext extends Closeable {
 
-	SessionFactory getSessionFactory();
+	SessionManager getSessionManager();
 
 	ByteBufferPool getBufferPool();
 

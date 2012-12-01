@@ -29,7 +29,7 @@ import java.net.SocketAddress;
  * 
  * @author Philipp Meinen
  */
-public interface SessionFactory {
+public interface SessionManager {
 
 	Session createSession(Connection connection) throws IOException;
 

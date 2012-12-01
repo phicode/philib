@@ -29,19 +29,23 @@ import java.util.List;
 
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetListener;
-import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.SessionManager;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.net.context.NetContextImpl;
 import ch.bind.philib.net.context.NetContexts;
+import ch.bind.philib.net.events.ConcurrentEventDispatcher;
+import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.net.session.EchoServerSession;
 import ch.bind.philib.net.tcp.TcpServer;
+import ch.bind.philib.pool.buffer.ByteBufferPool;
 
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
-public class TcpEchoServer implements SessionFactory {
+public class TcpEchoServer implements SessionManager {
 
 	public static void main(String[] args) throws Exception {
 		new TcpEchoServer().foo();
@@ -50,14 +54,22 @@ public class TcpEchoServer implements SessionFactory {
 	private void foo() throws Exception {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
 		// NetContext context = new SimpleNetContext();
-		NetContext context = NetContexts.createSimple(this);// new
+		
+		ByteBufferPool bufferPool = ByteBufferPool.create(8192, 128, 4);
+		EventDispatcher eventDispatcher = ConcurrentEventDispatcher.open(4);
+		NetContext context = new NetContextImpl(this, bufferPool, eventDispatcher);
+//		NetContext context = NetContexts.createSimple(this);// new
 															// ScalableNetContext(16);
-		// context.setTcpNoDelay(true);
+		context.setTcpNoDelay(true);
 		// context.setSndBufSize(64 * 1024);
 		// context.setRcvBufSize(64 * 1024);
+
+		context.setSndBufSize(1024 * 1024);
+		context.setRcvBufSize(1024 * 1024);
+
 		context.setTcpNoDelay(false);
-		context.setSndBufSize(512);
-		context.setRcvBufSize(512);
+		// context.setSndBufSize(512);
+		// context.setRcvBufSize(512);
 		NetListener server = TcpServer.open(context, bindAddress);
 		System.out.println("listening on: " + bindAddress);
 		while (true) {

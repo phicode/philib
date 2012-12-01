@@ -26,6 +26,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -41,10 +42,12 @@ import org.testng.annotations.Test;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.NetListener;
 import ch.bind.philib.net.Session;
-import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.SessionManager;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.net.context.NetContexts;
 import ch.bind.philib.net.session.DevNullSession;
 
 /**
@@ -105,19 +108,18 @@ public class TcpConnectionTest {
 	@Test(timeOut = 60000, priority = 0)
 	public void connectAndDisconnect() throws Exception {
 		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
-		NetContext context = new SimpleNetContext();
+		DevNullsessionManager sessionManager = new DevNullsessionManager();
+		NetContext context =NetContexts.createSimple(sessionManager);
 		SocketAddress addr = SocketAddresses.localhost(1234);
-		DevNullSessionFactory serverSessionFactory = new DevNullSessionFactory();
-		DevNullSessionFactory clientSessionFactory = new DevNullSessionFactory();
-		NetServer netServer = TcpNetFactory.openServer(context, addr, serverSessionFactory);
-		Session clientS = TcpNetFactory.syncOpen(context, addr, clientSessionFactory);
+		NetListener netServer = TcpServer.open(context, addr);
+		Session clientS = TcpConnection.connect TcpNetFactory.syncOpen(context, addr, sessionManager);
 
 		// give some time for the client and server-side of the connection to
 		// establish proper fusion power
 		Thread.sleep(50);
 
-		DevNullSession server = serverSessionFactory.session;
-		DevNullSession client = clientSessionFactory.session;
+		DevNullSession server = serversessionManager.session;
+		DevNullSession client = clientsessionManager.session;
 		assertNotNull(server);
 		assertNotNull(client);
 		assertTrue(client == clientS);
@@ -144,19 +146,18 @@ public class TcpConnectionTest {
 	@Test(timeOut = 60000, priority = 10)
 	public void sendManyZeros() throws Exception {
 		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
-		NetContext context = new SimpleNetContext();
+		DevNullsessionManager sessionManager = new DevNullsessionManager();
+		NetContext context = NetContexts.createSimple(sessionManager);
 		SocketAddress addr = SocketAddresses.localhost(1234);
-		DevNullSessionFactory serverSessionFactory = new DevNullSessionFactory();
-		DevNullSessionFactory clientSessionFactory = new DevNullSessionFactory();
-		NetServer netServer = TcpNetFactory.openServer(context, addr, serverSessionFactory);
-		Session clientS = TcpNetFactory.syncOpen(context, addr, clientSessionFactory);
+		NetListener netServer = TcpServer.open(context, addr);
+		Session clientS = TcpNetFactory.syncOpen(context, addr, clientsessionManager);
 
 		// give some time for the client and server-side of the connection to
 		// establish proper fusion power
 		Thread.sleep(50);
 
-		DevNullSession server = serverSessionFactory.session;
-		DevNullSession client = clientSessionFactory.session;
+		DevNullSession server = serversessionManager.session;
+		DevNullSession client = clientsessionManager.session;
 
 		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
 
@@ -178,7 +179,8 @@ public class TcpConnectionTest {
 
 		int size = data.remaining();
 		long tStart = System.nanoTime();
-		from.sendSync(data);
+		int sent = from.send(data);
+		assertEquals(sent, size);
 		assertEquals(data.remaining(), 0);
 
 		long tEndWrite = System.nanoTime();
@@ -198,7 +200,7 @@ public class TcpConnectionTest {
 				(tEndWrite - tStart) / 1000000f, t / 1000000f, mbPerSec);
 	}
 
-	private static final class DevNullSessionFactory implements SessionFactory {
+	private static final class DevNullsessionManager implements SessionManager {
 
 		volatile DevNullSession session;
 
@@ -207,6 +209,11 @@ public class TcpConnectionTest {
 			assertNull(session);
 			session = new DevNullSession(connection);
 			return session;
+		}
+
+		@Override
+		public void connectFailed(SocketAddress remoteAddress, Throwable cause) {
+			fail(cause.getMessage());
 		}
 	}
 }

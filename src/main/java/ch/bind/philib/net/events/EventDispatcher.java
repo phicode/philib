@@ -41,7 +41,7 @@ public interface EventDispatcher extends Closeable {
 
 	void unregister(EventHandler eventHandler);
 
-	boolean isEventDispatcherThread(Thread thread);
+	boolean isEventDispatcherThread(EventHandler eventHandler);
 
 	// void registerForRedeliverPartialReads(EventHandler eventHandler);
 	//

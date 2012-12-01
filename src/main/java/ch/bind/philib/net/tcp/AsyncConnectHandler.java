@@ -32,7 +32,7 @@ import java.util.concurrent.TimeoutException;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.net.Session;
-import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.SessionManager;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.net.events.Event;
@@ -48,7 +48,7 @@ public final class AsyncConnectHandler extends EventHandlerBase implements Futur
 
 	private SocketChannel channel;
 
-	private SessionFactory sessionFactory;
+	private SessionManager sessionManager;
 
 	private Session session;
 
@@ -58,16 +58,16 @@ public final class AsyncConnectHandler extends EventHandlerBase implements Futur
 
 	private boolean registered;
 
-	private AsyncConnectHandler(NetContext context, SocketChannel channel, SessionFactory sessionFactory) {
+	private AsyncConnectHandler(NetContext context, SocketChannel channel, SessionManager sessionManager) {
 		super(context);
 		Validation.notNull(channel);
-		Validation.notNull(sessionFactory);
+		Validation.notNull(sessionManager);
 		this.channel = channel;
-		this.sessionFactory = sessionFactory;
+		this.sessionManager = sessionManager;
 	}
 
-	public static AsyncConnectHandler create(NetContext context, SocketChannel channel, SessionFactory sessionFactory) {
-		AsyncConnectHandler rv = new AsyncConnectHandler(context, channel, sessionFactory);
+	public static AsyncConnectHandler create(NetContext context, SocketChannel channel, SessionManager sessionManager) {
+		AsyncConnectHandler rv = new AsyncConnectHandler(context, channel, sessionManager);
 		rv.context.getEventDispatcher().register(rv, Event.CONNECT);
 		rv.registered = true;
 		return rv;
@@ -125,7 +125,7 @@ public final class AsyncConnectHandler extends EventHandlerBase implements Futur
 				context.getEventDispatcher().unregister(this);
 				registered = false;
 			}
-			sessionFactory = null;
+			sessionManager = null;
 		}
 		SafeCloseUtil.close(channel);
 		channel = null;
@@ -147,7 +147,7 @@ public final class AsyncConnectHandler extends EventHandlerBase implements Futur
 		} else {
 			try {
 				if (channel.finishConnect()) {
-					this.session = TcpNetFactory.create(this, context, channel, sessionFactory);
+					this.session = TcpNetFactory.create(this, context, channel, sessionManager);
 					registered = false;
 					// creating a tcp-connection has changed the interested-ops
 					// and handler-attachment of the

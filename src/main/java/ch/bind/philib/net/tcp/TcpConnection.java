@@ -34,6 +34,7 @@ import ch.bind.philib.net.InterestedEvents;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.Event;
+import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.validation.Validation;
 
@@ -87,7 +88,7 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 
 	private void setup() throws IOException {
 		try {
-			session = context.getSessionFactory().createSession(this);
+			session = context.getSessionManager().createSession(this);
 		} catch (Exception e) {
 			throw new IOException("session-creation failed", e);
 		}
@@ -97,18 +98,14 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 	@Override
 	public void setEvents(InterestedEvents interestedEvents) {
 		this.interestedEvents = interestedEvents;
-		private void registerForWriteEvents() {
-			if (!registeredForWriteEvt) {
-				context.getEventDispatcher().changeOps(this, Event.READ_WRITE, true);
-				registeredForWriteEvt = true;
-			}
-		}
-
-		private void unregisterFromWriteEvents() {
-			if (registeredForWriteEvt) {
-				context.getEventDispatcher().changeOps(this, Event.READ, false);
-				registeredForWriteEvt = false;
-			}
+		InterestedEvents ie = interestedEvents;
+		if (ie != null) {
+			int events = ie.getEventMask();
+			EventDispatcher eventDispatcher = context.getEventDispatcher();
+			// only wake up the event-dispatcher if it is not the currently
+			// running thread
+			boolean asap = !eventDispatcher.isEventDispatcherThread(this);
+			context.getEventDispatcher().changeOps(this, events, asap);
 		}
 	}
 
@@ -170,58 +167,40 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 		if (data == null || !data.hasRemaining()) {
 			return 0;
 		}
-		int numWritten = channelWrite(data);
-		if (data.hasRemaining()) {
-			registerForWriteEvents();
-		} else {
-			unregisterFromWriteEvents();
-		}
-		return numWritten;
-	}
-
-	private int channelWrite(final ByteBuffer data) throws IOException {
 		int num = channel.write(data);
 		if (num > 0) {
 			tx.addAndGet(num);
 		}
-		return num;
-	}
-
-	private int channelRead(final ByteBuffer rbuf) throws IOException {
-		int num = channel.read(rbuf);
-		if (num > 0) {
-			rx.addAndGet(num);
-		}
+		//if data.remaining() && not on event dispatcher thread -> register for it
 		return num;
 	}
 
 	private void handleRead() throws IOException {
 		final ByteBuffer bb = takeBuffer();
-		int totalRead = 0;
-		while (totalRead < IO_READ_LIMIT_PER_ROUND && interestedEvents.hasReceive()) {
-			final int n = channelRead(bb);
-			// deliver data regardless of whether the channel is closed or not
-			if (n == -1) {
-				// connection closed
-				close();
-				return;
-			} else {
+		try {
+			int totalRead = 0;
+			while (totalRead < IO_READ_LIMIT_PER_ROUND && interestedEvents.hasReceive()) {
+				final int n = channel.read(bb);
+				if (n > 0) {
+					rx.addAndGet(n);
+				}
+				if (n == -1) {
+					// connection closed
+					close();
+					return;
+				}
 				if (n == 0) {
 					break;
 				}
 				totalRead += n;
-				deliverReadData(bb);
+				// switch from write mode to read
+				bb.flip();
+				interestedEvents = session.receive(this, bb);
+				// switch back to write mode
+				bb.clear();
 			}
-		}
-	}
-
-	private void deliverReadData(final ByteBuffer data) throws IOException {
-		if (data.position() > 0) {
-			// switch from write mode to read
-			data.flip();
-			interestedEvents = session.receive(this, data);
-			// switch back to write mode
-			data.clear();
+		} finally {
+			recycleBuffer(bb);
 		}
 	}
 

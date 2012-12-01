@@ -21,8 +21,11 @@
  */
 package ch.bind.philib.net.tcp;
 
+import static org.testng.Assert.fail;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -34,11 +37,15 @@ import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
-import ch.bind.philib.net.SessionFactory;
+import ch.bind.philib.net.SessionManager;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.net.context.NetContextImpl;
+import ch.bind.philib.net.events.ConcurrentEventDispatcher;
+import ch.bind.philib.net.events.EventDispatcher;
+import ch.bind.philib.net.events.EventDispatcherCreationException;
 import ch.bind.philib.net.session.EchoClientSession;
-import ch.bind.philib.net.tcp.TcpNetFactory;
+import ch.bind.philib.pool.buffer.ByteBufferPool;
 
 /**
  * TODO
@@ -87,7 +94,7 @@ public class TcpEchoClient {
 
 	private NetContext context;
 
-	private static final SessionFactory sessionFactory = new SessionFactory() {
+	private static final SessionManager sessionManager = new SessionManager() {
 
 		@Override
 		public Session createSession(Connection connection) throws IOException {
@@ -95,9 +102,14 @@ public class TcpEchoClient {
 			session.send();
 			return session;
 		}
+
+		@Override
+		public void connectFailed(SocketAddress remoteAddress, Throwable cause) {
+			fail(cause.getMessage());
+		}
 	};
 
-	private void run(int numClients) {
+	private void run(int numClients) throws IOException {
 		// endpoint = SocketAddresses.fromIp("10.0.0.71", 1234);
 		// endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
 		try {
@@ -106,16 +118,15 @@ public class TcpEchoClient {
 			System.out.println("unknown host: " + ExceptionUtil.buildMessageChain(e));
 			return;
 		}
-
-		// context = new SimpleNetContext();
-		context = new ScalableNetContext(16);
+		ByteBufferPool bufferPool = ByteBufferPool.create(8192, 128, 4);
+		EventDispatcher eventDispatcher = ConcurrentEventDispatcher.open(4);
+		context = new NetContextImpl(sessionManager, bufferPool, eventDispatcher);
 		// context.setTcpNoDelay(true);
 		// context.setSndBufSize(64 * 1024);
 		// context.setRcvBufSize(64 * 1024);
 		context.setTcpNoDelay(false);
 		context.setSndBufSize(512);
 		context.setRcvBufSize(512);
-		context.setDebugMode(DEBUG_MODE);
 
 		final long printStatsIntervalMs = 10000;
 		final long start = System.currentTimeMillis();
@@ -234,7 +245,8 @@ public class TcpEchoClient {
 			return;
 		}
 		try {
-			Future<Session> future = TcpNetFactory.asyncOpen(context, endpoint, sessionFactory);
+			TcpConnection.connect
+			Future<Session> future = TcpNetFactory.asyncOpen(context, endpoint, sessionManager);
 			connecting.add(future);
 		} catch (IOException e) {
 			System.out.println("asyncOpenClient failed: " + ExceptionUtil.buildMessageChain(e));
@@ -248,7 +260,7 @@ public class TcpEchoClient {
 			RichEchoClientSession recs = iter.next();
 			if (recs.createdAt < killIfOlder) {
 				iter.remove();
-				System.out.println("closing: " + recs.session + ", " + recs.session.getConnection().getDebugInformations());
+				System.out.println("closing: " + recs.session);
 				close(recs);
 			}
 		}
