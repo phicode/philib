@@ -58,6 +58,11 @@ public final class ByteArrayPool implements Pool<byte[]> {
 		return backend.getPoolStats();
 	}
 
+	@Override
+	public int getNumPooled() {
+		return backend.getNumPooled();
+	}
+
 	public static ByteArrayPool create(int bufferSize, int maxEntries) {
 		ByteArrayManager manager = new ByteArrayManager(bufferSize);
 		return new ByteArrayPool(new LeakyPool<byte[]>(manager, maxEntries));

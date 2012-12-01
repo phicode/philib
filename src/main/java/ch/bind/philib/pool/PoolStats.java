@@ -49,5 +49,4 @@ public interface PoolStats {
 	 *         no longer needed.
 	 */
 	long getReleased();
-
 }

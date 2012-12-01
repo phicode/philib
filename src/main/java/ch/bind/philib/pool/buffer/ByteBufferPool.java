@@ -60,6 +60,11 @@ public final class ByteBufferPool implements Pool<ByteBuffer> {
 		return backend.getPoolStats();
 	}
 
+	@Override
+	public int getNumPooled() {
+		return backend.getNumPooled();
+	}
+
 	public static ByteBufferPool create(int bufferSize, int maxEntries) {
 		ByteBufferManager manager = new ByteBufferManager(bufferSize);
 		return new ByteBufferPool(new LeakyPool<ByteBuffer>(manager, maxEntries));

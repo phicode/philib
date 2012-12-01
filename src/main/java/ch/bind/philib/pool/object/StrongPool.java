@@ -1,14 +1,15 @@
 package ch.bind.philib.pool.object;
 
 import ch.bind.philib.pool.manager.ObjectManager;
+import ch.bind.philib.util.LimitedConcurrentQueue;
 
 public final class StrongPool<T> extends PoolBase<T> {
 
-	private final LimitedQueue<T> queue;
+	private final LimitedConcurrentQueue<T> queue;
 
 	public StrongPool(ObjectManager<T> manager, int maxEntries) {
 		super(manager);
-		queue = new LimitedQueue<T>(maxEntries);
+		queue = new LimitedConcurrentQueue<T>(maxEntries);
 	}
 
 	@Override
@@ -19,5 +20,10 @@ public final class StrongPool<T> extends PoolBase<T> {
 	@Override
 	protected boolean offer(T value) {
 		return queue.offer(value);
+	}
+
+	@Override
+	public int getNumPooled() {
+		return queue.size();
 	}
 }

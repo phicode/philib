@@ -82,6 +82,15 @@ public final class ConcurrentPool<T> implements Pool<T> {
 		return stats;
 	}
 
+	@Override
+	public int getNumPooled() {
+		int total = 0;
+		for (PoolBase<T> pool : pools) {
+			total += pool.getNumPooled();
+		}
+		return total;
+	}
+
 	PoolBase<T> bindToThread() {
 		// round robin distribution in the order the
 		// threads first access the pool

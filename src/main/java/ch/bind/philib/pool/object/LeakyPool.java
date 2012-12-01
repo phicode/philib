@@ -3,14 +3,15 @@ package ch.bind.philib.pool.object;
 import java.lang.ref.SoftReference;
 
 import ch.bind.philib.pool.manager.ObjectManager;
+import ch.bind.philib.util.LimitedConcurrentQueue;
 
 public final class LeakyPool<T> extends PoolBase<T> {
 
-	private final LimitedQueue<SoftReference<T>> queue;
+	private final LimitedConcurrentQueue<SoftReference<T>> queue;
 
 	public LeakyPool(ObjectManager<T> manager, int maxEntries) {
 		super(manager);
-		queue = new LimitedQueue<SoftReference<T>>(maxEntries);
+		queue = new LimitedConcurrentQueue<SoftReference<T>>(maxEntries);
 	}
 
 	@Override
@@ -30,5 +31,10 @@ public final class LeakyPool<T> extends PoolBase<T> {
 	@Override
 	protected boolean offer(T value) {
 		return queue.offer(new SoftReference<T>(value));
+	}
+
+	@Override
+	public int getNumPooled() {
+		return queue.size();
 	}
 }

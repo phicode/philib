@@ -1,11 +1,11 @@
-package ch.bind.philib.pool.object;
+package ch.bind.philib.util;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import ch.bind.philib.validation.Validation;
 
-final class LimitedQueue<T> {
+public final class LimitedConcurrentQueue<T> {
 
 	private final ConcurrentLinkedQueue<T> queue = new ConcurrentLinkedQueue<T>();
 
@@ -13,12 +13,12 @@ final class LimitedQueue<T> {
 
 	private final int capacity;
 
-	LimitedQueue(int capacity) {
-		Validation.isTrue(capacity > 0);
-		this.capacity = capacity;
+	public LimitedConcurrentQueue(int limit) {
+		Validation.isTrue(limit > 0);
+		this.capacity = limit;
 	}
 
-	T poll() {
+	public T poll() {
 		final T value = queue.poll();
 		if (value != null) {
 			size.decrementAndGet();
@@ -26,7 +26,7 @@ final class LimitedQueue<T> {
 		return value;
 	}
 
-	boolean offer(T value) {
+	public boolean offer(T value) {
 		for (;;) {
 			final int s = size.get();
 			if (s >= capacity) {
@@ -36,5 +36,13 @@ final class LimitedQueue<T> {
 				return queue.offer(value);
 			}
 		}
+	}
+
+	public int size() {
+		return size.get();
+	}
+
+	public int getLimit() {
+		return capacity;
 	}
 }

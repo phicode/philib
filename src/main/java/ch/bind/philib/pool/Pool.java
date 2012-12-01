@@ -55,4 +55,9 @@ public interface Pool<T> {
 	 */
 	PoolStats getPoolStats();
 
+	
+	/**
+	 * @return The number of currently pooled objects.
+	 */
+	int getNumPooled();
 }
