@@ -22,6 +22,7 @@
 package ch.bind.philib.net.context;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -74,11 +75,11 @@ public interface NetContext extends Closeable {
 
 	void getTcpServerSocketBacklog(int tcpServerSocketBacklog);
 
-	void setSocketOptions(Socket socket) throws SocketException;
+	void setSocketOptions(Socket socket) throws IOException;
 
-	void setSocketOptions(ServerSocket socket) throws SocketException;
+	void setSocketOptions(ServerSocket socket) throws IOException;
 
-	void setSocketOptions(DatagramSocket socket) throws SocketException;
+	void setSocketOptions(DatagramSocket socket) throws IOException;
 
 	boolean isOpen();
 }

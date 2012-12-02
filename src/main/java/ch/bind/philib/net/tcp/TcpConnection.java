@@ -43,56 +43,56 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public final class TcpConnection extends EventHandlerBase implements Connection {
+public class TcpConnection extends EventHandlerBase implements Connection {
 
-	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
+	// TODO: configurable
+	private static final int IO_READ_LIMIT_PER_ROUND = 256 * 1024;
 
-	private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
+	// private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
 
 	private final AtomicLong rx = new AtomicLong(0);
 
 	private final AtomicLong tx = new AtomicLong(0);
 
-	private final SocketChannel channel;
+	protected final SocketChannel channel;
 
-	private final SocketAddress remoteAddress;
+	protected final SocketAddress remoteAddress;
 
-	private volatile InterestedEvents interestedEvents = InterestedEvents.SENDABLE_RECEIVE;
-
-	// private volatile boolean receiveEnabled = true;
-
-	// private volatile boolean notifyWhenWritable = false;
-
-	// private volatile boolean registerForWrite = false;
-
-	// private boolean lastWriteBlocked = false;
+	protected volatile InterestedEvents interestedEvents = InterestedEvents.SENDABLE_RECEIVE;
 
 	private Session session;
 
-	private TcpConnection(NetContext context, SocketChannel channel, SocketAddress remoteAddress) {
+	TcpConnection(NetContext context, SocketChannel channel, SocketAddress remoteAddress) {
 		super(context);
+		Validation.notNull(channel);
 		this.channel = channel;
 		this.remoteAddress = remoteAddress;
 	}
 
+	// for already connected channels
 	public static TcpConnection create(NetContext context, SocketChannel channel, SocketAddress remoteAddress) throws IOException {
-		Validation.notNull(context);
-		Validation.notNull(channel);
-		// make the socket ready for the session to write to
-		channel.configureBlocking(false);
-		context.setSocketOptions(channel.socket());
 		TcpConnection conn = new TcpConnection(context, channel, remoteAddress);
-		conn.setup();
+		conn.setupChannel();
+		conn.setupSession();
+		context.getEventDispatcher().register(conn, conn.interestedEvents.getEventMask());
 		return conn;
 	}
 
-	private void setup() throws IOException {
+	final void setupChannel() throws IOException {
+		// make the socket ready for the session to write to
+		channel.configureBlocking(false);
+		context.setSocketOptions(channel.socket());
+	}
+
+	final void setupSession() throws IOException {
 		try {
 			session = context.getSessionManager().createSession(this);
 		} catch (Exception e) {
 			throw new IOException("session-creation failed", e);
 		}
-		context.getEventDispatcher().register(this, Event.READ);
+		if (session == null) {
+			throw new IOException("session-creation failed: no session provided");
+		}
 	}
 
 	@Override
@@ -100,38 +100,8 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 		this.interestedEvents = interestedEvents;
 		InterestedEvents ie = interestedEvents;
 		if (ie != null) {
-			int events = ie.getEventMask();
-			EventDispatcher eventDispatcher = context.getEventDispatcher();
-			// only wake up the event-dispatcher if it is not the currently
-			// running thread
-			boolean asap = !eventDispatcher.isEventDispatcherThread(this);
-			context.getEventDispatcher().changeOps(this, events, asap);
+			context.getEventDispatcher().register(this, ie.getEventMask());
 		}
-	}
-
-	@Override
-	public NetContext getContext() {
-		return context;
-	}
-
-	@Override
-	public boolean isConnected() {
-		return channel.isConnected();
-	}
-
-	@Override
-	public boolean isOpen() {
-		return channel.isOpen();
-	}
-
-	@Override
-	public SocketAddress getRemoteAddress() {
-		return remoteAddress;
-	}
-
-	@Override
-	public SelectableChannel getChannel() {
-		return channel;
 	}
 
 	@Override
@@ -171,7 +141,8 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 		if (num > 0) {
 			tx.addAndGet(num);
 		}
-		//if data.remaining() && not on event dispatcher thread -> register for it
+		// if data.remaining() && not on event dispatcher thread -> register for
+		// it
 		return num;
 	}
 
@@ -192,7 +163,7 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 				if (n == 0) {
 					break;
 				}
-				totalRead += n;
+				// totalRead += n;
 				// switch from write mode to read
 				bb.flip();
 				interestedEvents = session.receive(this, bb);
@@ -205,12 +176,42 @@ public final class TcpConnection extends EventHandlerBase implements Connection 
 	}
 
 	@Override
-	public long getRx() {
+	public final NetContext getContext() {
+		return context;
+	}
+
+	@Override
+	public final boolean isConnected() {
+		return channel.isConnected();
+	}
+
+	@Override
+	public final boolean isOpen() {
+		return channel.isOpen();
+	}
+
+	@Override
+	public final SocketAddress getRemoteAddress() {
+		return remoteAddress;
+	}
+
+	@Override
+	public final SelectableChannel getChannel() {
+		return channel;
+	}
+
+	@Override
+	public final long getRx() {
 		return rx.get();
 	}
 
 	@Override
-	public long getTx() {
+	public final long getTx() {
 		return tx.get();
+	}
+
+	@Override
+	public final Session getSession() {
+		return session;
 	}
 }

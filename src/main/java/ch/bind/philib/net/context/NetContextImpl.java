@@ -165,16 +165,32 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
-	public void setSocketOptions(Socket socket) throws SocketException {
+	public void setSocketOptions(Socket socket) throws IOException {
 		Validation.notNull(socket);
-		if (tcpNoDelay != null) {
-			socket.setTcpNoDelay(tcpNoDelay);
+		Exception lastExc = null;
+		int numExc = 0;
+		for (int tryCount = 0; tryCount < 3; tryCount++) {
+			try {
+				if (tcpNoDelay != null) {
+					socket.setTcpNoDelay(tcpNoDelay);
+				}
+				if (sndBufSize != null) {
+					socket.setSendBufferSize(sndBufSize);
+				}
+				if (rcvBufSize != null) {
+					socket.setReceiveBufferSize(rcvBufSize);
+				}
+			} catch (Exception e) {
+				lastExc = e;
+				numExc++;
+			}
 		}
-		if (sndBufSize != null) {
-			socket.setSendBufferSize(sndBufSize);
-		}
-		if (rcvBufSize != null) {
-			socket.setReceiveBufferSize(rcvBufSize);
+		if (numExc > 0) {
+			if (numExc < 3) {
+				LOG.warn(numExc + "/3 set-socket-options resulted in an exception, last exception: " + lastExc);
+			} else {
+				throw new IOException("all 3 set-socket-options resulted in an exception", lastExc);
+			}
 		}
 	}
 

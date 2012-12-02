@@ -50,4 +50,6 @@ public interface Connection extends Closeable {
 	long getTx();
 
 	SocketAddress getRemoteAddress();
+
+	Session getSession();
 }

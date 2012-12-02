@@ -84,7 +84,7 @@ public class TcpEchoClient {
 
 	private List<RichEchoClientSession> sessions = new LinkedList<RichEchoClientSession>();
 
-	private List<Future<Session>> connecting = new LinkedList<Future<Session>>();
+	private List<Future<TcpConnection>> connecting = new LinkedList<Future<TcpConnection>>();
 
 	private long numConnectFails;
 
@@ -98,14 +98,15 @@ public class TcpEchoClient {
 
 		@Override
 		public Session createSession(Connection connection) throws IOException {
-			EchoClientSession session = new EchoClientSession(connection, VERIFY_MODE);
-			session.send();
-			return session;
+			return new EchoClientSession(connection, VERIFY_MODE);
+			// session.send();
+			// return session;
 		}
 
 		@Override
 		public void connectFailed(SocketAddress remoteAddress, Throwable cause) {
-			fail(cause.getMessage());
+			System.out.println("connect failed: " + cause.getMessage());
+			cause.printStackTrace(System.err);
 		}
 	};
 
@@ -121,12 +122,12 @@ public class TcpEchoClient {
 		ByteBufferPool bufferPool = ByteBufferPool.create(8192, 128, 4);
 		EventDispatcher eventDispatcher = ConcurrentEventDispatcher.open(4);
 		context = new NetContextImpl(sessionManager, bufferPool, eventDispatcher);
-		// context.setTcpNoDelay(true);
-		// context.setSndBufSize(64 * 1024);
-		// context.setRcvBufSize(64 * 1024);
-		context.setTcpNoDelay(false);
-		context.setSndBufSize(512);
-		context.setRcvBufSize(512);
+		context.setTcpNoDelay(true);
+		context.setSndBufSize(64 * 1024);
+		context.setRcvBufSize(64 * 1024);
+		// context.setTcpNoDelay(false);
+		// context.setSndBufSize(512);
+		// context.setRcvBufSize(512);
 
 		final long printStatsIntervalMs = 10000;
 		final long start = System.currentTimeMillis();
@@ -224,13 +225,13 @@ public class TcpEchoClient {
 	}
 
 	private void handleConnected() throws InterruptedException {
-		Iterator<Future<Session>> iter = connecting.iterator();
+		Iterator<Future<TcpConnection>> iter = connecting.iterator();
 		while (iter.hasNext()) {
-			Future<Session> fes = iter.next();
-			if (fes.isDone()) {
+			Future<TcpConnection> conn = iter.next();
+			if (conn.isDone()) {
 				iter.remove();
 				try {
-					Session s = fes.get();
+					Session s = conn.get().getSession();
 					sessions.add(new RichEchoClientSession((EchoClientSession) s));
 				} catch (ExecutionException e) {
 					numConnectFails++;
@@ -245,11 +246,11 @@ public class TcpEchoClient {
 			return;
 		}
 		try {
-			TcpConnection.connect
-			Future<Session> future = TcpNetFactory.asyncOpen(context, endpoint, sessionManager);
+			Future<TcpConnection> future = TcpNetFactory.connect(context, endpoint);
 			connecting.add(future);
 		} catch (IOException e) {
-			System.out.println("asyncOpenClient failed: " + ExceptionUtil.buildMessageChain(e));
+			System.out.println("connect failed: " + ExceptionUtil.buildMessageChain(e));
+			e.printStackTrace(System.err);
 		}
 	}
 

@@ -70,32 +70,7 @@ public final class Event {
 		return (events & WRITE) == WRITE;
 	}
 
-	// public static void writeAllBlocking(final Connection connection, final
-	// ByteBuffer data) throws IOException {
-	//
-	// }
-	//
-	// public static void writeAllBlocking(final NetContext context, final
-	// Connection connection, final byte[] data) throws IOException {
-	// final ByteBuffer buf = context.getBufferCache().acquire();
-	// int remaining = data.length;
-	// int offset = 0;
-	// while (remaining > 0) {
-	// int num = copy(data, offset, buf);
-	// offset += num;
-	// remaining -= num;
-	// writeAllBlocking(connection, buf);
-	// }
-	// context.getBufferCache().release(buf);
-	// }
-	//
-	// private static int copy(final byte[] data, final int offset, final
-	// ByteBuffer buf) {
-	// int remaining = data.length - offset;
-	// int num = Math.min(remaining, buf.capacity());
-	// buf.clear();
-	// buf.put(data, offset, num);
-	// buf.flip();
-	// return num;
-	// }
+	public static boolean hasConnect(int events) {
+		return (events & CONNECT) == CONNECT;
+	}
 }

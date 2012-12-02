@@ -21,9 +21,6 @@
  */
 package ch.bind.philib.net.tcp;
 
-import java.io.IOException;
-import java.nio.channels.SelectableChannel;
-import java.nio.channels.SocketChannel;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -31,11 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import ch.bind.philib.io.SafeCloseUtil;
-import ch.bind.philib.net.Session;
-import ch.bind.philib.net.SessionManager;
-import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.events.EventHandlerBase;
-import ch.bind.philib.net.events.Event;
+import ch.bind.philib.net.Connection;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -44,30 +37,45 @@ import ch.bind.philib.validation.Validation;
  * @author Philipp Meinen
  */
 
-public final class AsyncConnectFuture implements Future<Session>, SessionManager {
+public final class AsyncConnectFuture<T extends Connection> implements Future<T> {
 
-	private Session session;
+	private final T connection;
 
 	private Exception execException;
 
 	private boolean cancelled;
 
-	private boolean registered;
+	private boolean done;
 
-	private final NetContext context;
+	AsyncConnectFuture(T connection) {
+		Validation.notNull(connection);
+		this.connection = connection;
+	}
 
-	private AsyncConnectFuture(NetContext context) {
-		Validation.notNull(context);
-		this.context = context;
+	synchronized void setFinishedOk() {
+		this.done = true;
+		notifyAll();
+	}
+
+	synchronized void setFailed(Exception execException) {
+		this.execException = execException;
+		this.done = true;
+		notifyAll();
 	}
 
 	@Override
-	public synchronized boolean cancel(boolean mayInterruptIfRunning) {
-		if (session != null) {
-			return false;
+	public boolean cancel(boolean mayInterruptIfRunning) {
+		synchronized (this) {
+			if (done) {
+				return false;
+			}
+			done = true;
+			cancelled = true;
 		}
-		cancelled = true;
-		SafeCloseUtil.close(this);
+		SafeCloseUtil.close(connection);
+		synchronized (this) {
+			notifyAll();
+		}
 		return true;
 	}
 
@@ -78,30 +86,36 @@ public final class AsyncConnectFuture implements Future<Session>, SessionManager
 
 	@Override
 	public synchronized boolean isDone() {
-		return _isDone();
-	}
-
-	private boolean _isDone() {
-		return session != null || execException != null || cancelled;
+		return done;
 	}
 
 	@Override
-	public synchronized Session get() throws InterruptedException, ExecutionException {
-		while (!_isDone()) {
+	public synchronized T get() throws InterruptedException, ExecutionException {
+		if (!done) {
 			wait();
 		}
+		throwWhenFailedOrCancelled();
+		return connection;
+	}
+
+	@Override
+	public synchronized T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+		if (!done) {
+			unit.timedWait(this, timeout);
+		}
+		if (!done) {
+			throw new TimeoutException();
+		}
+		throwWhenFailedOrCancelled();
+		return connection;
+	}
+
+	private void throwWhenFailedOrCancelled() throws ExecutionException, CancellationException {
 		if (execException != null) {
 			throw new ExecutionException("async connect failed", execException);
 		}
 		if (cancelled) {
 			throw new CancellationException();
 		}
-		return session;
-	}
-
-	@Override
-	public synchronized Session get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		// TODO
-		throw new UnsupportedOperationException("TODO");
 	}
 }

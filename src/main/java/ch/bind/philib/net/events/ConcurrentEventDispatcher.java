@@ -182,24 +182,6 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public void changeOps(EventHandler eventHandler, int ops, boolean asap) {
-		EventDispatcher disp = findMapping(eventHandler);
-		if (disp != null) {
-			disp.changeOps(eventHandler, ops, asap);
-		} else {
-			try {
-				throw new Exception();
-			} catch (Exception e) {
-				e.printStackTrace(System.err);
-			}
-			System.exit(1);
-			// TODO: notify listener
-			// System.out.println("event handler is not registered: " +
-			// eventHandler);
-		}
-	}
-
-	@Override
 	public void unregister(EventHandler eventHandler) {
 		if (eventHandler != null) {
 			EventDispatcher disp = map.remove(eventHandler.getEventHandlerId());
@@ -210,12 +192,6 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 				System.out.println("event handler is not registered: " + eventHandler);
 			}
 		}
-	}
-
-	@Override
-	public boolean isEventDispatcherThread(EventHandler eventHandler) {
-		EventDispatcher dispatcher = findMapping(eventHandler);
-		return dispatcher == null ? false : dispatcher.isEventDispatcherThread(eventHandler);
 	}
 
 	@Override

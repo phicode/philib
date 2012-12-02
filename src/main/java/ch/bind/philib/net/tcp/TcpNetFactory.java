@@ -26,7 +26,10 @@ import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Future;
 
+import org.testng.internal.collections.Pair;
+
 import ch.bind.philib.io.SafeCloseUtil;
+import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.util.FinishedFuture;
@@ -53,7 +56,7 @@ public final class TcpNetFactory {
 	// return create(null, context, channel, endpoint, sessionManager);
 	// }
 	//
-	public static Future<Session> connect(NetContext context, SocketAddress endpoint) throws IOException {
+	public static Future<TcpConnection> connect(NetContext context, SocketAddress endpoint) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 		try {
 			channel.configureBlocking(false);
@@ -67,17 +70,16 @@ public final class TcpNetFactory {
 
 		try {
 			boolean finished = channel.connect(endpoint);
-			// TODO: implement :)
 			if (finished) {
-				Session session = TcpConnection.create(context, channel, endpoint);
-				return new FinishedFuture<Session>(session);
+				TcpConnection conn = TcpConnection.create(context, channel, endpoint);
+				return new FinishedFuture<TcpConnection>(conn);
+			} else {
+				return TcpClientConnection.connect(context, channel, endpoint);
 			}
-			return AsyncConnectHandler.create(context, channel, sessionManager);
 		} catch (IOException e) {
 			SafeCloseUtil.close(channel);
-			// TODO: merge with other places which do the same exception
-			// catching
-			throw new IOException("see todo", e);
+			context.getSessionManager().connectFailed(endpoint, e);
+			throw e;
 		}
 	}
 	//

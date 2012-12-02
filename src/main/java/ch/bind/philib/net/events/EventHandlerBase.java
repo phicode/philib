@@ -54,13 +54,4 @@ public abstract class EventHandlerBase implements EventHandler {
 	protected final void recycleBuffer(final ByteBuffer buf) {
 		context.getBufferPool().recycle(buf);
 	}
-
-	protected final boolean releaseBuffer(final NetBuf buf) {
-		buf.finished();
-		if (buf.isIntern()) {
-			context.getBufferPool().recycle(buf.getBuffer());
-			return false;
-		}
-		return true;
-	}
 }

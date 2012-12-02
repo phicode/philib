@@ -50,7 +50,7 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-// TODO: thread safe
+// TODO: verify thread safety
 public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SimpleEventDispatcher.class);
@@ -69,14 +69,11 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	private final Thread dispatchThread;
 
-	private final long dispatchThreadId;
-
 	private SimpleEventDispatcher(Selector selector, LoadAvg loadAvg) {
 		this.selector = selector;
 		this.loadAvg = loadAvg;
 		String threadName = getClass().getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
 		this.dispatchThread = ThreadUtil.createAndStartForeverRunner(this, threadName);
-		this.dispatchThreadId = dispatchThread.getId();
 	}
 
 	public static SimpleEventDispatcher open(boolean collectLoadAverage) throws SelectorCreationException {
@@ -92,10 +89,6 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	public static SimpleEventDispatcher open() throws SelectorCreationException {
 		return open(false);
-	}
-
-	long getDispatchThreadId() {
-		return dispatchThreadId;
 	}
 
 	@Override
@@ -197,7 +190,13 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	@Override
 	public void register(EventHandler eventHandler, int ops) {
-		newRegistrations.add(new NewRegistration(eventHandler, ops));
+		SelectableChannel channel = eventHandler.getChannel();
+		SelectionKey key = channel.keyFor(selector);
+		if (key != null) {
+			key.interestOps(ops);
+		} else {
+			newRegistrations.add(new NewRegistration(eventHandler, ops));
+		}
 		wakeup();
 	}
 
@@ -205,22 +204,6 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		Thread t = dispatchThread;
 		if (t != null && t != Thread.currentThread()) {
 			selector.wakeup();
-		}
-	}
-
-	@Override
-	public void changeOps(EventHandler eventHandler, int ops, boolean asap) {
-		SelectableChannel channel = eventHandler.getChannel();
-		SelectionKey key = channel.keyFor(selector);
-		if (key == null) {
-			// channel is not registered for this selector
-			// TODO: notify a listener
-			System.err.println("cannot change ops for a channel which is not yet registered, handler: " + eventHandler);
-		} else {
-			key.interestOps(ops);
-			if (asap) {
-				wakeup();
-			}
 		}
 	}
 
@@ -233,6 +216,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			key.attach(null);
 			wakeup();
 		} else {
+			// handle event-handlers which unregister before they were added to
+			// the selector
+
 			// TODO: this could be implemented more efficiently, is it required
 			// for high load?
 			Iterator<NewRegistration> iter = newRegistrations.iterator();
@@ -244,12 +230,6 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 				}
 			}
 		}
-	}
-
-	@Override
-	public boolean isEventDispatcherThread(EventHandler eventHandler) {
-		Thread currentThread = Thread.currentThread();
-		return (currentThread.getId() == dispatchThreadId);
 	}
 
 	@Override

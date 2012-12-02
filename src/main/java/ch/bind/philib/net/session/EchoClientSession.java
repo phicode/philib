@@ -24,11 +24,12 @@ package ch.bind.philib.net.session;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import ch.bind.philib.io.BufferUtil;
 import ch.bind.philib.io.EndianConverter;
+import ch.bind.philib.io.RingBuffer;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.InterestedEvents;
 import ch.bind.philib.net.Session;
-import ch.bind.philib.validation.Validation;
 
 /**
  * TODO
@@ -39,29 +40,22 @@ public class EchoClientSession implements Session {
 
 	private long lastInteractionNs;
 
-	private long nextValueRead;
-
-	private long nextValueSend;
-
-	private final byte[] readBuf = new byte[8192];
-
-	private final ByteBuffer writeBb = ByteBuffer.wrap(new byte[8192]);
-
-	private final byte[] sendEnc = new byte[8];
-
-	private final Object lock = new Object();
-
 	private final boolean performVerification;
 
 	private final Connection connection;
 
-	private boolean sendPending = false;
-
-	private int numSendable = 16384;
-
 	private long lastRx;
 
 	private long lastTx;
+
+	private final RingBuffer buf = new RingBuffer();
+	private final byte[] encodeBuf = new byte[8192];
+	private final ByteBuffer writeBuf = ByteBuffer.wrap(encodeBuf);
+	private long nextSendNum;
+	private long nextReceiveNum;
+
+	private ByteBuffer receiveBuf = ByteBuffer.allocate(8192);
+	private byte[] receiveNum = new byte[8];
 
 	public EchoClientSession(Connection connection, boolean performVerification) {
 		this.connection = connection;
@@ -73,102 +67,63 @@ public class EchoClientSession implements Session {
 	}
 
 	@Override
-	public InterestedEvents receive(ByteBuffer data) throws IOException {
+	public InterestedEvents receive(Connection conn, ByteBuffer data) throws IOException {
 		lastInteractionNs = System.nanoTime();
-		synchronized (lock) {
+		if (performVerification) {
+			receiveBuf = BufferUtil.append(receiveBuf, data);
+			verifyReceived();
+		}
+		send();
+		return InterestedEvents.SENDABLE_RECEIVE;
+	}
+
+	private void verifyReceived() {
+		while (receiveBuf.remaining() >= 8) {
+			receiveBuf.get(receiveNum);
+			long num = EndianConverter.decodeInt64LE(receiveNum);
+			if (num != nextReceiveNum) {
+				System.out.println("expected: " + nextReceiveNum + " got: " + num);
+				// throw new AssertionError(num + " != " + nextReceiveNum);
+			}
+			nextReceiveNum++;
+		}
+	}
+
+	private void send() throws IOException {
+		if (writeBuf.hasRemaining()) {
+			connection.send(writeBuf);
+		}
+		while (!writeBuf.hasRemaining()) {
 			if (performVerification) {
-				verifyReceived(data);
+				fillWriteBuf();
 			} else {
-				int rem = data.remaining();
-				int consume = (rem / 8);
-				numSendable += consume;
-				int newPos = data.position() + (consume * 8);
-				data.position(newPos);
+				writeBuf.clear();
 			}
-			// TODO: send nulled packets if we are not in verification mode
-			_send();
+			connection.send(writeBuf);
 		}
 	}
 
-	public void send() throws IOException {
-		synchronized (lock) {
-			_send();
+	private void fillWriteBuf() {
+		int canWriteNums = writeBuf.capacity() / 8;
+		for (int i = 0, off = 0; i < canWriteNums; i++, off += 8) {
+			EndianConverter.encodeInt64LE(nextSendNum++, encodeBuf, off);
 		}
-	}
-
-	void _send() throws IOException {
-		if (sendPending) {
-			// writeBb is in read mode
-			connection.sendAsync(writeBb);
-			if (writeBb.hasRemaining()) {
-				return;
-			}
-			sendPending = false;
-		}
-		while (!sendPending) {// loop if all data has been written
-			// switch writeBb to write mode
-			writeBb.clear();
-			int canWriteNums = writeBb.capacity() / 8;
-			int sendNums = Math.min(numSendable, canWriteNums);
-			Validation.isTrue(sendNums >= 0);
-			if (sendNums == 0) {
-				return;
-			}
-			enc(sendNums);
-			// switch writeBb to read mode
-			writeBb.flip();
-			Validation.isTrue(writeBb.position() == 0 && writeBb.limit() == sendNums * 8, "" + writeBb.limit());
-			connection.sendAsync(writeBb);
-			sendPending = writeBb.hasRemaining();
-		}
-	}
-
-	private void enc(int num) {
-		for (int i = 0; i < num; i++) {
-			EndianConverter.encodeInt64LE(nextValueSend, sendEnc);
-			writeBb.put(sendEnc);
-			numSendable--;
-			nextValueSend++;
-		}
-	}
-
-	private void verifyReceived(ByteBuffer data) {
-		int rem = data.remaining();
-		assert (rem > 0);
-		int numVerify = Math.min(readBuf.length / 8, rem / 8);
-		int verifyBytes = numVerify * 8;
-		data.get(readBuf, 0, verifyBytes);
-		int off = 0;
-		while (off < verifyBytes) {
-			long v = EndianConverter.decodeInt64LE(readBuf, off);
-			off += 8;
-			if (v != nextValueRead) {
-				System.out.println("expected: " + nextValueRead + " got: " + v);
-				// throw new AssertionError(v + " != " + nextValueRead);
-			}
-			nextValueRead++;
-			numSendable++;
-		}
+		writeBuf.clear();
 	}
 
 	@Override
-	public void closed() {
+	public void closed(Connection conn) {
 	}
 
 	public long getLastInteractionNs() {
 		return lastInteractionNs;
 	}
 
-	public void incInTransitBytes(int num) {
-		Validation.isTrue(num % 8 == 0);
-		synchronized (lock) {
-			numSendable += num / 8;
-		}
-	}
-
 	@Override
-	public void writable() throws IOException {
+	public InterestedEvents sendable(Connection conn) throws IOException {
+		lastInteractionNs = System.nanoTime();
 		send();
+		return InterestedEvents.SENDABLE_RECEIVE;
 	}
 
 	public long getRxDiff() {
