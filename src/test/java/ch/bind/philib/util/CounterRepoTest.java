@@ -35,8 +35,11 @@ public class CounterRepoTest {
 		Counter b = CounterRepo.DEFAULT.forName("b", null);
 
 		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 2);
-		assertTrue(a == CounterRepo.DEFAULT.forName("a", null));
-		assertTrue(b == CounterRepo.DEFAULT.forName("b", null));
+		Counter a2 = CounterRepo.DEFAULT.forName("a", null);
+		Counter b2 = CounterRepo.DEFAULT.forName("b", null);
+		assertTrue(a == a2);
+		assertTrue(b == b2);
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 2);
 	}
 
 	@Test
@@ -44,6 +47,7 @@ public class CounterRepoTest {
 		Counter a = CounterRepo.DEFAULT.forName("a", null);
 		CounterRepo.DEFAULT.remove("a");
 		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 0);
-		assertTrue(a != CounterRepo.DEFAULT.forName("a", null));
+		Counter a2 = CounterRepo.DEFAULT.forName("a", null);
+		assertTrue(a != null && a2 != null && a != a2);
 	}
 }
