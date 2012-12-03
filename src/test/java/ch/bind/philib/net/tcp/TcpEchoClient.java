@@ -57,9 +57,7 @@ import ch.bind.philib.pool.buffer.ByteBufferPool;
 // TODO: many threads
 public class TcpEchoClient {
 
-	private static final boolean VERIFY_MODE = false;
-
-	private static final boolean DEBUG_MODE = true;
+	private static final boolean VERIFY_MODE = true;
 
 	public static void main(String[] args) throws Exception {
 		int numClients = 1;
@@ -138,7 +136,7 @@ public class TcpEchoClient {
 
 		final long rampUpMs = 50L;
 		final long rampDownMs = 200000L;
-		final int maxConnections = 1000;
+		final int maxConnections = 1;
 
 		long startNext = start - 1;
 		long lastPrintStats = start;
@@ -246,6 +244,7 @@ public class TcpEchoClient {
 			return;
 		}
 		try {
+			System.out.println("connecting one");
 			Future<TcpConnection> future = TcpNetFactory.connect(context, endpoint);
 			connecting.add(future);
 		} catch (IOException e) {

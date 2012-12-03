@@ -34,6 +34,8 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -108,18 +110,23 @@ public class TcpConnectionTest {
 	@Test(timeOut = 60000, priority = 0)
 	public void connectAndDisconnect() throws Exception {
 		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
-		DevNullsessionManager sessionManager = new DevNullsessionManager();
-		NetContext context =NetContexts.createSimple(sessionManager);
+		DevNullsessionManager serverSessionManager = new DevNullsessionManager();
+		DevNullsessionManager clientSessionManager = new DevNullsessionManager();
+		NetContext serverContext = NetContexts.createSimple(serverSessionManager);
+		NetContext clientContext = NetContexts.createSimple(clientSessionManager);
 		SocketAddress addr = SocketAddresses.localhost(1234);
-		NetListener netServer = TcpServer.open(context, addr);
-		Session clientS = TcpConnection.connect TcpNetFactory.syncOpen(context, addr, sessionManager);
+		NetListener netServer = TcpServer.open(serverContext, addr);
+		Future<TcpConnection> clientFuture = TcpNetFactory.connect(clientContext, addr);
+
+		TcpConnection clientConn = clientFuture.get(100, TimeUnit.MILLISECONDS);
+		assertNotNull(clientConn);
 
 		// give some time for the client and server-side of the connection to
 		// establish proper fusion power
 		Thread.sleep(50);
 
-		DevNullSession server = serversessionManager.session;
-		DevNullSession client = clientsessionManager.session;
+		DevNullSession server = serverSessionManager.session;
+		DevNullSession client = clientSessionManager.session;
 		assertNotNull(server);
 		assertNotNull(client);
 		assertTrue(client == clientS);
@@ -171,7 +178,7 @@ public class TcpConnectionTest {
 		context.close();
 	}
 
-	private static void sendSync(Connection from, Connection to, ByteBuffer data) throws Exception {
+	private static void send(Connection from, Connection to, ByteBuffer data) throws Exception {
 		long fromRx = from.getRx();
 		long fromTx = from.getTx();
 		long toRx = to.getRx();

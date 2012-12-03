@@ -56,6 +56,13 @@ public interface NetContext extends Closeable {
 	/**
 	 * @return {@code null} if not set.
 	 */
+	Boolean getTcpKeepAlive();
+
+	void setTcpKeepAlive(boolean tcpKeepAlive);
+
+	/**
+	 * @return {@code null} if not set.
+	 */
 	Integer getSndBufSize();
 
 	void setSndBufSize(int size);

@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import ch.bind.philib.io.BufferUtil;
 import ch.bind.philib.io.EndianConverter;
 import ch.bind.philib.io.RingBuffer;
+import ch.bind.philib.lang.ArrayUtil;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.InterestedEvents;
 import ch.bind.philib.net.Session;
@@ -38,6 +39,10 @@ import ch.bind.philib.net.Session;
  */
 public class EchoClientSession implements Session {
 
+	private static final int NUMS = 2;
+	// private static final int NUMS = 1024;
+	private static final int BUF_SIZE = NUMS * 8;
+
 	private long lastInteractionNs;
 
 	private final boolean performVerification;
@@ -48,18 +53,18 @@ public class EchoClientSession implements Session {
 
 	private long lastTx;
 
-	private final RingBuffer buf = new RingBuffer();
-	private final byte[] encodeBuf = new byte[8192];
+	private final byte[] encodeBuf = new byte[BUF_SIZE];
 	private final ByteBuffer writeBuf = ByteBuffer.wrap(encodeBuf);
 	private long nextSendNum;
 	private long nextReceiveNum;
 
-	private ByteBuffer receiveBuf = ByteBuffer.allocate(8192);
+	private ByteBuffer receiveBuf = ByteBuffer.allocate(BUF_SIZE);
 	private byte[] receiveNum = new byte[8];
 
 	public EchoClientSession(Connection connection, boolean performVerification) {
 		this.connection = connection;
 		this.performVerification = performVerification;
+		writeBuf.limit(0);
 	}
 
 	public Connection getConnection() {
@@ -68,6 +73,14 @@ public class EchoClientSession implements Session {
 
 	@Override
 	public InterestedEvents receive(Connection conn, ByteBuffer data) throws IOException {
+		System.out.println("received: " + ArrayUtil.formatShortHex(data, 16));
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e);
+		}
 		lastInteractionNs = System.nanoTime();
 		if (performVerification) {
 			receiveBuf = BufferUtil.append(receiveBuf, data);
@@ -77,20 +90,26 @@ public class EchoClientSession implements Session {
 		return InterestedEvents.SENDABLE_RECEIVE;
 	}
 
-	private void verifyReceived() {
+	private void verifyReceived() throws IOException {
 		while (receiveBuf.remaining() >= 8) {
 			receiveBuf.get(receiveNum);
 			long num = EndianConverter.decodeInt64LE(receiveNum);
 			if (num != nextReceiveNum) {
 				System.out.println("expected: " + nextReceiveNum + " got: " + num);
-				// throw new AssertionError(num + " != " + nextReceiveNum);
+				connection.close();
+				return;
 			}
 			nextReceiveNum++;
 		}
 	}
 
+	private int numSendPrints;
+
 	private void send() throws IOException {
 		if (writeBuf.hasRemaining()) {
+			if (numSendPrints++ < 4) {
+				System.out.println("sending: " + ArrayUtil.formatShortHex(writeBuf, 16));
+			}
 			connection.send(writeBuf);
 		}
 		while (!writeBuf.hasRemaining()) {
@@ -98,6 +117,9 @@ public class EchoClientSession implements Session {
 				fillWriteBuf();
 			} else {
 				writeBuf.clear();
+			}
+			if (numSendPrints++ < 4) {
+				System.out.println("sending: " + ArrayUtil.formatShortHex(writeBuf, 16));
 			}
 			connection.send(writeBuf);
 		}

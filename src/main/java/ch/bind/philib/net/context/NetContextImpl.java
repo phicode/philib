@@ -59,6 +59,7 @@ public class NetContextImpl implements NetContext {
 	private final EventDispatcher eventDispatcher;
 
 	private Boolean tcpNoDelay;
+	private Boolean tcpKeepAlive;
 
 	private Integer sndBufSize;
 
@@ -121,6 +122,16 @@ public class NetContextImpl implements NetContext {
 	}
 
 	@Override
+	public void setTcpKeepAlive(boolean tcpKeepAlive) {
+		this.tcpKeepAlive = tcpKeepAlive;
+	}
+
+	@Override
+	public Boolean getTcpKeepAlive() {
+		return tcpKeepAlive;
+	}
+
+	@Override
 	public void setSndBufSize(int size) {
 		this.sndBufSize = size;
 	}
@@ -179,6 +190,9 @@ public class NetContextImpl implements NetContext {
 				}
 				if (rcvBufSize != null) {
 					socket.setReceiveBufferSize(rcvBufSize);
+				}
+				if (tcpKeepAlive != null) {
+					socket.setKeepAlive(tcpKeepAlive);
 				}
 			} catch (Exception e) {
 				lastExc = e;

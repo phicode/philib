@@ -176,24 +176,29 @@ public abstract class ArrayUtil {
 		return sb.toString();
 	}
 
-	public static String formatShortHex(ByteBuffer data) {
+	public static String formatShortHex(final ByteBuffer data, final int len) {
 		if (data == null) {
 			return "";
 		}
-		final int len = data.remaining();
-		if (len == 0) {
+		final int dataLen = data.remaining();
+		if (dataLen == 0) {
 			return "";
 		}
+		final int printLen = len == -1 ? dataLen : Math.min(dataLen, len);
 		if (data.hasArray()) {
-			return formatShortHex(data.array(), data.position(), len);
+			return formatShortHex(data.array(), data.position(), printLen);
 		}
-		StringBuilder sb = new StringBuilder(len * 2);
+		StringBuilder sb = new StringBuilder(printLen * 2);
 		final int initialPos = data.position();
-		for (int i = 0; i < len; i++) {
+		for (int i = 0; i < printLen; i++) {
 			toShortHex(sb, (data.get() & 0xFF));
 		}
 		data.position(initialPos);
 		return sb.toString();
+	}
+
+	public static String formatShortHex(ByteBuffer data) {
+		return formatShortHex(data, -1);
 	}
 
 	private static void toShortHex(StringBuilder sb, int v) {
