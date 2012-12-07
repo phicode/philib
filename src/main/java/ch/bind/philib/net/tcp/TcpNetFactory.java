@@ -26,11 +26,7 @@ import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Future;
 
-import org.testng.internal.collections.Pair;
-
 import ch.bind.philib.io.SafeCloseUtil;
-import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.Session;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.util.FinishedFuture;
 
@@ -44,23 +40,16 @@ public final class TcpNetFactory {
 	private TcpNetFactory() {
 	}
 
-	// // TODO: supply session directly!
-	// public static Session syncOpen(NetContext context, SocketAddress
-	// endpoint, sessionManager sessionManager) throws IOException {
-	// SocketChannel channel = SocketChannel.open();
-	// channel.configureBlocking(true);
-	// context.setSocketOptions(channel.socket());
-	// if (!channel.connect(endpoint)) {
-	// channel.finishConnect();
-	// }
-	// return create(null, context, channel, endpoint, sessionManager);
-	// }
-	//
+	public static TcpServer listen(NetContext context, SocketAddress bindAddress) throws IOException {
+		return TcpServer.listen(context, bindAddress);
+	}
+
 	public static Future<TcpConnection> connect(NetContext context, SocketAddress endpoint) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 		try {
 			channel.configureBlocking(false);
 			context.setSocketOptions(channel.socket());
+			
 		} catch (IOException e) {
 			SafeCloseUtil.close(channel);
 			// TODO: merge with other places which do the same exception
@@ -69,12 +58,14 @@ public final class TcpNetFactory {
 		}
 
 		try {
-			boolean finished = channel.connect(endpoint);
+			long timeout = context.getConnectTimeoutMs();
+			boolean finished = channel.connect(endpoint,timeout);
 			if (finished) {
-				TcpConnection conn = TcpConnection.create(context, channel, endpoint);
+				TcpConnection conn = TcpConnection.createConnected(context, channel, endpoint);
 				return new FinishedFuture<TcpConnection>(conn);
-			} else {
-				return TcpClientConnection.connect(context, channel, endpoint);
+			}
+			else {
+				return TcpClientConnection.createConnecting(context, channel, endpoint);
 			}
 		} catch (IOException e) {
 			SafeCloseUtil.close(channel);
@@ -82,14 +73,5 @@ public final class TcpNetFactory {
 			throw e;
 		}
 	}
-	//
-	//
-	// public static Session create(EventHandler oldHandler, NetContext context,
-	// SocketChannel channel, sessionManager sessionManager)
-	// throws IOException {
-	// // TODO:jdk7 SocketAddress remoteAddress = channel.getRemoteAddress();
-	// SocketAddress remoteAddress = channel.socket().getRemoteSocketAddress();
-	// return create(oldHandler, context, channel, remoteAddress,
-	// sessionManager);
-	// }
+
 }

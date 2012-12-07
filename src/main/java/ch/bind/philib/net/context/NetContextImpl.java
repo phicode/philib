@@ -59,6 +59,7 @@ public class NetContextImpl implements NetContext {
 	private final EventDispatcher eventDispatcher;
 
 	private Boolean tcpNoDelay;
+
 	private Boolean tcpKeepAlive;
 
 	private Integer sndBufSize;
@@ -170,7 +171,8 @@ public class NetContextImpl implements NetContext {
 	public void getTcpServerSocketBacklog(int tcpServerSocketBacklog) {
 		if (tcpServerSocketBacklog < 1) {
 			this.tcpServerSocketBacklog = 1;
-		} else {
+		}
+		else {
 			this.tcpServerSocketBacklog = tcpServerSocketBacklog;
 		}
 	}
@@ -182,9 +184,6 @@ public class NetContextImpl implements NetContext {
 		int numExc = 0;
 		for (int tryCount = 0; tryCount < 3; tryCount++) {
 			try {
-				if (tcpNoDelay != null) {
-					socket.setTcpNoDelay(tcpNoDelay);
-				}
 				if (sndBufSize != null) {
 					socket.setSendBufferSize(sndBufSize);
 				}
@@ -194,6 +193,10 @@ public class NetContextImpl implements NetContext {
 				if (tcpKeepAlive != null) {
 					socket.setKeepAlive(tcpKeepAlive);
 				}
+				if (tcpNoDelay != null) {
+					socket.setTcpNoDelay(tcpNoDelay);
+				}
+				socket.set
 			} catch (Exception e) {
 				lastExc = e;
 				numExc++;
@@ -202,7 +205,8 @@ public class NetContextImpl implements NetContext {
 		if (numExc > 0) {
 			if (numExc < 3) {
 				LOG.warn(numExc + "/3 set-socket-options resulted in an exception, last exception: " + lastExc);
-			} else {
+			}
+			else {
 				throw new IOException("all 3 set-socket-options resulted in an exception", lastExc);
 			}
 		}
@@ -218,6 +222,7 @@ public class NetContextImpl implements NetContext {
 
 	@Override
 	public void setSocketOptions(DatagramSocket socket) throws SocketException {
+		Validation.notNull(socket);
 		if (broadcastDatagram != null) {
 			socket.setBroadcast(broadcastDatagram);
 		}

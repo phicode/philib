@@ -31,9 +31,9 @@ import java.nio.ByteBuffer;
  */
 public interface Session {
 
-	InterestedEvents receive(Connection conn, ByteBuffer data) throws IOException;
+	Events receive(Connection conn, ByteBuffer data) throws IOException;
 
-	InterestedEvents sendable(Connection conn) throws IOException;
+	Events sendable(Connection conn) throws IOException;
 
 	void closed(Connection conn);
 }

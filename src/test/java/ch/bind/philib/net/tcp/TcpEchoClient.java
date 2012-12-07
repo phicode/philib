@@ -21,8 +21,6 @@
  */
 package ch.bind.philib.net.tcp;
 
-import static org.testng.Assert.fail;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -43,7 +41,6 @@ import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.NetContextImpl;
 import ch.bind.philib.net.events.ConcurrentEventDispatcher;
 import ch.bind.philib.net.events.EventDispatcher;
-import ch.bind.philib.net.events.EventDispatcherCreationException;
 import ch.bind.philib.net.session.EchoClientSession;
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 
@@ -57,7 +54,9 @@ import ch.bind.philib.pool.buffer.ByteBufferPool;
 // TODO: many threads
 public class TcpEchoClient {
 
-	private static final boolean VERIFY_MODE = true;
+	private static final boolean VERIFY_MODE = false;
+
+	private static final long CONNECT_TIMEOUT = 1000L;
 
 	public static void main(String[] args) throws Exception {
 		int numClients = 1;
@@ -65,7 +64,8 @@ public class TcpEchoClient {
 		if (args.length > 1) {
 			System.out.println("only one parameter may be specified");
 			System.exit(1);
-		} else if (args.length == 1) {
+		}
+		else if (args.length == 1) {
 			try {
 				numClients = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -108,6 +108,7 @@ public class TcpEchoClient {
 		}
 	};
 
+	// TODO: keep track of connection times
 	private void run(int numClients) throws IOException {
 		// endpoint = SocketAddresses.fromIp("10.0.0.71", 1234);
 		// endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
@@ -117,12 +118,13 @@ public class TcpEchoClient {
 			System.out.println("unknown host: " + ExceptionUtil.buildMessageChain(e));
 			return;
 		}
-		ByteBufferPool bufferPool = ByteBufferPool.create(8192, 128, 4);
-		EventDispatcher eventDispatcher = ConcurrentEventDispatcher.open(4);
+		ByteBufferPool bufferPool = ByteBufferPool.create(8192, 128, 3);
+		EventDispatcher eventDispatcher = ConcurrentEventDispatcher.open(3);
 		context = new NetContextImpl(sessionManager, bufferPool, eventDispatcher);
 		context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
+		context.setConnectTimeout(CONNECT_TIMEOUT);
 		// context.setTcpNoDelay(false);
 		// context.setSndBufSize(512);
 		// context.setRcvBufSize(512);
@@ -136,7 +138,7 @@ public class TcpEchoClient {
 
 		final long rampUpMs = 50L;
 		final long rampDownMs = 200000L;
-		final int maxConnections = 1;
+		final int maxConnections = 100;
 
 		long startNext = start - 1;
 		long lastPrintStats = start;
@@ -244,7 +246,7 @@ public class TcpEchoClient {
 			return;
 		}
 		try {
-			System.out.println("connecting one");
+			// System.out.println("connecting one");
 			Future<TcpConnection> future = TcpNetFactory.connect(context, endpoint);
 			connecting.add(future);
 		} catch (IOException e) {
@@ -260,7 +262,7 @@ public class TcpEchoClient {
 			RichEchoClientSession recs = iter.next();
 			if (recs.createdAt < killIfOlder) {
 				iter.remove();
-				System.out.println("closing: " + recs.session);
+				// System.out.println("closing: " + recs.session);
 				close(recs);
 			}
 		}

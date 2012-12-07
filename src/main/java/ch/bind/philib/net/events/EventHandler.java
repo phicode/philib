@@ -34,7 +34,7 @@ public interface EventHandler extends Closeable {
 
 	SelectableChannel getChannel();
 
-	int handle(int events) throws IOException;
+	int handleOps(int ops) throws IOException;
 
 	long getEventHandlerId();
 

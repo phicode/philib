@@ -34,11 +34,13 @@ import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ArrayUtil;
+import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.DatagramSession;
+import ch.bind.philib.net.NetListener;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.EventHandlerBase;
-import ch.bind.philib.net.events.Event;
+import ch.bind.philib.net.events.SelectOps;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -46,13 +48,11 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public final class UdpServer extends EventHandlerBase implements NetServer {
+public final class UdpServer extends EventHandlerBase implements NetListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UdpServer.class);
 
 	private static final int IO_READ_LIMIT_PER_ROUND = 64 * 1024;
-
-	private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
 
 	private final ServiceState serviceState = new ServiceState();
 
@@ -60,7 +60,7 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 
 	private final DatagramSession session;
 
-	UdpServer(NetContext context, DatagramSession session, DatagramChannel channel) {
+	UdpServer(NetContext context, DatagramChannel channel, DatagramSession session) {
 		super(context);
 		Validation.notNull(session);
 		Validation.notNull(channel);
@@ -72,22 +72,26 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 		channel.configureBlocking(false);
 		context.setSocketOptions(channel.socket());
 		serviceState.setOpen();
-		context.getEventDispatcher().register(this, Event.READ);
+		context.getEventDispatcher().register(this, SelectOps.READ_WRITE);
 	}
 
-	static UdpServer open(NetContext context, DatagramSession session, SocketAddress bindAddress) throws IOException {
+	public static UdpServer open(NetContext context, SocketAddress bindAddress, DatagramSession session) throws IOException {
 		DatagramChannel channel = DatagramChannel.open();
 		DatagramSocket socket = channel.socket();
 		try {
 			socket.bind(bindAddress);
 		} catch (SocketException e) {
 			SafeCloseUtil.close(channel, LOG);
-			throw e;
+			throw new IOException("socket binding failed", e);
 		}
-
-		UdpServer server = new UdpServer(context, session, channel);
-		server.setup();
-		return server;
+		try {
+			UdpServer server = new UdpServer(context, channel, session);
+			server.setup();
+			return server;
+		} catch (IOException e) {
+			SafeCloseUtil.close(channel);
+			throw new IOException("channel setup failed", e);
+		}
 	}
 
 	@Override
@@ -109,29 +113,15 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 		return context;
 	}
 
-	private void notifyReceive(SocketAddress addr, ByteBuffer data) {
-		try {
-			session.receive(addr, data);
-			if (data.hasRemaining()) {
-				if (LOG.isTraceEnabled()) {
-					String m = "UDP packet from {} was not fully consumed, {} bytes remaining";
-					LOG.trace(m, addr, data.remaining());
-				}
-			}
-		} catch (Exception e) {
-			LOG.error("error notifying an UDP session about a packet from {}", addr);
-		}
-	}
-
 	@Override
 	public SelectableChannel getChannel() {
 		return channel;
 	}
 
 	@Override
-	public int handle(int ops) throws IOException {
+	public int handleOps(int ops) throws IOException {
 		int totalRead = 0;
-		final ByteBuffer rbuf = acquireBuffer();
+		final ByteBuffer rbuf = takeBuffer();
 		while (totalRead < IO_READ_LIMIT_PER_ROUND) {
 			if (totalRead > 0) {
 				// clear the data from the first read
@@ -145,7 +135,7 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 			try {
 				addr = channel.receive(rbuf);
 			} catch (SecurityException e) {
-				// this is the only possible runtime-exception, quite nasty
+				// this is a possible runtime-exception, quite nasty
 				if (LOG.isTraceEnabled()) {
 					LOG.trace("a security-manager blocked an incoming UDP packet");
 				}
@@ -154,57 +144,25 @@ public final class UdpServer extends EventHandlerBase implements NetServer {
 			if (addr == null) {
 				// no more data to read
 				assert (rbuf.position() == 0 && rbuf.limit() == rbuf.capacity());
-				return Event.READ;
+				return SelectOps.READ;
 			}
 			rbuf.flip();
 			totalRead += rbuf.remaining();
 			notifyReceive(addr, rbuf);
 		}
-		freeBuffer(rbuf);
-		return Event.READ;
+		recycleBuffer(rbuf);
+		return SelectOps.READ;
 	}
 
-	void sendSync(final SocketAddress addr, final ByteBuffer data) throws IOException {
-		Validation.notNull(addr);
-		if (data == null || !data.hasRemaining()) {
-			return;
+	private void notifyReceive(SocketAddress addr, ByteBuffer data) {
+		try {
+			session.receive(addr, data);
+		} catch (Exception e) {
+			LOG.error("notifying an UDP session about a packet from {} failed: {}", addr, ExceptionUtil.buildMessageChain(e));
 		}
-		if (getContext().getEventDispatcher().isEventDispatcherThread(Thread.currentThread())) {
-			throw new IllegalStateException("cant write in blocking mode from the dispatcher thread");
-		}
-
-		// // first the remaining data in the backlog has to be written (if
-		// // any), then our buffer
-		// // if in the meantime more data arrives we do not want to block
-		// // longer
-		// final NetBuf externBuf = NetBuf.createExtern(data);
-		// synchronized (w_writeBacklog) {
-		// w_writeBacklog.addBack(externBuf);
-		// while (true) {
-		// boolean finished = sendPendingAsync();
-		//
-		// if (finished) {
-		// // all data from the backlog has been written
-		// assert (!externBuf.isPending() && !data.hasRemaining());
-		// unregisterFromWriteEvents();
-		// return;
-		// }
-		// registerForWriteEvents();
-		//
-		// // not all data in the backlog has been written
-		// if (externBuf.isPending()) {
-		// // our data is among those who are waiting to be written
-		// w_writeBacklog.wait();
-		// } else {
-		// // our data has been written
-		// assert (!data.hasRemaining());
-		// return;
-		// }
-		// }
-		// }
 	}
 
-	void sendAsync(final SocketAddress addr, final ByteBuffer data) throws IOException {
+	void send(final SocketAddress addr, final ByteBuffer data) throws IOException {
 		Validation.notNull(addr);
 		if (data == null || !data.hasRemaining()) {
 			return;

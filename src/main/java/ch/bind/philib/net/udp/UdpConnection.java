@@ -21,12 +21,85 @@
  */
 package ch.bind.philib.net.udp;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectableChannel;
+
+import ch.bind.philib.net.Connection;
+import ch.bind.philib.net.Events;
+import ch.bind.philib.net.Session;
+import ch.bind.philib.net.conn.ConnectionBase;
+import ch.bind.philib.net.context.NetContext;
+import ch.bind.philib.net.events.EventHandlerBase;
+
 /**
  * TODO
  * 
  * @author Philipp Meinen
  */
 
-public class UdpConnection {
+public class UdpConnection  extends ConnectionBase {
 
+//	private final 
+public UdpConnection(NetContext context) {
+		super(context);
+	}
+
+	
+	
+	
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int send(ByteBuffer data) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setEvents(Events interestedEvents) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isConnected() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isOpen() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public SocketAddress getRemoteAddress() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Session getSession() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SelectableChannel getChannel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int handleOps(int ops) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

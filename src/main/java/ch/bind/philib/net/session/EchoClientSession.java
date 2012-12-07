@@ -26,10 +26,8 @@ import java.nio.ByteBuffer;
 
 import ch.bind.philib.io.BufferUtil;
 import ch.bind.philib.io.EndianConverter;
-import ch.bind.philib.io.RingBuffer;
-import ch.bind.philib.lang.ArrayUtil;
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.InterestedEvents;
+import ch.bind.philib.net.Events;
 import ch.bind.philib.net.Session;
 
 /**
@@ -39,8 +37,8 @@ import ch.bind.philib.net.Session;
  */
 public class EchoClientSession implements Session {
 
-	private static final int NUMS = 2;
-	// private static final int NUMS = 1024;
+	private static final int NUMS = 1024;
+
 	private static final int BUF_SIZE = NUMS * 8;
 
 	private long lastInteractionNs;
@@ -54,17 +52,24 @@ public class EchoClientSession implements Session {
 	private long lastTx;
 
 	private final byte[] encodeBuf = new byte[BUF_SIZE];
+
 	private final ByteBuffer writeBuf = ByteBuffer.wrap(encodeBuf);
+
 	private long nextSendNum;
+
 	private long nextReceiveNum;
 
 	private ByteBuffer receiveBuf = ByteBuffer.allocate(BUF_SIZE);
-	private byte[] receiveNum = new byte[8];
+
+	private byte[] decodeBuf = new byte[8];
+
+	private boolean verificationOk = true;
 
 	public EchoClientSession(Connection connection, boolean performVerification) {
 		this.connection = connection;
 		this.performVerification = performVerification;
 		writeBuf.limit(0);
+		receiveBuf.limit(0);
 	}
 
 	public Connection getConnection() {
@@ -72,29 +77,22 @@ public class EchoClientSession implements Session {
 	}
 
 	@Override
-	public InterestedEvents receive(Connection conn, ByteBuffer data) throws IOException {
-		System.out.println("received: " + ArrayUtil.formatShortHex(data, 16));
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new IOException(e);
-		}
+	public Events receive(Connection conn, ByteBuffer data) throws IOException {
 		lastInteractionNs = System.nanoTime();
 		if (performVerification) {
 			receiveBuf = BufferUtil.append(receiveBuf, data);
 			verifyReceived();
 		}
 		send();
-		return InterestedEvents.SENDABLE_RECEIVE;
+		return Events.SENDABLE_RECEIVE;
 	}
 
 	private void verifyReceived() throws IOException {
 		while (receiveBuf.remaining() >= 8) {
-			receiveBuf.get(receiveNum);
-			long num = EndianConverter.decodeInt64LE(receiveNum);
+			receiveBuf.get(decodeBuf);
+			long num = EndianConverter.decodeInt64LE(decodeBuf);
 			if (num != nextReceiveNum) {
+				verificationOk = false;
 				System.out.println("expected: " + nextReceiveNum + " got: " + num);
 				connection.close();
 				return;
@@ -103,31 +101,23 @@ public class EchoClientSession implements Session {
 		}
 	}
 
-	private int numSendPrints;
-
 	private void send() throws IOException {
 		if (writeBuf.hasRemaining()) {
-			if (numSendPrints++ < 4) {
-				System.out.println("sending: " + ArrayUtil.formatShortHex(writeBuf, 16));
-			}
 			connection.send(writeBuf);
 		}
 		while (!writeBuf.hasRemaining()) {
 			if (performVerification) {
 				fillWriteBuf();
-			} else {
-				writeBuf.clear();
 			}
-			if (numSendPrints++ < 4) {
-				System.out.println("sending: " + ArrayUtil.formatShortHex(writeBuf, 16));
+			else {
+				writeBuf.clear();
 			}
 			connection.send(writeBuf);
 		}
 	}
 
 	private void fillWriteBuf() {
-		int canWriteNums = writeBuf.capacity() / 8;
-		for (int i = 0, off = 0; i < canWriteNums; i++, off += 8) {
+		for (int i = 0, off = 0; i < NUMS; i++, off += 8) {
 			EndianConverter.encodeInt64LE(nextSendNum++, encodeBuf, off);
 		}
 		writeBuf.clear();
@@ -142,10 +132,10 @@ public class EchoClientSession implements Session {
 	}
 
 	@Override
-	public InterestedEvents sendable(Connection conn) throws IOException {
+	public Events sendable(Connection conn) throws IOException {
 		lastInteractionNs = System.nanoTime();
 		send();
-		return InterestedEvents.SENDABLE_RECEIVE;
+		return Events.SENDABLE_RECEIVE;
 	}
 
 	public long getRxDiff() {
@@ -166,5 +156,9 @@ public class EchoClientSession implements Session {
 	public String toString() {
 		return String.format("%s[rx=%d, tx=%d, remote=%s]", getClass().getSimpleName(), connection.getRx(), connection.getTx(),
 				connection.getRemoteAddress());
+	}
+
+	public boolean isVerificationOk() {
+		return verificationOk;
 	}
 }

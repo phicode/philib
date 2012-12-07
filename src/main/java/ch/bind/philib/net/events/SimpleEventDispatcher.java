@@ -30,6 +30,7 @@ import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -43,7 +44,6 @@ import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.util.LoadAvg;
 import ch.bind.philib.util.LoadAvgNoop;
 import ch.bind.philib.util.LoadAvgSimple;
-import ch.bind.philib.validation.Validation;
 
 /**
  * TODO
@@ -68,6 +68,10 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	private final LoadAvg loadAvg;
 
 	private final Thread dispatchThread;
+
+	private volatile int numHandlers;
+	
+	private final SortedMap<Long, EventHandler> upcomingEventTimeouts;
 
 	private SimpleEventDispatcher(Selector selector, LoadAvg loadAvg) {
 		this.selector = selector;
@@ -98,9 +102,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	@Override
 	public int getNumEventHandlers() {
-		// this is actually not thread safe but we access the information in
-		// read-only mode
-		return selector.keys().size();
+		return numHandlers;
 	}
 
 	@Override
@@ -109,26 +111,14 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	}
 
 	private int select() throws IOException, ClosedSelectorException {
-		int num = 0;
-		while (num == 0 && serviceState.isOpen()) {
+		while (serviceState.isOpen()) {
 			updateRegistrations();
-			num = selector.select(10000L);
-		}
-		return num;
-	}
-
-	private void updateRegistrations() {
-		NewRegistration reg = null;
-		while ((reg = newRegistrations.poll()) != null) {
-			EventHandler eventHandler = reg.getEventHandler();
-			try {
-				SelectableChannel channel = eventHandler.getChannel();
-				int ops = reg.getOps();
-				channel.register(selector, ops, eventHandler);
-			} catch (ClosedChannelException e) {
-				SafeCloseUtil.close(eventHandler, LOG);
+			int num = selector.select(10000L);
+			if (num != 0) {
+				return num;
 			}
 		}
+		return -1;
 	}
 
 	@Override
@@ -144,6 +134,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 					Object att = key.attachment();
 					if (att instanceof EventHandler) {
 						EventHandler e = (EventHandler) att;
+						key.cancel();
 						SafeCloseUtil.close(e, LOG);
 					}
 				}
@@ -152,7 +143,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			SafeCloseUtil.close(selector, LOG);
 
 			for (NewRegistration newReg : newRegistrations) {
-				SafeCloseUtil.close(newReg.eventHandler, LOG);
+				SafeCloseUtil.close(newReg.getEventHandler(), LOG);
 			}
 
 			serviceState.setClosed();
@@ -160,6 +151,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	}
 
 	private void handleReadyKey(final SelectionKey key) {
+		if (key == null) {
+			return;
+		}
 		final EventHandler eventHandler = (EventHandler) key.attachment();
 		if (eventHandler == null) {
 			// cancelled key
@@ -167,23 +161,24 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		}
 		if (key.isValid()) {
 			handleEvent(eventHandler, key, key.readyOps());
-		} else {
+		}
+		else {
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
 	}
 
-	private void handleEvent(final EventHandler handler, final SelectionKey key, final int events) {
+	private void handleEvent(final EventHandler handler, final SelectionKey key, final int ops) {
 		try {
-			Validation.notNull(handler);
-			Validation.notNull(key);
 			int interestedOps = key.interestOps();
-			int newInterestedOps = handler.handle(events);
-			if (newInterestedOps != interestedOps && newInterestedOps != Event.DONT_CHANGE) {
+			int newInterestedOps = handler.handleOps(ops);
+			if (newInterestedOps != interestedOps && newInterestedOps != SelectOps.DONT_CHANGE) {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
 			// TODO: notify session-manager
-			LOG.info("closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e), e);
+			LOG.info(
+					"closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e) + ", thread: "
+							+ Thread.currentThread(), e);
 			SafeCloseUtil.close(handler, LOG);
 		}
 	}
@@ -194,10 +189,32 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		SelectionKey key = channel.keyFor(selector);
 		if (key != null) {
 			key.interestOps(ops);
-		} else {
+		}
+		else {
 			newRegistrations.add(new NewRegistration(eventHandler, ops));
 		}
 		wakeup();
+	}
+
+	private void updateRegistrations() {
+		NewRegistration reg = null;
+		while ((reg = newRegistrations.poll()) != null) {
+			EventHandler eventHandler = reg.getEventHandler();
+			SelectableChannel channel = eventHandler.getChannel();
+			SelectionKey key = channel.keyFor(selector);
+			if (key != null) {
+				key.interestOps(reg.getOps());
+			}
+			else {
+				try {
+					int ops = reg.getOps();
+					channel.register(selector, ops, eventHandler);
+				} catch (ClosedChannelException e) {
+					SafeCloseUtil.close(eventHandler, LOG);
+				}
+			}
+		}
+		numHandlers = selector.keys().size();
 	}
 
 	private void wakeup() {
@@ -215,12 +232,11 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			key.cancel();
 			key.attach(null);
 			wakeup();
-		} else {
+		}
+		else {
 			// handle event-handlers which unregister before they were added to
 			// the selector
 
-			// TODO: this could be implemented more efficiently, is it required
-			// for high load?
 			Iterator<NewRegistration> iter = newRegistrations.iterator();
 			while (iter.hasNext()) {
 				NewRegistration newReq = iter.next();
@@ -267,19 +283,10 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			serviceState.setOpen();
 		}
 		try {
-			int selectIoeInArow = 0;
-			while (serviceState.isOpen() && selectIoeInArow < 5) {
-				// TODO: start to sleep with an exponential backoff when
-				// select
-				// fails ... why can it fail anyway?
-				int num;
-				try {
-					num = select();
-					selectIoeInArow = 0;
-				} catch (IOException e) {
-					selectIoeInArow++;
-					LOG.error("IOException in Selector.select(): " + ExceptionUtil.buildMessageChain(e));
-					continue;
+			while (serviceState.isOpen()) {
+				int num = select();
+				if (num == -1) {
+					break;
 				}
 				long tStartNs = System.nanoTime();
 				if (num > 0) {
@@ -292,8 +299,13 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 				long tWorkNs = System.nanoTime() - tStartNs;
 				loadAvg.logWorkNs(tWorkNs);
 			}
+			System.out.println("shutting down, thread: " + Thread.currentThread());
+		} catch (IOException e) {
+			LOG.error("select() failed", e);
 		} catch (ClosedSelectorException e) {
+		} finally {
 			serviceState.setClosed();
+			SafeCloseUtil.close(this, LOG);
 		}
 	}
 }

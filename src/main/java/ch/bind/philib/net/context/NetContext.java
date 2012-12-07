@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 import ch.bind.philib.net.SessionManager;
 import ch.bind.philib.net.events.EventDispatcher;

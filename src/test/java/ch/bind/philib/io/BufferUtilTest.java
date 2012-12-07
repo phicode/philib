@@ -62,7 +62,7 @@ public class BufferUtilTest {
 		ByteBuffer dst2 = ByteBuffer.allocateDirect(8);
 		ByteBuffer src = ByteBuffer.allocate(5);
 
-		// __abcde_
+		// __abcde__
 		dst1.position(2);
 		dst1.put(abcde);
 		dst1.position(2);
@@ -86,6 +86,25 @@ public class BufferUtilTest {
 
 		verify(res1, both);
 		verify(res2, both);
+	}
+
+	@Test
+	public void appendToEmpty() {
+		ByteBuffer dst = ByteBuffer.allocate(8);
+		ByteBuffer src = ByteBuffer.allocate(5);
+
+		// ________
+		dst.position(0);
+		dst.limit(0);
+
+		// qwxyz_____
+		src.put(qwxyz);
+		src.flip();
+
+		ByteBuffer res = BufferUtil.append(dst, src);
+		assertTrue(res == dst);
+
+		verify(res, qwxyz);
 	}
 
 	private void verify(ByteBuffer res, byte[] expected) {

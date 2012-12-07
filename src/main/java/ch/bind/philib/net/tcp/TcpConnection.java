@@ -26,16 +26,13 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.SafeCloseUtil;
-import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.InterestedEvents;
+import ch.bind.philib.net.Events;
 import ch.bind.philib.net.Session;
+import ch.bind.philib.net.conn.ConnectionBase;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.events.Event;
-import ch.bind.philib.net.events.EventDispatcher;
-import ch.bind.philib.net.events.EventHandlerBase;
+import ch.bind.philib.net.events.SelectOps;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -43,22 +40,16 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  */
-public class TcpConnection extends EventHandlerBase implements Connection {
+public class TcpConnection extends ConnectionBase {
 
 	// TODO: configurable
 	private static final int IO_READ_LIMIT_PER_ROUND = 256 * 1024;
-
-	// private static final int IO_WRITE_LIMIT_PER_ROUND = 64 * 1024;
-
-	private final AtomicLong rx = new AtomicLong(0);
-
-	private final AtomicLong tx = new AtomicLong(0);
 
 	protected final SocketChannel channel;
 
 	protected final SocketAddress remoteAddress;
 
-	protected volatile InterestedEvents interestedEvents = InterestedEvents.SENDABLE_RECEIVE;
+	protected volatile Events events = Events.SENDABLE_RECEIVE;
 
 	private Session session;
 
@@ -70,11 +61,11 @@ public class TcpConnection extends EventHandlerBase implements Connection {
 	}
 
 	// for already connected channels
-	public static TcpConnection create(NetContext context, SocketChannel channel, SocketAddress remoteAddress) throws IOException {
+	static TcpConnection createConnected(NetContext context, SocketChannel channel, SocketAddress remoteAddress) throws IOException {
 		TcpConnection conn = new TcpConnection(context, channel, remoteAddress);
 		conn.setupChannel();
 		conn.setupSession();
-		context.getEventDispatcher().register(conn, conn.interestedEvents.getEventMask());
+		context.getEventDispatcher().register(conn, conn.events.getEventMask());
 		return conn;
 	}
 
@@ -96,29 +87,29 @@ public class TcpConnection extends EventHandlerBase implements Connection {
 	}
 
 	@Override
-	public void setEvents(InterestedEvents interestedEvents) {
-		this.interestedEvents = interestedEvents;
-		InterestedEvents ie = interestedEvents;
-		if (ie != null) {
-			context.getEventDispatcher().register(this, ie.getEventMask());
+	public void setEvents(Events events) {
+		this.events = events;
+		Events e = events;
+		if (e != null) {
+			context.getEventDispatcher().register(this, e.getEventMask());
 		}
 	}
 
 	@Override
-	public int handle(int events) throws IOException {
+	public int handleOps(final int ops) throws IOException {
 		// only the read and/or write flags may be set
-		assert ((events & Event.READ_WRITE) != 0 && (events & ~Event.READ_WRITE) == 0);
+		assert ((ops & SelectOps.READ_WRITE) != 0 && (ops & ~SelectOps.READ_WRITE) == 0);
 
-		if (Event.hasRead(events) && interestedEvents.hasReceive()) {
+		if (SelectOps.hasRead(ops) && events.hasReceive()) {
 			handleRead();
 		}
 
-		if (Event.hasWrite(events) && interestedEvents.hasSendable()) {
-			interestedEvents = session.sendable(this);
+		if (SelectOps.hasWrite(ops) && events.hasSendable()) {
+			events = session.sendable(this);
 		}
 
-		InterestedEvents ie = interestedEvents;
-		return ie == null ? Event.DONT_CHANGE : ie.getEventMask();
+		Events e = events;
+		return e == null ? SelectOps.DONT_CHANGE : e.getEventMask();
 	}
 
 	@Override
@@ -139,10 +130,8 @@ public class TcpConnection extends EventHandlerBase implements Connection {
 		}
 		int num = channel.write(data);
 		if (num > 0) {
-			tx.addAndGet(num);
+			incrementTx(num);
 		}
-		// if data.remaining() && not on event dispatcher thread -> register for
-		// it
 		return num;
 	}
 
@@ -150,34 +139,27 @@ public class TcpConnection extends EventHandlerBase implements Connection {
 		final ByteBuffer bb = takeBuffer();
 		try {
 			int totalRead = 0;
-			while (totalRead < IO_READ_LIMIT_PER_ROUND && interestedEvents.hasReceive()) {
+			while (totalRead < IO_READ_LIMIT_PER_ROUND && events.hasReceive()) {
 				final int n = channel.read(bb);
-				if (n > 0) {
-					rx.addAndGet(n);
+				if (n == 0) {
+					break;
 				}
 				if (n == -1) {
 					// connection closed
 					close();
 					return;
 				}
-				if (n == 0) {
-					break;
-				}
-				// totalRead += n;
+				incrementRx(n);
+				totalRead += n;
 				// switch from write mode to read
 				bb.flip();
-				interestedEvents = session.receive(this, bb);
+				events = session.receive(this, bb);
 				// switch back to write mode
 				bb.clear();
 			}
 		} finally {
 			recycleBuffer(bb);
 		}
-	}
-
-	@Override
-	public final NetContext getContext() {
-		return context;
 	}
 
 	@Override
@@ -198,16 +180,6 @@ public class TcpConnection extends EventHandlerBase implements Connection {
 	@Override
 	public final SelectableChannel getChannel() {
 		return channel;
-	}
-
-	@Override
-	public final long getRx() {
-		return rx.get();
-	}
-
-	@Override
-	public final long getTx() {
-		return tx.get();
 	}
 
 	@Override

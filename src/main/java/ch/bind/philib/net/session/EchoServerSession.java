@@ -25,9 +25,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import ch.bind.philib.io.BufferUtil;
-import ch.bind.philib.lang.ArrayUtil;
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.InterestedEvents;
+import ch.bind.philib.net.Events;
 import ch.bind.philib.net.Session;
 
 /**
@@ -50,10 +49,8 @@ public class EchoServerSession implements Session {
 	}
 
 	@Override
-	public InterestedEvents receive(Connection conn, ByteBuffer data) throws IOException {
-		// assert (data.position() == 0 && data.hasRemaining());
+	public Events receive(Connection conn, ByteBuffer data) throws IOException {
 		lastInteractionNs = System.nanoTime();
-		System.out.println("received: " + data.remaining() + " : " + ArrayUtil.formatShortHex(data, 16));
 		if (backlog.hasRemaining()) {
 			conn.send(backlog);
 		}
@@ -63,24 +60,21 @@ public class EchoServerSession implements Session {
 		if (data.hasRemaining()) {
 			backlog = BufferUtil.append(backlog, data);
 			// disable receiving more data until we have written the backlog
-			System.out.println("switing to sendable mode");
-			return InterestedEvents.SENDABLE;
+			return Events.SENDABLE;
 		}
-		return InterestedEvents.RECEIVE;
+		return Events.RECEIVE;
 	}
 
 	@Override
-	public InterestedEvents sendable(Connection conn) throws IOException {
+	public Events sendable(Connection conn) throws IOException {
 		lastInteractionNs = System.nanoTime();
 		if (backlog.hasRemaining()) {
-			System.out.println("sendable sending: " + backlog.remaining() + " : " + ArrayUtil.formatShortHex(backlog, 16));
 			conn.send(backlog);
 		}
 		if (backlog.hasRemaining()) {
-			return InterestedEvents.SENDABLE;
+			return Events.SENDABLE;
 		}
-		System.out.println("switing back to receive mode");
-		return InterestedEvents.RECEIVE;
+		return Events.RECEIVE;
 	}
 
 	@Override

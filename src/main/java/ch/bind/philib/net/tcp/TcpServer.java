@@ -36,7 +36,7 @@ import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.NetListener;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.events.Event;
+import ch.bind.philib.net.events.SelectOps;
 import ch.bind.philib.net.events.EventHandlerBase;
 import ch.bind.philib.validation.Validation;
 
@@ -84,8 +84,8 @@ public final class TcpServer extends EventHandlerBase implements NetListener {
 	}
 
 	@Override
-	public int handle(int ops) throws IOException {
-		assert (ops == Event.ACCEPT);
+	public int handleOps(final int ops) throws IOException {
+		assert (ops == SelectOps.ACCEPT);
 		while (true) {
 			SocketChannel clientChannel = channel.accept();
 			if (clientChannel == null) {
@@ -94,10 +94,10 @@ public final class TcpServer extends EventHandlerBase implements NetListener {
 			}
 			createSession(clientChannel);
 		}
-		return Event.ACCEPT;
+		return SelectOps.ACCEPT;
 	}
 
-	public static TcpServer open(NetContext context, SocketAddress bindAddress) throws IOException {
+	static TcpServer listen(NetContext context, SocketAddress bindAddress) throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();
 		int backlog = context.getTcpServerSocketBacklog();
@@ -110,7 +110,7 @@ public final class TcpServer extends EventHandlerBase implements NetListener {
 
 		try {
 			TcpServer server = new TcpServer(context, channel);
-			server.setup(context);
+			server.setup();
 			return server;
 		} catch (IOException e) {
 			SafeCloseUtil.close(channel);
@@ -118,19 +118,21 @@ public final class TcpServer extends EventHandlerBase implements NetListener {
 		}
 	}
 
-	private void setup(NetContext context) throws IOException {
+	private void setup() throws IOException {
 		channel.configureBlocking(false);
 		context.setSocketOptions(channel.socket());
 		serviceState.setOpen();
-		context.getEventDispatcher().register(this, Event.ACCEPT);
+		context.getEventDispatcher().register(this, SelectOps.ACCEPT);
 	}
 
 	private void createSession(final SocketChannel clientChannel) {
 		try {
 			// TODO:jdk7 SocketAddress remoteAddress =
 			// clientChannel.getRemoteAddress();
+			// TODO: accept the connection here but create the session on the
+			// dispatcher thread
 			SocketAddress remoteAddress = clientChannel.socket().getRemoteSocketAddress();
-			TcpConnection.create(context, clientChannel, remoteAddress);
+			TcpConnection.createConnected(context, clientChannel, remoteAddress);
 			// TODO
 			// contextListener.connect(connection);
 		} catch (IOException e) {

@@ -37,7 +37,7 @@ public interface Connection extends Closeable {
 
 	int send(ByteBuffer data) throws IOException;
 
-	void setEvents(InterestedEvents interestedEvents);
+	void setEvents(Events interestedEvents);
 
 	boolean isConnected();
 

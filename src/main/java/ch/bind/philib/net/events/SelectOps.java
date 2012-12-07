@@ -28,9 +28,9 @@ import java.nio.channels.SelectionKey;
  * 
  * @author Philipp Meinen
  */
-public final class Event {
+public final class SelectOps {
 
-	private Event() {
+	private SelectOps() {
 	}
 
 	public static final int READ = SelectionKey.OP_READ;
@@ -43,10 +43,12 @@ public final class Event {
 
 	public static final int CONNECT = SelectionKey.OP_CONNECT;
 
-	public static final int DONT_CHANGE = -1;
+	public static final int DONT_CHANGE = 1 << 10;
 
-	public static String eventToString(int event) {
-		switch (event) {
+	public static final int TIMEOUT = 1 << 11;
+
+	public static String opsToString(int ops) {
+		switch (ops) {
 		case READ:
 			return "r";
 		case WRITE:
@@ -58,7 +60,7 @@ public final class Event {
 		case CONNECT:
 			return "c";
 		default:
-			return Integer.toString(event);
+			return Integer.toString(ops);
 		}
 	}
 

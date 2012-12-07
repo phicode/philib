@@ -29,6 +29,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -51,6 +52,8 @@ import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.NetContexts;
 import ch.bind.philib.net.session.DevNullSession;
+import ch.bind.philib.net.session.EchoClientSession;
+import ch.bind.philib.net.session.EchoServerSession;
 
 /**
  * TODO
@@ -107,30 +110,31 @@ public class TcpConnectionTest {
 		}
 	}
 
-	@Test(timeOut = 60000, priority = 0)
+	@Test(timeOut = 60000, priority = 1)
 	public void connectAndDisconnect() throws Exception {
-		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
-		DevNullsessionManager serverSessionManager = new DevNullsessionManager();
-		DevNullsessionManager clientSessionManager = new DevNullsessionManager();
+		DevNullSessionManager serverSessionManager = new DevNullSessionManager();
+		DevNullSessionManager clientSessionManager = new DevNullSessionManager();
 		NetContext serverContext = NetContexts.createSimple(serverSessionManager);
 		NetContext clientContext = NetContexts.createSimple(clientSessionManager);
 		SocketAddress addr = SocketAddresses.localhost(1234);
-		NetListener netServer = TcpServer.open(serverContext, addr);
+		NetListener netServer = TcpNetFactory.listen(serverContext, addr);
 		Future<TcpConnection> clientFuture = TcpNetFactory.connect(clientContext, addr);
 
 		TcpConnection clientConn = clientFuture.get(100, TimeUnit.MILLISECONDS);
 		assertNotNull(clientConn);
-
-		// give some time for the client and server-side of the connection to
-		// establish proper fusion power
-		Thread.sleep(50);
+		assertTrue(clientConn.isConnected());
+		assertEquals(clientContext.getEventDispatcher().getNumEventHandlers(), 1);
+		while (serverContext.getEventDispatcher().getNumEventHandlers() != 2) {
+			Thread.yield();
+		}
 
 		DevNullSession server = serverSessionManager.session;
 		DevNullSession client = clientSessionManager.session;
 		assertNotNull(server);
 		assertNotNull(client);
-		assertTrue(client == clientS);
-		assertTrue(context.isOpen());
+		assertTrue(client == clientConn.getSession());
+		assertTrue(serverContext.isOpen());
+		assertTrue(clientContext.isOpen());
 		assertTrue(netServer.isOpen());
 		assertTrue(server.getConnection().isOpen());
 		assertTrue(client.getConnection().isOpen());
@@ -138,10 +142,11 @@ public class TcpConnectionTest {
 		assertTrue(server.getServiceState().isOpen());
 		assertTrue(client.getServiceState().isOpen());
 
-		// this should close the server as well as the client
-		context.close();
+		serverContext.close();
+		clientContext.close();
 
-		assertFalse(context.isOpen());
+		assertFalse(serverContext.isOpen());
+		assertFalse(clientContext.isOpen());
 		assertFalse(netServer.isOpen());
 		assertFalse(server.getConnection().isOpen());
 		assertFalse(client.getConnection().isOpen());
@@ -153,29 +158,99 @@ public class TcpConnectionTest {
 	@Test(timeOut = 60000, priority = 10)
 	public void sendManyZeros() throws Exception {
 		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
-		DevNullsessionManager sessionManager = new DevNullsessionManager();
-		NetContext context = NetContexts.createSimple(sessionManager);
+		DevNullSessionManager serverSessionManager = new DevNullSessionManager();
+		DevNullSessionManager clientSessionManager = new DevNullSessionManager();
+		NetContext serverContext = NetContexts.createSimple(serverSessionManager);
+		NetContext clientContext = NetContexts.createSimple(clientSessionManager);
 		SocketAddress addr = SocketAddresses.localhost(1234);
-		NetListener netServer = TcpServer.open(context, addr);
-		Session clientS = TcpNetFactory.syncOpen(context, addr, clientsessionManager);
+		NetListener netServer = TcpNetFactory.listen(serverContext, addr);
+		Future<TcpConnection> clientFuture = TcpNetFactory.connect(clientContext, addr);
 
-		// give some time for the client and server-side of the connection to
-		// establish proper fusion power
-		Thread.sleep(50);
+		TcpConnection clientConn = clientFuture.get(100, TimeUnit.MILLISECONDS);
+		assertNotNull(clientConn);
+		assertTrue(clientConn.isConnected());
+		assertEquals(clientContext.getEventDispatcher().getNumEventHandlers(), 1);
+		while (serverContext.getEventDispatcher().getNumEventHandlers() != 2) {
+			Thread.yield();
+		}
 
-		DevNullSession server = serversessionManager.session;
-		DevNullSession client = clientsessionManager.session;
+		DevNullSession server = serverSessionManager.session;
+		DevNullSession client = clientSessionManager.session;
 
 		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
 
-		sendSync(client.getConnection(), server.getConnection(), bigMappedBuffer);
+		send(client.getConnection(), server.getConnection(), bigMappedBuffer);
 
 		bigMappedBuffer.rewind();
 		assertEquals(bigMappedBuffer.remaining(), MAPPED_BUFFER_SIZE);
 
-		sendSync(server.getConnection(), client.getConnection(), bigMappedBuffer);
+		send(server.getConnection(), client.getConnection(), bigMappedBuffer);
 
-		context.close();
+		serverContext.close();
+		clientContext.close();
+	}
+
+	@Test(timeOut = 60000, priority = 20)
+	public void echoSomeData() throws Exception {
+		final long tStart = System.currentTimeMillis();
+		// ByteBufferPool pool = ByteBufferPool.create(16384, 16);
+		// EventDispatcher disp = SimpleEventDispatcher.open();
+		EchoServerSessionManager serverSessionManager = new EchoServerSessionManager();
+		EchoClientSessionManager clientSessionManager = new EchoClientSessionManager();
+		NetContext serverContext = NetContexts.createSimple(serverSessionManager);
+		NetContext clientContext = NetContexts.createSimple(clientSessionManager);
+		// NetContext serverContext = new NetContextImpl(serverSessionManager,
+		// pool, disp);
+		// NetContext clientContext = new NetContextImpl(clientSessionManager,
+		// pool, disp);
+		SocketAddress addr = SocketAddresses.localhost(1234);
+		NetListener netServer = TcpNetFactory.listen(serverContext, addr);
+		Future<TcpConnection> clientFuture = TcpNetFactory.connect(clientContext, addr);
+
+		TcpConnection clientConn = clientFuture.get(100, TimeUnit.MILLISECONDS);
+		assertNotNull(clientConn);
+		assertTrue(clientConn.isConnected());
+		assertEquals(clientContext.getEventDispatcher().getNumEventHandlers(), 1);
+		while (serverContext.getEventDispatcher().getNumEventHandlers() != 2) {
+			Thread.yield();
+		}
+
+		EchoServerSession server = serverSessionManager.session;
+		EchoClientSession client = clientSessionManager.session;
+		assertNotNull(server);
+		assertNotNull(client);
+		assertTrue(client == clientConn.getSession());
+		assertTrue(serverContext.isOpen());
+		assertTrue(clientContext.isOpen());
+		assertTrue(netServer.isOpen());
+		assertTrue(server.getConnection().isOpen());
+		assertTrue(client.getConnection().isOpen());
+		assertTrue(client.getConnection().isConnected());
+
+		long time = System.currentTimeMillis() - tStart;
+		while (time < 10000) {
+			Thread.sleep(250);
+			time = System.currentTimeMillis() - tStart;
+		}
+
+		serverContext.close();
+		clientContext.close();
+
+		assertFalse(serverContext.isOpen());
+		assertFalse(clientContext.isOpen());
+		assertFalse(netServer.isOpen());
+		assertFalse(server.getConnection().isOpen());
+		assertFalse(client.getConnection().isOpen());
+		assertFalse(client.getConnection().isConnected());
+
+		long total = client.getConnection().getTx() + client.getConnection().getRx() + server.getConnection().getTx()
+				+ server.getConnection().getRx();
+		System.out.printf("client tx=%d, rx=%d%n", client.getConnection().getTx(), client.getConnection().getRx());
+		System.out.printf("server tx=%d, rx=%d%n", server.getConnection().getTx(), server.getConnection().getRx());
+		time = System.currentTimeMillis() - tStart;
+		double sec = time / 1000f;
+		System.out.printf("total: %.3fMB in %.3fsec%n", (total / (1024f * 1024f)), sec);
+		assertTrue(client.isVerificationOk());
 	}
 
 	private static void send(Connection from, Connection to, ByteBuffer data) throws Exception {
@@ -186,9 +261,10 @@ public class TcpConnectionTest {
 
 		int size = data.remaining();
 		long tStart = System.nanoTime();
-		int sent = from.send(data);
-		assertEquals(sent, size);
-		assertEquals(data.remaining(), 0);
+
+		while (data.hasRemaining()) {
+			from.send(data);
+		}
 
 		long tEndWrite = System.nanoTime();
 		assertEquals(from.getRx(), fromRx); // no change
@@ -203,11 +279,11 @@ public class TcpConnectionTest {
 		long tEndReceive = System.nanoTime();
 		long t = tEndReceive - tStart;
 		double mbPerSec = ((double) size) / (1024f * 1024f) / (t / 1000000000f);
-		System.out.printf("write took %.3fms, write+receive took %.3fms -> %.3fMb/s%n", //
+		System.out.printf("send took %.3fms, send+receive took %.3fms -> %.3fMb/s%n", //
 				(tEndWrite - tStart) / 1000000f, t / 1000000f, mbPerSec);
 	}
 
-	private static final class DevNullsessionManager implements SessionManager {
+	private static final class DevNullSessionManager implements SessionManager {
 
 		volatile DevNullSession session;
 
@@ -215,6 +291,40 @@ public class TcpConnectionTest {
 		public synchronized Session createSession(Connection connection) {
 			assertNull(session);
 			session = new DevNullSession(connection);
+			return session;
+		}
+
+		@Override
+		public void connectFailed(SocketAddress remoteAddress, Throwable cause) {
+			fail(cause.getMessage());
+		}
+	}
+
+	private static final class EchoClientSessionManager implements SessionManager {
+
+		volatile EchoClientSession session;
+
+		@Override
+		public synchronized Session createSession(Connection connection) throws IOException {
+			assertNull(session);
+			session = new EchoClientSession(connection, true);
+			return session;
+		}
+
+		@Override
+		public void connectFailed(SocketAddress remoteAddress, Throwable cause) {
+			fail(cause.getMessage());
+		}
+	}
+
+	private static final class EchoServerSessionManager implements SessionManager {
+
+		volatile EchoServerSession session;
+
+		@Override
+		public synchronized Session createSession(Connection connection) throws IOException {
+			assertNull(session);
+			session = new EchoServerSession(connection);
 			return session;
 		}
 

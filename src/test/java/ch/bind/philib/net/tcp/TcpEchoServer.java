@@ -33,11 +33,9 @@ import ch.bind.philib.net.SessionManager;
 import ch.bind.philib.net.SocketAddresses;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.context.NetContextImpl;
-import ch.bind.philib.net.context.NetContexts;
 import ch.bind.philib.net.events.ConcurrentEventDispatcher;
 import ch.bind.philib.net.events.EventDispatcher;
 import ch.bind.philib.net.session.EchoServerSession;
-import ch.bind.philib.net.tcp.TcpServer;
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 
 /**
@@ -54,30 +52,30 @@ public class TcpEchoServer implements SessionManager {
 	private void foo() throws Exception {
 		InetSocketAddress bindAddress = SocketAddresses.wildcard(1234);
 		// NetContext context = new SimpleNetContext();
-		
-		ByteBufferPool bufferPool = ByteBufferPool.create(8192, 128, 4);
-		EventDispatcher eventDispatcher = ConcurrentEventDispatcher.open(4);
+
+		ByteBufferPool bufferPool = ByteBufferPool.create(8192, 128, 2);
+		EventDispatcher eventDispatcher = ConcurrentEventDispatcher.open(2);
 		NetContext context = new NetContextImpl(this, bufferPool, eventDispatcher);
-//		NetContext context = NetContexts.createSimple(this);// new
-															// ScalableNetContext(16);
+		// NetContext context = NetContexts.createSimple(this);// new
+		// ScalableNetContext(16);
 		context.setTcpNoDelay(true);
-		// context.setSndBufSize(64 * 1024);
-		// context.setRcvBufSize(64 * 1024);
+		context.setSndBufSize(64 * 1024);
+		context.setRcvBufSize(64 * 1024);
 
-		context.setSndBufSize(1024 * 1024);
-		context.setRcvBufSize(1024 * 1024);
+		// context.setSndBufSize(1024 * 1024);
+		// context.setRcvBufSize(1024 * 1024);
 
-		context.setTcpNoDelay(false);
+		// context.setTcpNoDelay(false);
 		// context.setSndBufSize(512);
 		// context.setRcvBufSize(512);
-		NetListener server = TcpServer.open(context, bindAddress);
+		NetListener server = TcpNetFactory.listen(context, bindAddress);
 		System.out.println("listening on: " + bindAddress);
 		while (true) {
 			Thread.sleep(20000);
 			synchronized (sessions) {
 				if (sessions.size() > 0) {
 					long now = System.nanoTime();
-					long tooFarAgo = now - 10000000L; // 10ms
+					long tooFarAgo = now - (25 * 1000000L); // 25ms
 					Iterator<EchoServerSession> iter = sessions.iterator();
 					System.out.println(server.getContext().getBufferPool().getPoolStats().toString());
 					System.out.println("sessions: " + sessions.size());
@@ -86,7 +84,8 @@ public class TcpEchoServer implements SessionManager {
 						if (!s.getConnection().isConnected()) {
 							System.out.println("removeing disconnected session: " + s);
 							iter.remove();
-						} else {
+						}
+						else {
 							long lastInteractionNs = s.getLastInteractionNs();
 							if (lastInteractionNs < tooFarAgo) {
 								double lastSec = (now - lastInteractionNs) / 1000000000f;
@@ -103,7 +102,7 @@ public class TcpEchoServer implements SessionManager {
 	private List<EchoServerSession> sessions = new ArrayList<EchoServerSession>();
 
 	@Override
-	public synchronized EchoServerSession createSession(Connection connection) {
+	public EchoServerSession createSession(Connection connection) {
 		EchoServerSession session = new EchoServerSession(connection);
 		synchronized (sessions) {
 			sessions.add(session);

@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.Connection;
-import ch.bind.philib.net.InterestedEvents;
+import ch.bind.philib.net.Events;
 import ch.bind.philib.net.Session;
 
 /**
@@ -47,9 +47,9 @@ public class DevNullSession implements Session {
 	}
 
 	@Override
-	public InterestedEvents receive(Connection conn, ByteBuffer data) throws IOException {
+	public Events receive(Connection conn, ByteBuffer data) throws IOException {
 		// "consume" all data
-		return InterestedEvents.RECEIVE;
+		return Events.RECEIVE;
 	}
 
 	@Override
@@ -58,9 +58,9 @@ public class DevNullSession implements Session {
 	}
 
 	@Override
-	public InterestedEvents sendable(Connection conn) {
+	public Events sendable(Connection conn) {
 		// there will never be anything to write
-		return InterestedEvents.RECEIVE;
+		return Events.RECEIVE;
 	}
 
 	public Connection getConnection() {

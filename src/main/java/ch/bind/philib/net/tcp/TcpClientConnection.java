@@ -5,9 +5,9 @@ import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Future;
 
-import ch.bind.philib.net.InterestedEvents;
+import ch.bind.philib.net.Events;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.events.Event;
+import ch.bind.philib.net.events.SelectOps;
 
 public class TcpClientConnection extends TcpConnection {
 
@@ -19,24 +19,25 @@ public class TcpClientConnection extends TcpConnection {
 	}
 
 	// for connecting channels
-	public static Future<TcpConnection> connect(NetContext context, SocketChannel channel, SocketAddress remoteAddress) throws IOException {
+	static Future<TcpConnection> createConnecting(NetContext context, SocketChannel channel, SocketAddress remoteAddress) throws IOException {
 		TcpClientConnection conn = new TcpClientConnection(context, channel, remoteAddress);
 		AsyncConnectFuture<TcpConnection> future = new AsyncConnectFuture<TcpConnection>(conn);
 		conn.future = future;
 		conn.setupChannel();
-		context.getEventDispatcher().register(conn, Event.CONNECT);
+		context.getEventDispatcher().register(conn, SelectOps.CONNECT);
 		return future;
 	}
 
 	@Override
-	public int handle(int events) throws IOException {
-		if (Event.hasConnect(events)) {
+	public int handleOps(int ops) throws IOException {
+		if (SelectOps.hasConnect(ops)) {
 			// assert that only the connect event is present (no read or write)
-			assert (future != null && events == Event.CONNECT);
+			assert (future != null && ops == SelectOps.CONNECT);
 			finishConnect();
-			return interestedEvents.getEventMask();
-		} else {
-			return super.handle(events);
+			return events.getEventMask();
+		}
+		else {
+			return super.handleOps(ops);
 		}
 	}
 
@@ -60,13 +61,14 @@ public class TcpClientConnection extends TcpConnection {
 	}
 
 	@Override
-	public void setEvents(InterestedEvents interestedEvents) {
+	public void setEvents(Events events) {
 		if (future != null) {
-			// while connecting we only want to update the interestedEvents
+			// while connecting we only want to update the events
 			// field and not tell the dispatcher
-			this.interestedEvents = interestedEvents;
-		} else {
-			super.setEvents(interestedEvents);
+			this.events = events;
+		}
+		else {
+			super.setEvents(events);
 		}
 	}
 }
