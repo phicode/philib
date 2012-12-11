@@ -22,6 +22,7 @@
 package ch.bind.philib.net.events;
 
 import java.io.Closeable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * TODO
@@ -35,6 +36,10 @@ public interface EventDispatcher extends Closeable {
 	void register(EventHandler eventHandler, int ops);
 
 	void unregister(EventHandler eventHandler);
+	
+	void setTimeout(EventHandler eventHandler, long timeout, TimeUnit timeUnit);
+	
+	void unsetTimeout(EventHandler eventHandler);
 
 	int getRegisteredOps(EventHandler eventHandler);
 

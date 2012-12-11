@@ -196,7 +196,6 @@ public class NetContextImpl implements NetContext {
 				if (tcpNoDelay != null) {
 					socket.setTcpNoDelay(tcpNoDelay);
 				}
-				socket.set
 			} catch (Exception e) {
 				lastExc = e;
 				numExc++;
