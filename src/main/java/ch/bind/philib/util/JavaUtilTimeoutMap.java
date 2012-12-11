@@ -36,46 +36,45 @@ public final class JavaUtilTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 	private final SortedMap<Long, K> timeoutToKey = new TreeMap<Long, K>();
 
-	private final Map<K, TOEntry<K, V>> keyToValue = new HashMap<K, TOEntry<K, V>>();
+	private final Map<K, Entry<K, V>> keyToValue = new HashMap<K, Entry<K, V>>();
 
 	private final Lock lock = new ReentrantLock();
 
 	@Override
-	public void add(long timeoutAt, K key, V value) {
-		long timeoutAtNs = 
-		TOEntry<K, V> entry = new TOEntry<K, V>(timeoutAtNs, key, value);
-		add(entry);
+	public void addWithRange(long timeout, TimeUnit timeUnit, K key, V value) {
+		Validation.notNegative(timeout, "timeout must be >= 0");
+		Validation.notNull(timeUnit);
+		long nowNs = System.nanoTime();
+		long timeoutNs = timeUnit.toNanos(timeout);
+		long timestampNs = nowNs + timeoutNs;
+		_addWithTimestampNs(timestampNs, key, value);
 	}
 
 	@Override
-	public void add(TOEntry<K, V> entry) {
-		if (entry == null) {
-			throw new IllegalArgumentException("entry must not be null");
-		}
+	public void addWithTimestamp(long timestamp, TimeUnit timeUnit, K key, V value) {
+		Validation.notNegative(timestamp, "timestamp must be >= 0");
+		Validation.notNull(timeUnit);
+		long timestampNs = timeUnit.toNanos(timestamp);
+		_addWithTimestampNs(timestampNs, key, value);
+	}
 
-		long timeoutAtNs = entry.getTimeoutAtNs();
-		K key = entry.getKey();
-		V value = entry.getValue();
-
-		Validation.notNegative(timeoutAtNs < 0, "timeoutAtNs must be > 0");
-		}
-		if (key == null) {
-			throw new IllegalArgumentException("key must not be null");
-		}
-		if (value == null) {
-			throw new IllegalArgumentException("value must not be null");
-		}
+	private void _addWithTimestampNs(long timestampNs, final K key, final V value) {
+		Validation.notNull(key, "key must not be null");
+		Validation.notNull(value, "value must not be null");
 		lock.lock();
 		try {
+			// TODO: treat duplicate keys as overwrite operations
 			if (keyToValue.containsKey(key)) {
 				throw new IllegalArgumentException("can not add duplicate key: " + key);
 			}
-			List<K> keysForTimeout = timeoutToKeys.get(timeoutAt);
-			if (keysForTimeout == null) {
-				keysForTimeout = new LinkedList<K>();
-				timeoutToKeys.put(timeoutAt, keysForTimeout);
+			// prevent duplicate timestamps, which should be rather rare due to
+			// the nanosecond resolution
+			while (timeoutToKey.get(timestampNs) != null) {
+				// TODO: add a random number somewhere between 1 and 50000 ns
+				timestampNs++;
 			}
-			keysForTimeout.add(key);
+			Entry<K, V> entry = new Entry<K, V>(timestampNs, key, value);
+			timeoutToKey.put(timestampNs, key);
 			keyToValue.put(key, entry);
 		} finally {
 			lock.unlock();
@@ -218,6 +217,19 @@ public final class JavaUtilTimeoutMap<K, V> implements TimeoutMap<K, V> {
 			lock.unlock();
 		}
 	}
-	
-	static final class 
+
+	static final class Entry<K, V> {
+		final long timestampNs;
+
+		final K key;
+
+		final V value;
+
+		public Entry(long timestampNs, K key, V value) {
+			this.timestampNs = timestampNs;
+			this.key = key;
+			this.value = value;
+		}
+	}
+
 }

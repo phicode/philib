@@ -25,13 +25,14 @@ public interface TimeoutMap<K, V> {
 
 	/**
 	 * Add a key-value pair with an associated timeout to the map.
+	 * The 
 	 * @param timeoutAt the pair's timeout.
 	 * @param timeUnit the unit of the parameter timeoutAt.
 	 * @param key the key, must not yet exist in the map
 	 * @param value the value
 	 */
 	void addWithRange(long timeout, TimeUnit timeUnit, K key, V value);
-	
+
 	void addWithTimestamp(long timestamp, TimeUnit timeUnit, K key, V value);
 
 	/**
@@ -45,9 +46,9 @@ public interface TimeoutMap<K, V> {
 	 * removes an entry by it's key
 	 * @param key the key for which an entry must be removed.
 	 * @return {@code null} if there was no entry for this key in that map,
-	 *         otherwise the {@code Entry} object of the removed key-value-pair.
+	 *         otherwise the value of the removed entry.
 	 */
-	TOEntry<K, V> remove(K key);
+	V remove(K key);
 
 	/**
 	 * finds the next entry which is timed out, based on the time of the
@@ -55,7 +56,7 @@ public interface TimeoutMap<K, V> {
 	 * @return {@code null} if there is no timed-out entry in this map.
 	 *         otherwise the oldest timed-out entry.
 	 */
-	TOEntry<K, V> pollTimeout();
+	Pair<K, V> pollTimeout();
 
 	/**
 	 * Finds the next entry which is timed out, based on a supplied timestamp.
@@ -66,7 +67,7 @@ public interface TimeoutMap<K, V> {
 	 * @throws IllegalArgumentException if the time is negative or the timeUnit
 	 *             is null
 	 */
-	TOEntry<K, V> pollTimeout(long time, TimeUnit timeUnit);
+	Pair<K, V> pollTimeout(long time, TimeUnit timeUnit);
 
 	/**
 	 * removes all key-value pairs from this map.
@@ -100,55 +101,4 @@ public interface TimeoutMap<K, V> {
 	 *         timed out.
 	 */
 	long getTimeToNextTimeout(TimeUnit timeUnit);
-
-	/**
-	 * Entry that can be put into the {@link TimeoutMap}
-	 * 
-	 * @param <K> type parameter for the map's keys.
-	 * @param <V> type parameter for the map's values.
-	 */
-	interface TOEntry<K, V> {
-
-//		private final long timeoutAtNs;
-//
-//		private final K key;
-//
-//		private final V value;
-
-//		/**
-//		 * Create a TimeoutMap Entry
-//		 * 
-//		 * @param timeoutAt Point in time when this entry will time out
-//		 * @param key The key for the map
-//		 * @param value The value for the map
-//		 */
-//		private TOEntry(long timeoutAtNs, K key, V value) {
-//			this.timeoutAtNs = timeoutAtNs;
-//			this.key = key;
-//			this.value = value;
-//		}
-		
-//		public static create(long timeout, TimeUnit timeUnit, K key, V value) {
-//			
-//		}
-//		
-//public static create(long timeout, TimeUnit timeUnit, K key, V value) {
-//			
-//		}
-
-		long getTimeoutTimestamp( TimeUnit timeUnit);
-//		{
-//			return timeoutAtNs;
-//		}
-
-		K getKey();
-//		{
-//			return key;
-//		}
-
-		V getValue();
-		// {
-		// return value;
-		// }
-	}
 }
