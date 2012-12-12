@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import ch.bind.philib.net.Events;
+import ch.bind.philib.net.conn.ConnectTimeoutException;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.SelectOps;
 
@@ -19,12 +21,14 @@ public class TcpClientConnection extends TcpConnection {
 	}
 
 	// for connecting channels
-	static Future<TcpConnection> createConnecting(NetContext context, SocketChannel channel, SocketAddress remoteAddress) throws IOException {
+	static Future<TcpConnection> createConnecting(NetContext context, SocketChannel channel, SocketAddress remoteAddress, long connectTimeout)
+			throws IOException {
 		TcpClientConnection conn = new TcpClientConnection(context, channel, remoteAddress);
 		AsyncConnectFuture<TcpConnection> future = new AsyncConnectFuture<TcpConnection>(conn);
 		conn.future = future;
 		conn.setupChannel();
 		context.getEventDispatcher().register(conn, SelectOps.CONNECT);
+		context.getEventDispatcher().setTimeout(conn, connectTimeout, TimeUnit.MILLISECONDS);
 		return future;
 	}
 
@@ -34,10 +38,37 @@ public class TcpClientConnection extends TcpConnection {
 			// assert that only the connect event is present (no read or write)
 			assert (future != null && ops == SelectOps.CONNECT);
 			finishConnect();
+			// stop listening for a connect timeout
+			context.getEventDispatcher().unsetTimeout(this);
 			return events.getEventMask();
 		}
 		else {
 			return super.handleOps(ops);
+		}
+	}
+
+	@Override
+	public void close() {
+		final AsyncConnectFuture<TcpConnection> f = this.future;
+		if (f != null) {
+			context.getEventDispatcher().unsetTimeout(this);
+			f.setFailed(new IOException("connection closed while connecting"));
+			future = null;
+		}
+		super.close();
+	}
+
+	@Override
+	public boolean handleTimeout() throws IOException {
+		final AsyncConnectFuture<TcpConnection> f = this.future;
+		if (f == null) {
+			return super.handleTimeout();
+		}
+		else {
+			// connecting
+			f.setFailed(new ConnectTimeoutException("connect timed out to: " + remoteAddress));
+			future = null;
+			return false;
 		}
 	}
 

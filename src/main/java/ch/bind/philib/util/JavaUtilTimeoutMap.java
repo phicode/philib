@@ -10,15 +10,15 @@
 package ch.bind.philib.util;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import ch.bind.philib.lang.CompareUtil;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -36,14 +36,18 @@ public final class JavaUtilTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 	private final SortedMap<Long, K> timeoutToKey = new TreeMap<Long, K>();
 
-	private final Map<K, Entry<K, V>> keyToValue = new HashMap<K, Entry<K, V>>();
+	private final Map<K, TOEntry<K, V>> keyToValue = new HashMap<K, TOEntry<K, V>>();
 
-	private final Lock lock = new ReentrantLock();
+	private final ReadWriteLock rwlock = new ReentrantReadWriteLock();
+
+	private final Lock rlock = rwlock.readLock();
+
+	private final Lock wlock = rwlock.writeLock();
 
 	@Override
-	public void addWithRange(long timeout, TimeUnit timeUnit, K key, V value) {
-		Validation.notNegative(timeout, "timeout must be >= 0");
-		Validation.notNull(timeUnit);
+	public void add(long timeout, TimeUnit timeUnit, K key, V value) {
+		Validation.notNegative(timeout, "timeout must not be negative");
+		Validation.notNull(timeUnit, "time-unit must not be null");
 		long nowNs = System.nanoTime();
 		long timeoutNs = timeUnit.toNanos(timeout);
 		long timestampNs = nowNs + timeoutNs;
@@ -52,109 +56,105 @@ public final class JavaUtilTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 	@Override
 	public void addWithTimestamp(long timestamp, TimeUnit timeUnit, K key, V value) {
-		Validation.notNegative(timestamp, "timestamp must be >= 0");
-		Validation.notNull(timeUnit);
+		Validation.notNegative(timestamp, "timestamp must not be negative");
+		Validation.notNull(timeUnit, "time-unit must not be null");
 		long timestampNs = timeUnit.toNanos(timestamp);
 		_addWithTimestampNs(timestampNs, key, value);
 	}
 
-	private void _addWithTimestampNs(long timestampNs, final K key, final V value) {
+	private void _addWithTimestampNs(final long timestampNs, final K key, final V value) {
 		Validation.notNull(key, "key must not be null");
 		Validation.notNull(value, "value must not be null");
-		lock.lock();
+		wlock.lock();
 		try {
-			// TODO: treat duplicate keys as overwrite operations
-			if (keyToValue.containsKey(key)) {
-				throw new IllegalArgumentException("can not add duplicate key: " + key);
+			TOEntry<K, V> existing = keyToValue.remove(key);
+			if (existing != null) {
+				timeoutToKey.remove(existing.timestampNs);
 			}
+
+			long actualTimestampNs = timestampNs;
 			// prevent duplicate timestamps, which should be rather rare due to
 			// the nanosecond resolution
-			while (timeoutToKey.get(timestampNs) != null) {
-				// TODO: add a random number somewhere between 1 and 50000 ns
-				timestampNs++;
+			while (timeoutToKey.get(actualTimestampNs) != null) {
+				// add a random number somewhere between so that we get some
+				// spread when many key-value pairs are added in short
+				// succession
+				actualTimestampNs += (long) (Math.random() * 25000);
 			}
-			Entry<K, V> entry = new Entry<K, V>(timestampNs, key, value);
-			timeoutToKey.put(timestampNs, key);
+			TOEntry<K, V> entry = new TOEntry<K, V>(actualTimestampNs, key, value);
+			timeoutToKey.put(actualTimestampNs, key);
 			keyToValue.put(key, entry);
 		} finally {
-			lock.unlock();
+			wlock.unlock();
 		}
 	}
 
 	@Override
 	public V get(K key) {
-		lock.lock();
+		rlock.lock();
 		try {
 			TOEntry<K, V> entry = keyToValue.get(key);
 			if (entry != null) {
-				return entry.getValue();
+				return entry.value;
 			}
 			return null;
 		} finally {
-			lock.unlock();
+			rlock.unlock();
 		}
 	}
 
 	@Override
-	public TOEntry<K, V> remove(K key) {
-		lock.lock();
+	public V remove(K key) {
+		wlock.lock();
 		try {
 			TOEntry<K, V> entry = keyToValue.remove(key);
 			if (entry != null) {
-				long timoutAt = entry.getTimeoutAt();
-				List<K> keys = timeoutToKeys.get(timoutAt);
-				keys.remove(key);
-				if (keys.isEmpty()) {
-					// no more entries for this timeout-slot
-					timeoutToKeys.remove(timoutAt);
-				}
+				long timestampNs = entry.timestampNs;
+				K otherKey = timeoutToKey.remove(timestampNs);
+				assert (otherKey != null);
+				return entry.value;
 			}
-			return entry;
+			return null;
 		} finally {
-			lock.unlock();
+			wlock.unlock();
 		}
 	}
 
 	@Override
-	public TOEntry<K, V> pollTimeout() {
-		lock.lock();
+	public Map.Entry<K, V> pollTimeout() {
+		wlock.lock();
 		try {
-			long now = System.nanoTime();
-			return _pollTimedout(now, TimeUnit.NANOSECONDS);
+			long nowNs = System.nanoTime();
+			return _pollTimedoutNs(nowNs);
 		} finally {
-			lock.unlock();
+			wlock.unlock();
 		}
 	}
 
 	@Override
-	public TOEntry<K, V> pollTimeout(long time, TimeUnit timeUnit) {
-		Validation.notNegative(time);
+	public Map.Entry<K, V> pollTimeout(long timestamp, TimeUnit timeUnit) {
+		Validation.notNegative(timestamp);
 		Validation.notNull(timeUnit);
-		lock.lock();
+		wlock.lock();
 		try {
-			return pollTimedout(time);
+			return _pollTimedoutNs(timeUnit.toNanos(timestamp));
 		} finally {
-			lock.unlock();
+			wlock.unlock();
 		}
 	}
 
 	/**
 	 * Find entries that are timed out
-	 * @param time The timeout cap. Anything older than that is timed out
+	 * @param timestamp The timeout cap. Anything older than that is timed out
 	 * @return the oldest timed out entry
 	 */
-	private TOEntry<K, V> _pollTimedout(long time, TimeUnit timeUnit) {
-		if (timeoutToKeys.isEmpty()) {
+	private Map.Entry<K, V> _pollTimedoutNs(final long timestampNs) {
+		if (timeoutToKey.isEmpty()) {
 			return null;
 		}
-		Long lowest = timeoutToKeys.firstKey();
-		if (time >= lowest) {
-			List<K> keys = timeoutToKeys.get(lowest);
-			K key = keys.remove(0);
-			if (keys.isEmpty()) {
-				// no more entries for this timeout-slot
-				timeoutToKeys.remove(lowest);
-			}
+		Long lowestNs = timeoutToKey.firstKey();
+		if (timestampNs >= lowestNs) {
+			K key = timeoutToKey.remove(lowestNs);
 			return keyToValue.remove(key);
 		}
 		// no entry timed out, or no entries at all
@@ -163,73 +163,114 @@ public final class JavaUtilTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 	@Override
 	public void clear() {
-		lock.lock();
+		wlock.lock();
 		try {
-			timeoutToKeys.clear();
+			timeoutToKey.clear();
 			keyToValue.clear();
 		} finally {
-			lock.unlock();
+			wlock.unlock();
 		}
 	}
 
 	@Override
 	public int size() {
-		lock.lock();
+		rlock.lock();
 		try {
 			return keyToValue.size();
 		} finally {
-			lock.unlock();
+			rlock.unlock();
 		}
 	}
 
 	@Override
 	public boolean isEmpty() {
-		lock.lock();
+		rlock.lock();
 		try {
 			return keyToValue.isEmpty();
 		} finally {
-			lock.unlock();
+			rlock.unlock();
 		}
 	}
 
 	@Override
 	public boolean containsKey(K key) {
-		lock.lock();
+		rlock.lock();
 		try {
 			return keyToValue.containsKey(key);
 		} finally {
-			lock.unlock();
+			rlock.unlock();
 		}
 	}
 
 	@Override
-	public long getTimeToNextTimeoutMs() {
-		lock.lock();
+	public long getTimeToNextTimeout(TimeUnit timeUnit) {
+		Validation.notNull(timeUnit);
+		rlock.lock();
 		try {
-			if (timeoutToKeys.isEmpty()) {
-				return 0;
+			if (timeoutToKey.isEmpty()) {
+				return Long.MAX_VALUE;
 			}
-			Long lowest = timeoutToKeys.firstKey();
-			long now = System.currentTimeMillis();
-			long diff = lowest.longValue() - now;
-			return diff < 0 ? 0 : diff;
+			Long lowest = timeoutToKey.firstKey();
+			long nowNs = System.nanoTime();
+			long diff = lowest.longValue() - nowNs;
+			return diff < 0 ? 0 : timeUnit.convert(diff, TimeUnit.NANOSECONDS);
 		} finally {
-			lock.unlock();
+			rlock.unlock();
 		}
 	}
 
-	static final class Entry<K, V> {
+	static final class TOEntry<K, V> implements Map.Entry<K, V> {
+
 		final long timestampNs;
 
 		final K key;
 
 		final V value;
 
-		public Entry(long timestampNs, K key, V value) {
+		public TOEntry(long timestampNs, K key, V value) {
 			this.timestampNs = timestampNs;
 			this.key = key;
 			this.value = value;
 		}
-	}
 
+		@Override
+		public K getKey() {
+			return key;
+		}
+
+		@Override
+		public V getValue() {
+			return value;
+		}
+
+		@Override
+		public V setValue(V value) {
+			throw new UnsupportedOperationException("setValue is not supported for entries of a TimeoutMap");
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			// according to the contract implied by Map.Entry
+			// but without the null checks since this implementation does not
+			// allow for null keys or values
+			if (obj == this) {
+				return true;
+			}
+			if (obj instanceof Map.Entry) {
+				Map.Entry other = (Map.Entry) obj;
+				return CompareUtil.equals(this.key, other.getKey()) && //
+						CompareUtil.equals(this.value, other.getValue());
+
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			// according to the contract implied by Map.Entry
+			// but without the null checks since this implementation does not
+			// allow for null keys or values
+			return key.hashCode() ^ value.hashCode();
+		}
+	}
 }

@@ -56,7 +56,7 @@ public class TcpEchoClient {
 
 	private static final boolean VERIFY_MODE = false;
 
-	private static final long CONNECT_TIMEOUT = 1000L;
+	private static final long CONNECT_TIMEOUT = 250L;
 
 	public static void main(String[] args) throws Exception {
 		int numClients = 1;
@@ -136,8 +136,8 @@ public class TcpEchoClient {
 		// final long rampDownMs = 60000L;
 		// final int maxConnections = 2000;
 
-		final long rampUpMs = 50L;
-		final long rampDownMs = 200000L;
+		final long rampUpMs = 250L;
+		final long rampDownMs = 60000L;
 		final int maxConnections = 100;
 
 		long startNext = start - 1;
@@ -216,8 +216,8 @@ public class TcpEchoClient {
 			double rxMb = totalRx / ((double) (1024 * 1024f));
 			double txMb = totalTx / ((double) (1024 * 1024f));
 			double mbit = ((totalRx + totalTx) * 8) / 1e6 / (timeDiff / 1000f);
-			System.out.printf("last %dsec total-rx=%.3fM, total-tx=%.3fM bytes => %.5f mbit/sec, #connections: %d, connecting: %d%n", //
-					intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size());
+			System.out.printf("last %dsec total-rx=%.3fM, total-tx=%.3fM bytes => %.5f mbit/sec, #connections: %d, connecting: %d, #handlers: %d%n", //
+					intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size(), context.getEventDispatcher().getNumEventHandlers());
 		}
 		if (sessions.isEmpty() && connecting.isEmpty()) {
 			System.out.println("no active or connecting sessions!");

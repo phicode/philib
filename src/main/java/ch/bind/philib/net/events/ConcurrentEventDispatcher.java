@@ -24,10 +24,12 @@ package ch.bind.philib.net.events;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ServiceState;
+import ch.bind.philib.validation.Validation;
 
 /**
  * TODO
@@ -53,7 +55,7 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 
 	private final AtomicLong nextRoundRobinIdx = new AtomicLong(0);
 
-	private ConcurrentEventDispatcher(EventDispatcher[] dispatchers, ScaleStrategy scaleStrategy) {
+	ConcurrentEventDispatcher(EventDispatcher[] dispatchers, ScaleStrategy scaleStrategy) {
 		this.dispatchers = dispatchers;
 		this.scaleStrategy = scaleStrategy;
 		serviceState.setOpen();
@@ -107,30 +109,74 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 
 	@Override
 	public void register(EventHandler eventHandler, int ops) {
-		EventDispatcher disp = findMapping(eventHandler);
-		if (disp == null) {
-			disp = createMapping(eventHandler);
-		}
+		EventDispatcher disp = createMappingOrThrow(eventHandler);
 		disp.register(eventHandler, ops);
 	}
 
-	private EventDispatcher findMapping(EventHandler eventHandler) {
-		if (eventHandler == null) {
-			return null;
-		}
+	@Override
+	public void unregister(EventHandler eventHandler) {
+		Validation.notNull(eventHandler);
 		long id = eventHandler.getEventHandlerId();
-		return map.get(id);
+		EventDispatcher disp = map.remove(id);
+		if (disp == null) {
+			return;
+		}
+		disp.unregister(eventHandler);
 	}
 
-	private EventDispatcher createMapping(EventHandler eventHandler) {
+	@Override
+	public void setTimeout(EventHandler eventHandler, long timeout, TimeUnit timeUnit) {
+		EventDispatcher disp = findMappingOrThrow(eventHandler);
+		disp.setTimeout(eventHandler, timeout, timeUnit);
+	}
+
+	@Override
+	public void unsetTimeout(EventHandler eventHandler) {
+		EventDispatcher disp = findMappingOrThrow(eventHandler);
+		disp.unsetTimeout(eventHandler);
+	}
+
+	@Override
+	public int getRegisteredOps(EventHandler eventHandler) {
+		EventDispatcher disp = findMappingOrThrow(eventHandler);
+		return disp.getRegisteredOps(eventHandler);
+	}
+
+	@Override
+	public int getNumEventHandlers() {
+		int c = 0;
+		for (EventDispatcher ed : dispatchers) {
+			c += ed.getNumEventHandlers();
+		}
+		return c;
+	}
+
+	@Override
+	public long getLoadAvg() {
+		long load = 0;
+		for (EventDispatcher ed : dispatchers) {
+			load += ed.getLoadAvg();
+		}
+		return load;
+	}
+
+	private EventDispatcher findMappingOrThrow(EventHandler eventHandler) {
+		Validation.notNull(eventHandler);
 		long id = eventHandler.getEventHandlerId();
 		EventDispatcher disp = map.get(id);
 		if (disp == null) {
-			disp = findBestDispatcher();
-			EventDispatcher registeredDisp = map.putIfAbsent(id, disp);
-			if (registeredDisp != null) {
-				disp = registeredDisp;
-			}
+			throw new IllegalStateException("event handler not registered, id=" + id + " : " + eventHandler);
+		}
+		return disp;
+	}
+
+	private EventDispatcher createMappingOrThrow(EventHandler eventHandler) {
+		Validation.notNull(eventHandler);
+		final long id = eventHandler.getEventHandlerId();
+		EventDispatcher disp = findBestDispatcher();
+		EventDispatcher existing = map.putIfAbsent(id, disp);
+		if (existing != null) {
+			throw new IllegalStateException("duplicate registration for event with id=" + id + " : " + eventHandler);
 		}
 		return disp;
 	}
@@ -179,47 +225,5 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 		long dispIdx = nextRoundRobinIdx.getAndIncrement();
 		int realDispIdx = (int) (dispIdx % dispatchers.length);
 		return dispatchers[realDispIdx];
-	}
-
-	@Override
-	public void unregister(EventHandler eventHandler) {
-		if (eventHandler != null) {
-			EventDispatcher disp = map.remove(eventHandler.getEventHandlerId());
-			if (disp != null) {
-				disp.unregister(eventHandler);
-			} else {
-				// TODO: notify listener
-				System.out.println("event handler is not registered: " + eventHandler);
-			}
-		}
-	}
-
-	@Override
-	public int getRegisteredOps(EventHandler eventHandler) {
-		EventDispatcher disp = findMapping(eventHandler);
-		if (disp != null) {
-			return disp.getRegisteredOps(eventHandler);
-		}
-		// TODO: notify listener
-		System.out.println("event handler is not registered: " + eventHandler);
-		return 0;
-	}
-
-	@Override
-	public int getNumEventHandlers() {
-		int c = 0;
-		for (EventDispatcher ed : dispatchers) {
-			c += ed.getNumEventHandlers();
-		}
-		return c;
-	}
-
-	@Override
-	public long getLoadAvg() {
-		long load = 0;
-		for (EventDispatcher ed : dispatchers) {
-			load += ed.getLoadAvg();
-		}
-		return load;
 	}
 }

@@ -52,6 +52,8 @@ public class NetContextImpl implements NetContext {
 
 	public static final int DEFAULT_TCP_SERVER_SOCKET_BACKLOG = 25;
 
+	public static final long DEFAULT_CONNECT_TIMEOUT = 60 * 1000L; // 1min
+
 	private final SessionManager sessionManager;
 
 	private final ByteBufferPool bufferPool;
@@ -67,6 +69,8 @@ public class NetContextImpl implements NetContext {
 	private Integer rcvBufSize;
 
 	private Boolean broadcastDatagram;
+
+	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT;
 
 	private int tcpServerSocketBacklog = DEFAULT_TCP_SERVER_SOCKET_BACKLOG;
 
@@ -165,6 +169,16 @@ public class NetContextImpl implements NetContext {
 	@Override
 	public int getTcpServerSocketBacklog() {
 		return tcpServerSocketBacklog;
+	}
+
+	@Override
+	public long getConnectTimeout() {
+		return connectTimeout;
+	}
+
+	@Override
+	public void setConnectTimeout(long connectTimeout) {
+		this.connectTimeout = connectTimeout;
 	}
 
 	@Override

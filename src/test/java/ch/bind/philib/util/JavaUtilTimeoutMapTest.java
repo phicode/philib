@@ -15,138 +15,145 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.testng.annotations.Test;
 
-import ch.admin.babs.polyalert.server.com.common.util.TimeoutMap.TOEntry;
-
 public class JavaUtilTimeoutMapTest {
+
+	private static final TimeUnit TU = TimeUnit.MILLISECONDS;
 
 	@Test
 	public void complexScenario() {
 		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
 
-		int kv = 0;
-		for (int i = 0; i < 100; i++) {
-			for (int j = 0; j < 10; j++) {
-				map.add(i, kv, kv);
-				kv++;
-			}
+		for (int i = 0; i < 1000; i++) {
+			Integer ikv = Integer.valueOf(i);
+			map.addWithTimestamp(i, TU, ikv, ikv);
 		}
-		assertEquals(map.size(), 100 * 10);
+		assertEquals(map.size(), 1000);
 
-		// find ten entries (0-9) at time 0
+		// find timeout entries 0-9
 		long time = 0;
 		assertNTimeouts(map, time, 10, 0);
-		assertEquals(map.size(), 99 * 10);
+		assertEquals(map.size(), 990);
 
-		// find ten entries (10-19) at time 1
-		time = 1;
-		assertNTimeouts(map, time, 10, 10);
-		assertEquals(map.size(), 98 * 10);
-
-		// find ten entries (20-29) at time 2
-		time = 2;
-		assertNTimeouts(map, time, 10, 20);
+		// find timeout entries 10-29
+		time = 10;
+		assertNTimeouts(map, time, 20, 10);
 		assertEquals(map.size(), 97 * 10);
 
 		// remove five entries (30-34)
 		for (int i = 30; i < 35; i++) {
 			map.remove(i);
 		}
-		assertEquals(map.size(), 97 * 10 - 5);
+		assertEquals(map.size(), 965);
 
-		// find five entries (35-39) at time 3
-		time = 3;
+		time = 35;
 		assertNTimeouts(map, time, 5, 35);
-		assertEquals(map.size(), 96 * 10);
+		assertEquals(map.size(), 960);
+
+		time = 40;
+		assertNTimeouts(map, time, 960, 40);
+
+		assertTrue(map.isEmpty());
+		assertNull(map.pollTimeout());
 	}
 
 	private void assertNTimeouts(TimeoutMap<Integer, Integer> map, long time, int numTimeouts, int firstKeyValue) {
 		Integer keyValue = firstKeyValue;
 		for (int i = 0; i < numTimeouts; i++) {
-			System.out.println("testing " + i);
-			TOEntry<Integer, Integer> e = map.findTimedout(time);
+			assertTrue(map.containsKey(keyValue));
+			Map.Entry<Integer, Integer> e = map.pollTimeout(time, TU);
 			assertNotNull(e);
-			assertEquals(e.getTimeoutAt(), time);
 			assertEquals(e.getKey(), keyValue);
 			assertEquals(e.getValue(), keyValue);
+
+			assertFalse(map.containsKey(keyValue));
+			assertNull(map.get(keyValue));
+			assertNull(map.pollTimeout(time, TU));
+
 			keyValue++;
+			time++;
 		}
-		// assert that we find no more timed-out entries for this time
-		TOEntry<Integer, Integer> e = map.findTimedout(time);
-		assertNull(e);
 	}
 
 	@Test
 	public void addEntry() {
 		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
-		TOEntry<Integer, Integer> e = new TOEntry<Integer, Integer>(0, 123, 456);
-		map.add(e);
+		map.add(0, TU, 123, 456);
 		assertEquals(1, map.size());
+		assertFalse(map.isEmpty());
 		map.remove(123);
+		assertEquals(0, map.size());
 		assertTrue(map.isEmpty());
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "entry must not be null")
-	public void nonNullEntry() {
-		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
-		TOEntry<Integer, Integer> e = null;
-		map.add(e);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "timeoutAt must be > 0")
-	public void nonNegativeTimeout() {
-		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
-		map.add(-1, 123, 456);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "timeoutAt must be > 0")
-	public void nonNegativeTimeoutEntry() {
-		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
-		TOEntry<Integer, Integer> e = new TOEntry<Integer, Integer>(-1, 123, 456);
-		map.add(e);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "key must not be null")
-	public void nonNullKey() {
-		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
-		map.add(0, null, 456);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "key must not be null")
-	public void nonNullKeyEntry() {
-		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
-		TOEntry<Integer, Integer> e = new TOEntry<Integer, Integer>(0, null, 456);
-		map.add(e);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "value must not be null")
-	public void nonNullValue() {
-		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
-		map.add(0, 123, null);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "value must not be null")
-	public void nonNullValueEntry() {
-		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
-		TOEntry<Integer, Integer> e = new TOEntry<Integer, Integer>(0, 123, null);
-		map.add(e);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "can not add duplicate key: 12345678")
-	public void noDuplicateKeys() {
+	@Test
+	public void duplicateKeys() {
 		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
 		int key = 12345678;
-		map.add(0, key, 1);
-		map.add(55, key, 1234);
+		map.add(45, TimeUnit.SECONDS, key, 1);
+		map.add(55, TimeUnit.SECONDS, key, 1234);
+		assertEquals(map.get(key).intValue(), 1234);
+		long timeToNextTimeout = map.getTimeToNextTimeout(TimeUnit.SECONDS);
+		assertTrue(timeToNextTimeout == 55 || timeToNextTimeout == 54);
 	}
 
 	@Test
 	public void returnNullOnNoTimeouts() {
 		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
-		long now = System.currentTimeMillis();
-		map.add(now + 1000, 123, 456);
-		assertNull(map.findTimedout());
+		map.add(10, TimeUnit.DAYS, 123, 456);
 		assertFalse(map.isEmpty());
+		assertNull(map.pollTimeout());
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "timeout must not be negative")
+	public void addNoNegativeTimeout() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.add(-1, TU, 1, 2);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "timestamp must not be negative")
+	public void addNoNegativeTimestamp() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.addWithTimestamp(-1, TU, 1, 2);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "time-unit must not be null")
+	public void addNoNullTimeUnit1() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.add(0, null, 1, 2);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "time-unit must not be null")
+	public void addNoNullTimeUnit2() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.addWithTimestamp(0, null, 1, 2);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "key must not be null")
+	public void noNullKey1() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.add(0, TU, null, 2);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "key must not be null")
+	public void noNullKey2() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.addWithTimestamp(0, TU, null, 2);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "value must not be null")
+	public void noNullValue1() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.add(0, TU, 1, null);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "value must not be null")
+	public void noNullValue2() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.addWithTimestamp(0, TU, 1, null);
 	}
 }

@@ -44,12 +44,12 @@ public final class TcpNetFactory {
 		return TcpServer.listen(context, bindAddress);
 	}
 
-	public static Future<TcpConnection> connect(NetContext context, SocketAddress endpoint) throws IOException {
+	public static Future<TcpConnection> connect(NetContext context, SocketAddress endpoint, long connectTimeout) throws IOException {
 		SocketChannel channel = SocketChannel.open();
 		try {
 			channel.configureBlocking(false);
 			context.setSocketOptions(channel.socket());
-			
+
 		} catch (IOException e) {
 			SafeCloseUtil.close(channel);
 			// TODO: merge with other places which do the same exception
@@ -58,14 +58,13 @@ public final class TcpNetFactory {
 		}
 
 		try {
-			long timeout = context.getConnectTimeoutMs();
-			boolean finished = channel.connect(endpoint,timeout);
+			boolean finished = channel.connect(endpoint);
 			if (finished) {
 				TcpConnection conn = TcpConnection.createConnected(context, channel, endpoint);
 				return new FinishedFuture<TcpConnection>(conn);
 			}
 			else {
-				return TcpClientConnection.createConnecting(context, channel, endpoint);
+				return TcpClientConnection.createConnecting(context, channel, endpoint, connectTimeout);
 			}
 		} catch (IOException e) {
 			SafeCloseUtil.close(channel);
@@ -74,4 +73,7 @@ public final class TcpNetFactory {
 		}
 	}
 
+	public static Future<TcpConnection> connect(NetContext context, SocketAddress endpoint) throws IOException {
+		return connect(context, endpoint, context.getConnectTimeout());
+	}
 }

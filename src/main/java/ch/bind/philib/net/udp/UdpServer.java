@@ -154,6 +154,12 @@ public final class UdpServer extends EventHandlerBase implements NetListener {
 		return SelectOps.READ;
 	}
 
+	@Override
+	public boolean handleTimeout() throws IOException {
+		LOG.error("UdpServer.handleTimeout() was unexpectedly called");
+		return true;
+	}
+
 	private void notifyReceive(SocketAddress addr, ByteBuffer data) {
 		try {
 			session.receive(addr, data);

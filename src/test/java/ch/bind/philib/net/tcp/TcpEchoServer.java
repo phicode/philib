@@ -77,8 +77,6 @@ public class TcpEchoServer implements SessionManager {
 					long now = System.nanoTime();
 					long tooFarAgo = now - (25 * 1000000L); // 25ms
 					Iterator<EchoServerSession> iter = sessions.iterator();
-					System.out.println(server.getContext().getBufferPool().getPoolStats().toString());
-					System.out.println("sessions: " + sessions.size());
 					while (iter.hasNext()) {
 						EchoServerSession s = iter.next();
 						if (!s.getConnection().isConnected()) {
@@ -92,8 +90,12 @@ public class TcpEchoServer implements SessionManager {
 								System.out.printf("last interaction: %.5fsec => %s%n", //
 										lastSec, s);
 							}
+
 						}
 					}
+					System.out.println(server.getContext().getBufferPool().getPoolStats().toString());
+					System.out.println("sessions: " + sessions.size());
+					System.out.println("#handlers: " + context.getEventDispatcher().getNumEventHandlers());
 				}
 			}
 		}

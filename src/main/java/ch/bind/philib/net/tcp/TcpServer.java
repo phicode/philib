@@ -97,6 +97,12 @@ public final class TcpServer extends EventHandlerBase implements NetListener {
 		return SelectOps.ACCEPT;
 	}
 
+	@Override
+	public boolean handleTimeout() throws IOException {
+		LOG.error("TcpServer.handleTimeout() was unexpectedly called");
+		return true;
+	}
+
 	static TcpServer listen(NetContext context, SocketAddress bindAddress) throws IOException {
 		ServerSocketChannel channel = ServerSocketChannel.open();
 		ServerSocket socket = channel.socket();

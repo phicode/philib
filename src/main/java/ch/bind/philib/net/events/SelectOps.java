@@ -45,7 +45,7 @@ public final class SelectOps {
 
 	public static final int DONT_CHANGE = 1 << 10;
 
-	public static final int TIMEOUT = 1 << 11;
+//	public static final int TIMEOUT = 1 << 11;
 
 	public static String opsToString(int ops) {
 		switch (ops) {

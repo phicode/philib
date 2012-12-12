@@ -9,6 +9,7 @@
  */
 package ch.bind.philib.util;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -24,15 +25,22 @@ import java.util.concurrent.TimeUnit;
 public interface TimeoutMap<K, V> {
 
 	/**
-	 * Add a key-value pair with an associated timeout to the map.
-	 * The 
-	 * @param timeoutAt the pair's timeout.
-	 * @param timeUnit the unit of the parameter timeoutAt.
-	 * @param key the key, must not yet exist in the map
-	 * @param value the value
+	 * Add a key-value pair with an associated timeout to the map. The resulting
+	 * timeout-timestamp is the current time plus the supplied timeout.
+	 * @param timeout the timeout.for this key-value pair
+	 * @param timeUnit the unit of the parameter timeout
+	 * @param key -
+	 * @param value -
 	 */
-	void addWithRange(long timeout, TimeUnit timeUnit, K key, V value);
+	void add(long timeout, TimeUnit timeUnit, K key, V value);
 
+	/**
+	 * Add a key-value pair with a specific timeout timestamp.
+	 * @param timestamp the timestamp when this key-value pair will expire
+	 * @param timeUnit the unit of the parameter timestamp
+	 * @param key -
+	 * @param value -
+	 */
 	void addWithTimestamp(long timestamp, TimeUnit timeUnit, K key, V value);
 
 	/**
@@ -56,18 +64,19 @@ public interface TimeoutMap<K, V> {
 	 * @return {@code null} if there is no timed-out entry in this map.
 	 *         otherwise the oldest timed-out entry.
 	 */
-	Pair<K, V> pollTimeout();
+	Map.Entry<K, V> pollTimeout();
 
 	/**
 	 * Finds the next entry which is timed out, based on a supplied timestamp.
-	 * @param time a supplied timestamp, for finding the next timed out entry
-	 * @param timeUnit the unit of the parameter time.
+	 * @param timestamp a supplied timestamp, for finding the next timed out
+	 *            entry
+	 * @param timeUnit the unit of the parameter timestamp.
 	 * @return {@code null} if there is no timed-out entry in this map.
 	 *         otherwise the oldest timed-out entry.
 	 * @throws IllegalArgumentException if the time is negative or the timeUnit
 	 *             is null
 	 */
-	Pair<K, V> pollTimeout(long time, TimeUnit timeUnit);
+	Map.Entry<K, V> pollTimeout(long timestamp, TimeUnit timeUnit);
 
 	/**
 	 * removes all key-value pairs from this map.

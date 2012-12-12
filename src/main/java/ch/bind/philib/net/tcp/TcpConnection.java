@@ -113,6 +113,12 @@ public class TcpConnection extends ConnectionBase {
 	}
 
 	@Override
+	public boolean handleTimeout() throws IOException {
+		// TODO: implement read & write timeouts
+		return true;
+	}
+
+	@Override
 	public void close() {
 		context.getEventDispatcher().unregister(this);
 		if (channel.isOpen()) {

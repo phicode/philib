@@ -28,6 +28,7 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -41,12 +42,11 @@ import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.lang.ThreadUtil;
+import ch.bind.philib.util.JavaUtilTimeoutMap;
 import ch.bind.philib.util.LoadAvg;
 import ch.bind.philib.util.LoadAvgNoop;
 import ch.bind.philib.util.LoadAvgSimple;
-import ch.bind.philib.util.SortedTwoKeyMap;
-import ch.bind.philib.util.TwoKeyMap;
-import ch.bind.philib.util.TwoKeyMap.TwoEntry;
+import ch.bind.philib.util.TimeoutMap;
 
 /**
  * TODO
@@ -74,9 +74,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	private volatile int numHandlers;
 
-	// Key-A: timestamp of the timeout in milliseconds
-	// Key-B: EventHandlerId
-	private final TwoKeyMap<Long, Long, EventHandler> upcomingTimeouts = SortedTwoKeyMap.create();
+	private final TimeoutMap<Long, EventHandler> upcomingTimeouts = new JavaUtilTimeoutMap<Long, EventHandler>();
 
 	private SimpleEventDispatcher(Selector selector, LoadAvg loadAvg) {
 		this.selector = selector;
@@ -116,20 +114,13 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	}
 
 	private int select() throws IOException, ClosedSelectorException {
-		while (serviceState.isOpen()) {
+		if (serviceState.isOpen()) {
 			updateRegistrations();
-			long timeout = selectTime();
-			if (timeout < 1) {
-				// timeout reached
-				handleTimeouts();
-				continue;
-			}
-			int num = selector.select(timeout);
-			if (num != 0) {
-				return num;
-			}
+			long nsUntilNextTimeout = upcomingTimeouts.getTimeToNextTimeout(TimeUnit.MILLISECONDS);
+			long timeout = Math.min(nsUntilNextTimeout, 10000L);
+			return selector.select(timeout);
 		}
-		return -1;
+		return 0;
 	}
 
 	@Override
@@ -156,6 +147,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			for (NewRegistration newReg : newRegistrations) {
 				SafeCloseUtil.close(newReg.getEventHandler(), LOG);
 			}
+
+			upcomingTimeouts.clear();
 
 			serviceState.setClosed();
 		}
@@ -187,9 +180,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			}
 		} catch (Exception e) {
 			// TODO: notify session-manager
-			LOG.info(
-					"closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e) + ", thread: "
-							+ Thread.currentThread(), e);
+			LOG.info("closing an event-handler due to an unexpected exception: " + ExceptionUtil.buildMessageChain(e) + ", thread: "
+					+ Thread.currentThread());
 			SafeCloseUtil.close(handler, LOG);
 		}
 	}
@@ -209,14 +201,16 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	@Override
 	public void setTimeout(EventHandler eventHandler, long timeout, TimeUnit timeUnit) {
-		// TODO Auto-generated method stub
-
+		long handlerId = eventHandler.getEventHandlerId();
+		upcomingTimeouts.add(timeout, timeUnit, handlerId, eventHandler);
+		wakeup();
 	}
 
 	@Override
 	public void unsetTimeout(EventHandler eventHandler) {
-		long keyB = eventHandler.getEventHandlerId();
-		upcomingTimeouts.removeByKeyB(keyB);
+		long handlerId = eventHandler.getEventHandlerId();
+		upcomingTimeouts.remove(handlerId);
+		// no wakeup needed
 	}
 
 	private void updateRegistrations() {
@@ -254,6 +248,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		if (key != null) {
 			key.cancel();
 			key.attach(null);
+			upcomingTimeouts.remove(eventHandler.getEventHandlerId());
 			wakeup();
 		}
 		else {
@@ -308,9 +303,6 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		try {
 			while (serviceState.isOpen()) {
 				int num = select();
-				if (num == -1) {
-					break;
-				}
 				long tStartNs = System.nanoTime();
 				if (num > 0) {
 					Set<SelectionKey> selected = selector.selectedKeys();
@@ -319,6 +311,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 					}
 					selected.clear();
 				}
+				handleTimeouts();
 				long tWorkNs = System.nanoTime() - tStartNs;
 				loadAvg.logWorkNs(tWorkNs);
 			}
@@ -332,41 +325,19 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		}
 	}
 
-	private long selectTime() {
-		TwoEntry<Long, Long, EventHandler> nextTimeout = upcomingTimeouts.firstByKeyA();
-		if (nextTimeout == null) {
-			// no pending timeouts
-			return 10000L;
-		}
-		long nextTimeoutAt = nextTimeout.getKeyA().longValue();
-		long now = System.currentTimeMillis();
-		long diff = nextTimeoutAt - now;
-		if (diff > 0) {
-			// timeout not yet reached
-			return Math.min(diff, 10000L);
-		}
-		// timeout reached
-		return -1;
-	}
-
 	private void handleTimeouts() {
-		long now = System.currentTimeMillis();
-		TwoEntry<Long, Long, EventHandler> nextTimeout;
-		while ((nextTimeout = upcomingTimeouts.firstByKeyA()) != null) {
-			long nextTimeoutAt = nextTimeout.getKeyA().longValue();
-			if (nextTimeoutAt > now) {
-				// no more timeouts
-				return;
-			}
-			long keyB = nextTimeout.getKeyB(); // event-handler-id
-			upcomingTimeouts.removeByKeyB(keyB);
-			handleTimeout(nextTimeout.getValue());
+		Map.Entry<Long, EventHandler> timeout = null;
+		while ((timeout = upcomingTimeouts.pollTimeout()) != null) {
+			handleTimeout(timeout.getValue());
 		}
 	}
 
 	private void handleTimeout(EventHandler handler) {
 		try {
-			handler.handleTimeout();
+			boolean keepRunning = handler.handleTimeout();
+			if (!keepRunning) {
+				SafeCloseUtil.close(handler, LOG);
+			}
 		} catch (Exception e) {
 			// TODO: notify session-manager
 			LOG.info(

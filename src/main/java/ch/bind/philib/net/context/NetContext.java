@@ -81,6 +81,10 @@ public interface NetContext extends Closeable {
 
 	void getTcpServerSocketBacklog(int tcpServerSocketBacklog);
 
+	void setConnectTimeout(long connectTimeout);
+
+	long getConnectTimeout();
+
 	void setSocketOptions(Socket socket) throws IOException;
 
 	void setSocketOptions(ServerSocket socket) throws IOException;
