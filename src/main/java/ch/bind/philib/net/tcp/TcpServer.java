@@ -98,7 +98,7 @@ public final class TcpServer extends EventHandlerBase implements NetListener {
 	}
 
 	@Override
-	public boolean handleTimeout() throws IOException {
+	public boolean handleTimeout() {
 		LOG.error("TcpServer.handleTimeout() was unexpectedly called");
 		return true;
 	}

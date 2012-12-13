@@ -91,7 +91,7 @@ public final class AsyncConnectFuture<T extends Connection> implements Future<T>
 
 	@Override
 	public synchronized T get() throws InterruptedException, ExecutionException {
-		if (!done) {
+		while (!done) {
 			wait();
 		}
 		throwWhenFailedOrCancelled();
@@ -100,8 +100,11 @@ public final class AsyncConnectFuture<T extends Connection> implements Future<T>
 
 	@Override
 	public synchronized T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		if (!done) {
-			unit.timedWait(this, timeout);
+		long nowNs = System.nanoTime();
+		long untilNs = nowNs + unit.toNanos(timeout);
+		while (!done && nowNs < untilNs) {
+			TimeUnit.NANOSECONDS.timedWait(this, untilNs - nowNs);
+			nowNs = System.nanoTime();
 		}
 		if (!done) {
 			throw new TimeoutException();

@@ -121,7 +121,7 @@ public class TcpEchoClient {
 		ByteBufferPool bufferPool = ByteBufferPool.create(8192, 128, 3);
 		EventDispatcher eventDispatcher = ConcurrentEventDispatcher.open(3);
 		context = new NetContextImpl(sessionManager, bufferPool, eventDispatcher);
-		context.setTcpNoDelay(true);
+//		context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
 		context.setConnectTimeout(CONNECT_TIMEOUT);

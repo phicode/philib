@@ -155,7 +155,7 @@ public final class UdpServer extends EventHandlerBase implements NetListener {
 	}
 
 	@Override
-	public boolean handleTimeout() throws IOException {
+	public boolean handleTimeout() {
 		LOG.error("UdpServer.handleTimeout() was unexpectedly called");
 		return true;
 	}

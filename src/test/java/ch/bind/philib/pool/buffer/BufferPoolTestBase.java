@@ -17,8 +17,6 @@ public abstract class BufferPoolTestBase<T> {
 
 	private static final boolean executeBenchmark = true;
 
-	private static final boolean printBenchmarkResults = true;
-
 	abstract Pool<T> createPool(int bufferSize, int maxEntries);
 
 	abstract T createBuffer(int bufferSize);
@@ -82,29 +80,22 @@ public abstract class BufferPoolTestBase<T> {
 		long numOps = 8L * 1024L * 1024L;
 		int getOps = 1000;
 		int putOps = 950;
-		boolean firstRun = true;
 		int numRuns = 1;
 		for (int i = 1; i <= 32; i *= 2) {
-			// long total = 0;
 			for (int r = 0; r < numRuns; r++) {
-				// total +=
-				benchmark(firstRun, i, numOps, getOps, putOps);
-				firstRun = false;
+				benchmark(i, numOps, getOps, putOps);
 			}
-			// long average = total / numRuns;
 		}
 	}
 
-	public long benchmark(boolean firstRun, int numThreads, long numOps, int getOps, int putOps) throws Exception {
+	public void benchmark(int numThreads, long numOps, int getOps, int putOps) throws Exception {
 		TestUtil.gcAndSleep();
 
 		int totalbufferSize = 32 * 1024 * 1024;
 		int bufferSize = 1024;
 		int maxEntries = totalbufferSize / bufferSize;
-		// System.out.printf("using at most %d buffers%n", maxEntries);
 
 		Pool<T> pool = createPool(bufferSize, maxEntries);
-		String name = getClass().getSimpleName();
 		Thread[] ts = new Thread[numThreads];
 		long numOpsPerThread = numOps / numThreads;
 		Semaphore ready = new Semaphore(0);
@@ -117,27 +108,17 @@ public abstract class BufferPoolTestBase<T> {
 		}
 		// wait until all threads are started and waiting on the semaphore
 		ready.acquire(numThreads);
-		long tStart = System.currentTimeMillis();
+		long tStartNs = System.nanoTime();
 		// let the threads run
 		go.release(numThreads);
 		// wait again until all threads have finished
 		end.acquire(numThreads);
-		long tEnd = System.currentTimeMillis();
+		long timeNs = System.nanoTime() - tStartNs;
 		for (Thread t : ts) {
 			t.join();
 		}
-		long time = tEnd - tStart;
 
-		double opsPerMs = numOps / ((double) time);
-		if (printBenchmarkResults) {
-			long bufsCreated = pool.getPoolStats().getCreates();
-			if (firstRun) {
-				System.out.println(name + " #threads; #ops ; #new bufs ; time(ms); ops/msec");
-			}
-			System.out.printf("%2d ; %9d ; %9d ; %4d ; %.3f%n", numThreads, numOps, bufsCreated, time, opsPerMs);
-		}
-		System.out.println("pool-stats: " + pool.getPoolStats());
-		return time;
+		TestUtil.printBenchResults(getClass(), "ops " + numThreads + " threads", "ops", timeNs, numOps);
 	}
 
 	private static final class StressTester<T> implements Runnable {
@@ -167,6 +148,7 @@ public abstract class BufferPoolTestBase<T> {
 			this.putOps = putOps;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void run() {
 			ready.release();

@@ -227,7 +227,7 @@ public final class JavaUtilTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 		final V value;
 
-		public TOEntry(long timestampNs, K key, V value) {
+		TOEntry(long timestampNs, K key, V value) {
 			this.timestampNs = timestampNs;
 			this.key = key;
 			this.value = value;

@@ -58,7 +58,7 @@ public class TcpEchoServer implements SessionManager {
 		NetContext context = new NetContextImpl(this, bufferPool, eventDispatcher);
 		// NetContext context = NetContexts.createSimple(this);// new
 		// ScalableNetContext(16);
-		context.setTcpNoDelay(true);
+//		context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
 

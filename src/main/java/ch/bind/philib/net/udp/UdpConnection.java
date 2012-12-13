@@ -39,20 +39,16 @@ import ch.bind.philib.net.events.EventHandlerBase;
  * @author Philipp Meinen
  */
 
-public class UdpConnection  extends ConnectionBase {
+public class UdpConnection extends ConnectionBase {
 
-//	private final 
-public UdpConnection(NetContext context) {
+	public UdpConnection(NetContext context) {
 		super(context);
 	}
 
-	
-	
-	
 	@Override
 	public void close() throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -64,7 +60,7 @@ public UdpConnection(NetContext context) {
 	@Override
 	public void setEvents(Events interestedEvents) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -101,5 +97,11 @@ public UdpConnection(NetContext context) {
 	public int handleOps(int ops) throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public boolean handleTimeout() throws IOException {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

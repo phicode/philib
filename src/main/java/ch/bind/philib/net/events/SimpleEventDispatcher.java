@@ -315,7 +315,6 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 				long tWorkNs = System.nanoTime() - tStartNs;
 				loadAvg.logWorkNs(tWorkNs);
 			}
-			System.out.println("shutting down, thread: " + Thread.currentThread());
 		} catch (IOException e) {
 			LOG.error("select() failed", e);
 		} catch (ClosedSelectorException e) {
