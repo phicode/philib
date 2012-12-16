@@ -62,8 +62,7 @@ public final class TcpNetFactory {
 			if (finished) {
 				TcpConnection conn = TcpConnection.createConnected(context, channel, endpoint);
 				return new FinishedFuture<TcpConnection>(conn);
-			}
-			else {
+			} else {
 				return TcpClientConnection.createConnecting(context, channel, endpoint, connectTimeout);
 			}
 		} catch (IOException e) {

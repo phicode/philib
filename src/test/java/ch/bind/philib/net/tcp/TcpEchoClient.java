@@ -64,8 +64,7 @@ public class TcpEchoClient {
 		if (args.length > 1) {
 			System.out.println("only one parameter may be specified");
 			System.exit(1);
-		}
-		else if (args.length == 1) {
+		} else if (args.length == 1) {
 			try {
 				numClients = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -121,10 +120,10 @@ public class TcpEchoClient {
 		ByteBufferPool bufferPool = ByteBufferPool.create(8192, 128, 3);
 		EventDispatcher eventDispatcher = ConcurrentEventDispatcher.open(3);
 		context = new NetContextImpl(sessionManager, bufferPool, eventDispatcher);
-//		context.setTcpNoDelay(true);
+		// context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
-		context.setConnectTimeout(CONNECT_TIMEOUT);
+		// context.setConnectTimeout(CONNECT_TIMEOUT);
 		// context.setTcpNoDelay(false);
 		// context.setSndBufSize(512);
 		// context.setRcvBufSize(512);

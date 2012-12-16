@@ -108,8 +108,7 @@ public class ConcurrentEventDispatcherTest {
 		disps[3] = new RecordingEventDispatcher();
 		ConcurrentEventDispatcher concDisp = new ConcurrentEventDispatcher(disps, ScaleStrategy.ROUND_ROBIN);
 
-		int[] exp = {
-				0, 0, 0, 0 };
+		int[] exp = { 0, 0, 0, 0 };
 		for (int i = 0; i < 1000; i++) {
 			concDisp.register(new RecordingEventHandler(i), 0);
 			exp[i % 4]++;
@@ -131,8 +130,7 @@ public class ConcurrentEventDispatcherTest {
 		ConcurrentEventDispatcher concDisp = new ConcurrentEventDispatcher(disps, ScaleStrategy.LEAST_LOAD);
 
 		Random rand = new Random();
-		int[] exp = {
-				0, 0, 0, 0 };
+		int[] exp = { 0, 0, 0, 0 };
 		for (int i = 0; i < 1000; i++) {
 			int which = rand.nextInt(4);
 			for (int x = 0; x < 4; x++) {

@@ -165,8 +165,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		}
 		if (key.isValid()) {
 			handleEvent(eventHandler, key, key.readyOps());
-		}
-		else {
+		} else {
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
 	}
@@ -192,8 +191,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		SelectionKey key = channel.keyFor(selector);
 		if (key != null) {
 			key.interestOps(ops);
-		}
-		else {
+		} else {
 			newRegistrations.add(new NewRegistration(eventHandler, ops));
 		}
 		wakeup();
@@ -221,8 +219,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			SelectionKey key = channel.keyFor(selector);
 			if (key != null) {
 				key.interestOps(reg.getOps());
-			}
-			else {
+			} else {
 				try {
 					int ops = reg.getOps();
 					channel.register(selector, ops, eventHandler);
@@ -250,8 +247,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			key.attach(null);
 			upcomingTimeouts.remove(eventHandler.getEventHandlerId());
 			wakeup();
-		}
-		else {
+		} else {
 			// handle event-handlers which unregister before they were added to
 			// the selector
 

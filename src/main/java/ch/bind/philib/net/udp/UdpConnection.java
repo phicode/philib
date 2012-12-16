@@ -26,12 +26,10 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 
-import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Events;
 import ch.bind.philib.net.Session;
 import ch.bind.philib.net.conn.ConnectionBase;
 import ch.bind.philib.net.context.NetContext;
-import ch.bind.philib.net.events.EventHandlerBase;
 
 /**
  * TODO

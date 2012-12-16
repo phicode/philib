@@ -33,7 +33,7 @@ public abstract class ConnectionBase extends EventHandlerBase implements Connect
 	public final long getTx() {
 		return tx.get();
 	}
-	
+
 	@Override
 	public final NetContext getContext() {
 		return context;

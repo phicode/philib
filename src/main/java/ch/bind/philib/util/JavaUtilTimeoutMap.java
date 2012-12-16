@@ -28,8 +28,10 @@ import ch.bind.philib.validation.Validation;
  * 
  * @author Philipp Meinen
  * 
- * @param <K> type parameter for the map's keys.
- * @param <V> type parameter for the map's values.
+ * @param <K>
+ *            type parameter for the map's keys.
+ * @param <V>
+ *            type parameter for the map's values.
  * @see TimeoutMap
  */
 public final class JavaUtilTimeoutMap<K, V> implements TimeoutMap<K, V> {
@@ -145,7 +147,9 @@ public final class JavaUtilTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 	/**
 	 * Find entries that are timed out
-	 * @param timestamp The timeout cap. Anything older than that is timed out
+	 * 
+	 * @param timestamp
+	 *            The timeout cap. Anything older than that is timed out
 	 * @return the oldest timed out entry
 	 */
 	private Map.Entry<K, V> _pollTimedoutNs(final long timestampNs) {

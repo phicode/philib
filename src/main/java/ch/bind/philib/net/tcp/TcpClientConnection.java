@@ -41,8 +41,7 @@ public class TcpClientConnection extends TcpConnection {
 			// stop listening for a connect timeout
 			context.getEventDispatcher().unsetTimeout(this);
 			return events.getEventMask();
-		}
-		else {
+		} else {
 			return super.handleOps(ops);
 		}
 	}
@@ -63,8 +62,7 @@ public class TcpClientConnection extends TcpConnection {
 		final AsyncConnectFuture<TcpConnection> f = this.future;
 		if (f == null) {
 			return super.handleTimeout();
-		}
-		else {
+		} else {
 			// connecting
 			f.setFailed(new ConnectTimeoutException("connect timed out to: " + remoteAddress));
 			future = null;
@@ -97,8 +95,7 @@ public class TcpClientConnection extends TcpConnection {
 			// while connecting we only want to update the events
 			// field and not tell the dispatcher
 			this.events = events;
-		}
-		else {
+		} else {
 			super.setEvents(events);
 		}
 	}

@@ -185,8 +185,7 @@ public class NetContextImpl implements NetContext {
 	public void getTcpServerSocketBacklog(int tcpServerSocketBacklog) {
 		if (tcpServerSocketBacklog < 1) {
 			this.tcpServerSocketBacklog = 1;
-		}
-		else {
+		} else {
 			this.tcpServerSocketBacklog = tcpServerSocketBacklog;
 		}
 	}
@@ -218,8 +217,7 @@ public class NetContextImpl implements NetContext {
 		if (numExc > 0) {
 			if (numExc < 3) {
 				LOG.warn(numExc + "/3 set-socket-options resulted in an exception, last exception: " + lastExc);
-			}
-			else {
+			} else {
 				throw new IOException("all 3 set-socket-options resulted in an exception", lastExc);
 			}
 		}
