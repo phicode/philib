@@ -10,6 +10,7 @@ import ch.bind.philib.net.Events;
 import ch.bind.philib.net.conn.ConnectTimeoutException;
 import ch.bind.philib.net.context.NetContext;
 import ch.bind.philib.net.events.SelectOps;
+import ch.bind.philib.validation.Validation;
 
 public class TcpClientConnection extends TcpConnection {
 
@@ -91,6 +92,7 @@ public class TcpClientConnection extends TcpConnection {
 
 	@Override
 	public void setEvents(Events events) {
+		Validation.notNull(events);
 		if (future != null) {
 			// while connecting we only want to update the events
 			// field and not tell the dispatcher

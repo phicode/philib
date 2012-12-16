@@ -88,11 +88,9 @@ public class TcpConnection extends ConnectionBase {
 
 	@Override
 	public void setEvents(Events events) {
+		Validation.notNull(events);
 		this.events = events;
-		Events e = events;
-		if (e != null) {
-			context.getEventDispatcher().register(this, e.getEventMask());
-		}
+		context.getEventDispatcher().register(this, events.getEventMask());
 	}
 
 	@Override
@@ -101,6 +99,7 @@ public class TcpConnection extends ConnectionBase {
 		assert ((ops & SelectOps.READ_WRITE) != 0 && (ops & ~SelectOps.READ_WRITE) == 0);
 
 		if (SelectOps.hasRead(ops) && events.hasReceive()) {
+			// updates "events", so dont cache this volatile field
 			handleRead();
 		}
 
@@ -108,8 +107,7 @@ public class TcpConnection extends ConnectionBase {
 			events = session.sendable(this);
 		}
 
-		Events e = events;
-		return e == null ? SelectOps.DONT_CHANGE : e.getEventMask();
+		return events.getEventMask();
 	}
 
 	@Override

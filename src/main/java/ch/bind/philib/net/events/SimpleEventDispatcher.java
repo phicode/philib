@@ -172,9 +172,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	private void handleEvent(final EventHandler handler, final SelectionKey key, final int ops) {
 		try {
-			int interestedOps = key.interestOps();
+			int oldInterestedOps = key.interestOps();
 			int newInterestedOps = handler.handleOps(ops);
-			if (newInterestedOps != interestedOps && newInterestedOps != SelectOps.DONT_CHANGE) {
+			if (newInterestedOps != oldInterestedOps) {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
