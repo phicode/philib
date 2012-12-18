@@ -9,13 +9,14 @@
  */
 package ch.bind.philib.util;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.testng.annotations.Test;
@@ -107,6 +108,104 @@ public class JavaUtilTimeoutMapTest {
 		map.add(10, TimeUnit.DAYS, 123, 456);
 		assertFalse(map.isEmpty());
 		assertNull(map.pollTimeout());
+	}
+
+	@Test
+	public void returnZeroOnImmediateTimeout() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.addWithTimestamp(10, TimeUnit.DAYS, 123, 456);
+		assertEquals(map.getTimeToNextTimeout(TimeUnit.MILLISECONDS), 0);
+		assertNotNull(map.pollTimeout());
+		assertTrue(map.isEmpty());
+	}
+
+	@Test
+	public void longMaxValueOnEmpty() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		assertEquals(map.getTimeToNextTimeout(TimeUnit.SECONDS), Long.MAX_VALUE);
+	}
+
+	@Test
+	public void removeOnEmptyReturnsNull() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.add(10, TimeUnit.DAYS, 123, 456);
+		assertEquals(map.remove(123).intValue(), 456);
+		assertNull(map.remove(123));
+	}
+
+	@Test
+	public void clear() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.add(10, TimeUnit.DAYS, 123, 456);
+		map.clear();
+		assertEquals(map.size(), 0);
+		assertTrue(map.isEmpty());
+		assertFalse(map.containsKey(123));
+		assertNull(map.remove(123));
+	}
+
+	@Test
+	public void sameTimestamp() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		long timestamp = 123000;
+		for (int i = 0; i < 1000; i++) {
+			Integer x = Integer.valueOf(i);
+			map.addWithTimestamp(timestamp, TimeUnit.NANOSECONDS, x, x);
+		}
+		int[] keys = new int[1000];
+		for (int i = 0; i < 1000; i++) {
+			Entry<Integer, Integer> e = map.pollTimeout();
+			assertNotNull(e);
+			assertEquals(e.getKey(), e.getValue());
+			keys[i] = e.getKey().intValue();
+		}
+		assertTrue(map.isEmpty());
+		// the first key should be on the exact timestamp, the others
+		// distributed randomly
+		assertEquals(keys[0], 0);
+
+		int last = 0;
+		int numSorted = 0;
+		for (int i = 1; i < 1000; i++) {
+			int now = keys[i];
+			if (now == (last + 1)) {
+				numSorted++;
+			}
+			last = now;
+		}
+		assertTrue(numSorted < 10);
+	}
+
+	@Test
+	public void entryEqualsAndHashcode() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+
+		map.addWithTimestamp(10, TimeUnit.DAYS, 111, 222);
+		Entry<Integer, Integer> a1 = map.pollTimeout();
+
+		map.addWithTimestamp(10, TimeUnit.DAYS, 111, 222);
+		Entry<Integer, Integer> a2 = map.pollTimeout();
+
+		map.addWithTimestamp(10, TimeUnit.DAYS, 111, 111);
+		Entry<Integer, Integer> b = map.pollTimeout();
+
+		map.addWithTimestamp(10, TimeUnit.DAYS, 222, 222);
+		Entry<Integer, Integer> c = map.pollTimeout();
+
+		assertEquals(a1.hashCode(), a2.hashCode());
+		assertTrue(a1.equals(a1));
+		assertTrue(a1.equals(a2));
+		assertFalse(a1.equals(b));
+		assertFalse(a1.equals(c));
+		assertFalse(a1.equals("abc"));
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void entrySetValueUnsupported() {
+		TimeoutMap<Integer, Integer> map = new JavaUtilTimeoutMap<Integer, Integer>();
+		map.addWithTimestamp(10, TimeUnit.DAYS, 123, 456);
+		Entry<Integer, Integer> e = map.pollTimeout();
+		e.setValue(123);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "timeout must not be negative")
