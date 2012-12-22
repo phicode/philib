@@ -125,9 +125,9 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 	}
 
 	@Override
-	public void setTimeout(EventHandler eventHandler, long timeout, TimeUnit timeUnit) {
+	public void setTimeout(EventHandler eventHandler, long timeout) {
 		EventDispatcher disp = findMappingOrThrow(eventHandler);
-		disp.setTimeout(eventHandler, timeout, timeUnit);
+		disp.setTimeout(eventHandler, timeout);
 	}
 
 	@Override

@@ -22,17 +22,21 @@
 
 package ch.bind.philib.net.events;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import org.testng.annotations.Test;
 
 import ch.bind.philib.net.events.ConcurrentEventDispatcher.ScaleStrategy;
-import static org.testng.Assert.*;
 
 public class ConcurrentEventDispatcherTest {
 
@@ -77,9 +81,9 @@ public class ConcurrentEventDispatcherTest {
 
 		RecordingEventHandler eh = new RecordingEventHandler(0);
 		concDisp.register(eh, 0);
-		concDisp.setTimeout(eh, 123, TimeUnit.MILLISECONDS);
+		concDisp.setTimeout(eh, 123);
 		concDisp.unsetTimeout(eh);
-		concDisp.setTimeout(eh, 234, TimeUnit.MILLISECONDS);
+		concDisp.setTimeout(eh, 234);
 		concDisp.getNumEventHandlers();
 		concDisp.getRegisteredOps(eh);
 		concDisp.unregister(eh);
@@ -301,25 +305,24 @@ public class ConcurrentEventDispatcherTest {
 
 		@Override
 		public void register(EventHandler eventHandler, int ops) {
-			registerCalls++;
 			assertNotNull(eventHandler);
+			registerCalls++;
 			EventHandler oldHandler = map.put(eventHandler.getEventHandlerId(), eventHandler);
 			assertNull(oldHandler);
 		}
 
 		@Override
 		public void unregister(EventHandler eventHandler) {
-			unregisterCalls++;
 			assertNotNull(eventHandler);
+			unregisterCalls++;
 			EventHandler handler = map.remove(eventHandler.getEventHandlerId());
 			assertTrue(handler == eventHandler);
 		}
 
 		@Override
-		public void setTimeout(EventHandler eventHandler, long timeout, TimeUnit timeUnit) {
-			setTimeoutCalls++;
+		public void setTimeout(EventHandler eventHandler, long timeout) {
 			assertNotNull(eventHandler);
-			assertNotNull(timeUnit);
+			setTimeoutCalls++;
 		}
 
 		@Override
@@ -330,8 +333,8 @@ public class ConcurrentEventDispatcherTest {
 
 		@Override
 		public int getRegisteredOps(EventHandler eventHandler) {
-			getRegisteredOpsCalls++;
 			assertNotNull(eventHandler);
+			getRegisteredOpsCalls++;
 			return 0;
 		}
 

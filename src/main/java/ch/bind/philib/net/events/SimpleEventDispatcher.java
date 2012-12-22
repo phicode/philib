@@ -116,9 +116,13 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	private int select() throws IOException, ClosedSelectorException {
 		if (serviceState.isOpen()) {
 			updateRegistrations();
-			long nsUntilNextTimeout = upcomingTimeouts.getTimeToNextTimeout(TimeUnit.MILLISECONDS);
-			long timeout = Math.min(nsUntilNextTimeout, 10000L);
-			return selector.select(timeout);
+			long msUntilNextTimeout = upcomingTimeouts.getTimeToNextTimeout();
+			if (msUntilNextTimeout <= 0) {
+				return selector.selectNow();
+			} else {
+				long selectTimeout = Math.min(msUntilNextTimeout, 10000L);
+				return selector.select(selectTimeout);
+			}
 		}
 		return 0;
 	}
@@ -198,9 +202,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	}
 
 	@Override
-	public void setTimeout(EventHandler eventHandler, long timeout, TimeUnit timeUnit) {
+	public void setTimeout(EventHandler eventHandler, long timeout) {
 		long handlerId = eventHandler.getEventHandlerId();
-		upcomingTimeouts.add(timeout, timeUnit, handlerId, eventHandler);
+		upcomingTimeouts.add(timeout, handlerId, eventHandler);
 		wakeup();
 	}
 

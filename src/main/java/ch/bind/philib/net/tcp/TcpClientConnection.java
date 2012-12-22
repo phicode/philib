@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import ch.bind.philib.net.Events;
 import ch.bind.philib.net.conn.ConnectTimeoutException;
@@ -51,7 +50,7 @@ public class TcpClientConnection extends TcpConnection {
 		conn.future = future;
 		conn.setupChannel();
 		context.getEventDispatcher().register(conn, SelectOps.CONNECT);
-		context.getEventDispatcher().setTimeout(conn, connectTimeout, TimeUnit.MILLISECONDS);
+		context.getEventDispatcher().setTimeout(conn, connectTimeout);
 		return future;
 	}
 
