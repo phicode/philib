@@ -37,13 +37,18 @@ public class ObjectCacheTest {
 		for (int i = 0; i < 10; i++) {
 			assertEquals(pool.take().intValue(), i);
 		}
+		assertEquals(pool.getNumPooled(), 0);
 		for (int i = 0; i < 10; i++) {
 			pool.recycle(Integer.valueOf(i));
 		}
+		// 1, 3, 5, 7, 9 => 5
+		assertEquals(pool.getNumPooled(), 5);
 		for (int i = 1; i < 10; i += 2) {
 			assertEquals(pool.take().intValue(), i);
 		}
 		assertEquals(pool.take().intValue(), 10);
+		assertEquals(pool.getNumPooled(), 0);
+		assertEquals(pool.getPoolStats().toString(), "creates=11, takes=16, recycled=5, released=5");
 	}
 
 	private static final class RecycleOddManager implements ObjectManager<Integer> {
