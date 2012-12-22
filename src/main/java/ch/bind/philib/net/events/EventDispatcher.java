@@ -22,7 +22,6 @@
 package ch.bind.philib.net.events;
 
 import java.io.Closeable;
-import java.util.concurrent.TimeUnit;
 
 /**
  * TODO
