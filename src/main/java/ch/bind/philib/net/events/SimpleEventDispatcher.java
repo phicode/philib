@@ -42,7 +42,7 @@ import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.lang.ThreadUtil;
-import ch.bind.philib.util.JavaUtilTimeoutMap;
+import ch.bind.philib.util.SimpleTimeoutMap;
 import ch.bind.philib.util.LoadAvg;
 import ch.bind.philib.util.LoadAvgNoop;
 import ch.bind.philib.util.LoadAvgSimple;
@@ -74,7 +74,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	private volatile int numHandlers;
 
-	private final TimeoutMap<Long, EventHandler> upcomingTimeouts = new JavaUtilTimeoutMap<Long, EventHandler>();
+	private final TimeoutMap<Long, EventHandler> upcomingTimeouts = new SimpleTimeoutMap<Long, EventHandler>();
 
 	private SimpleEventDispatcher(Selector selector, LoadAvg loadAvg) {
 		this.selector = selector;

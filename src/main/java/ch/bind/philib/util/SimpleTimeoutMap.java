@@ -34,7 +34,7 @@ import ch.bind.philib.validation.Validation;
  *            type parameter for the map's values.
  * @see TimeoutMap
  */
-public final class JavaUtilTimeoutMap<K, V> implements TimeoutMap<K, V> {
+public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 	private final SortedMap<Long, K> timeoutToKey = new TreeMap<Long, K>();
 
