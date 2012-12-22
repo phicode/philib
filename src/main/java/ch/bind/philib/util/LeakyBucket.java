@@ -128,8 +128,7 @@ public final class LeakyBucket {
 		if (timeNs < lastLeakNs) {
 			// it seems that someone adjusted his clock backwards
 			lastLeakNs = timeNs;
-		}
-		else {
+		} else {
 			long diff = timeNs - lastLeakNs;
 			long canLeak = diff / leakIntervalNs;
 			if (canLeak > 0) {
@@ -137,8 +136,7 @@ public final class LeakyBucket {
 				if (canLeak >= current) {
 					lastLeakNs = (leakIntervalNs * current);
 					current = 0;
-				}
-				else {
+				} else {
 					lastLeakNs += (leakIntervalNs * canLeak);
 					current -= canLeak;
 				}

@@ -94,8 +94,8 @@ public class EchoClientSession implements Session {
 			if (num != nextReceiveNum) {
 				verificationOk = false;
 				throw new IllegalStateException("expected: " + nextReceiveNum + " got: " + num);
-//				connection.close();
-//				return;
+				// connection.close();
+				// return;
 			}
 			nextReceiveNum++;
 		}

@@ -70,8 +70,7 @@ public final class Counter {
 				min = value;
 				max = value;
 				total = value;
-			}
-			else {
+			} else {
 				counts++;
 				total = Calc.unsignedAdd(total, value);
 				min = Math.min(min, value);

@@ -28,7 +28,6 @@ import java.util.Random;
 
 import ch.bind.philib.TestUtil;
 
-
 public final class Benchmark {
 
 	private Benchmark() {

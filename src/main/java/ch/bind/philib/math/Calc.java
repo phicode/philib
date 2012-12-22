@@ -30,8 +30,11 @@ public abstract class Calc {
 	/**
 	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not
 	 * evenly divisible by <i>divisor</i>.
-	 * @param num a number > 0
-	 * @param divisor a number > 0
+	 * 
+	 * @param num
+	 *            a number > 0
+	 * @param divisor
+	 *            a number > 0
 	 * @return
 	 */
 	public static long ceilDiv(long num, long divisor) {
@@ -42,8 +45,11 @@ public abstract class Calc {
 	/**
 	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not
 	 * evenly divisible by <i>divisor</i>.
-	 * @param num a number > 0
-	 * @param divisor a number > 0
+	 * 
+	 * @param num
+	 *            a number > 0
+	 * @param divisor
+	 *            a number > 0
 	 * @return
 	 */
 	public static int ceilDiv(int num, int divisor) {
@@ -75,6 +81,7 @@ public abstract class Calc {
 	 * 
 	 * So ((A^R) & (B^R)) produces a negative number (sign bit set) only if an under/overflow occurred.
 	 * </pre>
+	 * 
 	 * @param a
 	 * @param b
 	 * @param r
@@ -97,7 +104,8 @@ public abstract class Calc {
 	 * f(100) = 5050<br/>
 	 * </code>
 	 * 
-	 * @param end The end value of the sum-range.
+	 * @param end
+	 *            The end value of the sum-range.
 	 * @return The sum of all values from 1 to <code>end</code>, including.
 	 */
 	public static long sumOfRange(long end) {
@@ -112,8 +120,10 @@ public abstract class Calc {
 	 * Calculates the sum of all values from <code>start</code> to
 	 * <code>end</code>, including.
 	 * 
-	 * @param start The start value of the sum-range.
-	 * @param end The end value of the sum-range.
+	 * @param start
+	 *            The start value of the sum-range.
+	 * @param end
+	 *            The end value of the sum-range.
 	 * @return The sum of all values from <code>start</code> to <code>end</code>
 	 *         , including.
 	 */
