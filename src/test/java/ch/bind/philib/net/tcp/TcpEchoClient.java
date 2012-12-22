@@ -64,7 +64,8 @@ public class TcpEchoClient {
 		if (args.length > 1) {
 			System.out.println("only one parameter may be specified");
 			System.exit(1);
-		} else if (args.length == 1) {
+		}
+		else if (args.length == 1) {
 			try {
 				numClients = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -102,8 +103,7 @@ public class TcpEchoClient {
 
 		@Override
 		public void connectFailed(SocketAddress remoteAddress, Throwable cause) {
-			System.out.println("connect failed: " + cause.getMessage());
-			cause.printStackTrace(System.err);
+			System.err.println("connect failed: " + ExceptionUtil.buildMessageChain(cause));
 		}
 	};
 
@@ -250,7 +250,6 @@ public class TcpEchoClient {
 			connecting.add(future);
 		} catch (IOException e) {
 			System.out.println("connect failed: " + ExceptionUtil.buildMessageChain(e));
-			e.printStackTrace(System.err);
 		}
 	}
 

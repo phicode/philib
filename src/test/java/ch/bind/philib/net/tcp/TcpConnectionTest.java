@@ -98,7 +98,7 @@ public class TcpConnectionTest {
 			Thread.sleep(500);
 
 			if (tempFile != null && !tempFile.delete()) {
-				System.err.println("failed to delete: " + tempFile);
+				fail("failed to delete: " + tempFile);
 			}
 		} while (tempFile != null && tempFile.exists() && tryCount < 120);
 	}

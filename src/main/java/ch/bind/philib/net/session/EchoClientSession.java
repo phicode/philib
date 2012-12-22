@@ -93,9 +93,9 @@ public class EchoClientSession implements Session {
 			long num = EndianConverter.decodeInt64LE(decodeBuf);
 			if (num != nextReceiveNum) {
 				verificationOk = false;
-				System.out.println("expected: " + nextReceiveNum + " got: " + num);
-				connection.close();
-				return;
+				throw new IllegalStateException("expected: " + nextReceiveNum + " got: " + num);
+//				connection.close();
+//				return;
 			}
 			nextReceiveNum++;
 		}

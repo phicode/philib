@@ -22,13 +22,12 @@
 
 package ch.bind.philib.cache;
 
+import static org.testng.Assert.fail;
+
 import java.util.Random;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.cache.Cache;
-import ch.bind.philib.cache.SimpleCache;
-import ch.bind.philib.cache.StagedCache;
-import ch.bind.philib.cache.SyncCache;
+
 
 public final class Benchmark {
 
@@ -94,7 +93,7 @@ public final class Benchmark {
 			for (Thread t : ts)
 				t.join();
 		} catch (InterruptedException e) {
-			System.err.println("interrupted");
+			fail("interrupted");
 			return;
 		}
 		final long tEnd = System.currentTimeMillis();
