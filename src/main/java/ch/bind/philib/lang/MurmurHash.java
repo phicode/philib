@@ -144,7 +144,7 @@ public final class MurmurHash {
 			murmur2(b);
 			murmur3(b);
 		}
-		return (System.nanoTime() - s);
+		return System.nanoTime() - s;
 	}
 
 	public static final int murmur2a(byte[] key) {

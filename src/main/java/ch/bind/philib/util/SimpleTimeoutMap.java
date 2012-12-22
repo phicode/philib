@@ -26,12 +26,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import ch.bind.philib.lang.CompareUtil;
+import ch.bind.philib.math.Calc;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -60,20 +60,18 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 	private final Lock wlock = rwlock.writeLock();
 
 	@Override
-	public void add(long timeout, TimeUnit timeUnit, K key, V value) {
+	public void add(long timeout, K key, V value) {
 		Validation.notNegative(timeout, "timeout must not be negative");
-		Validation.notNull(timeUnit, "time-unit must not be null");
 		long nowNs = System.nanoTime();
-		long timeoutNs = timeUnit.toNanos(timeout);
+		long timeoutNs = timeout * 1000000L;
 		long timestampNs = nowNs + timeoutNs;
 		_addWithTimestampNs(timestampNs, key, value);
 	}
 
 	@Override
-	public void addWithTimestamp(long timestamp, TimeUnit timeUnit, K key, V value) {
+	public void addWithTimestamp(long timestamp, K key, V value) {
 		Validation.notNegative(timestamp, "timestamp must not be negative");
-		Validation.notNull(timeUnit, "time-unit must not be null");
-		long timestampNs = timeUnit.toNanos(timestamp);
+		long timestampNs = timestamp * 1000000L;
 		_addWithTimestampNs(timestampNs, key, value);
 	}
 
@@ -146,18 +144,6 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 		}
 	}
 
-	@Override
-	public Map.Entry<K, V> pollTimeout(long timestamp, TimeUnit timeUnit) {
-		Validation.notNegative(timestamp);
-		Validation.notNull(timeUnit);
-		wlock.lock();
-		try {
-			return _pollTimedoutNs(timeUnit.toNanos(timestamp));
-		} finally {
-			wlock.unlock();
-		}
-	}
-
 	/**
 	 * Find entries that are timed out
 	 * 
@@ -220,8 +206,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 	}
 
 	@Override
-	public long getTimeToNextTimeout(TimeUnit timeUnit) {
-		Validation.notNull(timeUnit);
+	public long getTimeToNextTimeout() {
 		rlock.lock();
 		try {
 			if (timeoutToKey.isEmpty()) {
@@ -230,7 +215,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 			Long lowest = timeoutToKey.firstKey();
 			long nowNs = System.nanoTime();
 			long diff = lowest.longValue() - nowNs;
-			return diff < 0 ? 0 : timeUnit.convert(diff, TimeUnit.NANOSECONDS);
+			return diff <= 0 ? 0 : Calc.ceilDiv(diff, 1000000L);
 		} finally {
 			rlock.unlock();
 		}

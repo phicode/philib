@@ -23,7 +23,6 @@
 package ch.bind.philib.util;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A map which additionaly to normal map operations allows the user to supply a
@@ -44,7 +43,7 @@ public interface TimeoutMap<K, V> {
 	 * timeout-timestamp is the current time plus the supplied timeout.
 	 * 
 	 * @param timeout
-	 *            the timeout.for this key-value pair
+	 *            the timeout for this key-value pair (in milliseconds)
 	 * @param timeUnit
 	 *            the unit of the parameter timeout
 	 * @param key
@@ -52,13 +51,14 @@ public interface TimeoutMap<K, V> {
 	 * @param value
 	 *            -
 	 */
-	void add(long timeout, TimeUnit timeUnit, K key, V value);
+	void add(long timeous, K key, V value);
 
 	/**
 	 * Add a key-value pair with a specific timeout timestamp.
 	 * 
 	 * @param timestamp
-	 *            the timestamp when this key-value pair will expire
+	 *            the timestamp when this key-value pair will expire (in
+	 *            milliseconds since the epoch).
 	 * @param timeUnit
 	 *            the unit of the parameter timestamp
 	 * @param key
@@ -66,7 +66,7 @@ public interface TimeoutMap<K, V> {
 	 * @param value
 	 *            -
 	 */
-	void addWithTimestamp(long timestamp, TimeUnit timeUnit, K key, V value);
+	void addWithTimestamp(long timestamp, K key, V value);
 
 	/**
 	 * Searches a value by its key
@@ -94,20 +94,6 @@ public interface TimeoutMap<K, V> {
 	 *         otherwise the oldest timed-out entry.
 	 */
 	Map.Entry<K, V> pollTimeout();
-
-	/**
-	 * Finds the next entry which is timed out, based on a supplied timestamp.
-	 * 
-	 * @param timestamp
-	 *            a supplied timestamp, for finding the next timed out entry
-	 * @param timeUnit
-	 *            the unit of the parameter timestamp.
-	 * @return {@code null} if there is no timed-out entry in this map.
-	 *         otherwise the oldest timed-out entry.
-	 * @throws IllegalArgumentException
-	 *             if the time is negative or the timeUnit is null
-	 */
-	Map.Entry<K, V> pollTimeout(long timestamp, TimeUnit timeUnit);
 
 	/**
 	 * removes all key-value pairs from this map.
@@ -140,9 +126,9 @@ public interface TimeoutMap<K, V> {
 	 * @param timeUnit
 	 *            the unit of the returned value.
 	 * @return {@link Long.MAX_VALUE} if the TimeoutMap is empty. Otherwise the
-	 *         time until the next entry times out. A return value of zero
-	 *         indicates that there is at least one entry which has already
-	 *         timed out.
+	 *         time until the next entry times out (in milliseconds since the
+	 *         epoch). A return value of zero indicates that there is at least
+	 *         one entry which has already timed out.
 	 */
-	long getTimeToNextTimeout(TimeUnit timeUnit);
+	long getTimeToNextTimeout();
 }
