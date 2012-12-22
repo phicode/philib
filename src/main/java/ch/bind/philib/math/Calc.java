@@ -53,7 +53,7 @@ public abstract class Calc {
 
 	public static long unsignedAdd(long a, long b) {
 		long r = a + b;
-		return addUnderOrOverflow(r, a, b) ? Long.MAX_VALUE : r;
+		return isAddUnderOrOverflow(a, b, r) ? Long.MAX_VALUE : r;
 	}
 
 	/**
@@ -75,12 +75,67 @@ public abstract class Calc {
 	 * 
 	 * So ((A^R) & (B^R)) produces a negative number (sign bit set) only if an under/overflow occurred.
 	 * </pre>
-	 * @param r
 	 * @param a
 	 * @param b
+	 * @param r
 	 * @return
 	 */
-	public static boolean addUnderOrOverflow(long r, long a, long b) {
+	public static boolean isAddUnderOrOverflow(long a, long b, long r) {
 		return ((a ^ r) & (b ^ r)) < 0;
+	}
+
+	/**
+	 * Calculate the sum of all values from 1 to <code>end</code>, including.
+	 * That is: <code>sum = 1 + 2 + 3 + ... + (end-1) + end</code> <br/>
+	 * Examples:<br/>
+	 * <code>
+	 * f(0) = 0<br/>
+	 * f(1) = 1<br/>
+	 * f(2) = 3<br/>
+	 * f(3) = 6<br/>
+	 * f(10) = 55<br/>
+	 * f(100) = 5050<br/>
+	 * </code>
+	 * 
+	 * @param end The end value of the sum-range.
+	 * @return The sum of all values from 1 to <code>end</code>, including.
+	 */
+	public static long sumOfRange(long end) {
+		if (end < 1)
+			return 0;
+		// XXX: (end/2) * (end+1) would be possible as well, but for end=1 the
+		// term end/2 would result in 0 and therefore be wrong.
+		return (end * (end + 1)) / 2;
+	}
+
+	/**
+	 * Calculates the sum of all values from <code>start</code> to
+	 * <code>end</code>, including.
+	 * 
+	 * @param start The start value of the sum-range.
+	 * @param end The end value of the sum-range.
+	 * @return The sum of all values from <code>start</code> to <code>end</code>
+	 *         , including.
+	 */
+
+	public static long sumOfRange(long start, long end) {
+		if (start > end)
+			return 0;
+		return sumOfRange(end) - sumOfRange(start - 1);
+	}
+
+	// TODO
+	// public static long sumOfRange(long start, long end, long increment) {
+
+	public static int clip(int value, int min, int max) {
+		return value < min ? min : (value > max ? max : value);
+	}
+
+	public static long clip(long value, long min, long max) {
+		return value < min ? min : (value > max ? max : value);
+	}
+
+	public static double clip(double value, double min, double max) {
+		return value < min ? min : (value > max ? max : value);
 	}
 }

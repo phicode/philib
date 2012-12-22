@@ -22,7 +22,7 @@
 
 package ch.bind.philib.cache;
 
-import ch.bind.philib.math.RangeUtil;
+import ch.bind.philib.math.Calc;
 import ch.bind.philib.util.ClusteredHashIndex;
 import ch.bind.philib.util.ClusteredIndex;
 import ch.bind.philib.util.LruList;
@@ -76,7 +76,7 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	public StagedCache(int capacity, double oldGenRatio, int oldGenAfterHits, Cloner<V> cloner) {
 		this.capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
 		this.oldGenAfterHits = oldGenAfterHits < 1 ? 1 : oldGenAfterHits;
-		oldGenRatio = RangeUtil.clip(oldGenRatio, MIN_OLD_GEN_RATIO, MAX_OLD_GEN_RATIO);
+		oldGenRatio = Calc.clip(oldGenRatio, MIN_OLD_GEN_RATIO, MAX_OLD_GEN_RATIO);
 		int oldCap = (int) (this.capacity * oldGenRatio);
 		int youngCap = this.capacity - oldCap;
 		this.lruYoungGen = new LruList<StagedCacheEntry<K, V>>(youngCap);
