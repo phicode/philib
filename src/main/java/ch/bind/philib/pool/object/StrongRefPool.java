@@ -20,27 +20,32 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.net.context;
+package ch.bind.philib.pool.object;
 
-import java.io.IOException;
+import ch.bind.philib.pool.manager.ObjectManager;
+import ch.bind.philib.util.LimitedConcurrentQueue;
 
-import ch.bind.philib.net.SessionManager;
-import ch.bind.philib.net.events.EventDispatcher;
-import ch.bind.philib.net.events.SimpleEventDispatcher;
-import ch.bind.philib.pool.buffer.ByteBufferPool;
-import ch.bind.philib.validation.Validation;
+public final class StrongRefPool<T> extends PoolBase<T> {
 
-public final class NetContexts {
+	private final LimitedConcurrentQueue<T> queue;
 
-	private NetContexts() {
+	public StrongRefPool(ObjectManager<T> manager, int maxEntries) {
+		super(manager);
+		queue = new LimitedConcurrentQueue<T>(maxEntries);
 	}
 
-	public static NetContext createSimple(SessionManager sessionManager) throws IOException {
-		Validation.notNull(sessionManager);
-		int bufferSize = NetContextImpl.DEFAULT_BUFFER_SIZE;
-		int maxEntries = NetContextImpl.DEFAULT_NUM_BUFFERS;
-		ByteBufferPool pool = ByteBufferPool.create(bufferSize, maxEntries);
-		EventDispatcher dispatcher = SimpleEventDispatcher.open();
-		return new NetContextImpl(sessionManager, pool, dispatcher);
+	@Override
+	protected T poll() {
+		return queue.poll();
+	}
+
+	@Override
+	protected boolean offer(T value) {
+		return queue.offer(value);
+	}
+
+	@Override
+	public int getNumPooled() {
+		return queue.size();
 	}
 }

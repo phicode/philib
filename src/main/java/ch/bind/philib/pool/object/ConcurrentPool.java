@@ -58,10 +58,10 @@ public final class ConcurrentPool<T> implements Pool<T> {
 		PoolStats[] s = new PoolStats[concurrencyLevel];
 		for (int i = 0; i < concurrencyLevel; i++) {
 			if (allowLeaks) {
-				pools[i] = new LeakyPool<T>(manager, maxPerPool);
+				pools[i] = new SoftRefPool<T>(manager, maxPerPool);
 			}
 			else {
-				pools[i] = new StrongPool<T>(manager, maxPerPool);
+				pools[i] = new StrongRefPool<T>(manager, maxPerPool);
 			}
 			s[i] = pools[i].getPoolStats();
 		}

@@ -20,27 +20,43 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.net.context;
+package ch.bind.philib.pool.object;
 
-import java.io.IOException;
+import java.lang.ref.SoftReference;
 
-import ch.bind.philib.net.SessionManager;
-import ch.bind.philib.net.events.EventDispatcher;
-import ch.bind.philib.net.events.SimpleEventDispatcher;
-import ch.bind.philib.pool.buffer.ByteBufferPool;
-import ch.bind.philib.validation.Validation;
+import ch.bind.philib.pool.manager.ObjectManager;
+import ch.bind.philib.util.LimitedConcurrentQueue;
 
-public final class NetContexts {
+public final class SoftRefPool<T> extends PoolBase<T> {
 
-	private NetContexts() {
+	private final LimitedConcurrentQueue<SoftReference<T>> queue;
+
+	public SoftRefPool(ObjectManager<T> manager, int maxEntries) {
+		super(manager);
+		queue = new LimitedConcurrentQueue<SoftReference<T>>(maxEntries);
 	}
 
-	public static NetContext createSimple(SessionManager sessionManager) throws IOException {
-		Validation.notNull(sessionManager);
-		int bufferSize = NetContextImpl.DEFAULT_BUFFER_SIZE;
-		int maxEntries = NetContextImpl.DEFAULT_NUM_BUFFERS;
-		ByteBufferPool pool = ByteBufferPool.create(bufferSize, maxEntries);
-		EventDispatcher dispatcher = SimpleEventDispatcher.open();
-		return new NetContextImpl(sessionManager, pool, dispatcher);
+	@Override
+	protected T poll() {
+		for (;;) {
+			final SoftReference<T> ref = queue.poll();
+			if (ref == null) {
+				return null;
+			}
+			final T value = ref.get();
+			if (value != null) {
+				return value;
+			}
+		}
+	}
+
+	@Override
+	protected boolean offer(T value) {
+		return queue.offer(new SoftReference<T>(value));
+	}
+
+	@Override
+	public int getNumPooled() {
+		return queue.size();
 	}
 }

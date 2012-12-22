@@ -26,7 +26,7 @@ import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.PoolStats;
 import ch.bind.philib.pool.manager.ByteArrayManager;
 import ch.bind.philib.pool.object.ConcurrentPool;
-import ch.bind.philib.pool.object.LeakyPool;
+import ch.bind.philib.pool.object.SoftRefPool;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -65,13 +65,13 @@ public final class ByteArrayPool implements Pool<byte[]> {
 
 	public static ByteArrayPool create(int bufferSize, int maxEntries) {
 		ByteArrayManager manager = new ByteArrayManager(bufferSize);
-		return new ByteArrayPool(new LeakyPool<byte[]>(manager, maxEntries));
+		return new ByteArrayPool(new SoftRefPool<byte[]>(manager, maxEntries));
 	}
 
 	public static ByteArrayPool create(int bufferSize, int maxEntries, int concurrencyLevel) {
 		ByteArrayManager manager = new ByteArrayManager(bufferSize);
 		if (concurrencyLevel < 2) {
-			return new ByteArrayPool(new LeakyPool<byte[]>(manager, maxEntries));
+			return new ByteArrayPool(new SoftRefPool<byte[]>(manager, maxEntries));
 		}
 		return new ByteArrayPool(new ConcurrentPool<byte[]>(manager, maxEntries, true, concurrencyLevel));
 	}
