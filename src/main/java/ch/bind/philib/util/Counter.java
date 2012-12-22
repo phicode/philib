@@ -22,6 +22,8 @@
 
 package ch.bind.philib.util;
 
+import ch.bind.philib.math.Calc;
+
 /** A simple counter where values can be added or the whole counter be reset. */
 public final class Counter {
 
@@ -29,7 +31,7 @@ public final class Counter {
 
 	private final String unit;
 
-	private long numAdds;
+	private long counts;
 
 	private long total;
 
@@ -50,34 +52,36 @@ public final class Counter {
 		return unit;
 	}
 
+	/**
+	 * @deprecated deprecated in favor of {@link #count(long)}.
+	 */
+	@Deprecated
 	public void add(long value) {
+		count(value);
+	}
+
+	public void count(long value) {
 		if (value <= 0) {
 			return;
 		}
 		synchronized (this) {
-			numAdds++;
-			long newTotal = total + value;
-			if (newTotal < total) {
-				// overflow
-				total = Long.MAX_VALUE;
-			} else {
-				total = newTotal;
-			}
-			if (min == -1) {
+			if (counts == 0) {
+				counts = 1;
 				min = value;
-			} else {
-				min = Math.min(min, value);
-			}
-			if (max == -1) {
 				max = value;
-			} else {
+				total = value;
+			}
+			else {
+				counts++;
+				total = Calc.unsignedAdd(total, value);
+				min = Math.min(min, value);
 				max = Math.max(max, value);
 			}
 		}
 	}
 
 	public synchronized void reset() {
-		numAdds = 0;
+		counts = 0;
 		total = 0;
 		min = -1;
 		max = -1;
@@ -85,18 +89,18 @@ public final class Counter {
 
 	@Override
 	public String toString() {
-		long add, mi, ma, to;
+		long c, mi, ma, to;
 		synchronized (this) {
-			add = numAdds;
+			c = counts;
 			mi = min;
 			ma = max;
 			to = total;
 		}
 
-		if (add == 0) {
-			return String.format("%s[unit=%s, #adds=0, total=0, min=N/A, max=N/A, avg=N/A]", name, unit);
+		if (c == 0) {
+			return String.format("%s[unit=%s, #counts=0, total=0, min=N/A, max=N/A, avg=N/A]", name, unit);
 		}
-		double avg = ((double) to) / add;
-		return String.format("%s[unit=%s, #adds=%d, total=%d, min=%d, max=%d, avg=%.3f]", name, unit, add, to, mi, ma, avg);
+		double avg = ((double) to) / c;
+		return String.format("%s[unit=%s, #counts=%d, total=%d, min=%d, max=%d, avg=%.3f]", name, unit, c, to, mi, ma, avg);
 	}
 }

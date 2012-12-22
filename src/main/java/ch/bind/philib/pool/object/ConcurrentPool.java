@@ -24,7 +24,7 @@ package ch.bind.philib.pool.object;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import ch.bind.philib.math.PhiMath;
+import ch.bind.philib.math.Calc;
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.PoolStats;
 import ch.bind.philib.pool.manager.ObjectManager;
@@ -53,13 +53,14 @@ public final class ConcurrentPool<T> implements Pool<T> {
 			concurrencyLevel = 2;
 		}
 
-		int maxPerPool = (int) PhiMath.ceilDiv(maxEntries, concurrencyLevel);
+		int maxPerPool = Calc.ceilDiv(maxEntries, concurrencyLevel);
 		this.pools = new PoolBase[concurrencyLevel];
 		PoolStats[] s = new PoolStats[concurrencyLevel];
 		for (int i = 0; i < concurrencyLevel; i++) {
 			if (allowLeaks) {
 				pools[i] = new LeakyPool<T>(manager, maxPerPool);
-			} else {
+			}
+			else {
 				pools[i] = new StrongPool<T>(manager, maxPerPool);
 			}
 			s[i] = pools[i].getPoolStats();

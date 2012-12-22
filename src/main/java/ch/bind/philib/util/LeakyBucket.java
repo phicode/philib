@@ -21,7 +21,7 @@
  */
 package ch.bind.philib.util;
 
-import ch.bind.philib.math.PhiMath;
+import ch.bind.philib.math.Calc;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -105,11 +105,11 @@ public final class LeakyBucket {
 	}
 
 	public long nextFillUs() {
-		return PhiMath.ceilDiv(nextFillNs(), 1000L);
+		return Calc.ceilDiv(nextFillNs(), 1000L);
 	}
 
 	public long nextFillMs() {
-		return PhiMath.ceilDiv(nextFillNs(), 1000000L);
+		return Calc.ceilDiv(nextFillNs(), 1000000L);
 	}
 
 	public void sleepWhileNotFillable() throws InterruptedException {
@@ -125,7 +125,8 @@ public final class LeakyBucket {
 		if (timeNs < lastLeakNs) {
 			// it seems that someone adjusted his clock backwards
 			lastLeakNs = timeNs;
-		} else {
+		}
+		else {
 			long diff = timeNs - lastLeakNs;
 			long canLeak = diff / leakIntervalNs;
 			if (canLeak > 0) {
@@ -133,7 +134,8 @@ public final class LeakyBucket {
 				if (canLeak >= current) {
 					lastLeakNs = (leakIntervalNs * current);
 					current = 0;
-				} else {
+				}
+				else {
 					lastLeakNs += (leakIntervalNs * canLeak);
 					current -= canLeak;
 				}
