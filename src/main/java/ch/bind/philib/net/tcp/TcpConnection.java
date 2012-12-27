@@ -92,7 +92,7 @@ public class TcpConnection extends ConnectionBase {
 		this.events = events;
 		context.getEventDispatcher().register(this, events.getEventMask());
 	}
-
+	
 	@Override
 	public int handleOps(final int ops) throws IOException {
 		// only the read and/or write flags may be set
@@ -112,8 +112,10 @@ public class TcpConnection extends ConnectionBase {
 
 	@Override
 	public boolean handleTimeout() throws IOException {
-		// TODO: implement read & write timeouts
-		return true;
+		if (channel.isOpen()) {
+			return session.handleTimeout();
+		}
+		return false;
 	}
 
 	@Override
@@ -157,7 +159,12 @@ public class TcpConnection extends ConnectionBase {
 				totalRead += n;
 				// switch from write mode to read
 				bb.flip();
-				events = session.receive(this, bb);
+				Events e = session.receive(this, bb);
+				if (e == null) {
+					close();
+					return;
+				}
+				events = e;
 				// switch back to write mode
 				bb.clear();
 			}

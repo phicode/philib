@@ -24,8 +24,12 @@ package ch.bind.philib.net.session;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.bind.philib.io.BufferUtil;
 import ch.bind.philib.io.EndianConverter;
+import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Events;
 import ch.bind.philib.net.Session;
@@ -36,6 +40,8 @@ import ch.bind.philib.net.Session;
  * @author Philipp Meinen
  */
 public class EchoClientSession implements Session {
+
+	private static final Logger LOG = LoggerFactory.getLogger(EchoClientSession.class);
 
 	private static final int NUMS = 1024;
 
@@ -65,7 +71,10 @@ public class EchoClientSession implements Session {
 
 	private boolean verificationOk = true;
 
+	private final ServiceState state = new ServiceState();
+
 	public EchoClientSession(Connection connection, boolean performVerification) {
+		state.setOpen();
 		this.connection = connection;
 		this.performVerification = performVerification;
 		writeBuf.limit(0);
@@ -81,38 +90,60 @@ public class EchoClientSession implements Session {
 		lastInteractionNs = System.nanoTime();
 		if (performVerification) {
 			receiveBuf = BufferUtil.append(receiveBuf, data);
-			verifyReceived();
+			if (!verifyReceived()) {
+				connection.close();
+				return null;
+			}
 		}
-		send();
-		return Events.SENDABLE_RECEIVE;
+		return send();
 	}
 
-	private void verifyReceived() throws IOException {
+	public void shutdown() {
+		if (state.isOpen()) {
+			state.setClosing();
+			connection.setTimeout(10000L);
+		}
+	}
+
+	@Override
+	public boolean handleTimeout() {
+		return false;
+	}
+
+	private boolean verifyReceived() throws IOException {
 		while (receiveBuf.remaining() >= 8) {
 			receiveBuf.get(decodeBuf);
 			long num = EndianConverter.decodeInt64LE(decodeBuf);
 			if (num != nextReceiveNum) {
 				verificationOk = false;
-				throw new IllegalStateException("expected: " + nextReceiveNum + " got: " + num);
-				// connection.close();
-				// return;
+				LOG.error("expected: " + nextReceiveNum + " got: " + num);
+				return false;
 			}
 			nextReceiveNum++;
 		}
+		return true;
 	}
 
-	private void send() throws IOException {
+	private Events send() throws IOException {
 		if (writeBuf.hasRemaining()) {
 			connection.send(writeBuf);
+		}
+		if (state.isClosingOrClosed()) {
+			if (connection.getTx() == connection.getRx()) {
+				return null; // close the connection
+			}
+			return Events.RECEIVE;
 		}
 		while (!writeBuf.hasRemaining()) {
 			if (performVerification) {
 				fillWriteBuf();
-			} else {
+			}
+			else {
 				writeBuf.clear();
 			}
 			connection.send(writeBuf);
 		}
+		return Events.SENDABLE_RECEIVE;
 	}
 
 	private void fillWriteBuf() {
@@ -124,6 +155,7 @@ public class EchoClientSession implements Session {
 
 	@Override
 	public void closed(Connection conn) {
+		state.setClosed();
 	}
 
 	public long getLastInteractionNs() {
@@ -133,8 +165,7 @@ public class EchoClientSession implements Session {
 	@Override
 	public Events sendable(Connection conn) throws IOException {
 		lastInteractionNs = System.nanoTime();
-		send();
-		return Events.SENDABLE_RECEIVE;
+		return send();
 	}
 
 	public long getRxDiff() {
@@ -159,5 +190,9 @@ public class EchoClientSession implements Session {
 
 	public boolean isVerificationOk() {
 		return verificationOk;
+	}
+
+	public boolean isClosed() {
+		return state.isClosed();
 	}
 }

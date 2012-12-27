@@ -64,7 +64,8 @@ public class TcpEchoClient {
 		if (args.length > 1) {
 			System.out.println("only one parameter may be specified");
 			System.exit(1);
-		} else if (args.length == 1) {
+		}
+		else if (args.length == 1) {
 			try {
 				numClients = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -79,13 +80,13 @@ public class TcpEchoClient {
 		new TcpEchoClient().run(numClients);
 	}
 
-	private List<RichEchoClientSession> sessions = new LinkedList<RichEchoClientSession>();
+	private List<RichEchoClientSession> connected = new LinkedList<RichEchoClientSession>();
+
+	private List<RichEchoClientSession> shutdown = new LinkedList<RichEchoClientSession>();
 
 	private List<Future<TcpConnection>> connecting = new LinkedList<Future<TcpConnection>>();
 
 	private long numConnectFails;
-
-	private long numCloseFails;
 
 	private InetSocketAddress endpoint;
 
@@ -108,8 +109,6 @@ public class TcpEchoClient {
 
 	// TODO: keep track of connection times
 	private void run(int numClients) throws IOException {
-		// endpoint = SocketAddresses.fromIp("10.0.0.71", 1234);
-		// endpoint = SocketAddresses.fromIp("10.95.162.221", 1234);
 		try {
 			endpoint = SocketAddresses.fromIp("127.0.0.1", 1234);
 		} catch (UnknownHostException e) {
@@ -122,7 +121,7 @@ public class TcpEchoClient {
 		// context.setTcpNoDelay(true);
 		context.setSndBufSize(64 * 1024);
 		context.setRcvBufSize(64 * 1024);
-		// context.setConnectTimeout(CONNECT_TIMEOUT);
+		context.setConnectTimeout(CONNECT_TIMEOUT);
 		// context.setTcpNoDelay(false);
 		// context.setSndBufSize(512);
 		// context.setRcvBufSize(512);
@@ -145,7 +144,7 @@ public class TcpEchoClient {
 			while (!self.isInterrupted()) {
 				long now = System.currentTimeMillis();
 
-				closeTooOld(rampDownMs);
+				shutdownOld(rampDownMs);
 
 				// periodically start new connections
 				while (now > startNext) {
@@ -160,7 +159,6 @@ public class TcpEchoClient {
 					lastPrintStats = now;
 				}
 
-				removeDisconnected();
 				Thread.sleep((rampUpMs / 2) - 10);
 			}
 		} catch (InterruptedException e) {
@@ -170,31 +168,11 @@ public class TcpEchoClient {
 		System.exit(0);
 	}
 
-	private void removeDisconnected() {
-		Iterator<RichEchoClientSession> iter = sessions.iterator();
-		while (iter.hasNext()) {
-			RichEchoClientSession recs = iter.next();
-			if (!recs.session.getConnection().isConnected()) {
-				iter.remove();
-				close(recs);
-			}
-		}
-	}
-
-	private void close(RichEchoClientSession recs) {
-		try {
-			recs.session.getConnection().close();
-		} catch (IOException e) {
-			numCloseFails++;
-			System.out.println("connection.close() failed: " + ExceptionUtil.buildMessageChain(e));
-		}
-	}
-
 	private void printStats(long intervalMs, long timeDiff) {
 		long totalRx = 0;
 		long totalTx = 0;
-		int num = sessions.size();
-		Iterator<RichEchoClientSession> iter = sessions.iterator();
+		int num = connected.size();
+		Iterator<RichEchoClientSession> iter = connected.iterator();
 		while (iter.hasNext()) {
 			RichEchoClientSession recs = iter.next();
 			long rxDiff = recs.session.getRxDiff();
@@ -217,7 +195,7 @@ public class TcpEchoClient {
 			System.out.printf("last %dsec total-rx=%.3fM, total-tx=%.3fM bytes => %.5f mbit/sec, #connections: %d, connecting: %d, #handlers: %d%n", //
 					intervalMs / 1000, rxMb, txMb, mbit, num, connecting.size(), context.getEventDispatcher().getNumEventHandlers());
 		}
-		if (sessions.isEmpty() && connecting.isEmpty()) {
+		if (connected.isEmpty() && connecting.isEmpty() && shutdown.isEmpty()) {
 			System.out.println("no active or connecting sessions!");
 		}
 	}
@@ -230,7 +208,7 @@ public class TcpEchoClient {
 				iter.remove();
 				try {
 					Session s = conn.get().getSession();
-					sessions.add(new RichEchoClientSession((EchoClientSession) s));
+					connected.add(new RichEchoClientSession((EchoClientSession) s));
 				} catch (ExecutionException e) {
 					numConnectFails++;
 					System.out.println("exception while opening a connection async: " + ExceptionUtil.buildMessageChain(e));
@@ -240,7 +218,8 @@ public class TcpEchoClient {
 	}
 
 	private void maybeConnectOne(int maxConnections) {
-		if ((sessions.size() + connecting.size()) >= maxConnections) {
+		int n = connecting.size() + connected.size() + shutdown.size();
+		if (n >= maxConnections) {
 			return;
 		}
 		try {
@@ -252,15 +231,26 @@ public class TcpEchoClient {
 		}
 	}
 
-	private void closeTooOld(long maxAgeMs) {
-		long killIfOlder = System.currentTimeMillis() - maxAgeMs;
-		Iterator<RichEchoClientSession> iter = sessions.iterator();
+	private void shutdownOld(long maxAgeMs) {
+		long shutdownIfOlder = System.currentTimeMillis() - maxAgeMs;
+		Iterator<RichEchoClientSession> iter = connected.iterator();
 		while (iter.hasNext()) {
 			RichEchoClientSession recs = iter.next();
-			if (recs.createdAt < killIfOlder) {
+			if (recs.createdAt < shutdownIfOlder) {
 				iter.remove();
-				// System.out.println("closing: " + recs.session);
-				close(recs);
+				shutdown.add(recs);
+				recs.session.shutdown();
+			}
+			else if (recs.session.isClosed()) {
+				iter.remove();
+			}
+		}
+
+		iter = shutdown.iterator();
+		while (iter.hasNext()) {
+			RichEchoClientSession recs = iter.next();
+			if (recs.session.isClosed()) {
+				iter.remove();
 			}
 		}
 	}

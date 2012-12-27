@@ -118,7 +118,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			long msUntilNextTimeout = upcomingTimeouts.getTimeToNextTimeout();
 			if (msUntilNextTimeout <= 0) {
 				return selector.selectNow();
-			} else {
+			}
+			else {
 				long selectTimeout = Math.min(msUntilNextTimeout, 10000L);
 				return selector.select(selectTimeout);
 			}
@@ -131,8 +132,22 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		if (serviceState.isOpen()) {
 			// tell the dispatcher to stop processing events
 			serviceState.setClosing();
-			wakeup();
-			ThreadUtil.interruptAndJoin(dispatchThread);
+
+			Thread currentThread = Thread.currentThread();
+			if (currentThread != dispatchThread) {
+				wakeup();
+
+				// wait a moment for pending events to be processed
+				try {
+					dispatchThread.join(500);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					return;
+				}
+				if (dispatchThread.isAlive()) {
+					ThreadUtil.interruptAndJoin(dispatchThread, 500);
+				}
+			}
 
 			for (SelectionKey key : selector.keys()) {
 				if (key.isValid()) {
@@ -168,7 +183,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		}
 		if (key.isValid()) {
 			handleEvent(eventHandler, key, key.readyOps());
-		} else {
+		}
+		else {
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
 	}
@@ -177,7 +193,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		try {
 			int oldInterestedOps = key.interestOps();
 			int newInterestedOps = handler.handleOps(ops);
-			if (newInterestedOps != oldInterestedOps) {
+			if (newInterestedOps != oldInterestedOps && key.isValid()) {
 				key.interestOps(newInterestedOps);
 			}
 		} catch (Exception e) {
@@ -194,7 +210,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		SelectionKey key = channel.keyFor(selector);
 		if (key != null) {
 			key.interestOps(ops);
-		} else {
+		}
+		else {
 			newRegistrations.add(new NewRegistration(eventHandler, ops));
 		}
 		wakeup();
@@ -222,7 +239,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			SelectionKey key = channel.keyFor(selector);
 			if (key != null) {
 				key.interestOps(reg.getOps());
-			} else {
+			}
+			else {
 				try {
 					int ops = reg.getOps();
 					channel.register(selector, ops, eventHandler);
@@ -235,8 +253,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	}
 
 	private void wakeup() {
-		Thread t = dispatchThread;
-		if (t != null && t != Thread.currentThread()) {
+		if (dispatchThread != Thread.currentThread()) {
 			selector.wakeup();
 		}
 	}
@@ -250,7 +267,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			key.attach(null);
 			upcomingTimeouts.remove(eventHandler.getEventHandlerId());
 			wakeup();
-		} else {
+		}
+		else {
 			// handle event-handlers which unregister before they were added to
 			// the selector
 
@@ -316,10 +334,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			}
 		} catch (IOException e) {
 			LOG.error("select() failed", e);
+			close();
 		} catch (ClosedSelectorException e) {
-		} finally {
-			serviceState.setClosed();
-			SafeCloseUtil.close(this, LOG);
+			close();
 		}
 	}
 

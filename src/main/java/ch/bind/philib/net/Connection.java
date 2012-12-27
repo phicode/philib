@@ -37,7 +37,13 @@ public interface Connection extends Closeable {
 
 	int send(ByteBuffer data) throws IOException;
 
-	void setEvents(Events interestedEvents);
+	void setEvents(Events events);
+
+	// void setEvents(Events events, long timeout);
+
+	void setTimeout(long timeout);
+
+	void unsetTimeout();
 
 	boolean isConnected();
 
@@ -52,4 +58,5 @@ public interface Connection extends Closeable {
 	SocketAddress getRemoteAddress();
 
 	Session getSession();
+
 }

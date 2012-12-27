@@ -60,4 +60,14 @@ public abstract class ConnectionBase extends EventHandlerBase implements Connect
 	public final NetContext getContext() {
 		return context;
 	}
+
+	@Override
+	public final void setTimeout(long timeout) {
+		context.getEventDispatcher().setTimeout(this, timeout);
+	}
+
+	@Override
+	public final void unsetTimeout() {
+		context.getEventDispatcher().unsetTimeout(this);
+	}
 }

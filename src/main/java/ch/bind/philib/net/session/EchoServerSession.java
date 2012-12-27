@@ -24,6 +24,9 @@ package ch.bind.philib.net.session;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.bind.philib.io.BufferUtil;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.Events;
@@ -35,6 +38,8 @@ import ch.bind.philib.net.Session;
  * @author Philipp Meinen
  */
 public class EchoServerSession implements Session {
+
+	private static final Logger LOG = LoggerFactory.getLogger(EchoServerSession.class);
 
 	private volatile long lastInteractionNs;
 
@@ -75,6 +80,12 @@ public class EchoServerSession implements Session {
 			return Events.SENDABLE;
 		}
 		return Events.RECEIVE;
+	}
+
+	@Override
+	public boolean handleTimeout() {
+		LOG.info("unexpected handleTimeout call");
+		return false;
 	}
 
 	@Override

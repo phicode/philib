@@ -58,12 +58,12 @@ public class TestUtil {
 		}
 	}
 
-	public static void printBenchResults(Class<?> clazz, String longUnit, String shortUnit, long timeNs, double amount) {
+	public static void printBenchResults(Class<?> clazz, String description, String shortUnit, long timeNs, double amount) {
 		assertTrue(timeNs > 0);
 		double perS = amount / (timeNs / 1000000000f);
 		double perMs = amount / (timeNs / 1000000f);
-		System.out.printf("Bench [%-20s] %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms\n", //
-				clazz.getSimpleName(), amount, longUnit, timeNs, perS, shortUnit, perMs, shortUnit);
+		System.out.printf("Bench [%-20s] %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms%n", //
+				clazz.getSimpleName(), amount, description, timeNs, perS, shortUnit, perMs, shortUnit);
 	}
 
 	private static volatile SoftReference<List<String>> wordlist;

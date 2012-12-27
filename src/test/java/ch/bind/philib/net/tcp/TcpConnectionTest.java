@@ -43,6 +43,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import ch.bind.philib.TestUtil;
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.net.Connection;
 import ch.bind.philib.net.NetListener;
@@ -190,13 +191,22 @@ public class TcpConnectionTest {
 		clientContext.close();
 	}
 
-	@Test(timeOut = 60000, priority = 20)
-	public void echoSomeData() throws Exception {
+	@Test(timeOut = 12000, priority = 20)
+	private void echoNumbers() throws Exception {
+		echo(true);
+	}
+
+	@Test(timeOut = 12000, priority = 25)
+	private void echoZeros() throws Exception {
+		echo(false);
+	}
+
+	private void echo(boolean verify) throws Exception {
 		final long tStart = System.currentTimeMillis();
 		// ByteBufferPool pool = ByteBufferPool.create(16384, 16);
 		// EventDispatcher disp = SimpleEventDispatcher.open();
 		EchoServerSessionManager serverSessionManager = new EchoServerSessionManager();
-		EchoClientSessionManager clientSessionManager = new EchoClientSessionManager();
+		EchoClientSessionManager clientSessionManager = new EchoClientSessionManager(verify);
 		NetContext serverContext = NetContexts.createSimple(serverSessionManager);
 		NetContext clientContext = NetContexts.createSimple(clientSessionManager);
 		// NetContext serverContext = new NetContextImpl(serverSessionManager,
@@ -217,24 +227,35 @@ public class TcpConnectionTest {
 
 		EchoServerSession server = serverSessionManager.session;
 		EchoClientSession client = clientSessionManager.session;
+		Connection serverConn = server.getConnection();
 		assertNotNull(server);
 		assertNotNull(client);
 		assertTrue(client == clientConn.getSession());
 		assertTrue(serverContext.isOpen());
 		assertTrue(clientContext.isOpen());
 		assertTrue(netServer.isOpen());
-		assertTrue(server.getConnection().isOpen());
-		assertTrue(client.getConnection().isOpen());
-		assertTrue(client.getConnection().isConnected());
+		assertTrue(serverConn.isOpen());
+		assertTrue(clientConn.isOpen());
+		assertTrue(clientConn.isConnected());
 
-		long time = System.currentTimeMillis() - tStart;
-		while (time < 10000) {
+		long nowMs = System.currentTimeMillis() - tStart;
+		while (nowMs < 10000) {
 			Thread.sleep(250);
-			time = System.currentTimeMillis() - tStart;
+			nowMs = System.currentTimeMillis() - tStart;
 		}
+
+		client.shutdown();
+		// wait until the connection has been shut down
+		while (clientConn.isOpen()) {
+			Thread.yield();
+		}
+		assertFalse(clientConn.isOpen());
+		assertTrue(client.isVerificationOk());
 
 		serverContext.close();
 		clientContext.close();
+
+		final long totalTime = System.currentTimeMillis() - tStart;
 
 		assertFalse(serverContext.isOpen());
 		assertFalse(clientContext.isOpen());
@@ -243,14 +264,15 @@ public class TcpConnectionTest {
 		assertFalse(client.getConnection().isOpen());
 		assertFalse(client.getConnection().isConnected());
 
-		long total = client.getConnection().getTx() + client.getConnection().getRx() + server.getConnection().getTx()
-				+ server.getConnection().getRx();
-		System.out.printf("client tx=%d, rx=%d%n", client.getConnection().getTx(), client.getConnection().getRx());
-		System.out.printf("server tx=%d, rx=%d%n", server.getConnection().getTx(), server.getConnection().getRx());
-		time = System.currentTimeMillis() - tStart;
-		double sec = time / 1000f;
-		System.out.printf("total: %.3fMB in %.3fsec%n", (total / (1024f * 1024f)), sec);
-		assertTrue(client.isVerificationOk());
+		long clientTx = clientConn.getTx(), clientRx = clientConn.getRx();
+		long serverTx = serverConn.getTx(), serverRx = serverConn.getRx();
+		long totalRxTx = clientTx * 4;
+		assertEquals(clientTx, clientRx);
+		assertEquals(serverTx, serverRx);
+		assertEquals(clientTx, serverRx);
+		double mb = totalRxTx / 1024f / 1024f;
+		String desc = verify ? "MiB echo numbers" : "MiB echo zeros";
+		TestUtil.printBenchResults(getClass(), desc, "MiB", totalTime * 1000000L, mb);
 	}
 
 	private static void send(Connection from, Connection to, ByteBuffer data) throws Exception {
@@ -302,12 +324,18 @@ public class TcpConnectionTest {
 
 	private static final class EchoClientSessionManager implements SessionManager {
 
+		private final boolean verify;
+
 		volatile EchoClientSession session;
+
+		public EchoClientSessionManager(boolean verify) {
+			this.verify = verify;
+		}
 
 		@Override
 		public synchronized Session createSession(Connection connection) throws IOException {
 			assertNull(session);
-			session = new EchoClientSession(connection, true);
+			session = new EchoClientSession(connection, verify);
 			return session;
 		}
 

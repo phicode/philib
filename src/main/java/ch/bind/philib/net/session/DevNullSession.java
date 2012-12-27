@@ -63,6 +63,11 @@ public class DevNullSession implements Session {
 		return Events.RECEIVE;
 	}
 
+	@Override
+	public boolean handleTimeout() {
+		return false;
+	}
+
 	public Connection getConnection() {
 		return connection;
 	}

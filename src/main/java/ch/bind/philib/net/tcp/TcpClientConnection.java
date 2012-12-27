@@ -50,7 +50,7 @@ public class TcpClientConnection extends TcpConnection {
 		conn.future = future;
 		conn.setupChannel();
 		context.getEventDispatcher().register(conn, SelectOps.CONNECT);
-		context.getEventDispatcher().setTimeout(conn, connectTimeout);
+		conn.setTimeout(connectTimeout);
 		return future;
 	}
 
@@ -61,9 +61,10 @@ public class TcpClientConnection extends TcpConnection {
 			assert (future != null && ops == SelectOps.CONNECT);
 			finishConnect();
 			// stop listening for a connect timeout
-			context.getEventDispatcher().unsetTimeout(this);
+			unsetTimeout();
 			return events.getEventMask();
-		} else {
+		}
+		else {
 			return super.handleOps(ops);
 		}
 	}
@@ -72,7 +73,7 @@ public class TcpClientConnection extends TcpConnection {
 	public void close() {
 		final AsyncConnectFuture<TcpConnection> f = this.future;
 		if (f != null) {
-			context.getEventDispatcher().unsetTimeout(this);
+			unsetTimeout();
 			f.setFailed(new IOException("connection closed while connecting"));
 			future = null;
 		}
@@ -84,11 +85,12 @@ public class TcpClientConnection extends TcpConnection {
 		final AsyncConnectFuture<TcpConnection> f = this.future;
 		if (f == null) {
 			return super.handleTimeout();
-		} else {
+		}
+		else {
 			// connecting
 			f.setFailed(new ConnectTimeoutException("connect timed out to: " + remoteAddress));
 			future = null;
-			return false;
+			return false; // close
 		}
 	}
 
@@ -96,7 +98,10 @@ public class TcpClientConnection extends TcpConnection {
 		final AsyncConnectFuture<TcpConnection> f = this.future;
 		this.future = null;
 		try {
-			channel.finishConnect();
+			boolean ok = channel.finishConnect();
+			// finishConnect must throw an exception or return true since we
+			// received the corresponding selector event
+			assert (ok);
 		} catch (IOException e) {
 			context.getSessionManager().connectFailed(remoteAddress, e);
 			f.setFailed(e);
@@ -118,7 +123,8 @@ public class TcpClientConnection extends TcpConnection {
 			// while connecting we only want to update the events
 			// field and not tell the dispatcher
 			this.events = events;
-		} else {
+		}
+		else {
 			super.setEvents(events);
 		}
 	}
