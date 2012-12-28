@@ -26,23 +26,26 @@ public final class LoadAvgNoop implements LoadAvg {
 
 	public static final LoadAvgNoop INSTANCE = new LoadAvgNoop();
 
+	private LoadAvgNoop() {
+	}
+
 	@Override
 	public long getLoadAvg() {
 		return 0;
 	}
 
 	@Override
-	public double getLoadAvgAsFactor() {
+	public double asFactor(long loadAvg) {
 		return 0f;
 	}
 
 	@Override
-	public void logWorkMs(long workMs) {
-		// noop
+	public long logWorkMs(long workMs) {
+		return 0;
 	}
 
 	@Override
-	public void logWorkNs(long workNs) {
-		// noop
+	public long logWorkNs(long workNs) {
+		return 0;
 	}
 }

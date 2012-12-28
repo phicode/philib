@@ -24,12 +24,12 @@ package ch.bind.philib.util;
 
 public interface LoadAvg {
 
-	void logWorkMs(long workMs);
+	long logWorkMs(long workMs);
 
-	void logWorkNs(long workNs);
+	long logWorkNs(long workNs);
 
 	long getLoadAvg();
 
-	double getLoadAvgAsFactor();
+	double asFactor(long loadAvg);
 
 }

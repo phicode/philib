@@ -274,7 +274,7 @@ public class ArrayUtilTest {
 	@Test
 	public void memsetArray() {
 		Random rand = new Random();
-		for (int i = 0; i < 9999; i++) {
+		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
 			memsetZero(b);
@@ -287,7 +287,7 @@ public class ArrayUtilTest {
 	@Test
 	public void memsetArrayByteBuffer() {
 		Random rand = new Random();
-		for (int i = 0; i < 9999; i++) {
+		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
 			ByteBuffer bb = ByteBuffer.wrap(b);
@@ -301,7 +301,7 @@ public class ArrayUtilTest {
 	@Test
 	public void memsetDirectByteBuffer() {
 		Random rand = new Random();
-		for (int i = 0; i < 9999; i++) {
+		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
 			ByteBuffer bb = ByteBuffer.allocateDirect(i);

@@ -64,40 +64,45 @@ public final class LoadAvgSimple implements LoadAvg {
 	}
 
 	@Override
-	public void logWorkMs(long workMs) {
-		logWorkNs(workMs * 1000000L);
+	public long logWorkMs(final long workMs) {
+		return logWorkNs(workMs * 1000000L);
 	}
 
 	@Override
-	public void logWorkNs(long workNs) {
-		long now = System.nanoTime();
+	public long logWorkNs(final long workNs) {
+		return logWorkNs(System.nanoTime(), workNs);
+	}
+
+	// package private, for the unit tests
+	long logWorkNs(final long nowNs, final long workNs) {
 		long diff;
 		if (lastNormalizeNs == 0) {
 			diff = lAvgOfXNs;
-		} else {
-			diff = now - lastNormalizeNs;
+		}
+		else {
+			diff = nowNs - lastNormalizeNs;
 			if (diff < 0) {
 				diff = 0;
 			}
 		}
-		lastNormalizeNs = now;
+		lastNormalizeNs = nowNs;
 		tWork += workNs;
 		tIdle += Math.max(0, diff - workNs);
 		long total = tIdle + tWork;
 		double factor = fAvgOfXNs / total;
 		tIdle = (long) (tIdle * factor);
 		tWork = (long) (tWork * factor);
+		return tWork;
 	}
 
 	@Override
 	public long getLoadAvg() {
 		// update the internal state first
-		logWorkNs(0);
-		return tWork;
+		return logWorkNs(System.nanoTime(), 0);
 	}
 
 	@Override
-	public double getLoadAvgAsFactor() {
-		return getLoadAvg() / fAvgOfXNs;
+	public double asFactor(long loadAvg) {
+		return loadAvg / fAvgOfXNs;
 	}
 }

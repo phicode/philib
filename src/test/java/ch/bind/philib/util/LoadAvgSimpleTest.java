@@ -33,78 +33,81 @@ public class LoadAvgSimpleTest {
 	private static final Logger LOG = LoggerFactory.getLogger(LoadAvgSimpleTest.class);
 
 	@Test
+	public void withSeconds() {
+		LoadAvgSimple las = LoadAvgSimple.forSeconds(1);
+		runTest(las);
+	}
+
+	@Test
 	public void withMillis() {
-		LoadAvg la = LoadAvgSimple.forMillis(250);
-		runTest(la);
+		LoadAvgSimple las = LoadAvgSimple.forMillis(1000);
+		runTest(las);
 	}
 
 	@Test
 	public void withMicros() {
-		LoadAvg la = LoadAvgSimple.forMicros(250 * 1000);
-		runTest(la);
+		LoadAvgSimple las = LoadAvgSimple.forMicros(1000 * 1000);
+		runTest(las);
 	}
 
 	@Test
 	public void withNanos() {
-		LoadAvg la = LoadAvgSimple.forNanos(250 * 1000 * 1000);
-		runTest(la);
+		LoadAvgSimple las = LoadAvgSimple.forNanos(1000 * 1000 * 1000);
+		runTest(las);
 	}
 
-	// assumes a 250 millis load-avg object
-	private static void runTest(final LoadAvg la) {
-		verify(la, 0, 0.01);
-
+	// assumes a 1 second millis load-avg object
+	private static void runTest(final LoadAvgSimple las) {
 		// 0 load
-		simulateLoadMs(la, 0, 1000);
-		verify(la, 0, 0);
+		double load = simulateLoadMs(las, 0, 0, 5000);
+		verify(load, 0, 0);
 
 		// approx 25% load
-		simulateLoadMs(la, 25, 1000);
-		verify(la, 0.2, 0.3);
+		load = simulateLoadMs(las, 25, 1, 5000);
+		verify(load, 0.2, 0.3);
 
 		// approx 50% load
-		simulateLoadMs(la, 50, 1000);
-		verify(la, 0.45, 0.55);
+		load = simulateLoadMs(las, 50, 2, 5000);
+		verify(load, 0.45, 0.55);
 
 		// approx 75% load
-		simulateLoadMs(la, 75, 1000);
-		verify(la, 0.7, 0.8);
+		load = simulateLoadMs(las, 75, 3, 5000);
+		verify(load, 0.7, 0.8);
 
 		// full load
-		simulateLoadMs(la, 100, 1000);
-		verify(la, 0.95, 1);
+		load = simulateLoadMs(las, 100, 4, 5000);
+		verify(load, 0.95, 1);
 
-		simulateLoadMs(la, 75, 1000);
-		verify(la, 0.7, 0.8);
+		load = simulateLoadMs(las, 75, 5, 5000);
+		verify(load, 0.7, 0.8);
 
-		simulateLoadMs(la, 50, 1000);
-		verify(la, 0.45, 0.55);
+		load = simulateLoadMs(las, 50, 6, 5000);
+		verify(load, 0.45, 0.55);
 
-		simulateLoadMs(la, 25, 1000);
-		verify(la, 0.2, 0.3);
+		load = simulateLoadMs(las, 25, 7, 5000);
+		verify(load, 0.2, 0.3);
 
-		simulateLoadMs(la, 0, 1000);
-		verify(la, 0, 0.05);
+		load = simulateLoadMs(las, 0, 8, 5000);
+		verify(load, 0, 0.05);
 	}
 
-	private static void verify(LoadAvg la, double min, double max) {
-		double factor = la.getLoadAvgAsFactor();
-		assertTrue(factor >= min, factor + " should be >= " + min);
-		assertTrue(factor <= max, factor + " should be <= " + max);
+	private static void verify(double load, double min, double max) {
+		assertTrue(load >= min, load + " should be >= " + min);
+		assertTrue(load <= max, load + " should be <= " + max);
 	}
 
-	private static void simulateLoadMs(LoadAvg la, int work, int durationMs) {
+	private static double simulateLoadMs(LoadAvgSimple las, int work, int timeslot, int durationMs) {
 		final long nsPerMs = 1000000L;
-		final long startNs = System.nanoTime();
 		final long logWorkEveryMs = work * nsPerMs / 100;
 
+		long simulatedTimeNs = 123456789L + (timeslot * durationMs * nsPerMs);
 		for (int i = 0; i < durationMs; i++) {
-			final long endOfLoop = startNs + (nsPerMs * (i + 1));
-			while (System.nanoTime() < endOfLoop) {
-				// busy loop for 1 ms
-			}
-			la.logWorkNs(logWorkEveryMs);
+			las.logWorkNs(simulatedTimeNs, logWorkEveryMs);
+			simulatedTimeNs += nsPerMs;
 		}
-		LOG.debug(String.format("after %3d%% load: %f\n", work, la.getLoadAvgAsFactor()));
+		long loadAvg = las.logWorkNs(simulatedTimeNs, 0);
+		double load = las.asFactor(loadAvg);
+		LOG.debug(String.format("after %3d%% load: %f\n", work, load));
+		return load;
 	}
 }
