@@ -28,6 +28,10 @@
 		<javac.optimize>true</javac.optimize>
 		<javac.showWarnings>true</javac.showWarnings>
 		<javac.showDeprecation>true</javac.showDeprecation>
+
+		<!-- the following two properties are adjusted if the profile 'bench' is activated -->
+		<runBenchmarks>false</runBenchmarks>
+		<testMaxMemory>64</testMaxMemory>
 	</properties>
 
 	<licenses>
@@ -120,6 +124,19 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.13</version>
+				<configuration>
+					<enableAssertions>true</enableAssertions>
+					<argLine>-Xmx${testMaxMemory}M -DrunBenchmarks=${runBenchmarks}</argLine>
+					<suiteXmlFiles>
+						<suiteXmlFile>${basedir}/src/test/resources/testng.xml</suiteXmlFile>
+					</suiteXmlFiles>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<version>2.9</version>
 				<configuration>
@@ -131,12 +148,21 @@
 	</build>
 
 	<profiles>
+		<!-- set a property to when the bench profile is manually activated. This property is accessed by the 'TestUtil' -->
+		<profile>
+			<id>bench</id>
+			<properties>
+				<runBenchmarks>true</runBenchmarks>
+				<testMaxMemory>512</testMaxMemory>
+			</properties>
+		</profile>
+
+		<!-- only sign artifacts when building a release -->
 		<profile>
 			<id>release-sign-artifacts</id>
 			<activation>
 				<property>
-					<!-- 'maven-release-plugin' goal:'release:perform' sets 'performRelease' 
-						to true -->
+					<!-- the 'maven-release-plugin' with goal:'release:perform' sets 'performRelease' property to 'true' -->
 					<name>performRelease</name>
 					<value>true</value>
 				</property>

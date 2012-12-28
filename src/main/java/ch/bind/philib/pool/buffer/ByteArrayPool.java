@@ -63,6 +63,11 @@ public final class ByteArrayPool implements Pool<byte[]> {
 		return backend.getNumPooled();
 	}
 
+	@Override
+	public void clear() {
+		backend.clear();
+	}
+
 	public static ByteArrayPool create(int bufferSize, int maxEntries) {
 		ByteArrayManager manager = new ByteArrayManager(bufferSize);
 		return new ByteArrayPool(new SoftRefPool<byte[]>(manager, maxEntries));

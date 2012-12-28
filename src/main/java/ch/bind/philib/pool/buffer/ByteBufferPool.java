@@ -65,6 +65,11 @@ public final class ByteBufferPool implements Pool<ByteBuffer> {
 		return backend.getNumPooled();
 	}
 
+	@Override
+	public void clear() {
+		backend.clear();
+	}
+
 	public static ByteBufferPool create(int bufferSize, int maxEntries) {
 		ByteBufferManager manager = new ByteBufferManager(bufferSize);
 		return new ByteBufferPool(new SoftRefPool<ByteBuffer>(manager, maxEntries));

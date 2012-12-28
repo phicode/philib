@@ -74,6 +74,15 @@ public abstract class PoolBase<T> implements Pool<T> {
 	}
 
 	@Override
+	public final void clear() {
+		T e = null;
+		while ((e = poll()) != null) {
+			stats.incrementReleased();
+			manager.release(e);
+		}
+	}
+
+	@Override
 	public final PoolStats getPoolStats() {
 		return stats;
 	}

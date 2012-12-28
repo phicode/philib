@@ -34,10 +34,8 @@ import ch.bind.philib.TestUtil;
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.validation.Validation;
 
-//TODO: log a summary
+@Test(singleThreaded = true)
 public abstract class BufferPoolTestBase<T> {
-
-	private static final boolean executeBenchmark = true;
 
 	abstract Pool<T> createPool(int bufferSize, int maxEntries);
 
@@ -97,13 +95,16 @@ public abstract class BufferPoolTestBase<T> {
 		assertTrue(b != b2);
 	}
 
-	@Test(enabled = executeBenchmark)
+	@Test
 	public void benchmark() throws Exception {
-		long numOps = 8L * 1024L * 1024L;
+		if (!TestUtil.RUN_BENCHMARKS) {
+			return;
+		}
+		long numOps = 32L * 1024L * 1024L;
 		int getOps = 1000;
 		int putOps = 950;
 		int numRuns = 1;
-		for (int i = 1; i <= 32; i *= 2) {
+		for (int i = 1; i <= 16; i *= 2) {
 			for (int r = 0; r < numRuns; r++) {
 				benchmark(i, numOps, getOps, putOps);
 			}
@@ -139,7 +140,7 @@ public abstract class BufferPoolTestBase<T> {
 		for (Thread t : ts) {
 			t.join();
 		}
-
+		pool.clear();
 		TestUtil.printBenchResults(getClass(), "ops " + numThreads + " threads", "ops", timeNs, numOps);
 	}
 

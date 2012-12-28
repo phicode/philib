@@ -24,12 +24,28 @@ package ch.bind.philib.lang;
 
 import java.util.Random;
 
-public class MurmurHashBench {
+import org.testng.annotations.Test;
+
+import ch.bind.philib.TestUtil;
+
+public class MurmurHashBenchTest {
 
 	private static final Random r = new Random();
 
 	public static void main(String[] args) {
-		System.out.printf("optimized in: %dns%n", MurmurHash.optimize());
+		doBenchmark();
+	}
+
+	@Test
+	public void benchmark() {
+		if (!TestUtil.RUN_BENCHMARKS) {
+			return;
+		}
+		doBenchmark();
+	}
+
+	private static void doBenchmark() {
+		System.out.printf("MurmurHash optimized in: %dns%n", MurmurHash.optimize());
 		for (int i = 0; i < 2; i++) {
 			testSpeed2(1);
 			testSpeed2(2);

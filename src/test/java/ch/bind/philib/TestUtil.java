@@ -42,6 +42,8 @@ public class TestUtil {
 
 	private static final long DEFAULT_SLEEPTIME_MS = 500;
 
+	public static final boolean RUN_BENCHMARKS = "true".equalsIgnoreCase(System.getProperty("runBenchmarks"));
+	
 	private TestUtil() {
 	}
 

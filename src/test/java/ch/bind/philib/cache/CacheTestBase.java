@@ -24,13 +24,16 @@ package ch.bind.philib.cache;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.security.SecureRandom;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.cache.Cache;
+import ch.bind.philib.math.Calc;
 
 /**
  * tests which must pass on all cache implementations.
@@ -38,7 +41,10 @@ import ch.bind.philib.cache.Cache;
  * @author philipp meinen
  * 
  */
+@Test(singleThreaded = true)
 public abstract class CacheTestBase {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CacheTestBase.class);
 
 	abstract <K, V> Cache<K, V> create();
 
@@ -121,10 +127,10 @@ public abstract class CacheTestBase {
 
 		// Make the cache hold on to more data than it possibly can
 		// 16GiB if the vm has no specified upper limit
-		// otherwise double the amount that the vm can use
 		long vmmax = Runtime.getRuntime().maxMemory();
-		vmmax = vmmax == Long.MAX_VALUE ? 16L * 1024 * 1024 * 1024 : vmmax * 2;
-		final int cap = (int) (vmmax / data.length);
+		vmmax = vmmax == Long.MAX_VALUE ? 16L * 1024 * 1024 * 1024 : (long) (vmmax * 1.05);
+
+		final int cap = (int) Calc.ceilDiv(vmmax, data.length);
 		long t0 = System.nanoTime();
 		Cache<Integer, byte[]> cache = this.<Integer, byte[]> create(cap);
 		long t1 = System.nanoTime() - t0;
@@ -138,12 +144,16 @@ public abstract class CacheTestBase {
 				inMem++;
 			}
 		}
+		// the JVM must have thrown away some of the soft-references
+		assertTrue(inMem < cap);
 		long t3 = System.nanoTime() - t0 - t1 - t2;
 		cache.clear();
 		TestUtil.gcAndSleep(100);
-		System.out.printf("JVM held on to %d out of %d cached elements => %dMiB\n", inMem, cap, inMem / 2);
-		System.out.printf("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
-				t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("JVM held on to %d out of %d added elements => %dMiB\n", inMem, cap, inMem / 2);
+			LOG.debug("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
+					t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f);
+		}
 	}
 
 	public static String itos(int i) {

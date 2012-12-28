@@ -59,14 +59,12 @@ import ch.bind.philib.net.core.tcp.TcpConnection;
 import ch.bind.philib.net.core.tcp.TcpNetFactory;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 @Test(singleThreaded = true)
 public class TcpConnectionTest {
 
-	private static final int MAPPED_BUFFER_SIZE = Integer.MAX_VALUE;
+	private int MAPPED_BUFFER_SIZE;
 
 	private File tempFile;
 
@@ -78,6 +76,9 @@ public class TcpConnectionTest {
 
 	@BeforeClass
 	public void beforeClass() throws Exception {
+		// 64 MiB or 2GiB
+		MAPPED_BUFFER_SIZE = TestUtil.RUN_BENCHMARKS ? Integer.MAX_VALUE : 64 * 1024 * 1024;
+
 		tempFile = File.createTempFile(getClass().getSimpleName(), ".tmp");
 		randomAccessFile = new RandomAccessFile(tempFile, "rw");
 		fileChannel = randomAccessFile.getChannel();
@@ -193,17 +194,18 @@ public class TcpConnectionTest {
 		clientContext.close();
 	}
 
-	@Test(timeOut = 12000, priority = 20)
+	@Test(timeOut = 20000, priority = 20)
 	private void echoNumbers() throws Exception {
 		echo(true);
 	}
 
-	@Test(timeOut = 12000, priority = 25)
+	@Test(timeOut = 20000, priority = 25)
 	private void echoZeros() throws Exception {
 		echo(false);
 	}
 
 	private void echo(boolean verify) throws Exception {
+		final int runForMs = TestUtil.RUN_BENCHMARKS ? 15000 : 1000;
 		final long tStart = System.currentTimeMillis();
 		// ByteBufferPool pool = ByteBufferPool.create(16384, 16);
 		// EventDispatcher disp = SimpleEventDispatcher.open();
@@ -240,10 +242,10 @@ public class TcpConnectionTest {
 		assertTrue(clientConn.isOpen());
 		assertTrue(clientConn.isConnected());
 
-		long nowMs = System.currentTimeMillis() - tStart;
-		while (nowMs < 10000) {
-			Thread.sleep(250);
-			nowMs = System.currentTimeMillis() - tStart;
+		long elapsedMs = System.currentTimeMillis() - tStart;
+		while (elapsedMs < runForMs) {
+			Thread.sleep(25);
+			elapsedMs = System.currentTimeMillis() - tStart;
 		}
 
 		client.shutdown();
@@ -269,6 +271,8 @@ public class TcpConnectionTest {
 		long clientTx = clientConn.getTx(), clientRx = clientConn.getRx();
 		long serverTx = serverConn.getTx(), serverRx = serverConn.getRx();
 		long totalRxTx = clientTx * 4;
+		// to be sure that we have actually transmitted something
+		assertTrue(clientTx > 1024 * 1024L);
 		assertEquals(clientTx, clientRx);
 		assertEquals(serverTx, serverRx);
 		assertEquals(clientTx, serverRx);
@@ -277,7 +281,7 @@ public class TcpConnectionTest {
 		TestUtil.printBenchResults(getClass(), desc, "MiB", totalTime * 1000000L, mb);
 	}
 
-	private static void send(Connection from, Connection to, ByteBuffer data) throws Exception {
+	private void send(Connection from, Connection to, ByteBuffer data) throws Exception {
 		long fromRx = from.getRx();
 		long fromTx = from.getTx();
 		long toRx = to.getRx();
@@ -301,10 +305,12 @@ public class TcpConnectionTest {
 		assertEquals(to.getTx(), toTx); // no change
 
 		long tEndReceive = System.nanoTime();
-		long t = tEndReceive - tStart;
-		double mbPerSec = ((double) size) / (1024f * 1024f) / (t / 1000000000f);
-		System.out.printf("send took %.3fms, send+receive took %.3fms -> %.3fMb/s%n", //
-				(tEndWrite - tStart) / 1000000f, t / 1000000f, mbPerSec);
+		long timeTx = tEndWrite - tStart;
+		long timeTxRx = tEndReceive - tStart;
+		double mib = ((double) size) / (1024f * 1024f);
+
+		TestUtil.printBenchResults(getClass(), "MiB send", "MiB", timeTx, mib);
+		TestUtil.printBenchResults(getClass(), "MiB send+receive", "MiB", timeTxRx, mib);
 	}
 
 	private static final class DevNullSessionManager implements SessionManager {

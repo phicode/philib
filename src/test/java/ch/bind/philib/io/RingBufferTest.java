@@ -51,11 +51,11 @@ public class RingBufferTest {
 
 	private static final int RANDOM_TEST_MAX_CHUNK_SIZE = 256;
 
-	private static final long PERF_SIZE = 4 * GB;
+	private static final long PERF_SIZE = 32 * GB;
 
 	private static final int PERF_CHUNKSIZE = 4096;
 
-	private static final int REPEATS = 1;
+	private static final int REPEATS = 4;
 
 	@Test
 	public void frontAndBack() {
@@ -70,7 +70,8 @@ public class RingBufferTest {
 			if (chunkIdx % 2 == 0) {
 				buf.write(d);
 				bufExp.addLast(d);
-			} else {
+			}
+			else {
 				buf.writeFront(d);
 				bufExp.addFirst(d);
 			}
@@ -100,17 +101,20 @@ public class RingBufferTest {
 				if (doFront) {
 					ringBuf.read(buf);
 					verifyRead(buf, bufExp);
-				} else {
+				}
+				else {
 					ringBuf.readBack(buf);
 					verifyReadBack(buf, bufExp);
 				}
 				size -= len;
-			} else {
+			}
+			else {
 				rand.nextBytes(buf);
 				if (doFront) {
 					ringBuf.writeFront(buf);
 					prepend(buf, bufExp);
-				} else {
+				}
+				else {
 					ringBuf.write(buf);
 					append(buf, bufExp);
 				}
@@ -123,13 +127,16 @@ public class RingBufferTest {
 	}
 
 	@Test
-	public void perfTest() {
+	public void benchmark() {
+		if (!TestUtil.RUN_BENCHMARKS) {
+			return;
+		}
 		for (int i = 0; i < REPEATS; i++) {
-			doPerfTest();
+			doBenchmark();
 		}
 	}
 
-	private void doPerfTest() {
+	private void doBenchmark() {
 		final long start = System.nanoTime();
 		RingBuffer ringBuf = new RingBuffer();
 		byte[] buf = new byte[PERF_CHUNKSIZE];
@@ -242,7 +249,8 @@ public class RingBufferTest {
 	@Test
 	public void clear() {
 		RingBuffer buf = new RingBuffer();
-		byte[] a = { 0, 1, 2, 3 };
+		byte[] a = {
+				0, 1, 2, 3 };
 		buf.write(a);
 		assertEquals(a.length, buf.available());
 		buf.clear();

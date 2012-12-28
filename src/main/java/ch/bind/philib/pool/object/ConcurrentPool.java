@@ -59,7 +59,8 @@ public final class ConcurrentPool<T> implements Pool<T> {
 		for (int i = 0; i < concurrencyLevel; i++) {
 			if (allowLeaks) {
 				pools[i] = new SoftRefPool<T>(manager, maxPerPool);
-			} else {
+			}
+			else {
 				pools[i] = new StrongRefPool<T>(manager, maxPerPool);
 			}
 			s[i] = pools[i].getPoolStats();
@@ -89,6 +90,11 @@ public final class ConcurrentPool<T> implements Pool<T> {
 			total += pool.getNumPooled();
 		}
 		return total;
+	}
+
+	@Override
+	public void clear() {
+		poolByThread.get().clear();
 	}
 
 	PoolBase<T> bindToThread() {
