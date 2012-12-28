@@ -147,8 +147,12 @@ public abstract class CacheTestBase {
 		// the JVM must have thrown away some of the soft-references
 		assertTrue(inMem < cap);
 		long t3 = System.nanoTime() - t0 - t1 - t2;
+
+		// remove all hard-referenced to SoftReference objects and give the JVM
+		// a chance to free memory
 		cache.clear();
 		TestUtil.gcAndSleep(100);
+
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("JVM held on to %d out of %d added elements => %dMiB\n", inMem, cap, inMem / 2);
 			LOG.debug("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
