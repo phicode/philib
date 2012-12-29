@@ -22,11 +22,7 @@
 
 package ch.bind.philib.lang;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public final class ServiceState {
@@ -39,49 +35,65 @@ public final class ServiceState {
 
 	private static final int STATE_CLOSED = 3;
 
-	private AtomicInteger state = new AtomicInteger(STATE_UNINITIALIZED);
+	private volatile int state;
 
 	public boolean isUninitialized() {
-		return state.get() == STATE_UNINITIALIZED;
+		return state == STATE_UNINITIALIZED;
 	}
 
 	public boolean isOpen() {
-		return state.get() == STATE_OPEN;
+		return state == STATE_OPEN;
 	}
 
 	public boolean isClosing() {
-		return state.get() == STATE_CLOSING;
+		return state == STATE_CLOSING;
 	}
 
 	public boolean isClosed() {
-		return state.get() == STATE_CLOSED;
+		return state == STATE_CLOSED;
 	}
 
 	public boolean isClosingOrClosed() {
-		return state.get() >= STATE_CLOSING;
+		return state >= STATE_CLOSING;
 	}
 
-	public void setOpen() {
+	public synchronized void setOpen() {
 		switchState(STATE_OPEN);
+		notifyAll();
 	}
 
-	public void setClosing() {
+	public synchronized void setClosing() {
 		switchState(STATE_CLOSING);
+		notifyAll();
 	}
 
-	public void setClosed() {
+	public synchronized void setClosed() {
 		switchState(STATE_CLOSED);
+		notifyAll();
+	}
+
+	public void awaitOpen() throws InterruptedException {
+		await(STATE_OPEN);
+	}
+
+	public void awaitClosing() throws InterruptedException {
+		await(STATE_CLOSING);
+	}
+
+	public void awaitClosed() throws InterruptedException {
+		await(STATE_CLOSED);
+	}
+
+	private synchronized void await(int waitForState) throws InterruptedException {
+		while (state < waitForState) {
+			wait();
+		}
 	}
 
 	private void switchState(int newState) {
-		while (true) {
-			int stateNow = state.get();
-			if (newState < stateNow) {
-				throw new IllegalStateException("service-states can only be moved forward");
-			}
-			if (state.compareAndSet(stateNow, newState)) {
-				return;
-			}
+		if (newState < state) {
+			throw new IllegalStateException("service-states can only be moved forward");
 		}
+		state = newState;
 	}
 }

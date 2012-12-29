@@ -27,6 +27,7 @@ import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
@@ -82,18 +83,31 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		this.dispatchThread = ThreadUtil.createAndStartForeverRunner(this, threadName);
 	}
 
-	public static SimpleEventDispatcher open(boolean collectLoadAverage) throws SelectorCreationException {
+	public static SimpleEventDispatcher open(SelectorProvider selectorProvider, boolean collectLoadAverage) throws IOException {
 		Selector selector;
 		try {
-			selector = Selector.open();
+			selector = selectorProvider.openSelector();
 		} catch (IOException e) {
 			throw new SelectorCreationException(e);
 		}
 		LoadAvg loadAvg = collectLoadAverage ? LoadAvgSimple.forSeconds(LOAD_AVG_SECONDS) : LoadAvgNoop.INSTANCE;
-		return new SimpleEventDispatcher(selector, loadAvg);
+		SimpleEventDispatcher disp = new SimpleEventDispatcher(selector, loadAvg);
+		// wait for the thread to start
+		try {
+			disp.serviceState.awaitOpen();
+		} catch (InterruptedException e) {
+			SafeCloseUtil.close(disp, LOG);
+			Thread.currentThread().interrupt();
+			throw new IOException("interrupted while waiting for the event dispatcher thread to start", e);
+		}
+		return disp;
 	}
 
-	public static SimpleEventDispatcher open() throws SelectorCreationException {
+	public static SimpleEventDispatcher open(boolean collectLoadAverage) throws IOException {
+		return open(SelectorProvider.provider(), collectLoadAverage);
+	}
+
+	public static SimpleEventDispatcher open() throws IOException {
 		return open(false);
 	}
 

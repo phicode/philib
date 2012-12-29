@@ -29,6 +29,8 @@ import static org.testng.Assert.fail;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.TestUtil;
+
 public class ServiceStateTest {
 
 	@Test
@@ -80,6 +82,49 @@ public class ServiceStateTest {
 		}
 	}
 
+	@Test(timeOut = 1000)
+	public void awaitStates() throws InterruptedException {
+		final ServiceState state = new ServiceState();
+
+		assertFalse(state.isOpen());
+		long startTime = System.nanoTime();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				TestUtil.sleepOrFail(50);
+				state.setOpen();
+			}
+		}).start();
+		state.awaitOpen();
+		assertTrue(state.isOpen());
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				TestUtil.sleepOrFail(50);
+				state.setClosing();
+			}
+		}).start();
+
+		state.awaitClosing();
+		assertTrue(state.isClosing());
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				TestUtil.sleepOrFail(50);
+				state.setClosed();
+			}
+		}).start();
+
+		state.awaitClosed();
+		assertTrue(state.isClosed());
+
+		long totalTime = System.nanoTime() - startTime;
+		assertTrue(totalTime > 150 * 1000 * 1000);
+		assertTrue(totalTime < 250 * 1000 * 1000);
+	}
+
 	private static void verify(ServiceState state, boolean uninit, boolean open, boolean closing, boolean closed) {
 		assertEquals(state.isUninitialized(), uninit);
 		assertEquals(state.isOpen(), open);
@@ -87,7 +132,8 @@ public class ServiceStateTest {
 		assertEquals(state.isClosed(), closed);
 		if (closing || closed) {
 			assertTrue(state.isClosingOrClosed());
-		} else {
+		}
+		else {
 			assertFalse(state.isClosingOrClosed());
 		}
 	}
