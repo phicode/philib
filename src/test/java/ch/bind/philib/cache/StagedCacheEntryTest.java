@@ -28,8 +28,6 @@ import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
-import ch.bind.philib.cache.StagedCacheEntry;
-
 public class StagedCacheEntryTest {
 
 	@Test

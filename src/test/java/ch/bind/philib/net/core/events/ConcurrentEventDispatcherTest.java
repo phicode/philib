@@ -36,9 +36,6 @@ import java.util.Random;
 
 import org.testng.annotations.Test;
 
-import ch.bind.philib.net.core.events.ConcurrentEventDispatcher;
-import ch.bind.philib.net.core.events.EventDispatcher;
-import ch.bind.philib.net.core.events.EventHandler;
 import ch.bind.philib.net.core.events.ConcurrentEventDispatcher.ScaleStrategy;
 
 public class ConcurrentEventDispatcherTest {

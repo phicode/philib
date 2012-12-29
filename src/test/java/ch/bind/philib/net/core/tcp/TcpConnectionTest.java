@@ -55,8 +55,6 @@ import ch.bind.philib.net.core.context.NetContexts;
 import ch.bind.philib.net.core.session.DevNullSession;
 import ch.bind.philib.net.core.session.EchoClientSession;
 import ch.bind.philib.net.core.session.EchoServerSession;
-import ch.bind.philib.net.core.tcp.TcpConnection;
-import ch.bind.philib.net.core.tcp.TcpNetFactory;
 
 /**
  * @author Philipp Meinen

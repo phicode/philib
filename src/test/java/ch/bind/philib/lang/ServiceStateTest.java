@@ -27,9 +27,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Semaphore;
-
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;

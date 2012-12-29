@@ -22,6 +22,9 @@
 
 package ch.bind.philib.net.core.events;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.net.ProtocolFamily;
 import java.nio.channels.Channel;
@@ -32,8 +35,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static org.testng.Assert.*;
 
 public class DummySelectorProvider extends SelectorProvider {
 

@@ -92,7 +92,7 @@ public class TcpConnection extends ConnectionBase {
 		this.events = events;
 		context.getEventDispatcher().register(this, events.getEventMask());
 	}
-	
+
 	@Override
 	public int handleOps(final int ops) throws IOException {
 		// only the read and/or write flags may be set

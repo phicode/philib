@@ -221,8 +221,7 @@ public class HashUtilTest {
 			if (cur == prev) {
 				colls++;
 				colCount++;
-			}
-			else {
+			} else {
 				if (colCount > highColl) {
 					highColl = colCount;
 				}

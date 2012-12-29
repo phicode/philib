@@ -34,7 +34,7 @@ public interface Session {
 	Events receive(Connection conn, ByteBuffer data) throws IOException;
 
 	Events sendable(Connection conn) throws IOException;
-	
+
 	boolean handleTimeout();
 
 	void closed(Connection conn);

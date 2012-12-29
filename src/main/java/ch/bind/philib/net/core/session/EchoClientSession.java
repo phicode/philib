@@ -137,8 +137,7 @@ public class EchoClientSession implements Session {
 		while (!writeBuf.hasRemaining()) {
 			if (performVerification) {
 				fillWriteBuf();
-			}
-			else {
+			} else {
 				writeBuf.clear();
 			}
 			connection.send(writeBuf);

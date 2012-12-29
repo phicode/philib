@@ -36,7 +36,6 @@ import ch.bind.philib.net.core.context.NetContextImpl;
 import ch.bind.philib.net.core.events.ConcurrentEventDispatcher;
 import ch.bind.philib.net.core.events.EventDispatcher;
 import ch.bind.philib.net.core.session.EchoServerSession;
-import ch.bind.philib.net.core.tcp.TcpNetFactory;
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 
 /**

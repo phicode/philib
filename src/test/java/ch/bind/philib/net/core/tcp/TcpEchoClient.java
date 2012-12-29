@@ -42,8 +42,6 @@ import ch.bind.philib.net.core.context.NetContextImpl;
 import ch.bind.philib.net.core.events.ConcurrentEventDispatcher;
 import ch.bind.philib.net.core.events.EventDispatcher;
 import ch.bind.philib.net.core.session.EchoClientSession;
-import ch.bind.philib.net.core.tcp.TcpConnection;
-import ch.bind.philib.net.core.tcp.TcpNetFactory;
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 
 /**
@@ -66,8 +64,7 @@ public class TcpEchoClient {
 		if (args.length > 1) {
 			System.out.println("only one parameter may be specified");
 			System.exit(1);
-		}
-		else if (args.length == 1) {
+		} else if (args.length == 1) {
 			try {
 				numClients = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -242,8 +239,7 @@ public class TcpEchoClient {
 				iter.remove();
 				shutdown.add(recs);
 				recs.session.shutdown();
-			}
-			else if (recs.session.isClosed()) {
+			} else if (recs.session.isClosed()) {
 				iter.remove();
 			}
 		}

@@ -42,10 +42,10 @@ import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.lang.ThreadUtil;
-import ch.bind.philib.util.SimpleTimeoutMap;
 import ch.bind.philib.util.LoadAvg;
 import ch.bind.philib.util.LoadAvgNoop;
 import ch.bind.philib.util.LoadAvgSimple;
+import ch.bind.philib.util.SimpleTimeoutMap;
 import ch.bind.philib.util.TimeoutMap;
 
 /**
@@ -132,8 +132,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			long msUntilNextTimeout = upcomingTimeouts.getTimeToNextTimeout();
 			if (msUntilNextTimeout <= 0) {
 				return selector.selectNow();
-			}
-			else {
+			} else {
 				long selectTimeout = Math.min(msUntilNextTimeout, 10000L);
 				return selector.select(selectTimeout);
 			}
@@ -197,8 +196,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		}
 		if (key.isValid()) {
 			handleEvent(eventHandler, key, key.readyOps());
-		}
-		else {
+		} else {
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
 	}
@@ -224,8 +222,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		SelectionKey key = channel.keyFor(selector);
 		if (key != null) {
 			key.interestOps(ops);
-		}
-		else {
+		} else {
 			newRegistrations.add(new NewRegistration(eventHandler, ops));
 		}
 		wakeup();
@@ -253,8 +250,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			SelectionKey key = channel.keyFor(selector);
 			if (key != null) {
 				key.interestOps(reg.getOps());
-			}
-			else {
+			} else {
 				try {
 					int ops = reg.getOps();
 					channel.register(selector, ops, eventHandler);
@@ -281,8 +277,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			key.attach(null);
 			upcomingTimeouts.remove(eventHandler.getEventHandlerId());
 			wakeup();
-		}
-		else {
+		} else {
 			// handle event-handlers which unregister before they were added to
 			// the selector
 

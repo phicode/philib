@@ -27,9 +27,6 @@ import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
 
-import ch.bind.philib.cache.Cache;
-import ch.bind.philib.cache.SimpleCache;
-
 public class SimpleCacheTest extends CacheTestBase {
 
 	@Override

@@ -78,8 +78,7 @@ public final class LoadAvgSimple implements LoadAvg {
 		long diff;
 		if (lastNormalizeNs == 0) {
 			diff = lAvgOfXNs;
-		}
-		else {
+		} else {
 			diff = nowNs - lastNormalizeNs;
 			if (diff < 0) {
 				diff = 0;

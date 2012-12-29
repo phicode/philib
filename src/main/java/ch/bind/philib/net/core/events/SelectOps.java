@@ -43,22 +43,22 @@ public final class SelectOps {
 
 	public static final int CONNECT = SelectionKey.OP_CONNECT;
 
-//	public static String opsToString(int ops) {
-//		switch (ops) {
-//		case READ:
-//			return "r";
-//		case WRITE:
-//			return "w";
-//		case READ_WRITE:
-//			return "rw";
-//		case ACCEPT:
-//			return "a";
-//		case CONNECT:
-//			return "c";
-//		default:
-//			return Integer.toString(ops);
-//		}
-//	}
+	// public static String opsToString(int ops) {
+	// switch (ops) {
+	// case READ:
+	// return "r";
+	// case WRITE:
+	// return "w";
+	// case READ_WRITE:
+	// return "rw";
+	// case ACCEPT:
+	// return "a";
+	// case CONNECT:
+	// return "c";
+	// default:
+	// return Integer.toString(ops);
+	// }
+	// }
 
 	public static boolean hasRead(int events) {
 		return (events & READ) == READ;
