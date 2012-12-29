@@ -22,6 +22,8 @@
 
 package ch.bind.philib.net.core.events;
 
+import java.io.IOException;
+
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -52,5 +54,12 @@ public class SimpleEventDispatcherTest {
 		dispatcher.close();
 
 		assertFalse(dispatcher.isOpen());
+	}
+	
+	@Test(expectedExceptions=SelectorCreationException.class) 
+	public void selectorProvidersOpenSelectorException() throws Exception {
+		DummySelectorProvider selectorProvider = new DummySelectorProvider();
+		selectorProvider.setNextOpenSelectorException(new IOException());
+		SimpleEventDispatcher.open(selectorProvider, false);
 	}
 }

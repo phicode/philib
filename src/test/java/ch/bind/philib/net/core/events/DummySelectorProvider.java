@@ -23,6 +23,7 @@
 package ch.bind.philib.net.core.events;
 
 import java.io.IOException;
+import java.net.ProtocolFamily;
 import java.nio.channels.Channel;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.Pipe;
@@ -37,10 +38,16 @@ import static org.testng.Assert.*;
 public class DummySelectorProvider extends SelectorProvider {
 
 	private final AtomicReference<AbstractSelector> nextOpenSelector = new AtomicReference<AbstractSelector>();
+	private final AtomicReference<IOException> nextOpenSelectorException = new AtomicReference<IOException>();
 
 	public void setNextOpenSelector(AbstractSelector selector) {
 		assertNotNull(selector);
 		assertTrue(nextOpenSelector.compareAndSet(null, selector));
+	}
+
+	public void setNextOpenSelectorException(IOException exc) {
+		assertNotNull(exc);
+		assertTrue(nextOpenSelectorException.compareAndSet(null, exc));
 	}
 
 	@Override
@@ -55,6 +62,10 @@ public class DummySelectorProvider extends SelectorProvider {
 
 	@Override
 	public AbstractSelector openSelector() throws IOException {
+		IOException exc = nextOpenSelectorException.getAndSet(null);
+		if (exc != null) {
+			throw exc;
+		}
 		AbstractSelector selector = nextOpenSelector.getAndSet(null);
 		assertNotNull(selector);
 		return selector;
@@ -73,5 +84,15 @@ public class DummySelectorProvider extends SelectorProvider {
 	@Override
 	public Channel inheritedChannel() throws IOException {
 		throw new AssertionError();
+	}
+
+	public DatagramChannel openDatagramChannel(Object family) {
+		throw new AssertionError();
+	}
+
+	@Override
+	public DatagramChannel openDatagramChannel(ProtocolFamily family) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
