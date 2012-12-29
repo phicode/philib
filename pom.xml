@@ -31,7 +31,7 @@
 
 		<!-- the following two properties are adjusted if the profile 'bench' is activated -->
 		<runBenchmarks>false</runBenchmarks>
-		<testMaxMemory>64</testMaxMemory>
+		<testMaxMemory>128</testMaxMemory>
 	</properties>
 
 	<licenses>
