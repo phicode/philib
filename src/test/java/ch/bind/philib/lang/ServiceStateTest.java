@@ -27,6 +27,9 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
+
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
@@ -85,8 +88,8 @@ public class ServiceStateTest {
 	@Test(timeOut = 1000)
 	public void awaitStates() throws InterruptedException {
 		final ServiceState state = new ServiceState();
-
 		assertFalse(state.isOpen());
+
 		long startTime = System.nanoTime();
 		new Thread(new Runnable() {
 			@Override
@@ -95,6 +98,7 @@ public class ServiceStateTest {
 				state.setOpen();
 			}
 		}).start();
+
 		state.awaitOpen();
 		assertTrue(state.isOpen());
 
@@ -121,7 +125,7 @@ public class ServiceStateTest {
 		assertTrue(state.isClosed());
 
 		long totalTime = System.nanoTime() - startTime;
-		assertTrue(totalTime > 150 * 1000 * 1000);
+		assertTrue(totalTime > 140 * 1000 * 1000);
 		assertTrue(totalTime < 250 * 1000 * 1000);
 	}
 
@@ -132,8 +136,7 @@ public class ServiceStateTest {
 		assertEquals(state.isClosed(), closed);
 		if (closing || closed) {
 			assertTrue(state.isClosingOrClosed());
-		}
-		else {
+		} else {
 			assertFalse(state.isClosingOrClosed());
 		}
 	}
