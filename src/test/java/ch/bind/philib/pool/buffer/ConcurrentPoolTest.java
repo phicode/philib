@@ -29,7 +29,7 @@ import ch.bind.philib.pool.manager.ByteArrayManager;
 import ch.bind.philib.pool.object.ConcurrentPool;
 
 @Test
-public class ConcurrentTest extends BufferPoolTestBase<byte[]> {
+public class ConcurrentPoolTest extends BufferPoolTestBase<byte[]> {
 
 	@Override
 	Pool<byte[]> createPool(int bufferSize, int maxEntries) {
