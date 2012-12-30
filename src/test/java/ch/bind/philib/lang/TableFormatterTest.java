@@ -25,7 +25,6 @@ package ch.bind.philib.lang;
 import static ch.bind.philib.lang.TableFormatter.NULL_TABLE;
 import static ch.bind.philib.lang.TableFormatter.formatTable;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
 
 import org.testng.annotations.Test;
 
