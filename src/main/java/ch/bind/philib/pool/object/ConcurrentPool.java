@@ -46,7 +46,7 @@ public final class ConcurrentPool<T> implements Pool<T> {
 	private final MultiPoolStats stats;
 
 	@SuppressWarnings("unchecked")
-	public ConcurrentPool(ObjectManager<T> manager, int maxEntries, boolean allowLeaks, int concurrencyLevel) {
+	public ConcurrentPool(ObjectManager<T> manager, int maxEntries, boolean softRefs, int concurrencyLevel) {
 		Validation.notNull(manager, "no object manager provided");
 		Validation.isTrue(maxEntries > 0, "wont create an empty object pool");
 		if (concurrencyLevel < 2) {
@@ -57,7 +57,7 @@ public final class ConcurrentPool<T> implements Pool<T> {
 		this.pools = new PoolBase[concurrencyLevel];
 		PoolStats[] s = new PoolStats[concurrencyLevel];
 		for (int i = 0; i < concurrencyLevel; i++) {
-			if (allowLeaks) {
+			if (softRefs) {
 				pools[i] = new SoftRefPool<T>(manager, maxPerPool);
 			} else {
 				pools[i] = new StrongRefPool<T>(manager, maxPerPool);
