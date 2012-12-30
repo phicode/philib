@@ -110,8 +110,7 @@ public class TableFormatterTest {
 			} else if (toStrCount == 2) {
 				return "abcdef";
 			} else {
-				fail();
-				return null;
+				throw new AssertionError();
 			}
 		}
 	}
@@ -128,8 +127,7 @@ public class TableFormatterTest {
 			} else if (toStrCount == 2) {
 				return "xyz";
 			} else {
-				fail();
-				return null;
+				throw new AssertionError();
 			}
 		}
 	}

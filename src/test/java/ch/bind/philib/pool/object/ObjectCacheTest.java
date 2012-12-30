@@ -66,7 +66,7 @@ public class ObjectCacheTest {
 
 		@Override
 		public boolean prepareForRecycle(Integer value) {
-			return value.intValue() % 2 == 1;
+			return (value.intValue() & 1) == 1;
 		}
 
 		@Override
