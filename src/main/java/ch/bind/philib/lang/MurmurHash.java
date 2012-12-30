@@ -22,7 +22,7 @@
 
 package ch.bind.philib.lang;
 
-import ch.bind.philib.io.EndianConverter;
+import ch.bind.philib.io.EndianCodec;
 
 /**
  * Implementation of the murmur hashing functions.
@@ -56,7 +56,7 @@ public final class MurmurHash {
 		int hash = MURMUR2_32_SEED ^ len;
 
 		while (off < limitOffset) {
-			int k = EndianConverter.decodeInt32LE(key, off);
+			int k = EndianCodec.decodeInt32LE(key, off);
 			off += 4;
 
 			hash = murmur2_mmix(hash, k);
@@ -95,7 +95,7 @@ public final class MurmurHash {
 		int hash = seed;
 
 		while (off < limitOffset) {
-			int k = EndianConverter.decodeInt32LE(key, off);
+			int k = EndianCodec.decodeInt32LE(key, off);
 			off += 4;
 
 			hash ^= murmur3_round32(k);
@@ -160,7 +160,7 @@ public final class MurmurHash {
 		int off = 0;
 
 		while (off < limitOffset) {
-			int k = EndianConverter.decodeInt32LE(key, off);
+			int k = EndianCodec.decodeInt32LE(key, off);
 			off += 4;
 
 			hash = murmur2_mmix(hash, k);

@@ -30,7 +30,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class EndianConverterTest {
+public class EndianCodecTest {
 
 	private static final int REPEATS = 2048;
 
@@ -101,26 +101,26 @@ public class EndianConverterTest {
 	}
 
 	private void testInt64BE(final long v) {
-		EndianConverter.encodeInt64BE(v, buf);
-		long dec = EndianConverter.decodeInt64BE(buf);
+		EndianCodec.encodeInt64BE(v, buf);
+		long dec = EndianCodec.decodeInt64BE(buf);
 		assertEquals(v, dec);
 	}
 
 	private void testInt64BE(final long v, final int off) {
-		EndianConverter.encodeInt64BE(v, buf, off);
-		long dec = EndianConverter.decodeInt64BE(buf, off);
+		EndianCodec.encodeInt64BE(v, buf, off);
+		long dec = EndianCodec.decodeInt64BE(buf, off);
 		assertEquals(v, dec);
 	}
 
 	private void testInt64LE(final long v) {
-		EndianConverter.encodeInt64LE(v, buf);
-		long dec = EndianConverter.decodeInt64LE(buf);
+		EndianCodec.encodeInt64LE(v, buf);
+		long dec = EndianCodec.decodeInt64LE(buf);
 		assertEquals(v, dec);
 	}
 
 	private void testInt64LE(final long v, final int off) {
-		EndianConverter.encodeInt64LE(v, buf, off);
-		long dec = EndianConverter.decodeInt64LE(buf, off);
+		EndianCodec.encodeInt64LE(v, buf, off);
+		long dec = EndianCodec.decodeInt64LE(buf, off);
 		assertEquals(v, dec);
 	}
 
@@ -135,26 +135,26 @@ public class EndianConverterTest {
 	}
 
 	private void testInt32BE(final int v) {
-		EndianConverter.encodeInt32BE(v, buf);
-		int dec = EndianConverter.decodeInt32BE(buf);
+		EndianCodec.encodeInt32BE(v, buf);
+		int dec = EndianCodec.decodeInt32BE(buf);
 		assertEquals(v, dec);
 	}
 
 	private void testInt32BE(final int v, final int off) {
-		EndianConverter.encodeInt32BE(v, buf, off);
-		int dec = EndianConverter.decodeInt32BE(buf, off);
+		EndianCodec.encodeInt32BE(v, buf, off);
+		int dec = EndianCodec.decodeInt32BE(buf, off);
 		assertEquals(v, dec);
 	}
 
 	private void testInt32LE(final int v) {
-		EndianConverter.encodeInt32LE(v, buf);
-		int dec = EndianConverter.decodeInt32LE(buf);
+		EndianCodec.encodeInt32LE(v, buf);
+		int dec = EndianCodec.decodeInt32LE(buf);
 		assertEquals(v, dec);
 	}
 
 	private void testInt32LE(final int v, final int off) {
-		EndianConverter.encodeInt32LE(v, buf, off);
-		int dec = EndianConverter.decodeInt32LE(buf, off);
+		EndianCodec.encodeInt32LE(v, buf, off);
+		int dec = EndianCodec.decodeInt32LE(buf, off);
 		assertEquals(v, dec);
 	}
 
@@ -169,38 +169,38 @@ public class EndianConverterTest {
 	}
 
 	private void testInt16BE(final int v) {
-		EndianConverter.encodeInt16BE(v, buf);
-		int dec = EndianConverter.decodeInt16BE(buf);
+		EndianCodec.encodeInt16BE(v, buf);
+		int dec = EndianCodec.decodeInt16BE(buf);
 		assertEquals(v, dec);
 	}
 
 	private void testInt16BE(final int v, final int off) {
-		EndianConverter.encodeInt16BE(v, buf, off);
-		int dec = EndianConverter.decodeInt16BE(buf, off);
+		EndianCodec.encodeInt16BE(v, buf, off);
+		int dec = EndianCodec.decodeInt16BE(buf, off);
 		assertEquals(v, dec);
 	}
 
 	private void testInt16LE(final int v) {
-		EndianConverter.encodeInt16LE(v, buf);
-		int dec = EndianConverter.decodeInt16LE(buf);
+		EndianCodec.encodeInt16LE(v, buf);
+		int dec = EndianCodec.decodeInt16LE(buf);
 		assertEquals(v, dec);
 	}
 
 	private void testInt16LE(final int v, final int off) {
-		EndianConverter.encodeInt16LE(v, buf, off);
-		int dec = EndianConverter.decodeInt16LE(buf, off);
+		EndianCodec.encodeInt16LE(v, buf, off);
+		int dec = EndianCodec.decodeInt16LE(buf, off);
 		assertEquals(v, dec);
 	}
 
 	private void testInt8(final int v) {
-		EndianConverter.encodeInt8(v, buf);
-		int dec = EndianConverter.decodeInt8(buf);
+		EndianCodec.encodeInt8(v, buf);
+		int dec = EndianCodec.decodeInt8(buf);
 		assertEquals(v, dec);
 	}
 
 	private void testInt8(final int v, final int off) {
-		EndianConverter.encodeInt8(v, buf, off);
-		int dec = EndianConverter.decodeInt8(buf, off);
+		EndianCodec.encodeInt8(v, buf, off);
+		int dec = EndianCodec.decodeInt8(buf, off);
 		assertEquals(v, dec);
 	}
 }

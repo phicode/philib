@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.io.BufferUtil;
-import ch.bind.philib.io.EndianConverter;
+import ch.bind.philib.io.EndianCodec;
 import ch.bind.philib.lang.ServiceState;
 import ch.bind.philib.net.core.Connection;
 import ch.bind.philib.net.core.Events;
@@ -113,7 +113,7 @@ public class EchoClientSession implements Session {
 	private boolean verifyReceived() throws IOException {
 		while (receiveBuf.remaining() >= 8) {
 			receiveBuf.get(decodeBuf);
-			long num = EndianConverter.decodeInt64LE(decodeBuf);
+			long num = EndianCodec.decodeInt64LE(decodeBuf);
 			if (num != nextReceiveNum) {
 				verificationOk = false;
 				LOG.error("expected: " + nextReceiveNum + " got: " + num);
@@ -147,7 +147,7 @@ public class EchoClientSession implements Session {
 
 	private void fillWriteBuf() {
 		for (int i = 0, off = 0; i < NUMS; i++, off += 8) {
-			EndianConverter.encodeInt64LE(nextSendNum++, encodeBuf, off);
+			EndianCodec.encodeInt64LE(nextSendNum++, encodeBuf, off);
 		}
 		writeBuf.clear();
 	}

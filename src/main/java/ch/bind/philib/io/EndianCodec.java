@@ -27,9 +27,9 @@ package ch.bind.philib.io;
  * 
  * @author Philipp Meinen
  */
-public final class EndianConverter {
+public final class EndianCodec {
 
-	private EndianConverter() {
+	private EndianCodec() {
 	}
 
 	// #################
