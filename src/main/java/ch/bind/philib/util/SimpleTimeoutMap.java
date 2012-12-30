@@ -262,7 +262,6 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				Map.Entry other = (Map.Entry) obj;
 				return CompareUtil.equals(this.key, other.getKey()) && //
 						CompareUtil.equals(this.value, other.getValue());
-
 			}
 			return false;
 		}
