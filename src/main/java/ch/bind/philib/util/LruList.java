@@ -28,22 +28,22 @@ public final class LruList<E extends LruNode> {
 
 	private final int capacity;
 
-	private E head;
+	private final HeadTailNode headTail = new HeadTailNode();
 
-	private E tail;
+//	private final HeadTailNode tail = new HeadTailNode();
 
 	private int size;
 
 	public LruList(int capacity) {
 		Validation.isTrue(capacity > 0, "capacity must be > 0");
 		this.capacity = capacity;
+		link(headTail, headTail);
 	}
 
 	/**
 	 * Add a new {@code LruNode} to the head of the LRU.
 	 * 
-	 * @param node
-	 *            The new head of the {@code LruList}.
+	 * @param node The new head of the {@code LruList}.
 	 * @return {@code null} if the the size after adding the new {@code LruNode}
 	 *         does not exceed this list's {@code capacity}. Otherwise the list
 	 *         will remove the tail (the element which wasn't accessed for the
@@ -52,18 +52,10 @@ public final class LruList<E extends LruNode> {
 	public E add(final E node) {
 		assert (node.getLruPrev() == null && node.getLruNext() == null);
 
-		if (head == null) {
-			assert (tail == null);
-			// empty LRU
-			head = node;
-			tail = node;
-		} else {
-			assert (tail != null);
-			// non-empty LRU
-			node.setLruNext(head);
-			head.setLruPrev(node);
-			head = node;
-		}
+		LruNode afterHead = headTail.getLruNext();
+		link(headTail, node);
+		link(node, afterHead);
+
 		size++;
 		if (size <= capacity) {
 			return null;
@@ -72,98 +64,57 @@ public final class LruList<E extends LruNode> {
 	}
 
 	public void remove(final E node) {
-		assert (head != null && tail != null);
+		final LruNode prev = node.getLruPrev();
+		final LruNode next = node.getLruNext();
 
-		final E prev = (E) node.getLruPrev();
-		final E next = (E) node.getLruNext();
+		assert (next != null && prev != null);
 
-		if (head == node) {
-			if (tail == node) {
-				assert (next == null && prev == null);
-				// this was the only element in the LRU
-				head = null;
-				tail = null;
-			} else {
-				assert (prev == null && next.getLruPrev() == node);
-				// node is at the head of the LRU
-				next.setLruPrev(null);
-				head = next;
-			}
-		} else {
-			if (tail == node) {
-				assert (next == null && prev.getLruNext() == node);
-				// node is at the tail of the LRU
-				prev.setLruNext(null);
-				tail = prev;
-			} else {
-				assert (prev != null && next != null && prev.getLruNext() == node && next.getLruPrev() == node);
-				// node is is the middle of the LRU
-				prev.setLruNext(next);
-				next.setLruPrev(prev);
-			}
-		}
+		link(prev, next);
+
 		size--;
 		node.resetLruNode();
 	}
 
 	public E removeTail() {
-		if (tail == null) {
+		if (size == 0) {
 			return null;
 		}
-		final E node = tail;
-		// 1 element lru
-		if (head == node) {
-			tail = null;
-			head = null;
-			size = 0;
-		} else {
-			final E prev = (E) node.getLruPrev();
-			prev.setLruNext(null);
-			tail = prev;
-			size--;
-		}
-		node.resetLruNode();
+		final E node = (E) headTail.getLruPrev();
+		remove(node);
 		return node;
 	}
 
 	public void moveToHead(final E node) {
-		assert (head != null && tail != null);
+		assert (size > 0);
 
-		if (head == node) {
+		final LruNode prev = node.getLruPrev();
+		final LruNode next = node.getLruNext();
+
+		if (prev == headTail) {
 			// LRU with size 1 or the the node is already in head position
 			return;
 		}
-		final E prev = (E) node.getLruPrev();
-		final E next = (E) node.getLruNext();
 
-		// since this node is not the head there are 2
-		// or more elements in the LRU
-		if (tail == node) {
-			assert (prev != null && next == null && prev.getLruNext() == node);
-			// move from tail to head
-			node.setLruPrev(null);
-			prev.setLruNext(null);
-			head.setLruPrev(node);
-			node.setLruNext(head);
-			head = node;
-			tail = prev;
-		} else {
-			assert (prev != null && next != null && prev.getLruNext() == node && next.getLruPrev() == node);
-			// node is is the middle of the LRU -> unlink
-			prev.setLruNext(next);
-			next.setLruPrev(prev);
-			node.setLruNext(head);
-			node.setLruPrev(null);
-			head.setLruPrev(node);
-			head = node;
-		}
+		// remove
+		link(prev, next);
+
+		// add
+		LruNode afterHead = headTail.getLruNext();
+		link(headTail, node);
+		link(node, afterHead);
 	}
 
-	// TODO: cleaner clear() implementation which calls reset() on every node??
 	public void clear() {
+		if (size > 0) {
+			LruNode node = headTail.getLruNext();
+			while (node != null) {
+				LruNode next = node.getLruNext();
+				node.resetLruNode();
+				node = next;
+			}
+		}
 		size = 0;
-		head = null;
-		tail = null;
+		link(headTail, headTail);
 	}
 
 	public int size() {
@@ -176,5 +127,43 @@ public final class LruList<E extends LruNode> {
 
 	public boolean hasSpace() {
 		return size < capacity;
+	}
+	
+	private void link(LruNode first, LruNode second) {
+		first.setLruNext(second);
+		second.setLruPrev(first);
+	}
+
+	static final class HeadTailNode implements LruNode {
+
+		private LruNode next;
+
+		private LruNode prev;
+
+		@Override
+		public void setLruNext(LruNode lruNext) {
+			this.next = lruNext;
+		}
+
+		@Override
+		public void setLruPrev(LruNode lruPrev) {
+			this.prev = lruPrev;
+		}
+
+		@Override
+		public LruNode getLruNext() {
+			return next;
+		}
+
+		@Override
+		public LruNode getLruPrev() {
+			return prev;
+		}
+
+		@Override
+		public void resetLruNode() {
+			next = null;
+			prev = null;
+		}
 	}
 }
