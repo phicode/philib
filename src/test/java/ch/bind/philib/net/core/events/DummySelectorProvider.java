@@ -36,7 +36,7 @@ import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class DummySelectorProvider extends SelectorProvider {
+public final class DummySelectorProvider extends SelectorProvider {
 
 	private final AtomicReference<AbstractSelector> nextOpenSelector = new AtomicReference<AbstractSelector>();
 	private final AtomicReference<IOException> nextOpenSelectorException = new AtomicReference<IOException>();

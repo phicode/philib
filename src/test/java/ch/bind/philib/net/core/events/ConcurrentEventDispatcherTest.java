@@ -29,7 +29,6 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
-import java.nio.channels.SelectableChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -47,8 +46,8 @@ public class ConcurrentEventDispatcherTest {
 		disps[1] = new RecordingEventDispatcher();
 		ConcurrentEventDispatcher concDisp = new ConcurrentEventDispatcher(disps, ScaleStrategy.ROUND_ROBIN);
 
-		concDisp.register(new RecordingEventHandler(0), 0);
-		concDisp.register(new RecordingEventHandler(0), 0);
+		concDisp.register(new DummyEventHandler(0), 0);
+		concDisp.register(new DummyEventHandler(0), 0);
 		concDisp.close();
 	}
 
@@ -58,7 +57,7 @@ public class ConcurrentEventDispatcherTest {
 		disps[0] = new RecordingEventDispatcher();
 		ConcurrentEventDispatcher concDisp = new ConcurrentEventDispatcher(disps, ScaleStrategy.ROUND_ROBIN);
 
-		RecordingEventHandler eh = new RecordingEventHandler(0);
+		DummyEventHandler eh = new DummyEventHandler(0);
 		concDisp.register(eh, 0);
 		concDisp.unregister(eh);
 
@@ -79,7 +78,7 @@ public class ConcurrentEventDispatcherTest {
 		disps[0] = new RecordingEventDispatcher();
 		ConcurrentEventDispatcher concDisp = new ConcurrentEventDispatcher(disps, ScaleStrategy.ROUND_ROBIN);
 
-		RecordingEventHandler eh = new RecordingEventHandler(0);
+		DummyEventHandler eh = new DummyEventHandler(0);
 		concDisp.register(eh, 0);
 		concDisp.setTimeout(eh, 123);
 		concDisp.unsetTimeout(eh);
@@ -103,7 +102,7 @@ public class ConcurrentEventDispatcherTest {
 		RecordingEventDispatcher[] disps = new RecordingEventDispatcher[1];
 		disps[0] = new RecordingEventDispatcher();
 		ConcurrentEventDispatcher concDisp = new ConcurrentEventDispatcher(disps, ScaleStrategy.ROUND_ROBIN);
-		RecordingEventHandler eh = new RecordingEventHandler(45);
+		DummyEventHandler eh = new DummyEventHandler(45);
 		concDisp.unsetTimeout(eh);
 		concDisp.close();
 	}
@@ -115,8 +114,8 @@ public class ConcurrentEventDispatcherTest {
 		disps[1] = new RecordingEventDispatcher();
 		ConcurrentEventDispatcher concDisp = new ConcurrentEventDispatcher(disps, ScaleStrategy.ROUND_ROBIN);
 
-		concDisp.register(new RecordingEventHandler(0), 0);
-		concDisp.register(new RecordingEventHandler(1), 0);
+		concDisp.register(new DummyEventHandler(0), 0);
+		concDisp.register(new DummyEventHandler(1), 0);
 
 		concDisp.close();
 
@@ -136,7 +135,7 @@ public class ConcurrentEventDispatcherTest {
 
 		int[] exp = { 0, 0, 0, 0 };
 		for (int i = 0; i < 1000; i++) {
-			concDisp.register(new RecordingEventHandler(i), 0);
+			concDisp.register(new DummyEventHandler(i), 0);
 			exp[i % 4]++;
 			for (int x = 0; x < 4; x++) {
 				assertEquals(disps[x].registerCalls, exp[x]);
@@ -162,7 +161,7 @@ public class ConcurrentEventDispatcherTest {
 			for (int x = 0; x < 4; x++) {
 				disps[x].loadAvg = (x == which) ? 1 : 2;
 			}
-			concDisp.register(new RecordingEventHandler(i), 0);
+			concDisp.register(new DummyEventHandler(i), 0);
 			exp[which]++;
 			for (int x = 0; x < 4; x++) {
 				assertEquals(disps[x].registerCalls, exp[x]);
@@ -182,10 +181,10 @@ public class ConcurrentEventDispatcherTest {
 		disps[3] = new RecordingEventDispatcher();
 		ConcurrentEventDispatcher concDisp = new ConcurrentEventDispatcher(disps, ScaleStrategy.LEAST_CONNECTIONS);
 
-		RecordingEventHandler[] handlers = new RecordingEventHandler[400];
+		DummyEventHandler[] handlers = new DummyEventHandler[400];
 		// register 400 -> 100 on each dispatcher
 		for (int i = 0; i < 400; i++) {
-			handlers[i] = new RecordingEventHandler(i);
+			handlers[i] = new DummyEventHandler(i);
 			concDisp.register(handlers[i], 0);
 		}
 
@@ -225,48 +224,6 @@ public class ConcurrentEventDispatcherTest {
 		assertEquals(concDisp.getNumEventHandlers(), 400);
 
 		concDisp.close();
-	}
-
-	public static class RecordingEventHandler implements EventHandler {
-
-		public final long id;
-
-		public int closeCalls;
-
-		public int handleOpsCalls;
-
-		public int handleTimeoutCalls;
-
-		public RecordingEventHandler(long id) {
-			this.id = id;
-		}
-
-		@Override
-		public void close() throws IOException {
-			closeCalls++;
-		}
-
-		@Override
-		public SelectableChannel getChannel() {
-			return null;
-		}
-
-		@Override
-		public int handleOps(int ops) throws IOException {
-			handleOpsCalls++;
-			return 0;
-		}
-
-		@Override
-		public boolean handleTimeout() throws IOException {
-			handleTimeoutCalls++;
-			return true;
-		}
-
-		@Override
-		public long getEventHandlerId() {
-			return id;
-		}
 	}
 
 	public static class RecordingEventDispatcher implements EventDispatcher {

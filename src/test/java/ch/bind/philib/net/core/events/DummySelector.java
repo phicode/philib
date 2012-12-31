@@ -35,7 +35,7 @@ import java.util.Set;
 
 import ch.bind.philib.lang.ServiceState;
 
-public class DummySelector extends AbstractSelector {
+public final class DummySelector extends AbstractSelector {
 
 	private boolean doWakeup = false;
 
