@@ -3,9 +3,13 @@ package ch.bind.philib.net.core.events;
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 
+import ch.bind.philib.validation.Validation;
+
 public final class DummyEventHandler implements EventHandler {
 
 	public final long id;
+
+	private final SelectableChannel channel;
 
 	public int closeCalls;
 
@@ -14,7 +18,12 @@ public final class DummyEventHandler implements EventHandler {
 	public int handleTimeoutCalls;
 
 	public DummyEventHandler(long id) {
+		this(id, null);
+	}
+
+	public DummyEventHandler(long id, SelectableChannel channel) {
 		this.id = id;
+		this.channel = channel;
 	}
 
 	@Override
@@ -24,7 +33,8 @@ public final class DummyEventHandler implements EventHandler {
 
 	@Override
 	public SelectableChannel getChannel() {
-		throw new AssertionError();
+		Validation.notNull(channel);
+		return channel;
 	}
 
 	@Override

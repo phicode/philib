@@ -59,7 +59,7 @@ public class SimpleEventDispatcherTest {
 		assertFalse(dispatcher.isOpen());
 	}
 
-	@Test(timeOut = 1000, expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "unable to register an event-handler with a closed event-dispatcher")
+	@Test(timeOut = 1000, expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "unable to register an event-handler on a unopen event-dispatcher")
 	public void noRegistersAfterClose() throws Exception {
 		DummySelectorProvider selectorProvider = new DummySelectorProvider();
 		DummySelector selector = new DummySelector(selectorProvider);
@@ -69,9 +69,32 @@ public class SimpleEventDispatcherTest {
 		dispatcher.close();
 
 		assertFalse(dispatcher.isOpen());
-		
-		EventHandler handler = new DummyEventHandler(0);
+
+		EventHandler handler = new DummyEventHandler(0, new DummySelectableChannel(selectorProvider));
 		dispatcher.register(handler, 0);
+	}
+
+	@Test(timeOut = 1000)
+	public void dispatchEvents() throws Exception {
+		DummySelectorProvider selectorProvider = new DummySelectorProvider();
+		DummySelector selector = new DummySelector(selectorProvider);
+		selectorProvider.setNextOpenSelector(selector);
+
+		SimpleEventDispatcher dispatcher = SimpleEventDispatcher.open(selectorProvider, false);
+
+		DummySelectableChannel channel = new DummySelectableChannel(selectorProvider);
+		DummyEventHandler handler = new DummyEventHandler(0, channel);
+		dispatcher.register(handler, 1);
+
+//		while (selector.registerCalls < 1) {
+//			Thread.yield();
+//		}
+
+		dispatcher.close();
+
+		assertFalse(dispatcher.isOpen());
+		assertEquals(handler.closeCalls, 1);
+		assertEquals(dispatcher.getNumEventHandlers(), 0);
 	}
 
 	@Test(expectedExceptions = SelectorCreationException.class)

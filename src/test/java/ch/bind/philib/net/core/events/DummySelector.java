@@ -44,6 +44,8 @@ public final class DummySelector extends AbstractSelector {
 	private Set<SelectionKey> keys = new HashSet<SelectionKey>();
 
 	private Set<SelectionKey> selectedKeys = new HashSet<SelectionKey>();
+	
+	public int registerCalls;
 
 	protected DummySelector(SelectorProvider provider) {
 		super(provider);
@@ -60,6 +62,7 @@ public final class DummySelector extends AbstractSelector {
 
 	@Override
 	protected SelectionKey register(AbstractSelectableChannel ch, int ops, Object att) {
+		registerCalls++;
 		throw new AssertionError("TODO, not yet implemented");
 	}
 

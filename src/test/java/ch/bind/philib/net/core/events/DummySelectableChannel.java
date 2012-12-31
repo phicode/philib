@@ -57,7 +57,7 @@ public class DummySelectableChannel extends SelectableChannel {
 
 		SelectionKey key = keys.get(sel);
 		if (key == null) {
-			key = new DummySelectionKey();
+//			key = new DummySelectionKey();
 			keys.put(sel, key);
 		}
 		key.interestOps(ops);

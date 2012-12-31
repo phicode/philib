@@ -26,7 +26,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
-import java.net.ProtocolFamily;
 import java.nio.channels.Channel;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.Pipe;
@@ -89,11 +88,5 @@ public final class DummySelectorProvider extends SelectorProvider {
 
 	public DatagramChannel openDatagramChannel(Object family) {
 		throw new AssertionError();
-	}
-
-	@Override
-	public DatagramChannel openDatagramChannel(ProtocolFamily family) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

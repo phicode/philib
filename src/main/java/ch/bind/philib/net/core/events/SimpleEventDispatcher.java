@@ -218,6 +218,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	@Override
 	public void register(EventHandler eventHandler, int ops) {
+		if (!serviceState.isOpen()) {
+			throw new IllegalStateException("unable to register an event-handler on a unopen event-dispatcher");
+		}
 		SelectableChannel channel = eventHandler.getChannel();
 		SelectionKey key = channel.keyFor(selector);
 		if (key != null) {
@@ -230,6 +233,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	@Override
 	public void setTimeout(EventHandler eventHandler, long timeout) {
+		if (!serviceState.isOpen()) {
+			throw new IllegalStateException("unable to change timeouts for an event-handler on a closed event-dispatcher");
+		}
 		long handlerId = eventHandler.getEventHandlerId();
 		upcomingTimeouts.add(timeout, handlerId, eventHandler);
 		wakeup();
@@ -270,6 +276,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	@Override
 	public void unregister(EventHandler eventHandler) {
+		if (serviceState.isClosed()) {
+			throw new IllegalStateException("unable to unregister an event-handler on a closed event-dispatcher");
+		}
 		SelectableChannel channel = eventHandler.getChannel();
 		SelectionKey key = channel.keyFor(selector);
 		if (key != null) {
@@ -294,6 +303,9 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	@Override
 	public int getRegisteredOps(EventHandler eventHandler) {
+		if (!serviceState.isOpen()) {
+			throw new IllegalStateException();
+		}
 		SelectionKey selectionKey = eventHandler.getChannel().keyFor(selector);
 		if (selectionKey != null) {
 			return selectionKey.interestOps();
