@@ -22,6 +22,8 @@
 
 package ch.bind.philib.pool.buffer;
 
+import static org.testng.Assert.assertEquals;
+
 import org.testng.annotations.Test;
 
 import ch.bind.philib.pool.Pool;
@@ -40,5 +42,15 @@ public class ConcurrentPoolTest extends BufferPoolTestBase<byte[]> {
 	@Override
 	byte[] createBuffer(int bufferSize) {
 		return new byte[bufferSize];
+	}
+
+	@Test
+	public void atLeastTwoConcurrency() {
+		ByteArrayManager manager = new ByteArrayManager(1024);
+		int maxEntries = 8;
+		for (int i = -10; i < 2; i++) {
+			ConcurrentPool<byte[]> pool = new ConcurrentPool<byte[]>(manager, maxEntries, true, 0);
+			assertEquals(pool.getConcurrency(), 2);
+		}
 	}
 }

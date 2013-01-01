@@ -22,7 +22,7 @@
 
 package ch.bind.philib.pool.buffer;
 
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
 import ch.bind.philib.pool.Pool;
+import ch.bind.philib.pool.PoolStats;
 import ch.bind.philib.validation.Validation;
 
 @Test(singleThreaded = true)
@@ -93,6 +94,51 @@ public abstract class BufferPoolTestBase<T> {
 		T b2 = pool.take();
 
 		assertTrue(b != b2);
+	}
+
+	@Test
+	public void clear() {
+		int maxEntries = 10;
+		int bufferSize = 8192;
+		Pool<T> pool = createPool(bufferSize, maxEntries);
+		for (int i = 0; i < maxEntries * 2; i++) {
+			pool.recycle(createBuffer(bufferSize));
+		}
+		assertTrue(pool.getNumPooled() > 0);
+
+		pool.clear();
+
+		assertEquals(pool.getNumPooled(), 0);
+	}
+	
+	@Test
+	public void stats() {
+		int maxEntries = 10;
+		int bufferSize = 8192;
+		Pool<T> pool = createPool(bufferSize, maxEntries);
+		PoolStats stats = pool.getPoolStats();
+
+		assertEquals(stats.getCreates(),0);
+		assertEquals(stats.getRecycled(),0);
+		assertEquals(stats.getReleased(),0);
+		assertEquals(stats.getTakes(),0);
+		
+		String strStatsA = stats.toString();
+		assertNotNull(strStatsA);
+		
+		assertNotNull(pool.take());
+		
+		String strStatsB = stats.toString();
+		assertNotNull(strStatsB);
+		assertNotEquals(strStatsA, strStatsB);
+		strStatsA = strStatsB;
+
+		pool.recycle(createBuffer(bufferSize));
+		
+		strStatsB = stats.toString();
+		assertNotNull(strStatsB);
+		assertNotEquals(strStatsA, strStatsB);
+		strStatsA = strStatsB;
 	}
 
 	@Test

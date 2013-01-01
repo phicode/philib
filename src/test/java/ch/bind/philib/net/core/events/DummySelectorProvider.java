@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class DummySelectorProvider extends SelectorProvider {
 
 	private final AtomicReference<AbstractSelector> nextOpenSelector = new AtomicReference<AbstractSelector>();
+	
 	private final AtomicReference<IOException> nextOpenSelectorException = new AtomicReference<IOException>();
 
 	public void setNextOpenSelector(AbstractSelector selector) {
@@ -83,10 +84,6 @@ public final class DummySelectorProvider extends SelectorProvider {
 
 	@Override
 	public Channel inheritedChannel() throws IOException {
-		throw new AssertionError();
-	}
-
-	public DatagramChannel openDatagramChannel(Object family) {
 		throw new AssertionError();
 	}
 }

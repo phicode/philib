@@ -96,6 +96,10 @@ public final class ConcurrentPool<T> implements Pool<T> {
 		poolByThread.get().clear();
 	}
 
+	public int getConcurrency() {
+		return pools.length;
+	}
+
 	PoolBase<T> bindToThread() {
 		// round robin distribution in the order the
 		// threads first access the pool

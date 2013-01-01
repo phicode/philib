@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.manager.ObjectManager;
 
-public class ObjectCacheTest {
+public class ObjectPoolTest {
 
 	@Test
 	public void halfRecycleable() {
