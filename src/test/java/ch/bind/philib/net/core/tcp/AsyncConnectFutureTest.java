@@ -94,7 +94,7 @@ public class AsyncConnectFutureTest {
 			@Override
 			public void run() {
 				TestUtil.sleepOrFail(100);
-				future.cancel(true);
+				assertTrue(future.cancel(true));
 			}
 		}).start();
 
@@ -113,7 +113,7 @@ public class AsyncConnectFutureTest {
 	public void noCancelOnDone() throws Exception {
 		final AsyncConnectFuture<Connection> future = new AsyncConnectFuture<Connection>(conn);
 		future.setFinishedOk();
-		future.cancel(true);
+		assertFalse(future.cancel(true));
 		assertTrue(future.get() == conn);
 		assertTrue(future.isDone());
 		assertFalse(future.isCancelled());

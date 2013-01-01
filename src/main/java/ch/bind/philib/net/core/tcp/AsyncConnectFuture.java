@@ -75,8 +75,8 @@ public final class AsyncConnectFuture<T extends Connection> implements Future<T>
 		SafeCloseUtil.close(connection);
 		synchronized (this) {
 			notifyAll();
+			return true;
 		}
-		return true;
 	}
 
 	@Override
