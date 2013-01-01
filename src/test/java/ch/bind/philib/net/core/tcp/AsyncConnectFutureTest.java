@@ -103,8 +103,8 @@ public class AsyncConnectFutureTest {
 			fail();
 		} catch (Exception e) {
 			assertTrue(e instanceof CancellationException);
-			Mockito.verify(conn).close();
 		}
+		Mockito.verify(conn).close();
 		assertTrue(future.isDone());
 		assertTrue(future.isCancelled());
 	}
