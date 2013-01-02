@@ -30,8 +30,6 @@ public final class LruList<E extends LruNode> {
 
 	private final HeadTailNode headTail = new HeadTailNode();
 
-//	private final HeadTailNode tail = new HeadTailNode();
-
 	private int size;
 
 	public LruList(int capacity) {
