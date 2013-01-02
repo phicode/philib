@@ -40,6 +40,11 @@ public class StagedCacheTest extends CacheTestBase {
 	}
 
 	@Override
+	<K, V> Cache<K, V> create(int capacity, Cloner<V> valueCloner) {
+		return new StagedCache<K, V>(capacity, valueCloner);
+	}
+
+	@Override
 	int getMinCapacity() {
 		return StagedCache.MIN_CACHE_CAPACITY;
 	}
@@ -52,7 +57,7 @@ public class StagedCacheTest extends CacheTestBase {
 	@Test
 	public void stages() {
 		final int cap = 100000;
-		Cache<Integer, Integer> cache = new StagedCache<Integer, Integer>(cap, 0.5, 2);
+		Cache<Integer, Integer> cache = new StagedCache<Integer, Integer>(cap, null, 0.5, 2);
 
 		add(cache, 0, 50000);
 
@@ -103,7 +108,7 @@ public class StagedCacheTest extends CacheTestBase {
 	@Test
 	public void removeOldEntry() {
 		// 1 entry old gen & 1 young gen
-		Cache<Integer, Integer> cache = new StagedCache<Integer, Integer>(StagedCache.MIN_CACHE_CAPACITY, 0.5, 2);
+		Cache<Integer, Integer> cache = new StagedCache<Integer, Integer>(StagedCache.MIN_CACHE_CAPACITY, null, 0.5, 2);
 		cache.add(1, 1);
 
 		// 'elevate' 1 to old-gen

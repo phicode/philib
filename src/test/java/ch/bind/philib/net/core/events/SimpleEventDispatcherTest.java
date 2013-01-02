@@ -75,7 +75,7 @@ public class SimpleEventDispatcherTest {
 	}
 
 	@Test(timeOut = 1000)
-	public void dispatchEvents() throws Exception {
+	public void registerAndClose() throws Exception {
 		DummySelectorProvider selectorProvider = new DummySelectorProvider();
 		DummySelector selector = new DummySelector(selectorProvider);
 		selectorProvider.setNextOpenSelector(selector);
@@ -83,18 +83,24 @@ public class SimpleEventDispatcherTest {
 		SimpleEventDispatcher dispatcher = SimpleEventDispatcher.open(selectorProvider, false);
 
 		DummySelectableChannel channel = new DummySelectableChannel(selectorProvider);
+		channel.configureBlocking(false);
 		DummyEventHandler handler = new DummyEventHandler(0, channel);
 		dispatcher.register(handler, 1);
 
-//		while (selector.registerCalls < 1) {
-//			Thread.yield();
-//		}
+		while (!channel.isRegistered()) {
+			Thread.sleep(1);
+		}
+		// assertTrue(channel.isRegistered());
+		assertEquals(dispatcher.getNumEventHandlers(), 1);
+		assertEquals(dispatcher.getRegisteredOps(handler), 1);
 
 		dispatcher.close();
 
 		assertFalse(dispatcher.isOpen());
 		assertEquals(handler.closeCalls, 1);
 		assertEquals(dispatcher.getNumEventHandlers(), 0);
+		assertFalse(channel.isRegistered());
+		assertFalse(channel.isOpen());
 	}
 
 	@Test(expectedExceptions = SelectorCreationException.class)

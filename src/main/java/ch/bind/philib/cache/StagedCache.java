@@ -55,25 +55,21 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 
 	private final int capacity;
 
-	private final Cloner<V> cloner;
+	private final Cloner<V> valueCloner;
 
 	public StagedCache() {
 		this(DEFAULT_CACHE_CAPACITY);
 	}
 
 	public StagedCache(int capacity) {
-		this(capacity, DEFAULT_OLD_GEN_RATIO);
+		this(capacity, null);
 	}
 
-	public StagedCache(int capacity, double oldGenRatio) {
-		this(capacity, oldGenRatio, DEFAULT_OLD_GEN_AFTER_HITS);
+	public StagedCache(int capacity, Cloner<V> valueCloner) {
+		this(capacity, valueCloner, DEFAULT_OLD_GEN_RATIO, DEFAULT_OLD_GEN_AFTER_HITS);
 	}
 
-	public StagedCache(int capacity, double oldGenRatio, int oldGenAfterHits) {
-		this(capacity, oldGenRatio, oldGenAfterHits, null);
-	}
-
-	public StagedCache(int capacity, double oldGenRatio, int oldGenAfterHits, Cloner<V> cloner) {
+	public StagedCache(int capacity, Cloner<V> valueCloner, double oldGenRatio, int oldGenAfterHits) {
 		this.capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
 		this.oldGenAfterHits = oldGenAfterHits < 1 ? 1 : oldGenAfterHits;
 		oldGenRatio = Calc.clip(oldGenRatio, MIN_OLD_GEN_RATIO, MAX_OLD_GEN_RATIO);
@@ -82,7 +78,7 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 		this.lruYoungGen = new LruList<StagedCacheEntry<K, V>>(youngCap);
 		this.lruOldGen = new LruList<StagedCacheEntry<K, V>>(oldCap);
 		this.index = new ClusteredHashIndex<K, StagedCacheEntry<K, V>>(capacity);
-		this.cloner = cloner;
+		this.valueCloner = valueCloner;
 	}
 
 	// TODO: remove code duplication
@@ -100,7 +96,8 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 			entry = new StagedCacheEntry<K, V>(key, value);
 			index.add(entry);
 			addYoungGen(entry, false);
-		} else {
+		}
+		else {
 			entry.setValue(value);
 		}
 	}
@@ -124,13 +121,15 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 				entry.resetHits();
 				lruYoungGen.remove(entry);
 				addOldGen(entry);
-			} else {
+			}
+			else {
 				lruYoungGen.moveToHead(entry);
 			}
-		} else {
+		}
+		else {
 			lruOldGen.moveToHead(entry);
 		}
-		return cloner == null ? value : cloner.cloneValue(value);
+		return valueCloner == null ? value : valueCloner.clone(value);
 	}
 
 	@Override
@@ -156,7 +155,8 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 			index.remove(entry);
 			if (entry.isInYoungGen()) {
 				lruYoungGen.remove(entry);
-			} else {
+			}
+			else {
 				lruOldGen.remove(entry);
 			}
 		}
@@ -165,7 +165,8 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	private void addYoungGen(final StagedCacheEntry<K, V> entry, final boolean checkValue) {
 		if (checkValue && entry.getValue() == null) {
 			index.remove(entry);
-		} else {
+		}
+		else {
 			entry.setInYoungGen();
 			StagedCacheEntry<K, V> removed = lruYoungGen.add(entry);
 			if (removed != null) {
@@ -178,7 +179,8 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	private void addOldGen(final StagedCacheEntry<K, V> entry) {
 		if (entry.getValue() == null) {
 			index.remove(entry);
-		} else {
+		}
+		else {
 			entry.setInOldGen();
 			StagedCacheEntry<K, V> removed = lruOldGen.add(entry);
 			if (removed != null) {

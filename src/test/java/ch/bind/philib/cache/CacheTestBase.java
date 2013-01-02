@@ -23,6 +23,7 @@
 package ch.bind.philib.cache;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -49,6 +50,8 @@ public abstract class CacheTestBase {
 	abstract <K, V> Cache<K, V> create();
 
 	abstract <K, V> Cache<K, V> create(int capacity);
+
+	abstract <K, V> Cache<K, V> create(int capacity, Cloner<V> valueCloner);
 
 	abstract int getMinCapacity();
 
@@ -119,6 +122,26 @@ public abstract class CacheTestBase {
 		cache.add("1", null);
 		assertNull(cache.get("1"));
 	}
+
+	@Test
+	public void cloner() {
+		Cache<Integer, Integer> cache = this.<Integer, Integer> create(10, INTEGER_CLONER);
+		Integer one = Integer.valueOf(1);
+		cache.add(one, one);
+		Integer copy = cache.get(one);
+		assertNotNull(copy);
+		assertEquals(one.intValue(), copy.intValue());
+		// different reference
+		assertTrue(one != copy);
+	}
+
+	private static final Cloner<Integer> INTEGER_CLONER = new Cloner<Integer>() {
+		@Override
+		public Integer clone(Integer value) {
+			assertNotNull(value);
+			return new Integer(value.intValue());
+		}
+	};
 
 	@Test
 	public void softReferences() {

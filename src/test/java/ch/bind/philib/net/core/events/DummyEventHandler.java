@@ -29,6 +29,9 @@ public final class DummyEventHandler implements EventHandler {
 	@Override
 	public void close() throws IOException {
 		closeCalls++;
+		if (channel != null) {
+			channel.close();
+		}
 	}
 
 	@Override

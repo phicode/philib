@@ -36,7 +36,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 
 	private final ClusteredIndex<K, SimpleCacheEntry<K, V>> index;
 
-	private final Cloner<V> cloner;
+	private final Cloner<V> valueCloner;
 
 	public SimpleCache() {
 		this(DEFAULT_CACHE_CAPACITY);
@@ -46,11 +46,11 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 		this(capacity, null);
 	}
 
-	public SimpleCache(int capacity, Cloner<V> cloner) {
+	public SimpleCache(int capacity, Cloner<V> valueCloner) {
 		capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
 		this.lru = new LruList<SimpleCacheEntry<K, V>>(capacity);
 		this.index = new ClusteredHashIndex<K, SimpleCacheEntry<K, V>>(capacity);
-		this.cloner = cloner;
+		this.valueCloner = valueCloner;
 	}
 
 	@Override
@@ -70,7 +70,8 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 			if (removed != null) {
 				index.remove(removed);
 			}
-		} else {
+		}
+		else {
 			entry.setValue(value);
 		}
 	}
@@ -89,7 +90,7 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 			return null;
 		}
 		lru.moveToHead(entry);
-		return cloner == null ? value : cloner.cloneValue(value);
+		return valueCloner == null ? value : valueCloner.clone(value);
 	}
 
 	@Override

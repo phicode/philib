@@ -27,10 +27,12 @@ import java.io.InterruptedIOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelectableChannel;
+import java.nio.channels.spi.AbstractSelectionKey;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import ch.bind.philib.lang.ServiceState;
@@ -41,11 +43,11 @@ public final class DummySelector extends AbstractSelector {
 
 	private ServiceState state = new ServiceState();
 
-	private Set<SelectionKey> keys = new HashSet<SelectionKey>();
+	private Map<AbstractSelectableChannel, AbstractSelectionKey> keys = new HashMap<AbstractSelectableChannel, AbstractSelectionKey>();
 
 	private Set<SelectionKey> selectedKeys = new HashSet<SelectionKey>();
-	
-	public int registerCalls;
+
+	public volatile int registerCalls;
 
 	protected DummySelector(SelectorProvider provider) {
 		super(provider);
@@ -54,6 +56,11 @@ public final class DummySelector extends AbstractSelector {
 	@Override
 	protected void implCloseSelector() throws IOException {
 		try {
+			for (AbstractSelectionKey key : keys.values()) {
+				super.deregister(key);
+			}
+			keys.clear();
+			selectedKeys.clear();
 			state.setClosed();
 		} catch (IllegalStateException e) {
 			throw new IOException("implCloseSelector failed", e);
@@ -61,14 +68,22 @@ public final class DummySelector extends AbstractSelector {
 	}
 
 	@Override
-	protected SelectionKey register(AbstractSelectableChannel ch, int ops, Object att) {
+	protected synchronized SelectionKey register(AbstractSelectableChannel ch, int ops, Object att) {
 		registerCalls++;
-		throw new AssertionError("TODO, not yet implemented");
+		AbstractSelectionKey key = keys.get(ch);
+		if (key != null) {
+			return key;
+		}
+		key = new DummySelectionKey(ch, this);
+		key.interestOps(ops);
+		key.attach(att);
+		keys.put(ch, key);
+		return key;
 	}
 
 	@Override
-	public Set<SelectionKey> keys() {
-		return Collections.unmodifiableSet(keys);
+	public synchronized Set<SelectionKey> keys() {
+		return new HashSet<SelectionKey>(keys.values());
 	}
 
 	@Override
@@ -88,7 +103,7 @@ public final class DummySelector extends AbstractSelector {
 		try {
 			long now = System.currentTimeMillis();
 			long until = now + timeout;
-			while (!doWakeup && selectedKeys.isEmpty() && now < until) {
+			while (!doWakeup && super.cancelledKeys().isEmpty() && selectedKeys.isEmpty() && now < until) {
 				long remaining = until - now;
 				try {
 					wait(remaining);
@@ -114,5 +129,10 @@ public final class DummySelector extends AbstractSelector {
 		doWakeup = true;
 		notifyAll();
 		return this;
+	}
+
+	public synchronized void addReadySelectionKey(SelectionKey selectionKey) {
+		selectedKeys.add(selectionKey);
+		notifyAll();
 	}
 }

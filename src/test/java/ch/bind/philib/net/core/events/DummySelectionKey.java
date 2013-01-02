@@ -3,16 +3,21 @@ package ch.bind.philib.net.core.events;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.spi.AbstractSelectionKey;
 
 import ch.bind.philib.validation.Validation;
 
-public class DummySelectionKey extends SelectionKey {
+public class DummySelectionKey extends AbstractSelectionKey {
 
 	private final SelectableChannel channel;
 
-	private final Selector selector;
+	private final DummySelector selector;
 
-	public DummySelectionKey(SelectableChannel channel, Selector selector) {
+	private int interestedOps;
+
+	private int readyOps;
+
+	public DummySelectionKey(SelectableChannel channel, DummySelector selector) {
 		Validation.notNull(channel);
 		Validation.notNull(selector);
 		this.channel = channel;
@@ -30,32 +35,18 @@ public class DummySelectionKey extends SelectionKey {
 	}
 
 	@Override
-	public boolean isValid() {
-		// TODO Auto-generated method stub
-		return false;
+	public synchronized int interestOps() {
+		return interestedOps;
 	}
 
 	@Override
-	public void cancel() {
-		// TODO Auto-generated method stub
-
+	public synchronized SelectionKey interestOps(int ops) {
+		this.interestedOps = ops;
+		return this;
 	}
 
 	@Override
-	public int interestOps() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public SelectionKey interestOps(int ops) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int readyOps() {
-		// TODO Auto-generated method stub
-		return 0;
+	public synchronized int readyOps() {
+		return readyOps;
 	}
 }

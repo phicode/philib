@@ -40,6 +40,11 @@ public class SimpleCacheTest extends CacheTestBase {
 	}
 
 	@Override
+	<K, V> Cache<K, V> create(int capacity, Cloner<V> valueCloner) {
+		return new SimpleCache<K, V>(capacity, valueCloner);
+	}
+
+	@Override
 	int getMinCapacity() {
 		return SimpleCache.MIN_CACHE_CAPACITY;
 	}

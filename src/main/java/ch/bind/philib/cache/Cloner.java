@@ -22,8 +22,8 @@
 
 package ch.bind.philib.cache;
 
-public interface Cloner<V> {
+public interface Cloner<T> {
 
-	V cloneValue(V value);
+	T clone(T obj);
 
 }

@@ -132,7 +132,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			long msUntilNextTimeout = upcomingTimeouts.getTimeToNextTimeout();
 			if (msUntilNextTimeout <= 0) {
 				return selector.selectNow();
-			} else {
+			}
+			else {
 				long selectTimeout = Math.min(msUntilNextTimeout, 10000L);
 				return selector.select(selectTimeout);
 			}
@@ -163,13 +164,11 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			}
 
 			for (SelectionKey key : selector.keys()) {
-				if (key.isValid()) {
-					Object att = key.attachment();
-					if (att instanceof EventHandler) {
-						EventHandler e = (EventHandler) att;
-						key.cancel();
-						SafeCloseUtil.close(e, LOG);
-					}
+				Object att = key.attachment();
+				if (att instanceof EventHandler) {
+					EventHandler e = (EventHandler) att;
+					key.cancel();
+					SafeCloseUtil.close(e, LOG);
 				}
 			}
 
@@ -180,6 +179,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			}
 
 			upcomingTimeouts.clear();
+
+			numHandlers = 0;
 
 			serviceState.setClosed();
 		}
@@ -196,7 +197,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		}
 		if (key.isValid()) {
 			handleEvent(eventHandler, key, key.readyOps());
-		} else {
+		}
+		else {
 			SafeCloseUtil.close(eventHandler, LOG);
 		}
 	}
@@ -217,7 +219,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	}
 
 	@Override
-	public void register(EventHandler eventHandler, int ops) {
+	public void register(final EventHandler eventHandler, final int ops) {
 		if (!serviceState.isOpen()) {
 			throw new IllegalStateException("unable to register an event-handler on a unopen event-dispatcher");
 		}
@@ -225,14 +227,15 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		SelectionKey key = channel.keyFor(selector);
 		if (key != null) {
 			key.interestOps(ops);
-		} else {
+		}
+		else {
 			newRegistrations.add(new NewRegistration(eventHandler, ops));
 		}
 		wakeup();
 	}
 
 	@Override
-	public void setTimeout(EventHandler eventHandler, long timeout) {
+	public void setTimeout(final EventHandler eventHandler, final long timeout) {
 		if (!serviceState.isOpen()) {
 			throw new IllegalStateException("unable to change timeouts for an event-handler on a closed event-dispatcher");
 		}
@@ -242,7 +245,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	}
 
 	@Override
-	public void unsetTimeout(EventHandler eventHandler) {
+	public void unsetTimeout(final EventHandler eventHandler) {
 		long handlerId = eventHandler.getEventHandlerId();
 		upcomingTimeouts.remove(handlerId);
 		// no wakeup needed
@@ -256,7 +259,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			SelectionKey key = channel.keyFor(selector);
 			if (key != null) {
 				key.interestOps(reg.getOps());
-			} else {
+			}
+			else {
 				try {
 					int ops = reg.getOps();
 					channel.register(selector, ops, eventHandler);
@@ -275,7 +279,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	}
 
 	@Override
-	public void unregister(EventHandler eventHandler) {
+	public void unregister(final EventHandler eventHandler) {
 		if (serviceState.isClosed()) {
 			throw new IllegalStateException("unable to unregister an event-handler on a closed event-dispatcher");
 		}
@@ -286,7 +290,8 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			key.attach(null);
 			upcomingTimeouts.remove(eventHandler.getEventHandlerId());
 			wakeup();
-		} else {
+		}
+		else {
 			// handle event-handlers which unregister before they were added to
 			// the selector
 
@@ -302,13 +307,13 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 	}
 
 	@Override
-	public int getRegisteredOps(EventHandler eventHandler) {
+	public int getRegisteredOps(final EventHandler eventHandler) {
 		if (!serviceState.isOpen()) {
 			throw new IllegalStateException();
 		}
-		SelectionKey selectionKey = eventHandler.getChannel().keyFor(selector);
-		if (selectionKey != null) {
-			return selectionKey.interestOps();
+		SelectionKey key = eventHandler.getChannel().keyFor(selector);
+		if (key != null) {
+			return key.interestOps();
 		}
 		return 0;
 	}
@@ -368,7 +373,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		}
 	}
 
-	private void handleTimeout(EventHandler handler) {
+	private void handleTimeout(final EventHandler handler) {
 		try {
 			boolean keepRunning = handler.handleTimeout();
 			if (!keepRunning) {
