@@ -11,24 +11,34 @@ public final class DummyEventHandler implements EventHandler {
 
 	private final SelectableChannel channel;
 
+	private final EventDispatcher dispatcher;
+
 	public int closeCalls;
 
 	public int handleOpsCalls;
 
 	public int handleTimeoutCalls;
 
+	public volatile int handleOpsRetval;
+
+	public volatile int lastHandleOps;
+
 	public DummyEventHandler(long id) {
-		this(id, null);
+		this(id, null, null);
 	}
 
-	public DummyEventHandler(long id, SelectableChannel channel) {
+	public DummyEventHandler(long id, SelectableChannel channel, EventDispatcher dispatcher) {
 		this.id = id;
 		this.channel = channel;
+		this.dispatcher = dispatcher;
 	}
 
 	@Override
 	public void close() throws IOException {
 		closeCalls++;
+		if (dispatcher != null) {
+			dispatcher.unregister(this);
+		}
 		if (channel != null) {
 			channel.close();
 		}
@@ -43,7 +53,8 @@ public final class DummyEventHandler implements EventHandler {
 	@Override
 	public int handleOps(int ops) throws IOException {
 		handleOpsCalls++;
-		return 0;
+		lastHandleOps = ops;
+		return handleOpsRetval;
 	}
 
 	@Override

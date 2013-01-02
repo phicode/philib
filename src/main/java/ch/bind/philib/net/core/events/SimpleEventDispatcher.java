@@ -167,7 +167,6 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 				Object att = key.attachment();
 				if (att instanceof EventHandler) {
 					EventHandler e = (EventHandler) att;
-					key.cancel();
 					SafeCloseUtil.close(e, LOG);
 				}
 			}

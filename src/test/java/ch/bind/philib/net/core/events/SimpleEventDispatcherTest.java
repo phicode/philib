@@ -24,9 +24,11 @@ package ch.bind.philib.net.core.events;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
+import java.nio.channels.SelectionKey;
 
 import org.testng.annotations.Test;
 
@@ -70,7 +72,7 @@ public class SimpleEventDispatcherTest {
 
 		assertFalse(dispatcher.isOpen());
 
-		EventHandler handler = new DummyEventHandler(0, new DummySelectableChannel(selectorProvider));
+		EventHandler handler = new DummyEventHandler(0, new DummySelectableChannel(selectorProvider), dispatcher);
 		dispatcher.register(handler, 0);
 	}
 
@@ -84,20 +86,70 @@ public class SimpleEventDispatcherTest {
 
 		DummySelectableChannel channel = new DummySelectableChannel(selectorProvider);
 		channel.configureBlocking(false);
-		DummyEventHandler handler = new DummyEventHandler(0, channel);
+		DummyEventHandler handler = new DummyEventHandler(0, channel, dispatcher);
 		dispatcher.register(handler, 1);
 
-		while (!channel.isRegistered()) {
-			Thread.sleep(1);
+		while (!channel.isRegistered() || dispatcher.getNumEventHandlers() < 1) {
+			Thread.yield();
 		}
 		// assertTrue(channel.isRegistered());
 		assertEquals(dispatcher.getNumEventHandlers(), 1);
 		assertEquals(dispatcher.getRegisteredOps(handler), 1);
+		assertTrue(channel.isRegistered());
+		assertTrue(channel.isOpen());
 
 		dispatcher.close();
 
 		assertFalse(dispatcher.isOpen());
 		assertEquals(handler.closeCalls, 1);
+		assertEquals(dispatcher.getNumEventHandlers(), 0);
+		assertFalse(channel.isRegistered());
+		assertFalse(channel.isOpen());
+	}
+
+	@Test(timeOut = 1000)
+	public void registerEventUnregisterClose() throws Exception {
+		DummySelectorProvider selectorProvider = new DummySelectorProvider();
+		DummySelector selector = new DummySelector(selectorProvider);
+		selectorProvider.setNextOpenSelector(selector);
+
+		SimpleEventDispatcher dispatcher = SimpleEventDispatcher.open(selectorProvider, false);
+
+		DummySelectableChannel channel = new DummySelectableChannel(selectorProvider);
+		channel.configureBlocking(false);
+		DummyEventHandler handler = new DummyEventHandler(0, channel, dispatcher);
+		dispatcher.register(handler, 1);
+
+		while (!channel.isRegistered() || dispatcher.getNumEventHandlers() < 1) {
+			Thread.yield();
+		}
+		assertEquals(dispatcher.getNumEventHandlers(), 1);
+		assertEquals(dispatcher.getRegisteredOps(handler), 1);
+		SelectionKey k = channel.keyFor(selector);
+		assertNotNull(k);
+		DummySelectionKey key = (DummySelectionKey) k;
+
+		key.setReadyOps(3);
+		handler.handleOpsRetval = 2;
+
+		assertEquals(handler.handleOpsCalls, 0);
+		selector.addReadySelectionKey(channel.keyFor(selector));
+		while (handler.handleOpsCalls < 1) {
+			Thread.yield();
+		}
+		assertEquals(handler.handleOpsCalls, 1);
+		assertEquals(handler.lastHandleOps, 3);
+		assertEquals(dispatcher.getRegisteredOps(handler), 2);
+
+		handler.close();
+
+		while (channel.isRegistered()) {
+			Thread.yield();
+		}
+
+		dispatcher.close();
+
+		assertFalse(dispatcher.isOpen());
 		assertEquals(dispatcher.getNumEventHandlers(), 0);
 		assertFalse(channel.isRegistered());
 		assertFalse(channel.isOpen());

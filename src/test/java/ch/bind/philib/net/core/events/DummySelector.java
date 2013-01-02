@@ -103,7 +103,8 @@ public final class DummySelector extends AbstractSelector {
 		try {
 			long now = System.currentTimeMillis();
 			long until = now + timeout;
-			while (!doWakeup && super.cancelledKeys().isEmpty() && selectedKeys.isEmpty() && now < until) {
+			final Set<SelectionKey> cancelled = cancelledKeys();
+			while (!doWakeup && cancelled.isEmpty() && selectedKeys.isEmpty() && now < until) {
 				long remaining = until - now;
 				try {
 					wait(remaining);
@@ -113,6 +114,13 @@ public final class DummySelector extends AbstractSelector {
 				now = System.currentTimeMillis();
 			}
 			doWakeup = false;
+			synchronized (cancelled) {
+				for (SelectionKey c : cancelled) {
+					keys.remove(c.channel());
+					selectedKeys.remove(c.channel());
+					super.deregister((AbstractSelectionKey) c);
+				}
+			}
 			return selectedKeys.size();
 		} finally {
 			end();
