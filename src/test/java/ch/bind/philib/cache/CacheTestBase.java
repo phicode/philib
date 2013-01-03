@@ -177,9 +177,9 @@ public abstract class CacheTestBase {
 		TestUtil.gcAndSleep(100);
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("JVM held on to %d out of %d added elements => %dMiB\n", inMem, cap, inMem / 2);
-			LOG.debug("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
-					t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f);
+			LOG.debug(String.format("JVM held on to %d out of %d added elements => %dMiB\n", inMem, cap, inMem / 2));
+			LOG.debug(String.format("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
+					t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f));
 		}
 	}
 
