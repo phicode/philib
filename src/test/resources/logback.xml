@@ -6,8 +6,8 @@
 		</encoder>
 	</appender>
 
-	<logger name="ch.bind" level="DEBUG" />
-	<logger name="ch.bind.philib.lang.ThreadUtil" level="DEBUG" />
+	<logger name="ch.bind" level="INFO" />
+	<logger name="ch.bind.philib.lang.ThreadUtil" level="ERROR" />
 
 	<root level="WARN">
 		<appender-ref ref="STDOUT" />
