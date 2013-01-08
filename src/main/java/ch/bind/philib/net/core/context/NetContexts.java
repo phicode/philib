@@ -26,7 +26,7 @@ import java.io.IOException;
 
 import ch.bind.philib.net.core.SessionManager;
 import ch.bind.philib.net.core.events.EventDispatcher;
-import ch.bind.philib.net.core.events.SimpleEventDispatcher;
+import ch.bind.philib.net.core.events.BasicEventDispatcher;
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 import ch.bind.philib.validation.Validation;
 
@@ -40,7 +40,7 @@ public final class NetContexts {
 		int bufferSize = NetContextImpl.DEFAULT_BUFFER_SIZE;
 		int maxEntries = NetContextImpl.DEFAULT_NUM_BUFFERS;
 		ByteBufferPool pool = ByteBufferPool.create(bufferSize, maxEntries);
-		EventDispatcher dispatcher = SimpleEventDispatcher.open();
+		EventDispatcher dispatcher = BasicEventDispatcher.open();
 		return new NetContextImpl(sessionManager, pool, dispatcher);
 	}
 }

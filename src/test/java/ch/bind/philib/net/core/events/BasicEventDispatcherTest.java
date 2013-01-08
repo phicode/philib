@@ -32,7 +32,7 @@ import java.nio.channels.SelectionKey;
 
 import org.testng.annotations.Test;
 
-public class SimpleEventDispatcherTest {
+public class BasicEventDispatcherTest {
 
 	// EventDispatcher methods
 	// boolean isOpen();
@@ -50,7 +50,7 @@ public class SimpleEventDispatcherTest {
 		DummySelector selector = new DummySelector(selectorProvider);
 		selectorProvider.setNextOpenSelector(selector);
 
-		SimpleEventDispatcher dispatcher = SimpleEventDispatcher.open(selectorProvider, false);
+		BasicEventDispatcher dispatcher = BasicEventDispatcher.open(selectorProvider, false);
 
 		assertTrue(dispatcher.isOpen());
 		assertEquals(dispatcher.getNumEventHandlers(), 0);
@@ -67,7 +67,7 @@ public class SimpleEventDispatcherTest {
 		DummySelector selector = new DummySelector(selectorProvider);
 		selectorProvider.setNextOpenSelector(selector);
 
-		SimpleEventDispatcher dispatcher = SimpleEventDispatcher.open(selectorProvider, false);
+		BasicEventDispatcher dispatcher = BasicEventDispatcher.open(selectorProvider, false);
 		dispatcher.close();
 
 		assertFalse(dispatcher.isOpen());
@@ -82,7 +82,7 @@ public class SimpleEventDispatcherTest {
 		DummySelector selector = new DummySelector(selectorProvider);
 		selectorProvider.setNextOpenSelector(selector);
 
-		SimpleEventDispatcher dispatcher = SimpleEventDispatcher.open(selectorProvider, false);
+		BasicEventDispatcher dispatcher = BasicEventDispatcher.open(selectorProvider, false);
 
 		DummySelectableChannel channel = new DummySelectableChannel(selectorProvider);
 		channel.configureBlocking(false);
@@ -113,7 +113,7 @@ public class SimpleEventDispatcherTest {
 		DummySelector selector = new DummySelector(selectorProvider);
 		selectorProvider.setNextOpenSelector(selector);
 
-		SimpleEventDispatcher dispatcher = SimpleEventDispatcher.open(selectorProvider, false);
+		BasicEventDispatcher dispatcher = BasicEventDispatcher.open(selectorProvider, false);
 
 		DummySelectableChannel channel = new DummySelectableChannel(selectorProvider);
 		channel.configureBlocking(false);
@@ -159,6 +159,6 @@ public class SimpleEventDispatcherTest {
 	public void selectorProvidersOpenSelectorException() throws Exception {
 		DummySelectorProvider selectorProvider = new DummySelectorProvider();
 		selectorProvider.setNextOpenSelectorException(new IOException());
-		SimpleEventDispatcher.open(selectorProvider, false);
+		BasicEventDispatcher.open(selectorProvider, false);
 	}
 }

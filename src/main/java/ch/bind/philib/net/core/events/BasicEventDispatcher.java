@@ -54,9 +54,9 @@ import ch.bind.philib.util.TimeoutMap;
  * @author Philipp Meinen
  */
 // TODO: verify thread safety
-public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
+public final class BasicEventDispatcher implements EventDispatcher, Runnable {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SimpleEventDispatcher.class);
+	private static final Logger LOG = LoggerFactory.getLogger(BasicEventDispatcher.class);
 
 	private static final AtomicLong NAME_SEQ = new AtomicLong(0);
 
@@ -76,14 +76,14 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 
 	private final TimeoutMap<Long, EventHandler> upcomingTimeouts = new SimpleTimeoutMap<Long, EventHandler>();
 
-	private SimpleEventDispatcher(Selector selector, LoadAvg loadAvg) {
+	private BasicEventDispatcher(Selector selector, LoadAvg loadAvg) {
 		this.selector = selector;
 		this.loadAvg = loadAvg;
 		String threadName = getClass().getSimpleName() + '-' + NAME_SEQ.getAndIncrement();
 		this.dispatchThread = ThreadUtil.createAndStartForeverRunner(this, threadName);
 	}
 
-	public static SimpleEventDispatcher open(SelectorProvider selectorProvider, boolean collectLoadAverage) throws IOException {
+	public static BasicEventDispatcher open(SelectorProvider selectorProvider, boolean collectLoadAverage) throws IOException {
 		Selector selector;
 		try {
 			selector = selectorProvider.openSelector();
@@ -91,7 +91,7 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 			throw new SelectorCreationException(e);
 		}
 		LoadAvg loadAvg = collectLoadAverage ? LoadAvgSimple.forSeconds(LOAD_AVG_SECONDS) : LoadAvgNoop.INSTANCE;
-		SimpleEventDispatcher disp = new SimpleEventDispatcher(selector, loadAvg);
+		BasicEventDispatcher disp = new BasicEventDispatcher(selector, loadAvg);
 		// wait for the thread to start
 		try {
 			disp.serviceState.awaitOpen();
@@ -103,11 +103,11 @@ public final class SimpleEventDispatcher implements EventDispatcher, Runnable {
 		return disp;
 	}
 
-	public static SimpleEventDispatcher open(boolean collectLoadAverage) throws IOException {
+	public static BasicEventDispatcher open(boolean collectLoadAverage) throws IOException {
 		return open(SelectorProvider.provider(), collectLoadAverage);
 	}
 
-	public static SimpleEventDispatcher open() throws IOException {
+	public static BasicEventDispatcher open() throws IOException {
 		return open(false);
 	}
 

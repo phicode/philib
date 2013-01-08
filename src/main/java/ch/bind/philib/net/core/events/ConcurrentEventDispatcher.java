@@ -79,7 +79,7 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 		boolean collectLoadAverage = scaleStrategy == ScaleStrategy.LEAST_LOAD;
 		for (int i = 0; i < concurrency; i++) {
 			try {
-				dispatchers[i] = SimpleEventDispatcher.open(collectLoadAverage);
+				dispatchers[i] = BasicEventDispatcher.open(collectLoadAverage);
 			} catch (IOException e) {
 				// close all event-dispatchers which have already been created
 				for (int j = 0; j < i; j++) {
