@@ -1,0 +1,25 @@
+1. ~/.m2/settings.xml
+	<servers>
+		<server>
+			<id>sonatype-nexus-snapshots</id>
+			<username>...</username>
+			<password>...</password>
+		</server>
+		<server>
+			<id>sonatype-nexus-staging</id>
+			<username>...</username>
+			<password>...</password>
+		</server>
+	</servers>
+
+2. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:prepare
+
+3. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:perform
+
+4. login @ https://oss.sonatype.org/index.html
+
+5. navigate to "Staging Repositories"
+
+6. select the release in question and "Close" it
+
+7. refresh, select again and "Release"
