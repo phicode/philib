@@ -52,19 +52,6 @@ public class HashUtilTest {
 	}
 
 	@Test
-	public void simpleShort() {
-		for (short a = -5000; a < 5000; a++) {
-			for (short b = -5000; b < 5000; b++) {
-				if (a != b) {
-					int h1 = nextHash(startHash(a), b);
-					int h2 = nextHash(startHash(b), a);
-					assertTrue(h1 != h2);
-				}
-			}
-		}
-	}
-
-	@Test
 	public void simpleChar() {
 		int a = nextHash(startHash('a'), 'a');
 		int b = nextHash(startHash('a'), 'b');
@@ -76,9 +63,22 @@ public class HashUtilTest {
 	}
 
 	@Test
+	public void simpleShort() {
+		for (short a = -500; a < 500; a++) {
+			for (short b = -500; b < 500; b++) {
+				if (a != b) {
+					int h1 = nextHash(startHash(a), b);
+					int h2 = nextHash(startHash(b), a);
+					assertTrue(h1 != h2);
+				}
+			}
+		}
+	}
+
+	@Test
 	public void simpleInt() {
-		for (int a = 0; a < 10000; a++) {
-			for (int b = 0; b < 10000; b++) {
+		for (int a = 0; a < 1000; a++) {
+			for (int b = 0; b < 1000; b++) {
 				if (a != b) {
 					int h1 = nextHash(startHash(a), b);
 					int h2 = nextHash(startHash(b), a);
@@ -90,8 +90,8 @@ public class HashUtilTest {
 
 	@Test
 	public void simpleLong() {
-		for (long a = 0; a < 10000; a++) {
-			for (long b = 0; b < 10000; b++) {
+		for (long a = 0; a < 1000; a++) {
+			for (long b = 0; b < 1000; b++) {
 				if (a != b) {
 					int h1 = nextHash(startHash(a), b);
 					int h2 = nextHash(startHash(b), a);

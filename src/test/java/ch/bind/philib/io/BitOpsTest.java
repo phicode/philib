@@ -35,7 +35,7 @@ public class BitOpsTest {
 
 	private static final int TEST_LOOPS = 20000;
 
-	private static final long SPEED_LOOPS = 2000000000L;
+	private static final long SPEED_LOOPS = 8000 * 1000 * 1000L;
 
 	@Test
 	public void oneBit() {
@@ -64,7 +64,10 @@ public class BitOpsTest {
 	}
 
 	@Test
-	public void speedTest() {
+	public void benchmark() {
+		if (!TestUtil.RUN_BENCHMARKS) {
+			return;
+		}
 		// searching for the uppermost bit is the slowest operation
 		long v = 1L << 63;
 		assertEquals(63, findLowestSetBitIdx64(v));

@@ -60,8 +60,7 @@ public class StaticIntMapTest {
 	@Test(expectedExceptions = NullPointerException.class)
 	public void noNullElementsInCreateArray() {
 		TestDummy a = new TestDummy(1, "a");
-		StaticIntMap.create(new TestDummy[] {
-				a, null });
+		StaticIntMap.create(new TestDummy[] { a, null });
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -101,8 +100,7 @@ public class StaticIntMapTest {
 		TestDummy a = new TestDummy(1, "a");
 		TestDummy b = new TestDummy(2, "b");
 		String other = "c";
-		StaticIntMap<String> map = StaticIntMap.create(new TestDummy[] {
-				a, b });
+		StaticIntMap<String> map = StaticIntMap.create(new TestDummy[] { a, b });
 		assertEquals(map.size(), 2);
 		for (int i = -1000; i < 1000; i++) {
 			if (i == 1) {

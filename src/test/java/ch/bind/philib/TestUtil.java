@@ -42,7 +42,10 @@ public class TestUtil {
 
 	private static final long DEFAULT_SLEEPTIME_MS = 500;
 
-	private TestUtil() {}
+	public static final boolean RUN_BENCHMARKS = "true".equalsIgnoreCase(System.getProperty("runBenchmarks"));
+
+	private TestUtil() {
+	}
 
 	public static void gcAndSleep() {
 		gcAndSleep(DEFAULT_SLEEPTIME_MS);
@@ -57,12 +60,12 @@ public class TestUtil {
 		}
 	}
 
-	public static void printBenchResults(Class<?> clazz, String longUnit, String shortUnit, long timeNs, double amount) {
+	public static void printBenchResults(Class<?> clazz, String description, String shortUnit, long timeNs, double amount) {
 		assertTrue(timeNs > 0);
 		double perS = amount / (timeNs / 1000000000f);
 		double perMs = amount / (timeNs / 1000000f);
-		System.out.printf("Bench [%-20s]: %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms\n", //
-				clazz.getSimpleName(), amount, longUnit, timeNs, perS, shortUnit, perMs, shortUnit);
+		System.out.printf("Bench [%-20s] %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms%n", //
+				clazz.getSimpleName(), amount, description, timeNs, perS, shortUnit, perMs, shortUnit);
 	}
 
 	private static volatile SoftReference<List<String>> wordlist;
@@ -93,5 +96,13 @@ public class TestUtil {
 		}
 		fail();
 		return null;
+	}
+
+	public static void sleepOrFail(int millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			fail("interrupted while sleeping");
+		}
 	}
 }

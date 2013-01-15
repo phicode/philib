@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 
 public class CounterTest {
 
-	private static final String EXPECT_ZERO = "a[unit=ms, #adds=0, total=0, min=N/A, max=N/A, avg=N/A]";
+	private static final String EXPECT_ZERO = "a[unit=ms, #counts=0, total=0, min=N/A, max=N/A, avg=N/A]";
 
 	@Test
 	public void zero() {
@@ -39,67 +39,46 @@ public class CounterTest {
 	@Test
 	public void one() {
 		Counter pm = new Counter("a", "ms");
-		pm.add(500);
-		assertEquals(pm.toString(), "a[unit=ms, #adds=1, total=500, min=500, max=500, avg=500.000]");
+		pm.count(500);
+		assertEquals(pm.toString(), "a[unit=ms, #counts=1, total=500, min=500, max=500, avg=500.000]");
 	}
 
 	@Test
 	public void two() {
 		Counter pm = new Counter("a", "ms");
-		pm.add(100);
-		pm.add(500);
-		assertEquals(pm.toString(), "a[unit=ms, #adds=2, total=600, min=100, max=500, avg=300.000]");
+		pm.count(100);
+		pm.count(500);
+		assertEquals(pm.toString(), "a[unit=ms, #counts=2, total=600, min=100, max=500, avg=300.000]");
 	}
 
 	@Test
 	public void three() {
 		Counter pm = new Counter("a", "ms");
-		pm.add(200);
-		pm.add(100);
-		pm.add(300);
-		assertEquals(pm.toString(), "a[unit=ms, #adds=3, total=600, min=100, max=300, avg=200.000]");
+		pm.count(200);
+		pm.count(100);
+		pm.count(300);
+		assertEquals(pm.toString(), "a[unit=ms, #counts=3, total=600, min=100, max=300, avg=200.000]");
 	}
 
 	@Test
 	public void many() {
 		Counter pm = new Counter("a", "ms");
 		for (int i = 1000; i <= 10000; i++) {
-			pm.add(i);
+			pm.count(i);
 		}
 		for (int i = 999; i >= -100; i--) {
-			pm.add(i);
+			pm.count(i);
 		}
-		assertEquals(pm.toString(), "a[unit=ms, #adds=10000, total=50005000, min=1, max=10000, avg=5000.500]");
+		assertEquals(pm.toString(), "a[unit=ms, #counts=10000, total=50005000, min=1, max=10000, avg=5000.500]");
 	}
 
 	@Test
 	public void reset() {
 		Counter pm = new Counter("a", "ms");
 		assertEquals(pm.toString(), EXPECT_ZERO);
-		pm.add(100);
-		assertEquals(pm.toString(), "a[unit=ms, #adds=1, total=100, min=100, max=100, avg=100.000]");
+		pm.count(100);
+		assertEquals(pm.toString(), "a[unit=ms, #counts=1, total=100, min=100, max=100, avg=100.000]");
 		pm.reset();
 		assertEquals(pm.toString(), EXPECT_ZERO);
-	}
-
-	@Test
-	public void noName() {
-		Counter pm = CounterRepo.DEFAULT.forName(null, "ms");
-		assertEquals(pm.getName(), "default");
-		assertEquals(pm.getUnit(), "ms");
-	}
-
-	@Test
-	public void noUnit() {
-		Counter pm = new Counter("a", null);
-		assertEquals(pm.getName(), "a");
-		assertEquals(pm.getUnit(), "unknown");
-	}
-
-	@Test
-	public void noNameNoUnit() {
-		Counter pm = new Counter(null, null);
-		assertEquals(pm.getName(), "unknown");
-		assertEquals(pm.getUnit(), "unknown");
 	}
 }

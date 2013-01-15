@@ -29,6 +29,8 @@ import static org.testng.Assert.fail;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.TestUtil;
+
 public class ServiceStateTest {
 
 	@Test
@@ -78,6 +80,50 @@ public class ServiceStateTest {
 			assertTrue(e instanceof IllegalStateException);
 			verify(state, false, false, false, true);
 		}
+	}
+
+	@Test(timeOut = 1000)
+	public void awaitStates() throws InterruptedException {
+		final ServiceState state = new ServiceState();
+		assertFalse(state.isOpen());
+
+		long startTime = System.nanoTime();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				TestUtil.sleepOrFail(50);
+				state.setOpen();
+			}
+		}).start();
+
+		state.awaitOpen();
+		assertTrue(state.isOpen());
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				TestUtil.sleepOrFail(50);
+				state.setClosing();
+			}
+		}).start();
+
+		state.awaitClosing();
+		assertTrue(state.isClosing());
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				TestUtil.sleepOrFail(50);
+				state.setClosed();
+			}
+		}).start();
+
+		state.awaitClosed();
+		assertTrue(state.isClosed());
+
+		long totalTime = System.nanoTime() - startTime;
+		assertTrue(totalTime > 140 * 1000 * 1000);
+		assertTrue(totalTime < 250 * 1000 * 1000);
 	}
 
 	private static void verify(ServiceState state, boolean uninit, boolean open, boolean closing, boolean closed) {

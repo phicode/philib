@@ -76,7 +76,8 @@ public final class LeakyBucket {
 		fill(amount, System.nanoTime());
 	}
 
-	public void fill(long amount, long timeNs) {
+	// package protected, only for testing
+	void fill(long amount, long timeNs) {
 		leak(timeNs);
 		current += amount;
 	}
@@ -85,7 +86,8 @@ public final class LeakyBucket {
 		return canFill(System.nanoTime());
 	}
 
-	public long canFill(long timeNs) {
+	// package protected, only for testing
+	long canFill(long timeNs) {
 		leak(timeNs);
 		return capacity - current;
 	}
@@ -94,7 +96,8 @@ public final class LeakyBucket {
 		return nextFillNs(System.nanoTime());
 	}
 
-	public long nextFillNs(long timeNs) {
+	// package protected, only for testing
+	long nextFillNs(long timeNs) {
 		leak(timeNs);
 		if (current < capacity) {
 			// available immediately
