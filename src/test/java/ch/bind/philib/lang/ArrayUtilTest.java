@@ -28,10 +28,10 @@ import static ch.bind.philib.lang.ArrayUtil.concat;
 import static ch.bind.philib.lang.ArrayUtil.contains;
 import static ch.bind.philib.lang.ArrayUtil.extractBack;
 import static ch.bind.philib.lang.ArrayUtil.extractFront;
+import static ch.bind.philib.lang.ArrayUtil.find;
 import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
 import static ch.bind.philib.lang.ArrayUtil.memsetZero;
 import static ch.bind.philib.lang.ArrayUtil.pickRandom;
-import static ch.bind.philib.lang.ArrayUtil.search;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -318,7 +318,7 @@ public class ArrayUtilTest {
 	}
 
 	@Test
-	public void searchAndContains() {
+	public void findAndContains() {
 		byte[] abc = "abc".getBytes();
 		byte[] xyz = "xyz".getBytes();
 		byte[] abcx = "abcx".getBytes();
@@ -327,39 +327,94 @@ public class ArrayUtilTest {
 		byte[] e = EMPTY_BYTE_ARRAY;
 
 		// null tests
-		assertEquals(search(null, null), -1);
-		assertEquals(search(null, abc), -1);
-		assertEquals(search(abc, null), -1);
+		assertEquals(find(null, null), -1);
+		assertEquals(find(null, abc), -1);
+		assertEquals(find(abc, null), -1);
 		assertFalse(contains(null, null));
 		assertFalse(contains(null, abc));
 		assertFalse(contains(abc, null));
 
 		// zero length tests
-		assertEquals(search(e, e), -1);
-		assertEquals(search(e, abc), -1);
-		assertEquals(search(abc, e), -1);
+		assertEquals(find(e, e), -1);
+		assertEquals(find(e, abc), -1);
+		assertEquals(find(abc, e), -1);
 		assertFalse(contains(e, e));
 		assertFalse(contains(e, abc));
 		assertFalse(contains(abc, e));
 
 		// equal length, equal content
-		assertEquals(search(abc, abc), 0);
+		assertEquals(find(abc, abc), 0);
 		assertTrue(contains(abc, abc));
 
 		// equal length, not equal content
-		assertEquals(search(abc, xyz), -1);
-		assertEquals(search(xyz, abc), -1);
+		assertEquals(find(abc, xyz), -1);
+		assertEquals(find(xyz, abc), -1);
 		assertFalse(contains(abc, xyz));
 		assertFalse(contains(xyz, abc));
 
 		// search longer then data
-		assertEquals(search(abc, xabc), -1);
+		assertEquals(find(abc, xabc), -1);
 		assertFalse(contains(abc, xabc));
 
 		// different length, search ok
-		assertEquals(search(xabc, abc), 1);
-		assertEquals(search(abcx, abc), 0);
+		assertEquals(find(xabc, abc), 1);
+		assertEquals(find(abcx, abc), 0);
 		assertTrue(contains(xabc, abc));
 		assertTrue(contains(abcx, abc));
+	}
+
+	@Test
+	public void findMany() {
+		byte[] a = "abaabaaabaaaabaaaaab".getBytes();
+		byte[] _1 = "ab".getBytes();
+		byte[] _2 = "aab".getBytes();
+		byte[] _3 = "aaab".getBytes();
+		byte[] _4 = "aaaab".getBytes();
+		byte[] _5 = "aaaaab".getBytes();
+		byte[] _6 = "aaaaaab".getBytes();
+
+		assertTrue(contains(a, _1));
+		assertTrue(contains(a, _2));
+		assertTrue(contains(a, _3));
+		assertTrue(contains(a, _4));
+		assertTrue(contains(a, _5));
+		assertFalse(contains(a, _6));
+
+		assertEquals(find(a, _1), 0);
+		assertEquals(find(a, _2), 2); // +2
+		assertEquals(find(a, _3), 5); // +3
+		assertEquals(find(a, _4), 9); // +4
+		assertEquals(find(a, _5), 14); // +5
+		assertEquals(find(a, _6), -1);
+
+		assertEquals(find(a, _1, 0), 0); // ->ab
+
+		// aba->ab
+		assertEquals(find(a, _1, 1), 3);
+		assertEquals(find(a, _1, 2), 3);
+		assertEquals(find(a, _1, 3), 3);
+
+		// abaabaa->ab
+		assertEquals(find(a, _1, 4), 7);
+		assertEquals(find(a, _1, 5), 7);
+		assertEquals(find(a, _1, 6), 7);
+		assertEquals(find(a, _1, 7), 7);
+
+		// abaabaaabaaa->ab
+		assertEquals(find(a, _1, 8), 12);
+		assertEquals(find(a, _1, 9), 12);
+		assertEquals(find(a, _1, 10), 12);
+		assertEquals(find(a, _1, 11), 12);
+		assertEquals(find(a, _1, 12), 12);
+
+		// abaabaaabaaaabaaaa->ab
+		assertEquals(find(a, _1, 13), 18);
+		assertEquals(find(a, _1, 14), 18);
+		assertEquals(find(a, _1, 15), 18);
+		assertEquals(find(a, _1, 16), 18);
+		assertEquals(find(a, _1, 17), 18);
+		assertEquals(find(a, _1, 18), 18);
+
+		assertEquals(find(a, _1, 19), -1);
 	}
 }
