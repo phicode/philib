@@ -25,11 +25,13 @@ package ch.bind.philib.lang;
 import static ch.bind.philib.lang.ArrayUtil.EMPTY_BYTE_ARRAY;
 import static ch.bind.philib.lang.ArrayUtil.append;
 import static ch.bind.philib.lang.ArrayUtil.concat;
+import static ch.bind.philib.lang.ArrayUtil.contains;
 import static ch.bind.philib.lang.ArrayUtil.extractBack;
 import static ch.bind.philib.lang.ArrayUtil.extractFront;
 import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
 import static ch.bind.philib.lang.ArrayUtil.memsetZero;
 import static ch.bind.philib.lang.ArrayUtil.pickRandom;
+import static ch.bind.philib.lang.ArrayUtil.search;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -313,5 +315,51 @@ public class ArrayUtilTest {
 				assertTrue(b[j] == 0);
 			}
 		}
+	}
+
+	@Test
+	public void searchAndContains() {
+		byte[] abc = "abc".getBytes();
+		byte[] xyz = "xyz".getBytes();
+		byte[] abcx = "abcx".getBytes();
+		byte[] xabc = "xabc".getBytes();
+
+		byte[] e = EMPTY_BYTE_ARRAY;
+
+		// null tests
+		assertEquals(search(null, null), -1);
+		assertEquals(search(null, abc), -1);
+		assertEquals(search(abc, null), -1);
+		assertFalse(contains(null, null));
+		assertFalse(contains(null, abc));
+		assertFalse(contains(abc, null));
+
+		// zero length tests
+		assertEquals(search(e, e), -1);
+		assertEquals(search(e, abc), -1);
+		assertEquals(search(abc, e), -1);
+		assertFalse(contains(e, e));
+		assertFalse(contains(e, abc));
+		assertFalse(contains(abc, e));
+
+		// equal length, equal content
+		assertEquals(search(abc, abc), 0);
+		assertTrue(contains(abc, abc));
+
+		// equal length, not equal content
+		assertEquals(search(abc, xyz), -1);
+		assertEquals(search(xyz, abc), -1);
+		assertFalse(contains(abc, xyz));
+		assertFalse(contains(xyz, abc));
+
+		// search longer then data
+		assertEquals(search(abc, xabc), -1);
+		assertFalse(contains(abc, xabc));
+
+		// different length, search ok
+		assertEquals(search(xabc, abc), 1);
+		assertEquals(search(abcx, abc), 0);
+		assertTrue(contains(xabc, abc));
+		assertTrue(contains(abcx, abc));
 	}
 }

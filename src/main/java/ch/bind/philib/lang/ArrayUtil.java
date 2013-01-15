@@ -26,7 +26,8 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 /**
- * Various functions for dealing with arrays which are not present in the standard {@link java.util.Arrays} class.
+ * Various functions for dealing with arrays which are not present in the standard
+ * {@link java.util.Arrays} class.
  * 
  * @author Philipp Meinen
  * @since 2009-06-10
@@ -35,21 +36,25 @@ public abstract class ArrayUtil {
 
 	public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-	protected ArrayUtil() {}
+	protected ArrayUtil() {
+	}
 
 	// java.util.Random is updated atomically => this is thread-safe
 	private static final Random rand = new Random();
 
 	/**
-	 * Fills the <code>destination</code> array with randomly picked values from the <code>source</code> array. No value
+	 * Fills the <code>destination</code> array with randomly picked values from the
+	 * <code>source</code> array. No value
 	 * will be picked twice.
 	 * 
-	 * @param source The array from which random values must be picked. The content of this array will not be altered.
-	 * @param destination The array which must be filled with random values. Previous values within this array will be
+	 * @param source The array from which random values must be picked. The content of this array
+	 *            will not be altered.
+	 * @param destination The array which must be filled with random values. Previous values within
+	 *            this array will be
 	 *            overwritten.
 	 * @throws NullPointerException If either of the two parameters is null.
-	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller then the <code>destination</code>
-	 *             -array.
+	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller then the
+	 *             <code>destination</code> -array.
 	 */
 	public static <T> void pickRandom(final T[] source, final T[] destination) {
 		if (source == null)
@@ -76,7 +81,8 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
+	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a
+	 *         copy of their content.
 	 */
 	public static byte[] concat(byte[] a, byte[] b) {
 		// override null arrays
@@ -99,9 +105,10 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
-	 *         if the combined length exceeds {@code capacity} the returned array {@code a} will have
-	 *         {@code a.length == capacity}.
+	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a
+	 *         copy of their content.
+	 *         if the combined length exceeds {@code capacity} the returned array {@code a} will
+	 *         have {@code a.length == capacity}.
 	 */
 	public static byte[] append(byte[] a, byte[] b, int capacity) {
 		// override null arrays
@@ -137,6 +144,35 @@ public abstract class ArrayUtil {
 		byte[] rv = new byte[len];
 		System.arraycopy(data, 0, rv, 0, len);
 		return rv;
+	}
+
+	public static boolean contains(byte[] data, byte[] search) {
+		return search(data, search) >= 0;
+	}
+
+	public static int search(byte[] data, byte[] search) {
+		if (data == null || search == null) {
+			return -1;
+		}
+		final int searchLen = search.length;
+		final int dataLen = data.length;
+		if (dataLen == 0 || searchLen == 0 || searchLen > dataLen) {
+			return -1;
+		}
+
+		final int overlap = dataLen - searchLen + 1;
+
+		for (int off = 0; off < overlap; off++)
+			notfound: {
+				for (int i = 0; i < searchLen; i++) {
+					if (data[off + i] != search[i]) {
+						break notfound;
+					}
+				}
+				return off;
+			}
+		
+		return -1;
 	}
 
 	public static String formatShortHex(byte[] data) {
@@ -193,11 +229,10 @@ public abstract class ArrayUtil {
 		sb.append(TO_HEX[v & 15]);
 	}
 
-	private static final char[] TO_HEX = {
-			'0', '1', '2', '3', //
-			'4', '5', '6', '7', //
-			'8', '9', 'A', 'B', //
-			'C', 'D', 'E', 'F' };
+	private static final char[] TO_HEX = { '0', '1', '2', '3', //
+	        '4', '5', '6', '7', //
+	        '8', '9', 'A', 'B', //
+	        'C', 'D', 'E', 'F' };
 
 	public static void memsetZero(ByteBuffer buf) {
 		if (buf == null) {
