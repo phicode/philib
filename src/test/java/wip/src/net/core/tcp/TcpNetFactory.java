@@ -27,7 +27,6 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.Future;
 
 import wip.src.net.core.context.NetContext;
-
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.util.FinishedFuture;
 
@@ -38,8 +37,7 @@ import ch.bind.philib.util.FinishedFuture;
  */
 public final class TcpNetFactory {
 
-	private TcpNetFactory() {
-	}
+	private TcpNetFactory() {}
 
 	public static TcpServer listen(NetContext context, SocketAddress bindAddress) throws IOException {
 		return TcpServer.listen(context, bindAddress);

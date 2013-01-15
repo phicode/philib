@@ -37,8 +37,7 @@ public abstract class ThreadUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ThreadUtil.class);
 
-	protected ThreadUtil() {
-	}
+	protected ThreadUtil() {}
 
 	public static void sleepUntilMs(long time) throws InterruptedException {
 		long diff = time - System.currentTimeMillis();
@@ -49,9 +48,7 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param t
-	 *            the thread which must be interrupted and joined with a default
-	 *            timeout
+	 * @param t the thread which must be interrupted and joined with a default timeout
 	 * @return {@code true} for OK, {@code false} in case of an error.
 	 */
 	public static boolean interruptAndJoin(Thread t) {
@@ -59,11 +56,9 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param t
-	 *            the thread which must be interrupted
-	 * @param waitTime
-	 *            a specific timeout for the join operation. A negative or zero
-	 *            value means to no timeout is implied.
+	 * @param t the thread which must be interrupted
+	 * @param waitTime a specific timeout for the join operation. A negative or zero value means to no timeout is
+	 *            implied.
 	 * @return {@code true} for OK, {@code false} in case of an error.
 	 */
 	public static boolean interruptAndJoin(Thread t, long waitTime) {

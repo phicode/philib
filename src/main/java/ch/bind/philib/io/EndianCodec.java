@@ -29,8 +29,7 @@ package ch.bind.philib.io;
  */
 public final class EndianCodec {
 
-	private EndianCodec() {
-	}
+	private EndianCodec() {}
 
 	// #################
 	// # ENCODE INT 64 #

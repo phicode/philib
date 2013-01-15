@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class DummySelectorProvider extends SelectorProvider {
 
 	private final AtomicReference<AbstractSelector> nextOpenSelector = new AtomicReference<AbstractSelector>();
-	
+
 	private final AtomicReference<IOException> nextOpenSelectorException = new AtomicReference<IOException>();
 
 	public void setNextOpenSelector(AbstractSelector selector) {

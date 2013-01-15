@@ -26,8 +26,7 @@ public final class LoadAvgNoop implements LoadAvg {
 
 	public static final LoadAvgNoop INSTANCE = new LoadAvgNoop();
 
-	private LoadAvgNoop() {
-	}
+	private LoadAvgNoop() {}
 
 	@Override
 	public long getLoadAvg() {

@@ -5,7 +5,6 @@ import java.nio.channels.SelectableChannel;
 
 import wip.src.net.core.events.EventDispatcher;
 import wip.src.net.core.events.EventHandler;
-
 import ch.bind.philib.validation.Validation;
 
 public final class DummyEventHandler implements EventHandler {

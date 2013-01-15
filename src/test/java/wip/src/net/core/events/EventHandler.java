@@ -37,8 +37,8 @@ public interface EventHandler extends Closeable {
 	int handleOps(int ops) throws IOException;
 
 	/**
-	 * @return if this event-handler should be kept. a return value of
-	 *         {@code false} indicates that the handler must be closed.
+	 * @return if this event-handler should be kept. a return value of {@code false} indicates that the handler must be
+	 *         closed.
 	 * @throws IOException
 	 */
 	boolean handleTimeout() throws IOException;

@@ -29,8 +29,7 @@ package ch.bind.philib.pool;
 public interface PoolStats {
 
 	/**
-	 * @return The number of object which were created because no pooled objects
-	 *         were left.
+	 * @return The number of object which were created because no pooled objects were left.
 	 */
 	long getCreates();
 
@@ -45,8 +44,7 @@ public interface PoolStats {
 	long getRecycled();
 
 	/**
-	 * @return The number of objects which have been released because they were
-	 *         no longer needed.
+	 * @return The number of objects which have been released because they were no longer needed.
 	 */
 	long getReleased();
 }

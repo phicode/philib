@@ -32,8 +32,7 @@ import java.net.UnknownHostException;
  */
 public final class SocketAddresses {
 
-	private SocketAddresses() {
-	}
+	private SocketAddresses() {}
 
 	public static InetSocketAddress wildcard(int port) {
 		return new InetSocketAddress((InetAddress) null, port);

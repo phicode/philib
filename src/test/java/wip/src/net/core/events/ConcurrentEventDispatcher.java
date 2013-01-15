@@ -54,7 +54,7 @@ public class ConcurrentEventDispatcher implements EventDispatcher {
 
 	private final AtomicLong nextRoundRobinIdx = new AtomicLong(0);
 
-	//TODO: make package private once this code is no longer in WIP state
+	// TODO: make package private once this code is no longer in WIP state
 	public ConcurrentEventDispatcher(EventDispatcher[] dispatchers, ScaleStrategy scaleStrategy) {
 		this.dispatchers = dispatchers;
 		this.scaleStrategy = scaleStrategy;

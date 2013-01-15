@@ -16,10 +16,8 @@ public class DummySelectableChannel extends AbstractSelectableChannel {
 	}
 
 	@Override
-	protected void implCloseSelectableChannel() throws IOException {
-	}
+	protected void implCloseSelectableChannel() throws IOException {}
 
 	@Override
-	protected void implConfigureBlocking(boolean block) throws IOException {
-	}
+	protected void implConfigureBlocking(boolean block) throws IOException {}
 }

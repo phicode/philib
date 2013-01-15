@@ -27,14 +27,12 @@ import java.io.IOException;
 import wip.src.net.core.SessionManager;
 import wip.src.net.core.events.BasicEventDispatcher;
 import wip.src.net.core.events.EventDispatcher;
-
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 import ch.bind.philib.validation.Validation;
 
 public final class NetContexts {
 
-	private NetContexts() {
-	}
+	private NetContexts() {}
 
 	public static NetContext createSimple(SessionManager sessionManager) throws IOException {
 		Validation.notNull(sessionManager);

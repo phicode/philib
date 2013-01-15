@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import wip.src.net.core.Connection;
-
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.validation.Validation;
 

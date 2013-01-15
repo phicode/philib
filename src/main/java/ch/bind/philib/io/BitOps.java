@@ -29,8 +29,7 @@ package ch.bind.philib.io;
  */
 public final class BitOps {
 
-	private BitOps() {
-	}
+	private BitOps() {}
 
 	public static final int findLowestSetBitIdx64(final long v) {
 		if (v == 0) {

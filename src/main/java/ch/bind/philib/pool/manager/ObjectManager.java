@@ -33,25 +33,20 @@ public interface ObjectManager<T> {
 	void release(T value);
 
 	/**
-	 * Prepare an object to be reused by a different user. Implementors of this
-	 * method must make sure that any data from previous users is cleared.
+	 * Prepare an object to be reused by a different user. Implementors of this method must make sure that any data from
+	 * previous users is cleared.
 	 * 
-	 * @param value
-	 *            The object which must be prepared for reuse.
-	 * @return {@code true} if this object can be reused, {@code false}
-	 *         otherwise (for example if the size of the offered buffer is too
-	 *         small). After returning {@code false} {@link destroy(T)} will be
-	 *         called.
+	 * @param value The object which must be prepared for reuse.
+	 * @return {@code true} if this object can be reused, {@code false} otherwise (for example if the size of the
+	 *         offered buffer is too small). After returning {@code false} {@link destroy(T)} will be called.
 	 */
 	boolean prepareForRecycle(T value);
 
 	/**
-	 * @param value
-	 *            -
-	 * @return {@code true} if this pooled object can be reused, {@code false}
-	 *         otherwise. Example: The pooled object is a database connection
-	 *         which might not be reusable because the connection was closed
-	 *         while being in the pool.
+	 * @param value -
+	 * @return {@code true} if this pooled object can be reused, {@code false} otherwise. Example: The pooled object is
+	 *         a database connection which might not be reusable because the connection was closed while being in the
+	 *         pool.
 	 */
 	boolean canReuse(T value);
 

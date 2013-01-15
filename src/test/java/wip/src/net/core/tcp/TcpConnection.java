@@ -32,7 +32,6 @@ import wip.src.net.core.Session;
 import wip.src.net.core.conn.ConnectionBase;
 import wip.src.net.core.context.NetContext;
 import wip.src.net.core.events.SelectOps;
-
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.validation.Validation;
 

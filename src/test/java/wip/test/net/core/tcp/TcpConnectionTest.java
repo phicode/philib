@@ -55,7 +55,6 @@ import wip.src.net.core.session.EchoClientSession;
 import wip.src.net.core.session.EchoServerSession;
 import wip.src.net.core.tcp.TcpConnection;
 import wip.src.net.core.tcp.TcpNetFactory;
-
 import ch.bind.philib.TestUtil;
 import ch.bind.philib.io.SafeCloseUtil;
 

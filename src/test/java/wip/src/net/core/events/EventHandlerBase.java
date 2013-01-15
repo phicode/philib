@@ -24,7 +24,6 @@ package wip.src.net.core.events;
 import java.nio.ByteBuffer;
 
 import wip.src.net.core.context.NetContext;
-
 import ch.bind.philib.validation.Validation;
 
 /**

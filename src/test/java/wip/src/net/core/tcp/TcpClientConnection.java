@@ -31,7 +31,6 @@ import wip.src.net.core.Events;
 import wip.src.net.core.conn.ConnectTimeoutException;
 import wip.src.net.core.context.NetContext;
 import wip.src.net.core.events.SelectOps;
-
 import ch.bind.philib.validation.Validation;
 
 public class TcpClientConnection extends TcpConnection {

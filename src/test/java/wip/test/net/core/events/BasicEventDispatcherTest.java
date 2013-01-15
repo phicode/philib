@@ -36,7 +36,6 @@ import wip.src.net.core.events.BasicEventDispatcher;
 import wip.src.net.core.events.EventHandler;
 import wip.src.net.core.events.SelectorCreationException;
 
-
 public class BasicEventDispatcherTest {
 
 	// EventDispatcher methods

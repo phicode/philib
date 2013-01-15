@@ -44,8 +44,7 @@ public class TestUtil {
 
 	public static final boolean RUN_BENCHMARKS = "true".equalsIgnoreCase(System.getProperty("runBenchmarks"));
 
-	private TestUtil() {
-	}
+	private TestUtil() {}
 
 	public static void gcAndSleep() {
 		gcAndSleep(DEFAULT_SLEEPTIME_MS);

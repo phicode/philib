@@ -51,6 +51,6 @@ public class DummySelectionKey extends AbstractSelectionKey {
 	}
 
 	public synchronized void setReadyOps(int ops) {
-		this.readyOps=ops;
+		this.readyOps = ops;
 	}
 }

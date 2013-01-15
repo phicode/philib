@@ -28,7 +28,6 @@ import wip.src.net.core.Connection;
 import wip.src.net.core.context.NetContext;
 import wip.src.net.core.events.EventHandlerBase;
 
-
 public abstract class ConnectionBase extends EventHandlerBase implements Connection {
 
 	private final AtomicLong rx = new AtomicLong(0);

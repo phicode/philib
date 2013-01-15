@@ -112,7 +112,7 @@ public abstract class BufferPoolTestBase<T> {
 
 		assertEquals(pool.getNumPooled(), 0);
 	}
-	
+
 	@Test
 	public void stats() {
 		int maxEntries = 10;
@@ -120,23 +120,23 @@ public abstract class BufferPoolTestBase<T> {
 		Pool<T> pool = createPool(bufferSize, maxEntries);
 		PoolStats stats = pool.getPoolStats();
 
-		assertEquals(stats.getCreates(),0);
-		assertEquals(stats.getRecycled(),0);
-		assertEquals(stats.getReleased(),0);
-		assertEquals(stats.getTakes(),0);
-		
+		assertEquals(stats.getCreates(), 0);
+		assertEquals(stats.getRecycled(), 0);
+		assertEquals(stats.getReleased(), 0);
+		assertEquals(stats.getTakes(), 0);
+
 		String strStatsA = stats.toString();
 		assertNotNull(strStatsA);
-		
+
 		assertNotNull(pool.take());
-		
+
 		String strStatsB = stats.toString();
 		assertNotNull(strStatsB);
 		assertNotEquals(strStatsA, strStatsB);
 		strStatsA = strStatsB;
 
 		pool.recycle(createBuffer(bufferSize));
-		
+
 		strStatsB = stats.toString();
 		assertNotNull(strStatsB);
 		assertNotEquals(strStatsA, strStatsB);

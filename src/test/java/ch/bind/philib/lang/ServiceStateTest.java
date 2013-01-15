@@ -89,6 +89,7 @@ public class ServiceStateTest {
 
 		long startTime = System.nanoTime();
 		new Thread(new Runnable() {
+
 			@Override
 			public void run() {
 				TestUtil.sleepOrFail(50);
@@ -100,6 +101,7 @@ public class ServiceStateTest {
 		assertTrue(state.isOpen());
 
 		new Thread(new Runnable() {
+
 			@Override
 			public void run() {
 				TestUtil.sleepOrFail(50);
@@ -111,6 +113,7 @@ public class ServiceStateTest {
 		assertTrue(state.isClosing());
 
 		new Thread(new Runnable() {
+
 			@Override
 			public void run() {
 				TestUtil.sleepOrFail(50);

@@ -39,8 +39,7 @@ public interface EventDispatcher extends Closeable {
 	/**
 	 * 
 	 * @param eventHandler
-	 * @param timeout
-	 *            The timeout in milliseconds from now.
+	 * @param timeout The timeout in milliseconds from now.
 	 */
 	void setTimeout(EventHandler eventHandler, long timeout);
 

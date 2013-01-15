@@ -17,7 +17,6 @@ import org.testng.annotations.Test;
 
 import wip.src.net.core.Connection;
 import wip.src.net.core.tcp.AsyncConnectFuture;
-
 import ch.bind.philib.TestUtil;
 
 public class AsyncConnectFutureTest {
@@ -45,6 +44,7 @@ public class AsyncConnectFutureTest {
 	public void regularGet() throws Exception {
 		final AsyncConnectFuture<Connection> future = new AsyncConnectFuture<Connection>(conn);
 		new Thread(new Runnable() {
+
 			@Override
 			public void run() {
 				TestUtil.sleepOrFail(100);
@@ -63,6 +63,7 @@ public class AsyncConnectFutureTest {
 		final AsyncConnectFuture<Connection> future = new AsyncConnectFuture<Connection>(conn);
 		final Exception exc = new IOException();
 		new Thread(new Runnable() {
+
 			@Override
 			public void run() {
 				TestUtil.sleepOrFail(100);
@@ -93,6 +94,7 @@ public class AsyncConnectFutureTest {
 	public void cancel() throws Exception {
 		final AsyncConnectFuture<Connection> future = new AsyncConnectFuture<Connection>(conn);
 		new Thread(new Runnable() {
+
 			@Override
 			public void run() {
 				TestUtil.sleepOrFail(100);

@@ -29,7 +29,6 @@ import java.net.Socket;
 
 import wip.src.net.core.SessionManager;
 import wip.src.net.core.events.EventDispatcher;
-
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 
 /**

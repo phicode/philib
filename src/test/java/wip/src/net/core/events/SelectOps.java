@@ -30,8 +30,7 @@ import java.nio.channels.SelectionKey;
  */
 public final class SelectOps {
 
-	private SelectOps() {
-	}
+	private SelectOps() {}
 
 	public static final int READ = SelectionKey.OP_READ;
 

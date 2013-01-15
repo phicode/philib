@@ -136,6 +136,7 @@ public abstract class CacheTestBase {
 	}
 
 	private static final Cloner<Integer> INTEGER_CLONER = new Cloner<Integer>() {
+
 		@Override
 		public Integer clone(Integer value) {
 			assertNotNull(value);

@@ -37,7 +37,6 @@ import wip.src.net.core.events.ConcurrentEventDispatcher;
 import wip.src.net.core.events.EventDispatcher;
 import wip.src.net.core.session.EchoServerSession;
 import wip.src.net.core.tcp.TcpNetFactory;
-
 import ch.bind.philib.pool.buffer.ByteBufferPool;
 
 /**

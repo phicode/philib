@@ -42,7 +42,6 @@ import wip.src.net.core.events.EventDispatcher;
 import wip.src.net.core.session.EchoClientSession;
 import wip.src.net.core.tcp.TcpConnection;
 import wip.src.net.core.tcp.TcpNetFactory;
-
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.pool.buffer.ByteBufferPool;

@@ -37,7 +37,6 @@ import wip.src.net.core.NetListener;
 import wip.src.net.core.context.NetContext;
 import wip.src.net.core.events.EventHandlerBase;
 import wip.src.net.core.events.SelectOps;
-
 import ch.bind.philib.io.SafeCloseUtil;
 import ch.bind.philib.lang.ArrayUtil;
 import ch.bind.philib.lang.ExceptionUtil;

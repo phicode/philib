@@ -26,8 +26,7 @@ import java.nio.ByteBuffer;
 
 public final class BufferUtil {
 
-	private BufferUtil() {
-	}
+	private BufferUtil() {}
 
 	public static ByteBuffer append(ByteBuffer dst, ByteBuffer src) {
 		int cap = dst.capacity();

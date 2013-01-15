@@ -27,7 +27,6 @@ import java.nio.ByteBuffer;
 import wip.src.net.core.Connection;
 import wip.src.net.core.Events;
 import wip.src.net.core.Session;
-
 import ch.bind.philib.lang.ServiceState;
 
 /**
