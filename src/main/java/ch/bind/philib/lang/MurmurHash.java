@@ -22,19 +22,21 @@
 
 package ch.bind.philib.lang;
 
-import ch.bind.philib.io.EndianConverter;
+import ch.bind.philib.io.EndianCodec;
 
 /**
  * Implementation of the murmur hashing functions.
  * <p>
- * Based on Austin Appleby's <a href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
+ * Based on Austin Appleby's <a
+ * href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
  * </p>
  * 
  * @author Philipp Meinen
  */
 public final class MurmurHash {
 
-	private MurmurHash() {}
+	private MurmurHash() {
+	}
 
 	static final int MURMUR2_32_SEED = 0x9747B28C;
 
@@ -54,7 +56,7 @@ public final class MurmurHash {
 		int hash = MURMUR2_32_SEED ^ len;
 
 		while (off < limitOffset) {
-			int k = EndianConverter.decodeInt32LE(key, off);
+			int k = EndianCodec.decodeInt32LE(key, off);
 			off += 4;
 
 			hash = murmur2_mmix(hash, k);
@@ -93,7 +95,7 @@ public final class MurmurHash {
 		int hash = seed;
 
 		while (off < limitOffset) {
-			int k = EndianConverter.decodeInt32LE(key, off);
+			int k = EndianCodec.decodeInt32LE(key, off);
 			off += 4;
 
 			hash ^= murmur3_round32(k);
@@ -136,14 +138,13 @@ public final class MurmurHash {
 	}
 
 	public static final long optimize() {
-		byte[] b = {
-				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+		byte[] b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 		final long s = System.nanoTime();
 		for (int i = 0; i < 12000; i++) {
 			murmur2(b);
 			murmur3(b);
 		}
-		return (System.nanoTime() - s);
+		return System.nanoTime() - s;
 	}
 
 	public static final int murmur2a(byte[] key) {
@@ -159,7 +160,7 @@ public final class MurmurHash {
 		int off = 0;
 
 		while (off < limitOffset) {
-			int k = EndianConverter.decodeInt32LE(key, off);
+			int k = EndianCodec.decodeInt32LE(key, off);
 			off += 4;
 
 			hash = murmur2_mmix(hash, k);

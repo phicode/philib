@@ -199,24 +199,29 @@ public abstract class ArrayUtil {
 		return sb.toString();
 	}
 
-	public static String formatShortHex(ByteBuffer data) {
+	public static String formatShortHex(final ByteBuffer data, final int len) {
 		if (data == null) {
 			return "";
 		}
-		final int len = data.remaining();
-		if (len == 0) {
+		final int dataLen = data.remaining();
+		if (dataLen == 0) {
 			return "";
 		}
+		final int printLen = len == -1 ? dataLen : Math.min(dataLen, len);
 		if (data.hasArray()) {
-			return formatShortHex(data.array(), data.position(), len);
+			return formatShortHex(data.array(), data.position(), printLen);
 		}
-		StringBuilder sb = new StringBuilder(len * 2);
+		StringBuilder sb = new StringBuilder(printLen * 2);
 		final int initialPos = data.position();
-		for (int i = 0; i < len; i++) {
+		for (int i = 0; i < printLen; i++) {
 			toShortHex(sb, (data.get() & 0xFF));
 		}
 		data.position(initialPos);
 		return sb.toString();
+	}
+
+	public static String formatShortHex(ByteBuffer data) {
+		return formatShortHex(data, -1);
 	}
 
 	private static void toShortHex(StringBuilder sb, int v) {
@@ -234,7 +239,12 @@ public abstract class ArrayUtil {
 	        '8', '9', 'A', 'B', //
 	        'C', 'D', 'E', 'F' };
 
-	public static void memsetZero(ByteBuffer buf) {
+	/**
+	 * Overwrites the buffer's content with zeros. The buffer is cleared.
+	 * 
+	 * @param buf
+	 */
+	public static void memsetZero(final ByteBuffer buf) {
 		if (buf == null) {
 			return;
 		}
@@ -244,17 +254,17 @@ public abstract class ArrayUtil {
 			byte[] filler = getFiller();
 			int filLen = filler.length;
 			buf.clear();
-			int rem = buf.remaining();
+			int rem = buf.capacity();
 			while (rem > 0) {
 				int l = Math.min(rem, filLen);
 				buf.put(filler, 0, l);
 				rem -= l;
 			}
-			buf.clear();
 		}
+		buf.clear();
 	}
 
-	public static void memsetZero(byte[] buf) {
+	public static void memsetZero(final byte[] buf) {
 		if (buf == null || buf.length == 0) {
 			return;
 		}
