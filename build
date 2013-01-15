@@ -1,0 +1,3 @@
+
+env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:prepare
+env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:perform
