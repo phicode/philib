@@ -31,7 +31,7 @@ public abstract class Calc {
 	 * 
 	 * @param num a number > 0
 	 * @param divisor a number > 0
-	 * @return
+	 * @return rounded up {@code num/divisor}
 	 */
 	public static long ceilDiv(long num, long divisor) {
 		assert (num > 0 && divisor > 0);
@@ -43,7 +43,7 @@ public abstract class Calc {
 	 * 
 	 * @param num a number > 0
 	 * @param divisor a number > 0
-	 * @return
+	 * @return rounded up {@code num/divisor}
 	 */
 	public static int ceilDiv(int num, int divisor) {
 		assert (num > 0 && divisor > 0);

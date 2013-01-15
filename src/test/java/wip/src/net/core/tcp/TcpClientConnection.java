@@ -63,9 +63,8 @@ public class TcpClientConnection extends TcpConnection {
 			// stop listening for a connect timeout
 			unsetTimeout();
 			return events.getEventMask();
-		} else {
-			return super.handleOps(ops);
 		}
+		return super.handleOps(ops);
 	}
 
 	@Override
@@ -84,12 +83,11 @@ public class TcpClientConnection extends TcpConnection {
 		final AsyncConnectFuture<TcpConnection> f = this.future;
 		if (f == null) {
 			return super.handleTimeout();
-		} else {
-			// connecting
-			f.setFailed(new ConnectTimeoutException("connect timed out to: " + remoteAddress));
-			future = null;
-			return false; // close
 		}
+		// connecting
+		f.setFailed(new ConnectTimeoutException("connect timed out to: " + remoteAddress));
+		future = null;
+		return false; // close
 	}
 
 	private void finishConnect() throws IOException {

@@ -126,7 +126,7 @@ public final class LruList<E extends LruNode> {
 		return size < capacity;
 	}
 
-	private void link(LruNode first, LruNode second) {
+	private static void link(LruNode first, LruNode second) {
 		first.setLruNext(second);
 		second.setLruPrev(first);
 	}

@@ -61,9 +61,8 @@ public final class TcpNetFactory {
 			if (finished) {
 				TcpConnection conn = TcpConnection.createConnected(context, channel, endpoint);
 				return new FinishedFuture<TcpConnection>(conn);
-			} else {
-				return TcpClientConnection.createConnecting(context, channel, endpoint, connectTimeout);
 			}
+			return TcpClientConnection.createConnecting(context, channel, endpoint, connectTimeout);
 		} catch (IOException e) {
 			SafeCloseUtil.close(channel);
 			context.getSessionManager().connectFailed(endpoint, e);

@@ -133,10 +133,8 @@ public final class BasicEventDispatcher implements EventDispatcher, Runnable {
 			if (msUntilNextTimeout <= 0) {
 				return selector.selectNow();
 			}
-			else {
-				long selectTimeout = Math.min(msUntilNextTimeout, 10000L);
-				return selector.select(selectTimeout);
-			}
+			long selectTimeout = Math.min(msUntilNextTimeout, 10000L);
+			return selector.select(selectTimeout);
 		}
 		return 0;
 	}
@@ -202,7 +200,7 @@ public final class BasicEventDispatcher implements EventDispatcher, Runnable {
 		}
 	}
 
-	private void handleEvent(final EventHandler handler, final SelectionKey key, final int ops) {
+	private static void handleEvent(final EventHandler handler, final SelectionKey key, final int ops) {
 		try {
 			int oldInterestedOps = key.interestOps();
 			int newInterestedOps = handler.handleOps(ops);
@@ -372,7 +370,7 @@ public final class BasicEventDispatcher implements EventDispatcher, Runnable {
 		}
 	}
 
-	private void handleTimeout(final EventHandler handler) {
+	private static void handleTimeout(final EventHandler handler) {
 		try {
 			boolean keepRunning = handler.handleTimeout();
 			if (!keepRunning) {
