@@ -21,7 +21,7 @@
  */
 package ch.bind.philib.util;
 
-import ch.bind.philib.math.PhiMath;
+import ch.bind.philib.math.Calc;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -105,11 +105,11 @@ public final class LeakyBucket {
 	}
 
 	public long nextFillUs() {
-		return PhiMath.ceilDiv(nextFillNs(), 1000L);
+		return Calc.ceilDiv(nextFillNs(), 1000L);
 	}
 
 	public long nextFillMs() {
-		return PhiMath.ceilDiv(nextFillNs(), 1000000L);
+		return Calc.ceilDiv(nextFillNs(), 1000000L);
 	}
 
 	public void sleepWhileNotFillable() throws InterruptedException {
