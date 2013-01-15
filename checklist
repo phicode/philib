@@ -1,7 +1,7 @@
 Release checklist
 
 Code:
- - >60% unit test coverage
+ - >80% unit test coverage
  - basic documentation for major packages/utilities
 
 
