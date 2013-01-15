@@ -35,15 +35,20 @@ public final class LoadAvgSimple implements LoadAvg {
 	private long tIdle;
 
 	private long lastNormalizeNs;
-	
+
 	private double _50percent;
+
 	private double _80percent;
+
 	private double _90percent;
+
 	private double _95percent;
+
 	private double _99percent;
+
 	private double _999promile;
-	private double _999percent;
-	
+
+	private double _999percent
 
 	private LoadAvgSimple(long avgOfXNs) {
 		this.lAvgOfXNs = avgOfXNs;
