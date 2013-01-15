@@ -115,7 +115,6 @@ public class PrivateConstructorTest {
 		if (clazz.isAnonymousClass()) {
 			return;
 		}
-		// TODO: inner classes, anonymous classes
 		Constructor<?>[] ctors = clazz.getDeclaredConstructors();
 		if (ctors.length < 1) {
 			System.out.println("no constructors found for class: " + clazz.getName());

@@ -25,6 +25,7 @@ package ch.bind.philib.util;
 import java.util.Arrays;
 
 import ch.bind.philib.util.ClusteredIndex.Entry;
+import ch.bind.philib.validation.Validation;
 
 // TODO: round tablesize up (2^x) and use bitmasks
 // TODO: strengthen hashcodes through an avalanche phase
@@ -40,7 +41,8 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 
 	@Override
 	public boolean add(final T entry) {
-		assert (entry != null && entry.getNextIndexEntry() == null && entry.getKey() != null);
+		Validation.isTrue(entry != null && entry.getNextIndexEntry() == null && entry.getKey() != null, //
+				"newly added entries must not be null and cleared");
 
 		final K key = entry.getKey();
 		final int hash = key.hashCode();
@@ -68,7 +70,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 
 	@Override
 	public boolean remove(final T entry) {
-		assert (entry != null);
+		Validation.notNull(entry);
 
 		final K key = entry.getKey();
 		final int hash = key.hashCode();
@@ -85,7 +87,8 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 			if (scanPrev == null) {
 				// first entry in the table
 				table[position] = scanNow.getNextIndexEntry();
-			} else {
+			}
+			else {
 				// there are entries before this one
 				scanPrev.setNextIndexEntry(scanNow.getNextIndexEntry());
 			}
@@ -98,7 +101,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 	@Override
 	@SuppressWarnings("unchecked")
 	public T get(final K key) {
-		assert (key != null);
+		Validation.notNull(key);
 
 		final int hash = key.hashCode();
 		final int position = hashPosition(hash);

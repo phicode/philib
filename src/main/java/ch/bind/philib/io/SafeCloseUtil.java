@@ -41,7 +41,7 @@ public abstract class SafeCloseUtil {
 	}
 
 	public static void close(Closeable closeable) {
-		close(closeable, null);
+		close(closeable, LOG);
 	}
 
 	public static void close(Closeable closeable, Logger logger) {
