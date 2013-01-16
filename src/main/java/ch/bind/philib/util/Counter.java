@@ -52,14 +52,6 @@ public final class Counter {
 		return unit;
 	}
 
-	/**
-	 * @deprecated deprecated in favor of {@link #count(long)}.
-	 */
-	@Deprecated
-	public void add(long value) {
-		count(value);
-	}
-
 	public void count(long value) {
 		if (value <= 0) {
 			return;
