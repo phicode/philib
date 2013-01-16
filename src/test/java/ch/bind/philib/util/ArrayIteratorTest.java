@@ -69,7 +69,7 @@ public class ArrayIteratorTest {
 		verifyEnd(iter);
 	}
 
-	private void verifyEnd(Iterator<Integer> iter) {
+	private static void verifyEnd(Iterator<Integer> iter) {
 		assertFalse(iter.hasNext());
 		try {
 			iter.next();
@@ -79,7 +79,7 @@ public class ArrayIteratorTest {
 		}
 	}
 
-	private void verifyNoRemove(Iterator<Integer> iter) {
+	private static void verifyNoRemove(Iterator<Integer> iter) {
 		try {
 			iter.remove();
 			fail();

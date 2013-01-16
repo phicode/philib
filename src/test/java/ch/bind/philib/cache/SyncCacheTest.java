@@ -22,9 +22,11 @@
 
 package ch.bind.philib.cache;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
-import static org.testng.Assert.*;
 
 public class SyncCacheTest {
 

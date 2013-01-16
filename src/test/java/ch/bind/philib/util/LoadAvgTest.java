@@ -40,7 +40,7 @@ public class LoadAvgTest {
 		assertEquals(LoadAvgNoop.INSTANCE.getLoadAvg(), 0);
 		LoadAvgNoop.INSTANCE.logWorkMs(999999999);
 		assertEquals(LoadAvgNoop.INSTANCE.getLoadAvg(), 0);
-		
+
 		double z = 0;
 		assertEquals(LoadAvgNoop.INSTANCE.asFactor(0), z);
 		assertEquals(LoadAvgNoop.INSTANCE.asFactor(1000), z);

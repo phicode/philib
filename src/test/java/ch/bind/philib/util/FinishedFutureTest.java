@@ -22,10 +22,14 @@
 
 package ch.bind.philib.util;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.concurrent.TimeUnit;
 
 import org.testng.annotations.Test;
-import static org.testng.Assert.*;
 
 public class FinishedFutureTest {
 
