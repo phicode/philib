@@ -31,130 +31,125 @@ import ch.bind.philib.validation.Validation;
  */
 public final class LeakyBucket {
 
-	/** the maximum amount before the bucket will drop */
+	/** the maximum amount that can be taken before the bucket is "empty" */
 	private final long capacity;
 
-	/** how often the bucket will leak until it is empty */
-	private final long leakIntervalNs;
+	/** the time between individual takes on en empty bucket */
+	private final long takeIntervalNs;
 
-	/** the last time the bucket leaked */
-	private long lastLeakNs;
+	/** the last time a recalculation was performed */
+	private long lastRecalcNs;
 
 	/** the current content of the bucket */
-	private long current;
+	private long content;
 
-	private LeakyBucket(long leakIntervalNs, long capacity) {
-		this.leakIntervalNs = leakIntervalNs;
+	private LeakyBucket(long takeIntervalNs, long capacity) {
+		this.takeIntervalNs = takeIntervalNs;
 		this.capacity = capacity;
+		this.content = capacity;
 	}
 
-	public static LeakyBucket withLeakPerSecond(double leakPerSecond, long capacity) {
-		Validation.isTrue(leakPerSecond >= 0.000001, "leakPerSecond must be >= 0.000001");
-		long leakIntervalNs = (long) Math.ceil(1000000000f / leakPerSecond);
-		return withLeakIntervalNs(leakIntervalNs, capacity);
+	public static LeakyBucket withTakesPerSecond(double takesPerSecond, long capacity) {
+		Validation.isTrue(takesPerSecond >= 0.000001, "takesPerSecond must be >= 0.000001");
+		long takeIntervalNs = (long) Math.ceil(1000000000f / takesPerSecond);
+		return withTakeIntervalNs(takeIntervalNs, capacity);
 	}
 
-	public static LeakyBucket withLeakIntervalMs(long leakIntervalMs, long capacity) {
-		return withLeakIntervalNs(leakIntervalMs * 1000000L, capacity);
+	public static LeakyBucket withTakeIntervalMs(long takeIntervalMs, long capacity) {
+		return withTakeIntervalNs(takeIntervalMs * 1000000L, capacity);
 	}
 
-	public static LeakyBucket withLeakIntervalUs(long leakIntervalUs, long capacity) {
-		return withLeakIntervalNs(leakIntervalUs * 1000L, capacity);
+	public static LeakyBucket withTakeIntervalUs(long takeIntervalUs, long capacity) {
+		return withTakeIntervalNs(takeIntervalUs * 1000L, capacity);
 	}
 
-	public static LeakyBucket withLeakIntervalNs(long leakIntervalNs, long capacity) {
-		Validation.isTrue(leakIntervalNs > 0, "leakIntervalNs must be > 0");
+	public static LeakyBucket withTakeIntervalNs(long takeIntervalNs, long capacity) {
+		Validation.isTrue(takeIntervalNs > 0, "takeIntervalNs must be > 0");
 		Validation.isTrue(capacity >= 1, "capacity must be >= 1");
-		return new LeakyBucket(leakIntervalNs, capacity);
+		return new LeakyBucket(takeIntervalNs, capacity);
 	}
 
 	public long getCapacity() {
 		return capacity;
 	}
 
-	public void fill(long amount) {
-		fill(amount, System.nanoTime());
+	public void take(long amount) {
+		take(amount, System.nanoTime());
 	}
 
-	// package protected, only for testing
-	void fill(long amount, long timeNs) {
-		leak(timeNs);
-		current += amount;
+	public void take(long amount, long timeNs) {
+		recalculate(timeNs);
+		content = Math.max(0, content - amount);
 	}
 
-	public long canFill() {
-		return canFill(System.nanoTime());
-	}
-
-	/**
-	 * @param timeNs a relative timestamp as provided by
-	 *            {@code System.nanoTime()} and <b>not</b>
-	 *            {@code System.currentTimeMillis()}.
-	 * @return
-	 */
-	public long canFill(long timeNs) {
-		leak(timeNs);
-		return capacity - current;
-	}
-
-	public long nextFillNs() {
-		return nextFillNs(System.nanoTime());
+	public long canTake() {
+		return canTake(System.nanoTime());
 	}
 
 	/**
-	 * @param timeNs a relative timestamp as provided by
-	 *            {@code System.nanoTime()} and <b>not</b>
+	 * @param timeNs a relative timestamp as provided by {@code System.nanoTime()} and <b>not</b>
 	 *            {@code System.currentTimeMillis()}.
 	 * @return
 	 */
-	public long nextFillNs(long timeNs) {
-		leak(timeNs);
-		if (current < capacity) {
+	public long canTake(long timeNs) {
+		recalculate(timeNs);
+		return content;
+	}
+
+	public long nextTakeNs() {
+		return nextTakeNs(System.nanoTime());
+	}
+
+	/**
+	 * @param timeNs a relative timestamp as provided by {@code System.nanoTime()} and <b>not</b>
+	 *            {@code System.currentTimeMillis()}.
+	 * @return
+	 */
+	public long nextTakeNs(long timeNs) {
+		recalculate(timeNs);
+		if (content > 0) {
 			// available immediately
 			return 0;
 		}
-		long nextLeakNano = lastLeakNs + leakIntervalNs;
-		return nextLeakNano - timeNs;
+		long nextTakeNano = lastRecalcNs + takeIntervalNs;
+		return nextTakeNano - timeNs;
 	}
 
-	public long nextFillUs() {
-		return Calc.ceilDiv(nextFillNs(), 1000L);
+	public long nextTakeUs() {
+		return Calc.ceilDiv(nextTakeNs(), 1000L);
 	}
 
-	public long nextFillMs() {
-		return Calc.ceilDiv(nextFillNs(), 1000000L);
+	public long nextTakeMs() {
+		return Calc.ceilDiv(nextTakeNs(), 1000000L);
 	}
 
-	public void sleepWhileNotFillable() throws InterruptedException {
-		long nextFillNano;
-		while ((nextFillNano = nextFillNs()) > 0) {
-			long sleepMs = nextFillNano / 1000000L;
-			int sleepNano = (int) (nextFillNano % 1000000L);
+	public void sleepUntilAvailable() throws InterruptedException {
+		long nextTakeNano;
+		while ((nextTakeNano = nextTakeNs()) > 0) {
+			long sleepMs = nextTakeNano / 1000000L;
+			int sleepNano = (int) (nextTakeNano % 1000000L);
 			Thread.sleep(sleepMs, sleepNano);
 		}
 	}
 
-	private void leak(final long timeNs) {
-		if (timeNs < lastLeakNs) {
+	private void recalculate(final long timeNs) {
+		if (timeNs < lastRecalcNs) {
 			// it seems that someone adjusted his clock backwards
-			lastLeakNs = timeNs;
+			lastRecalcNs = timeNs;
 		}
 		else {
-			long diff = timeNs - lastLeakNs;
-			long canLeak = diff / leakIntervalNs;
-			if (canLeak > 0) {
-				// dont go below 0
-				if (canLeak >= current) {
-					lastLeakNs = (leakIntervalNs * current);
-					current = 0;
+			long diff = timeNs - lastRecalcNs;
+			long newlyAvailable = diff / takeIntervalNs;
+			if (newlyAvailable > 0) {
+				// do not overflow
+				long newContent = content + newlyAvailable;
+				if (newContent > capacity) {
+					content = capacity;
+					lastRecalcNs = timeNs;
+				} else {
+					lastRecalcNs += (newlyAvailable * takeIntervalNs);
+					content = newContent;
 				}
-				else {
-					lastLeakNs += (leakIntervalNs * canLeak);
-					current -= canLeak;
-				}
-			}
-			if (current == 0) {
-				lastLeakNs = timeNs;
 			}
 		}
 	}

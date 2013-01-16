@@ -28,82 +28,85 @@ import org.testng.annotations.Test;
 
 public class LeakyBucketTest {
 
-	private static final long SEC = 1000000000L;
+	private static final long NS_PER_SEC = 1000000000L;
 
-	@Test
+	@Test(timeOut = 2000)
 	public void normalTimeInitialCalc() {
-		LeakyBucket bc = LeakyBucket.withLeakPerSecond(2500, 1000);
-		assertEquals(1000, bc.canFill());
-		assertEquals(1000, bc.getCapacity());
+		LeakyBucket lb = LeakyBucket.withTakesPerSecond(2500, 1000);
+		assertEquals(1000, lb.canTake());
+		assertEquals(1000, lb.getCapacity());
 	}
 
-	@Test
+	@Test(timeOut = 2000)
 	public void fakeTimeInitialCalc() {
-		LeakyBucket bc = LeakyBucket.withLeakPerSecond(100, 1000);
-		// fill the bucket
-		bc.fill(1000, 0);
-		// not quite a second a second later
-		long time = SEC - 1;
-		assertEquals(99, bc.canFill(time));
-		time++; // 1sec
-		assertEquals(100, bc.canFill(time));
+		LeakyBucket lb = LeakyBucket.withTakesPerSecond(100, 1000);
+
+		// take everything
+		lb.take(1000, 0);
+
+		// not quite a second later
+		long timeNs = NS_PER_SEC - 1;
+		assertEquals(99, lb.canTake(timeNs));
+
+		timeNs = NS_PER_SEC;
+		assertEquals(100, lb.canTake(timeNs));
 	}
 
-	@Test
+	@Test(timeOut = 2000)
 	public void fakeTimeCountSmallSteps() {
-		LeakyBucket bc = LeakyBucket.withLeakPerSecond(2500, 2500);
-		long time = SEC;
+		LeakyBucket lb = LeakyBucket.withTakesPerSecond(2500, 2500);
+		long timeNs = NS_PER_SEC;
 		long interval = 400000; // SEC / 2500
-		assertEquals(2500, bc.canFill(time));
-		assertEquals(0, bc.nextFillNs(time));
+		assertEquals(2500, lb.canTake(timeNs));
+		assertEquals(0, lb.nextTakeNs(timeNs));
 		// simulate one whole day
 		for (int numSeconds = 0; numSeconds < 86400; numSeconds++) {
-			assertEquals(2500, bc.canFill(time));
-			assertEquals(0, bc.nextFillNs(time));
+			assertEquals(2500, lb.canTake(timeNs));
+			assertEquals(0, lb.nextTakeNs(timeNs));
 
-			bc.fill(2500, time);
-			assertEquals(0, bc.canFill(time));
-			assertEquals(interval, bc.nextFillNs(time));
-			time++; // x sec + 1 nano
-			assertEquals(0, bc.canFill(time));
-			assertEquals(interval - 1, bc.nextFillNs(time));
+			lb.take(2500, timeNs);
+			assertEquals(0, lb.canTake(timeNs));
+			assertEquals(interval, lb.nextTakeNs(timeNs));
+			timeNs++; // x sec + 1 nano
+			assertEquals(0, lb.canTake(timeNs));
+			assertEquals(interval - 1, lb.nextTakeNs(timeNs));
 
 			// x.5 sec - 1 nano
-			time += (SEC / 2 - 2);
-			assertEquals(1249, bc.canFill(time));
+			timeNs += (NS_PER_SEC / 2 - 2);
+			assertEquals(1249, lb.canTake(timeNs));
 			// x.5 sec
-			time++;
-			assertEquals(1250, bc.canFill(time));
+			timeNs++;
+			assertEquals(1250, lb.canTake(timeNs));
 
 			// x.5 sec + 1 nano
-			time++;
-			assertEquals(1250, bc.canFill(time));
+			timeNs++;
+			assertEquals(1250, lb.canTake(timeNs));
 
 			// x + 1 sec - 1 nano
-			time += (SEC / 2 - 2);
-			assertEquals(2499, bc.canFill(time));
+			timeNs += (NS_PER_SEC / 2 - 2);
+			assertEquals(2499, lb.canTake(timeNs));
 
 			// x + 1sec
-			time++;
-			assertEquals(2500, bc.canFill(time));
+			timeNs++;
+			assertEquals(2500, lb.canTake(timeNs));
 		}
 	}
 
-	@Test
-	public void fillWithRealTime() {
-		LeakyBucket bc = LeakyBucket.withLeakPerSecond(2500, 1000);
+	@Test(timeOut = 1000)
+	public void takeWithRealTime() {
+		LeakyBucket lb = LeakyBucket.withTakesPerSecond(25000, 1000);
+		assertEquals(lb.canTake(), 1000);
 		long start = System.nanoTime();
-		assertEquals(bc.canFill(), 1000);
-		bc.fill(1000);
-		assertEquals(bc.canFill(), 0);
+		lb.take(1000);
+		assertEquals(lb.canTake(start), 0);
 		long moreAcquired = 0;
 		while (moreAcquired < 5000) {
 			long time = System.nanoTime();
-			long nextAvail = bc.nextFillNs(time);
-			long a = bc.canFill(time);
+			long nextAvail = lb.nextTakeNs(time);
+			long a = lb.canTake(time);
 			if (a > 0) {
 				assertEquals(nextAvail, 0); // available now
-				bc.fill(a, time);
+				lb.take(a, time);
 				moreAcquired += a;
 			} else {
 				assertTrue(nextAvail > 0);
@@ -113,34 +116,41 @@ public class LeakyBucketTest {
 		long totalTime = end - start;
 		// 2 milliseconds or 0.1% should be ok even for lame computers
 		long delta = 5 * 1000 * 1000;
-		// should take 2 seconds
-		long min = 2 * 1000 * 1000 * 1000 - delta;
-		long max = 2 * 1000 * 1000 * 1000 + delta;
+		// should take 0.2 seconds
+		long min = 200 * 1000 * 1000 - delta;
+		long max = 200 * 1000 * 1000 + delta;
 		assertTrue(totalTime >= min && totalTime <= max, "total: " + totalTime);
 	}
 
-	@Test
+	@Test(timeOut = 5000)
 	public void exactRelease() {
-		long intervalMs = 100;
+		long intervalMs = 100; // 10 per sec
 		long intervalNs = intervalMs * 1000000L;
 		long i3 = intervalNs * 3;
 		long i4 = intervalNs * 4;
-		LeakyBucket bc = LeakyBucket.withLeakIntervalMs(intervalMs, 1);
-		bc.fill(1);
-		for (long t = 0; t < intervalNs; t += 10) {
-			assertTrue(bc.canFill(t) == 0);
-			assertTrue(bc.nextFillNs(t) == intervalNs - t);
+
+		LeakyBucket lb = LeakyBucket.withTakeIntervalMs(intervalMs, 1);
+		long t = 0;
+		lb.take(1, t);
+		while (t < intervalNs) {
+			assertEquals(lb.canTake(t), 0);
+			assertEquals(lb.nextTakeNs(t), intervalNs - t);
+			t += 1000;
 		}
-		for (long t = intervalNs; t < i3; t += 10) {
-			assertTrue(bc.canFill(t) == 1);
-			assertTrue(bc.nextFillNs(t) == 0);
+		while (t < i3) {
+			assertEquals(lb.canTake(t), 1);
+			assertEquals(lb.nextTakeNs(t), 0);
+			t += 1000;
 		}
-		bc.fill(1, i3);
-		for (long t = i3; t < i4; t += 10) {
-			assertTrue(bc.canFill(t) == 0);
-			assertTrue(bc.nextFillNs(t) == i4 - t);
+
+		lb.take(1, i3);
+		while (t < i4) {
+			assertEquals(lb.canTake(t), 0);
+			assertEquals(lb.nextTakeNs(t), i4 - t);
+			t += 1000;
 		}
-		assertTrue(bc.canFill(i4 + 1) == 1);
-		assertTrue(bc.nextFillNs(i4 + 1) == 0);
+
+		assertEquals(lb.canTake(i4 + 1), 1);
+		assertEquals(lb.nextTakeNs(i4 + 1), 0);
 	}
 }
