@@ -22,15 +22,30 @@
 
 package ch.bind.philib.util;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-public class LoadAvgSimpleTest {
+public class LoadAvgTest {
 
-	private static final Logger LOG = LoggerFactory.getLogger(LoadAvgSimpleTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LoadAvgTest.class);
+
+	@Test
+	public void noop() {
+		assertEquals(LoadAvgNoop.INSTANCE.getLoadAvg(), 0);
+		LoadAvgNoop.INSTANCE.logWorkNs(999999999);
+		assertEquals(LoadAvgNoop.INSTANCE.getLoadAvg(), 0);
+		LoadAvgNoop.INSTANCE.logWorkMs(999999999);
+		assertEquals(LoadAvgNoop.INSTANCE.getLoadAvg(), 0);
+		
+		double z = 0;
+		assertEquals(LoadAvgNoop.INSTANCE.asFactor(0), z);
+		assertEquals(LoadAvgNoop.INSTANCE.asFactor(1000), z);
+		assertEquals(LoadAvgNoop.INSTANCE.asFactor(1000000), z);
+	}
 
 	@Test
 	public void withSeconds() {
