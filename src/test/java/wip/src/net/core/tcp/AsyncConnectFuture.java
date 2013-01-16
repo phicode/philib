@@ -67,19 +67,15 @@ public final class AsyncConnectFuture<T extends Connection> implements Future<T>
 	}
 
 	@Override
-	public boolean cancel(boolean mayInterruptIfRunning) {
-		synchronized (this) {
-			if (done) {
-				return false;
-			}
-			done = true;
-			cancelled = true;
+	public synchronized boolean cancel(boolean mayInterruptIfRunning) {
+		if (done) {
+			return false;
 		}
+		done = true;
+		cancelled = true;
 		SafeCloseUtil.close(connection);
-		synchronized (this) {
-			notifyAll();
-			return true;
-		}
+		notifyAll();
+		return true;
 	}
 
 	@Override
