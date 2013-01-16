@@ -12,14 +12,18 @@
 		</server>
 	</servers>
 
-2. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:prepare
+2. run checkHeaders.sh and checkVersions.sh
 
-3. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:perform
+3. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn clean test install
 
-4. login @ https://oss.sonatype.org/index.html
+4. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:prepare
 
-5. navigate to "Staging Repositories"
+5. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:perform
 
-6. select the release in question and "Close" it
+6. login @ https://oss.sonatype.org/index.html
 
-7. refresh, select again and "Release"
+7. navigate to "Staging Repositories"
+
+8. select the release in question and "Close" it
+
+9. refresh, select again and "Release"
