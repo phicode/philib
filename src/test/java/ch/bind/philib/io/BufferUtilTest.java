@@ -129,11 +129,10 @@ public class BufferUtilTest {
 		verify(res, qwxyz);
 	}
 
-	private void verify(ByteBuffer res, byte[] expected) {
+	private static void verify(ByteBuffer res, byte[] expected) {
 		assertEquals(res.remaining(), expected.length);
 		byte[] verify = new byte[expected.length];
 		res.get(verify);
 		assertEquals(verify, expected);
 	}
-
 }
