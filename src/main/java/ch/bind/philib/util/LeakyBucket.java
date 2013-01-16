@@ -86,8 +86,13 @@ public final class LeakyBucket {
 		return canFill(System.nanoTime());
 	}
 
-	// package protected, only for testing
-	long canFill(long timeNs) {
+	/**
+	 * @param timeNs a relative timestamp as provided by
+	 *            {@code System.nanoTime()} and <b>not</b>
+	 *            {@code System.currentTimeMillis()}.
+	 * @return
+	 */
+	public long canFill(long timeNs) {
 		leak(timeNs);
 		return capacity - current;
 	}
@@ -96,8 +101,13 @@ public final class LeakyBucket {
 		return nextFillNs(System.nanoTime());
 	}
 
-	// package protected, only for testing
-	long nextFillNs(long timeNs) {
+	/**
+	 * @param timeNs a relative timestamp as provided by
+	 *            {@code System.nanoTime()} and <b>not</b>
+	 *            {@code System.currentTimeMillis()}.
+	 * @return
+	 */
+	public long nextFillNs(long timeNs) {
 		leak(timeNs);
 		if (current < capacity) {
 			// available immediately
@@ -128,7 +138,8 @@ public final class LeakyBucket {
 		if (timeNs < lastLeakNs) {
 			// it seems that someone adjusted his clock backwards
 			lastLeakNs = timeNs;
-		} else {
+		}
+		else {
 			long diff = timeNs - lastLeakNs;
 			long canLeak = diff / leakIntervalNs;
 			if (canLeak > 0) {
@@ -136,7 +147,8 @@ public final class LeakyBucket {
 				if (canLeak >= current) {
 					lastLeakNs = (leakIntervalNs * current);
 					current = 0;
-				} else {
+				}
+				else {
 					lastLeakNs += (leakIntervalNs * canLeak);
 					current -= canLeak;
 				}
