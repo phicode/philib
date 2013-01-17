@@ -33,9 +33,9 @@ public final class Philib {
 
 	public static final int PHILIB_VERSION_MAJOR = 0;
 
-	public static final int PHILIB_VERSION_MINOR = 5;
+	public static final int PHILIB_VERSION_MINOR = 6;
 
-	public static final int PHILIB_VERSION_PATCH = 1;
+	public static final int PHILIB_VERSION_PATCH = 0;
 
 	public static final String PHILIB_VERSION = PHILIB_VERSION_MAJOR + "." + PHILIB_VERSION_MINOR + "." + PHILIB_VERSION_PATCH;
 
