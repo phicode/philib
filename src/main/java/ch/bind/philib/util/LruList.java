@@ -28,7 +28,7 @@ public final class LruList<E extends LruNode> {
 
 	private final int capacity;
 
-	private final HeadTailNode headTail = new HeadTailNode();
+	private final HeadTailNode<E> headTail = new HeadTailNode<E>();
 
 	private int size;
 
@@ -131,7 +131,7 @@ public final class LruList<E extends LruNode> {
 		second.setLruPrev(first);
 	}
 
-	static final class HeadTailNode implements LruNode {
+	static final class HeadTailNode<E extends LruNode> implements LruNode {
 
 		private LruNode next;
 

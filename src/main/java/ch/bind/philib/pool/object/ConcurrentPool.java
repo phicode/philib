@@ -31,8 +31,6 @@ import ch.bind.philib.pool.manager.ObjectManager;
 import ch.bind.philib.validation.Validation;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public final class ConcurrentPool<T> implements Pool<T> {

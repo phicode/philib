@@ -25,8 +25,6 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public final class ValidationResults implements Serializable {

@@ -25,8 +25,6 @@ package ch.bind.philib.io;
 import ch.bind.philib.validation.Validation;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 // TODO: max-capacity

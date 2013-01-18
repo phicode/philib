@@ -22,8 +22,6 @@
 package ch.bind.philib.validation;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public class ValidationException extends Exception {

@@ -27,8 +27,6 @@ import ch.bind.philib.pool.manager.ObjectManager;
 import ch.bind.philib.validation.Validation;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public abstract class PoolBase<T> implements Pool<T> {

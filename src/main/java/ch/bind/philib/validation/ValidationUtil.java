@@ -24,8 +24,6 @@ package ch.bind.philib.validation;
 import java.util.Collection;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public final class ValidationUtil {

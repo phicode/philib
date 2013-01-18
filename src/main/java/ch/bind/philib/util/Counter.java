@@ -39,6 +39,15 @@ public final class Counter {
 
 	private long max = -1;
 
+	// TODO
+	// private double _50percent;
+	// private double _80percent;
+	// private double _90percent;
+	// private double _95percent;
+	// private double _99percent;
+	// private double _999promile;
+	// private double _999percent
+
 	Counter(String name, String unit) {
 		this.name = name;
 		this.unit = unit;
@@ -62,7 +71,8 @@ public final class Counter {
 				min = value;
 				max = value;
 				total = value;
-			} else {
+			}
+			else {
 				counts++;
 				total = Calc.unsignedAdd(total, value);
 				min = Math.min(min, value);

@@ -117,6 +117,7 @@
 					<optimize>${javac.optimize}</optimize>
 					<showWarnings>${javac.showWarnings}</showWarnings>
 					<showDeprecation>${javac.showDeprecation}</showDeprecation>
+					<compilerArgument>-Xlint:unchecked</compilerArgument>
 				</configuration>
 			</plugin>
 

@@ -23,8 +23,6 @@
 package ch.bind.philib.lang;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public abstract class StringUtil {

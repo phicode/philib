@@ -23,8 +23,6 @@
 package ch.bind.philib.io;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public interface DoubleSidedBuffer {

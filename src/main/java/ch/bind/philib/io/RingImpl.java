@@ -23,8 +23,6 @@
 package ch.bind.philib.io;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public final class RingImpl<T> implements Ring<T> {

@@ -26,8 +26,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import ch.bind.philib.pool.PoolStats;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public final class SimplePoolStats implements PoolStats {

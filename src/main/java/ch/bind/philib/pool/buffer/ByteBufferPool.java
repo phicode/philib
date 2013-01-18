@@ -32,8 +32,6 @@ import ch.bind.philib.pool.object.SoftRefPool;
 import ch.bind.philib.validation.Validation;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public final class ByteBufferPool implements Pool<ByteBuffer> {
