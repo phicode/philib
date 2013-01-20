@@ -4,6 +4,9 @@
       B = bugfix
       G = general
 
+=== 0.6.0 ===
+ F: rework of the counter api
+ 
 === 0.5.0 ===
  G: Test-coverage increased to over 90%
  G: Many minor enhancements and additions

@@ -29,8 +29,6 @@ public final class Counter {
 
 	private final String name;
 
-	private final String unit;
-
 	private long counts;
 
 	private long total;
@@ -48,21 +46,16 @@ public final class Counter {
 	// private double _999promile;
 	// private double _999percent
 
-	Counter(String name, String unit) {
+	Counter(String name) {
 		this.name = name;
-		this.unit = unit;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public String getUnit() {
-		return unit;
-	}
-
 	public void count(long value) {
-		if (value <= 0) {
+		if (value < 0) {
 			return;
 		}
 		synchronized (this) {
@@ -74,9 +67,9 @@ public final class Counter {
 			}
 			else {
 				counts++;
-				total = Calc.unsignedAdd(total, value);
 				min = Math.min(min, value);
 				max = Math.max(max, value);
+				total = Calc.unsignedAdd(total, value);
 			}
 		}
 	}
@@ -99,9 +92,9 @@ public final class Counter {
 		}
 
 		if (c == 0) {
-			return String.format("%s[unit=%s, #counts=0, total=0, min=N/A, max=N/A, avg=N/A]", name, unit);
+			return String.format("%s[counts=0, total=0, min=N/A, max=N/A, avg=N/A]", name);
 		}
 		double avg = ((double) to) / c;
-		return String.format("%s[unit=%s, #counts=%d, total=%d, min=%d, max=%d, avg=%.3f]", name, unit, c, to, mi, ma, avg);
+		return String.format("%s[counts=%d, total=%d, min=%d, max=%d, avg=%.3f]", name, c, to, mi, ma, avg);
 	}
 }

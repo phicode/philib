@@ -25,61 +25,90 @@ package ch.bind.philib.util;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 public class CounterRepoTest {
 
+	@AfterMethod
+	public void afterMethod() {
+		CounterRepo.DEFAULT.clear();
+	}
+
 	@Test
 	public void reuseExisting() {
-		Counter a = CounterRepo.DEFAULT.forName("a", null);
-		Counter b = CounterRepo.DEFAULT.forName("b", null);
+		Counter a1 = CounterRepo.DEFAULT.forName("a", null);
+		Counter a2 = CounterRepo.DEFAULT.forName("a");
+		Counter b1 = CounterRepo.DEFAULT.forName("b", null);
+		Counter b2 = CounterRepo.DEFAULT.forName("b");
+		Counter i1 = CounterRepo.DEFAULT.forClass(Integer.class, null);
+		Counter i2 = CounterRepo.DEFAULT.forClass(Integer.class);
+		Counter s1 = CounterRepo.DEFAULT.forClass(String.class, null);
+		Counter s2 = CounterRepo.DEFAULT.forClass(String.class);
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 4);
 
-		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 2);
-		Counter a2 = CounterRepo.DEFAULT.forName("a", null);
-		Counter b2 = CounterRepo.DEFAULT.forName("b", null);
-		assertTrue(a == a2);
-		assertTrue(b == b2);
-		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 2);
+		Counter ap1 = CounterRepo.DEFAULT.forName("a", "x");
+		Counter ap2 = CounterRepo.DEFAULT.forName("a", "x");
+		Counter bp1 = CounterRepo.DEFAULT.forName("b", "x");
+		Counter bp2 = CounterRepo.DEFAULT.forName("b", "x");
+		Counter ip1 = CounterRepo.DEFAULT.forClass(Integer.class, "x");
+		Counter ip2 = CounterRepo.DEFAULT.forClass(Integer.class, "x");
+		Counter sp1 = CounterRepo.DEFAULT.forClass(String.class, "x");
+		Counter sp2 = CounterRepo.DEFAULT.forClass(String.class, "x");
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 8);
 
-		CounterRepo.DEFAULT.remove("a");
-		CounterRepo.DEFAULT.remove("b");
+		assertTrue(a1 == a2);
+		assertTrue(b1 == b2);
+		assertTrue(i1 == i2);
+		assertTrue(s1 == s2);
+
+		assertTrue(ap1 == ap2);
+		assertTrue(bp1 == bp2);
+		assertTrue(ip1 == ip2);
+		assertTrue(sp1 == sp2);
 	}
 
 	@Test
 	public void remove() {
-		Counter a = CounterRepo.DEFAULT.forName("a", null);
-		CounterRepo.DEFAULT.remove("a");
-		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 0);
-		Counter a2 = CounterRepo.DEFAULT.forName("a", null);
-		assertTrue(a != null && a2 != null && a != a2);
+		Counter a1 = CounterRepo.DEFAULT.forName("a");
+		Counter a2 = CounterRepo.DEFAULT.forName("a", "x");
+		Counter i1 = CounterRepo.DEFAULT.forClass(Integer.class);
+		Counter i2 = CounterRepo.DEFAULT.forClass(Integer.class, "x");
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 4);
 
 		CounterRepo.DEFAULT.remove("a");
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 3);
+		CounterRepo.DEFAULT.remove("a", "x");
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 2);
+		CounterRepo.DEFAULT.remove(Integer.class);
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 1);
+		CounterRepo.DEFAULT.remove(Integer.class, "x");
+		assertEquals(CounterRepo.DEFAULT.getCounters().size(), 0);
+
+		Counter otherA1 = CounterRepo.DEFAULT.forName("a");
+		Counter otherA2 = CounterRepo.DEFAULT.forName("a", "x");
+		Counter otherI1 = CounterRepo.DEFAULT.forClass(Integer.class);
+		Counter otherI2 = CounterRepo.DEFAULT.forClass(Integer.class, "x");
+		assertTrue(a1 != otherA1 && a2 != otherA2 && i1 != otherI1 && i2 != otherI2);
 	}
 
 	@Test
 	public void noName() {
-		Counter pm = CounterRepo.DEFAULT.forName(null, "ms");
-		assertEquals(pm.getName(), "default");
-		assertEquals(pm.getUnit(), "ms");
+		Counter n1 = CounterRepo.DEFAULT.forName(null);
+		Counter n2 = CounterRepo.DEFAULT.forName(null, "x");
+		Counter n3 = CounterRepo.DEFAULT.forName("");
+		Counter n4 = CounterRepo.DEFAULT.forName("", "x");
+		assertEquals(n1.getName(), "default");
+		assertEquals(n2.getName(), "default:x");
+		assertEquals(n3.getName(), "default");
+		assertEquals(n4.getName(), "default:x");
 
-		CounterRepo.DEFAULT.remove("default");
-	}
+		Counter c1 = CounterRepo.DEFAULT.forClass(null);
+		Counter c2 = CounterRepo.DEFAULT.forClass(null, "x");
+		assertEquals(c1.getName(), "default");
+		assertEquals(c2.getName(), "default:x");
 
-	@Test
-	public void noUnit() {
-		Counter c = CounterRepo.DEFAULT.forName("a", null);
-		assertEquals(c.getName(), "a");
-		assertEquals(c.getUnit(), "unknown");
-
-		CounterRepo.DEFAULT.remove("a");
-	}
-
-	@Test
-	public void noNameNoUnit() {
-		Counter c = CounterRepo.DEFAULT.forName(null, null);
-		assertEquals(c.getName(), "default");
-		assertEquals(c.getUnit(), "unknown");
-
-		CounterRepo.DEFAULT.remove("default");
+		assertTrue(n1 == n3 && n1 == c1);
+		assertTrue(n2 == n4 && n2 == c2);
 	}
 }

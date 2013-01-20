@@ -29,9 +29,9 @@ import java.util.concurrent.ConcurrentMap;
 
 public final class CounterRepo {
 
-	private static final String DEFAULT_COUNTER_NAME = "default";
+	private static final String DEFAULT_NAME = "default";
 
-	private static final String DEFAULT_UNIT_NAME = "unknown";
+	private static final char POSTFIX_SEP = ':';
 
 	public static final CounterRepo DEFAULT = new CounterRepo();
 
@@ -40,39 +40,74 @@ public final class CounterRepo {
 	public CounterRepo() {}
 
 	public Counter forClass(Class<?> clazz) {
-		return forClass(clazz, null);
+		return get(nameOf(clazz));
 	}
 
-	public Counter forClass(Class<?> clazz, String unit) {
-		String name = clazz == null ? null : clazz.getName();
-		return forName(name, unit);
+	public Counter forClass(Class<?> clazz, String postfix) {
+		return get(nameOf(clazz, postfix));
 	}
 
 	public Counter forName(String name) {
-		return forName(name, null);
+		return get(nameOf(name));
 	}
 
-	public Counter forName(String name, String unit) {
-		name = getOrElse(name, DEFAULT_COUNTER_NAME);
-		unit = getOrElse(unit, DEFAULT_UNIT_NAME);
-		Counter counter = counters.get(name);
+	public Counter forName(String name, String postfix) {
+		return get(nameOf(name, postfix));
+	}
+
+	private Counter get(String realName) {
+		Counter counter = counters.get(realName);
 		if (counter != null) {
 			return counter;
 		}
-		counter = new Counter(name, unit);
-		Counter other = counters.putIfAbsent(name, counter);
+		counter = new Counter(realName);
+		Counter other = counters.putIfAbsent(realName, counter);
 		return other != null ? other : counter;
 	}
 
 	public void remove(String name) {
-		counters.remove(getOrElse(name, DEFAULT_COUNTER_NAME));
+		counters.remove(nameOf(name));
+	}
+
+	public void remove(String name, String postfix) {
+		counters.remove(nameOf(name, postfix));
+	}
+
+	public void remove(Class<?> clazz) {
+		counters.remove(nameOf(clazz));
+	}
+
+	public void remove(Class<?> clazz, String postfix) {
+		counters.remove(nameOf(clazz, postfix));
 	}
 
 	public Collection<Counter> getCounters() {
 		return new ArrayList<Counter>(counters.values());
 	}
 
-	private static String getOrElse(String name, String def) {
-		return (name == null || name.isEmpty()) ? def : name;
+	public void clear() {
+		counters.clear();
+	}
+
+	public static String nameOf(String name) {
+		return nullOrEmpty(name) ? DEFAULT_NAME : name;
+	}
+
+	public static String nameOf(String name, String postfix) {
+		String n = nameOf(name);
+		return nullOrEmpty(postfix) ? n : n + POSTFIX_SEP + postfix;
+	}
+
+	public static String nameOf(Class<?> clazz) {
+		return clazz == null ? DEFAULT_NAME : clazz.getName();
+	}
+
+	public static String nameOf(Class<?> clazz, String postfix) {
+		String n = nameOf(clazz);
+		return nullOrEmpty(postfix) ? n : n + POSTFIX_SEP + postfix;
+	}
+
+	private static final boolean nullOrEmpty(String s) {
+		return s == null || s.isEmpty();
 	}
 }
