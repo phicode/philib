@@ -72,13 +72,13 @@ public abstract class Calc {
 	 * 1 1 0  Underflow    1      1           1
 	 * 1 1 1  OK           0      0           0
 	 * 
-	 * So ((A^R) & (B^R)) produces a negative number (sign bit set) only if an under/overflow occurred.
+	 * ((A^R) & (B^R)) produces a negative number if an under/overflow occurred.
 	 * </pre>
 	 * 
-	 * @param a
-	 * @param b
-	 * @param r
-	 * @return
+	 * @param a -
+	 * @param b -
+	 * @param r result of a + b
+	 * @return {@code true} if an over-, or overflow occurred, {@code false} otherwise.
 	 */
 	public static boolean isAddUnderOrOverflow(long a, long b, long r) {
 		return ((a ^ r) & (b ^ r)) < 0;
