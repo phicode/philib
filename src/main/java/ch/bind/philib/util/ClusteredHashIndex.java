@@ -82,16 +82,16 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 			scanPrev = scanNow;
 			scanNow = scanNow.getNextIndexEntry();
 		}
-		if (scanNow != null) {
-			assert (hash == scanNow.getKey().hashCode() && key.equals(scanNow.getKey()));
+		if (scanNow == entry) {
 			if (scanPrev == null) {
 				// first entry in the table
-				table[position] = scanNow.getNextIndexEntry();
+				table[position] = entry.getNextIndexEntry();
 			}
 			else {
 				// there are entries before this one
-				scanPrev.setNextIndexEntry(scanNow.getNextIndexEntry());
+				scanPrev.setNextIndexEntry(entry.getNextIndexEntry());
 			}
+			entry.setNextIndexEntry(null);
 			return true; // entry found and removed
 		}
 		return false; // entry not found
