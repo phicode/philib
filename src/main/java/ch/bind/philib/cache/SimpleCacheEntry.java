@@ -29,11 +29,6 @@ import ch.bind.philib.util.LruNode;
 
 class SimpleCacheEntry<K, V> implements Entry<K>, LruNode {
 
-	SimpleCacheEntry(K key, V value) {
-		this.key = key;
-		setValue(value);
-	}
-
 	private final K key;
 
 	private SoftReference<V> value;
@@ -43,6 +38,11 @@ class SimpleCacheEntry<K, V> implements Entry<K>, LruNode {
 	private LruNode lruNext;
 
 	private LruNode lruPrev;
+
+	SimpleCacheEntry(K key, V value) {
+		this.key = key;
+		setValue(value);
+	}
 
 	@Override
 	public K getKey() {
