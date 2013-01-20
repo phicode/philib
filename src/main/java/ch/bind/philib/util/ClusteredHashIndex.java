@@ -124,6 +124,13 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 
 	@Override
 	public void clear() {
+		for (Entry<K> e : table) {
+			while (e != null) {
+				Entry<K> next = e.getNextIndexEntry();
+				e.setNextIndexEntry(null);
+				e = next;
+			}
+		}
 		Arrays.fill(table, null);
 	}
 }
