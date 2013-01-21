@@ -33,16 +33,18 @@ public abstract class StringUtil {
 		if (s == null || s.isEmpty()) {
 			return "";
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int l = s.length(), i = 0; i < l; i++) {
+		final int l = s.length();
+		int start = 0;
+		for (int i = 0; i < l; i++) {
 			char c = s.charAt(i);
 			if (c == delim) {
-				sb.setLength(0);
-			} else {
-				sb.append(c);
+				start = i+1;
 			}
 		}
-		return sb.toString();
+		if (start == l) {
+			return "";
+		}
+		return s.substring(start, l);
 	}
 
 	public static StringBuilder start(Object obj) {
