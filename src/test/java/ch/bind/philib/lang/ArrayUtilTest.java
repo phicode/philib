@@ -268,6 +268,31 @@ public class ArrayUtilTest {
 	}
 
 	@Test
+	public void limitedFormatShortHex() {
+		byte[] abcd = "abcd".getBytes();
+		ByteBuffer bb = ByteBuffer.wrap(abcd);
+
+		String a1 = formatShortHex(bb, 8);
+		String b1 = formatShortHex(bb, 2);
+		String c1 = formatShortHex((ByteBuffer)bb.position(1), 2);
+		String d1 = formatShortHex((ByteBuffer)bb.position(1), 8);
+
+		String a2 = formatShortHex(abcd, 0, 8);
+		String b2 = formatShortHex(abcd, 0, 2);
+		String c2 = formatShortHex(abcd, 1, 2);
+		String d2 = formatShortHex(abcd, 1, 8);
+
+		assertEquals(a1, "61626364");
+		assertEquals(a2, "61626364");
+		assertEquals(b1, "6162");
+		assertEquals(b2, "6162");
+		assertEquals(c1, "6263");
+		assertEquals(c2, "6263");
+		assertEquals(d1, "626364");
+		assertEquals(d2, "626364");
+	}
+
+	@Test
 	public void dontCareAboutNulls() {
 		memsetZero((byte[]) null);
 		memsetZero((ByteBuffer) null);
