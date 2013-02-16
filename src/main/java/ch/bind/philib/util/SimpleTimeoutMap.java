@@ -57,29 +57,27 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 	private final Lock wlock = rwlock.writeLock();
 
 	@Override
-	public void add(long timeout, K key, V value) {
+	public V put(long timeout, K key, V value) {
 		Validation.notNegative(timeout, "timeout must not be negative");
-		long nowNs = System.nanoTime();
-		long timeoutNs = timeout * 1000000L;
-		long timestampNs = nowNs + timeoutNs;
-		_addWithTimestampNs(timestampNs, key, value);
+		long timestampMs = System.currentTimeMillis()+timeout;
+		return _putWithTimestampMs(timestampMs, key, value);
 	}
 
 	@Override
-	public void addWithTimestamp(long timestamp, K key, V value) {
+	public V putWithTimestamp(long timestamp, K key, V value) {
 		Validation.notNegative(timestamp, "timestamp must not be negative");
 		long timestampNs = timestamp * 1000000L;
-		_addWithTimestampNs(timestampNs, key, value);
+		return _putWithTimestampMs(timestampMs, key, value);
 	}
 
-	private void _addWithTimestampNs(final long timestampNs, final K key, final V value) {
+	private V _putWithTimestampNs(final long timestampNs, final K key, final V value) {
 		Validation.notNull(key, "key must not be null");
 		Validation.notNull(value, "value must not be null");
 		wlock.lock();
 		try {
-			TOEntry<K, V> existing = keyToValue.remove(key);
-			if (existing != null) {
-				timeoutToKey.remove(existing.timestampNs);
+			TOEntry<K, V> previous = keyToValue.remove(key);
+			if (previous != null) {
+				timeoutToKey.remove(previous.timestampNs);
 			}
 
 			long actualTimestampNs = timestampNs;
@@ -94,6 +92,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 			TOEntry<K, V> entry = new TOEntry<K, V>(actualTimestampNs, key, value);
 			timeoutToKey.put(actualTimestampNs, key);
 			keyToValue.put(key, entry);
+			return previous == null ? null : previous.getValue();
 		} finally {
 			wlock.unlock();
 		}

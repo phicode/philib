@@ -40,21 +40,21 @@ public interface TimeoutMap<K, V> {
 	 * plus the supplied timeout.
 	 * 
 	 * @param timeout the timeout for this key-value pair (in milliseconds)
-	 * @param timeUnit the unit of the parameter timeout
 	 * @param key -
 	 * @param value -
+	 * @return the value which was previously associated with the given key or {@code null} if none.
 	 */
-	void add(long timeous, K key, V value);
+	V put(long timeout, K key, V value);
 
 	/**
 	 * Add a key-value pair with a specific timeout timestamp.
 	 * 
 	 * @param timestamp the timestamp when this key-value pair will expire (in milliseconds since the epoch).
-	 * @param timeUnit the unit of the parameter timestamp
 	 * @param key -
 	 * @param value -
+	 * @return the value which was previously associated with the given key or {@code null} if none.
 	 */
-	void addWithTimestamp(long timestamp, K key, V value);
+	V putWithTimestamp(long timestamp, K key, V value);
 
 	/**
 	 * Searches a value by its key
