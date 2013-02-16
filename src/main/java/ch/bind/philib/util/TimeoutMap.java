@@ -105,7 +105,6 @@ public interface TimeoutMap<K, V> {
 	boolean containsKey(K key);
 
 	/**
-	 * @param timeUnit the unit of the returned value.
 	 * @return {@link Long.MAX_VALUE} if the TimeoutMap is empty. Otherwise the time until the next entry times out (in
 	 *         milliseconds since the epoch). A return value of zero indicates that there is at least one entry which
 	 *         has already timed out.
