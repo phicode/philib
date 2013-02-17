@@ -38,7 +38,7 @@ public abstract class StringUtil {
 		for (int i = 0; i < l; i++) {
 			char c = s.charAt(i);
 			if (c == delim) {
-				start = i+1;
+				start = i + 1;
 			}
 		}
 		if (start == l) {

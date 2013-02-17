@@ -274,8 +274,8 @@ public class ArrayUtilTest {
 
 		String a1 = formatShortHex(bb, 8);
 		String b1 = formatShortHex(bb, 2);
-		String c1 = formatShortHex((ByteBuffer)bb.position(1), 2);
-		String d1 = formatShortHex((ByteBuffer)bb.position(1), 8);
+		String c1 = formatShortHex((ByteBuffer) bb.position(1), 2);
+		String d1 = formatShortHex((ByteBuffer) bb.position(1), 8);
 
 		String a2 = formatShortHex(abcd, 0, 8);
 		String b2 = formatShortHex(abcd, 0, 2);
