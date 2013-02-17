@@ -59,18 +59,17 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 	@Override
 	public V put(long timeout, K key, V value) {
 		Validation.notNegative(timeout, "timeout must not be negative");
-		long timestampMs = System.currentTimeMillis()+timeout;
-		return _putWithTimestampMs(timestampMs, key, value);
+		long timestamp = System.currentTimeMillis() + timeout;
+		return _putWithTimestamp(timestamp, key, value);
 	}
 
 	@Override
 	public V putWithTimestamp(long timestamp, K key, V value) {
 		Validation.notNegative(timestamp, "timestamp must not be negative");
-		long timestampNs = timestamp * 1000000L;
-		return _putWithTimestampMs(timestampMs, key, value);
+		return _putWithTimestamp(timestamp, key, value);
 	}
 
-	private V _putWithTimestampNs(final long timestampNs, final K key, final V value) {
+	private V _putWithTimestamp(final long timestamp, final K key, final V value) {
 		Validation.notNull(key, "key must not be null");
 		Validation.notNull(value, "value must not be null");
 		wlock.lock();
@@ -80,14 +79,14 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				timeoutToKey.remove(previous.timestampNs);
 			}
 
-			long actualTimestampNs = timestampNs;
+			long actualTimestampNs = timestamp * 1000000L;
 			// prevent duplicate timestamps, which should be rather rare due to
 			// the nanosecond resolution
 			while (timeoutToKey.get(actualTimestampNs) != null) {
 				// add a random number somewhere between so that we get some
 				// spread when many key-value pairs are added in short
 				// succession
-				actualTimestampNs += (long) (Math.random() * 25000);
+				actualTimestampNs += (long) (Math.random() * 250000); // 1/4ms
 			}
 			TOEntry<K, V> entry = new TOEntry<K, V>(actualTimestampNs, key, value);
 			timeoutToKey.put(actualTimestampNs, key);
@@ -133,7 +132,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 	public Map.Entry<K, V> pollTimeout() {
 		wlock.lock();
 		try {
-			long nowNs = System.nanoTime();
+			long nowNs = System.currentTimeMillis() * 1000000L;
 			return _pollTimedoutNs(nowNs);
 		} finally {
 			wlock.unlock();
@@ -208,7 +207,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				return Long.MAX_VALUE;
 			}
 			Long lowest = timeoutToKey.firstKey();
-			long nowNs = System.nanoTime();
+			long nowNs = System.currentTimeMillis() * 1000000L;
 			long diff = lowest.longValue() - nowNs;
 			return diff <= 0 ? 0 : Calc.ceilDiv(diff, 1000000L);
 		} finally {
