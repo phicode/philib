@@ -21,17 +21,12 @@
  */
 package ch.bind.philib.lang;
 
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.validation.Validation;
 
 /**
- * TODO
- * 
  * @author Philipp Meinen
  */
 public abstract class ThreadUtil {
