@@ -56,8 +56,9 @@ public final class LimitedConcurrentQueue<T> {
 			}
 			if (size.compareAndSet(s, s + 1)) {
 				return queue.offer(value);
-				// NOTE: ConcurrentLinkedQueue always returns true
-				// with "correct" implementation would be:
+				// NOTE: sun/oracle's ConcurrentLinkedQueue always returns true
+
+				// the interface-contract correct implementation would be:
 				// if (queue.offer(value)) {return true;}
 				// else { size.decrementAndGet(); return false; }
 			}
