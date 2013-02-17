@@ -23,6 +23,7 @@ package ch.bind.philib.lang;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,68 +85,16 @@ public abstract class ThreadUtil {
 		return true;
 	}
 
-	private static final AtomicLong FOREVER_RUNNER_SEQ = new AtomicLong(1);
-
-	private static final String FOREVER_RUNNER_NAME_FMT = "%s-for-%s-%d";
-
-	// TODO: documentation
-	public static Thread createForeverRunner(Runnable runnable) {
-		Validation.notNull(runnable);
-		String threadName = String.format(FOREVER_RUNNER_NAME_FMT, //
-				ForeverRunner.class.getSimpleName(), //
-				runnable.getClass().getSimpleName(), //
-				FOREVER_RUNNER_SEQ.getAndIncrement());
-		return createForeverRunner(runnable, threadName);
-	}
-
-	// TODO: documentation
-	public static Thread createForeverRunner(Runnable runnable, String threadName) {
-		return createForeverRunner(null, runnable, threadName);
-	}
-
-	// TODO: documentation
-	public static Thread createForeverRunner(ThreadGroup group, Runnable runnable, String threadName) {
-		// stackSize of 0 stands for: ignore this parameter
-		return createForeverRunner(group, runnable, threadName, 0);
-	}
-
-	// TODO: documentation
-	public static Thread createForeverRunner(ThreadGroup group, Runnable runnable, String threadName, long stackSize) {
-		Validation.notNull(runnable);
-		Validation.notNull(threadName);
-		ForeverRunner runner = new ForeverRunner(threadName, runnable);
-		return new Thread(group, runner, threadName, stackSize);
-	}
-
-	public static Thread createAndStartForeverRunner(Runnable runnable) {
-		return start(createForeverRunner(runnable));
-	}
-
-	public static Thread createAndStartForeverRunner(Runnable runnable, String threadName) {
-		return start(createForeverRunner(runnable, threadName));
-	}
-
-	public static Thread createAndStartForeverRunner(ThreadGroup group, Runnable runnable, String threadName) {
-		return start(createForeverRunner(group, runnable, threadName));
-	}
-
-	public static Thread createAndStartForeverRunner(ThreadGroup group, Runnable runnable, String threadName, long stackSize) {
-		return start(createForeverRunner(group, runnable, threadName, stackSize));
-	}
-
-	private static Thread start(Thread thread) {
-		thread.start();
-		return thread;
-	}
-
-	private static final class ForeverRunner implements Runnable {
-
-		private final String threadName;
+	/**
+	 * Wrapper for a runnable. The wrapper will delegate calls to Runnable.run() to the wrapped object. If the wrapped
+	 * run() method terminates unexpectedly the run method will be called again.
+	 */
+	public static final class ForeverRunner implements Runnable {
 
 		private final Runnable runnable;
 
-		public ForeverRunner(String threadName, Runnable runnable) {
-			this.threadName = threadName;
+		public ForeverRunner(Runnable runnable) {
+			Validation.notNull(runnable);
 			this.runnable = runnable;
 		}
 
@@ -157,7 +106,9 @@ public abstract class ThreadUtil {
 					// regular shutdown
 					return;
 				} catch (Exception e) {
-					LOG.warn("runnable crashed, restarting it. thread-name=" + threadName, e);
+					LOG.warn("runnable crashed, restarting it. thread: " + Thread.currentThread().getName(), e);
+				} catch (Throwable e) {
+					LOG.error("runnable crashed with an error, will not restart. thread: " + Thread.currentThread().getName(), e);
 				}
 			}
 		}

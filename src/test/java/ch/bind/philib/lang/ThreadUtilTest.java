@@ -23,84 +23,68 @@
 package ch.bind.philib.lang;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
 public class ThreadUtilTest {
 
-	@Test(timeOut = 1000)
-	public void normalShutdown() throws Exception {
-		DelayRunnable r = new DelayRunnable(100, 0);
-		Thread t = ThreadUtil.createAndStartForeverRunner(r);
-		long start = System.currentTimeMillis();
-		t.join();
-		long time = System.currentTimeMillis() - start;
-		assertTrue(time > 90 && time < 150);
-		assertFalse(t.isAlive());
+	@Test
+	public void normal() throws Exception {
+		TestRunnable r = new TestRunnable(false, false);
+		Runnable wrapped = new ThreadUtil.ForeverRunner(r);
+		wrapped.run();
 		assertEquals(r.numStarts, 1);
-		assertFalse(r.wasInterrupted);
 	}
 
-	// slower machines require a large amount of time to load all the classes
-	// which are pulled in by this test, so the timeout needs to be way higher
-	// then on faster machines
-	@Test(timeOut = 2000)
-	public void interruptShutdown() throws Exception {
-		DelayRunnable r = new DelayRunnable(5000000, 0);
-		Thread t = ThreadUtil.createAndStartForeverRunner(r);
-		Thread.sleep(200);
-		assertTrue(t.isAlive());
-		boolean ok = ThreadUtil.interruptAndJoin(t);
-		assertTrue(ok);
-
-		assertFalse(t.isAlive());
-		assertEquals(r.numStarts, 1);
-		assertTrue(r.wasInterrupted);
+	@Test
+	public void exception() throws Exception {
+		TestRunnable r = new TestRunnable(true, false);
+		Runnable wrapped = new ThreadUtil.ForeverRunner(r);
+		wrapped.run();
+		assertEquals(r.numStarts, 2);
 	}
 
-	@Test(timeOut = 1000)
-	public void restartFaultyThread() throws Exception {
-		DelayRunnable r = new DelayRunnable(100, 5);
-		Thread t = ThreadUtil.createAndStartForeverRunner(r);
-		long start = System.currentTimeMillis();
-		t.join(800);
-		long time = System.currentTimeMillis() - start;
-		assertTrue(time >= 600 && time < 750);
-		assertFalse(t.isAlive());
-		assertEquals(r.numStarts, 6);
-		assertFalse(r.wasInterrupted);
+	@Test
+	public void error() throws Exception {
+		TestRunnable r = new TestRunnable(false, true);
+		Runnable wrapped = new ThreadUtil.ForeverRunner(r);
+		wrapped.run();
+		assertEquals(r.numStarts, 2);
 	}
 
-	private static final class DelayRunnable implements Runnable {
+	@Test
+	public void exceptionThenError() throws Exception {
+		TestRunnable r = new TestRunnable(true, true);
+		Runnable wrapped = new ThreadUtil.ForeverRunner(r);
+		wrapped.run();
+		assertEquals(r.numStarts, 3);
+	}
 
-		private final long delayMs;
+	private static final class TestRunnable implements Runnable {
 
-		private int numThrowExc;
+		private boolean throwException;
 
-		volatile boolean wasInterrupted;
+		private boolean throwError;
 
-		volatile int numStarts;
+		private int numStarts;
 
-		DelayRunnable(long delayMs, int numThrowExc) {
-			super();
-			this.delayMs = delayMs;
-			this.numThrowExc = numThrowExc;
+		TestRunnable(boolean throwException, boolean throwError) {
+			this.throwException = throwException;
+			this.throwError = throwError;
 		}
 
 		@Override
 		public void run() {
 			numStarts++;
-			try {
-				Thread.sleep(delayMs);
-				if (numThrowExc > 0) {
-					numThrowExc--;
-					throw new RuntimeException("forever-runner should restart this runnable");
-				}
-			} catch (InterruptedException e) {
-				wasInterrupted = true;
-				Thread.currentThread().interrupt();
+			if (throwException) {
+				throwException = false;
+				// forever-runner must restart this runnable
+				throw new RuntimeException();
+			}
+			if (throwError) {
+				throwError = false;
+				// forever-runner must not restart this runnable
+				throw new Error();
 			}
 		}
 	}
