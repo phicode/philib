@@ -47,7 +47,9 @@ public final class LruList<E extends LruNode> {
 	 *         longest amount of time) and return it.
 	 */
 	public E add(final E node) {
-		assert (node.getLruPrev() == null && node.getLruNext() == null);
+		Validation.notNull(node);
+		assert (node.getLruPrev() == null);
+		assert (node.getLruNext() == null);
 
 		LruNode afterHead = headTail.getLruNext();
 		link(headTail, node);

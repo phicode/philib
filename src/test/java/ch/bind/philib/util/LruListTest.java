@@ -22,7 +22,7 @@
 
 package ch.bind.philib.util;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
@@ -31,9 +31,9 @@ public class LruListTest {
 
 	@Test
 	public void removeTailOnOverflow() {
-		Node a = new Node(), b = new Node(), c = new Node();
+		TestNode a = new TestNode(), b = new TestNode(), c = new TestNode();
 
-		LruList<Node> lru = new LruList<Node>(2);
+		LruList<TestNode> lru = new LruList<TestNode>(2);
 		assertNull(lru.add(a));
 		assertNull(lru.add(b));
 		assertEquals(lru.add(c), a);
@@ -41,9 +41,9 @@ public class LruListTest {
 
 	@Test
 	public void moveToHead() {
-		Node a = new Node(), b = new Node(), c = new Node();
+		TestNode a = new TestNode(), b = new TestNode(), c = new TestNode();
 
-		LruList<Node> lru = new LruList<Node>(2);
+		LruList<TestNode> lru = new LruList<TestNode>(2);
 		assertNull(lru.add(a));
 		assertNull(lru.add(b));
 		lru.moveToHead(a);
@@ -54,9 +54,9 @@ public class LruListTest {
 
 	@Test
 	public void clear() {
-		Node a = new Node(), b = new Node();
+		TestNode a = new TestNode(), b = new TestNode();
 
-		LruList<Node> lru = new LruList<Node>(2);
+		LruList<TestNode> lru = new LruList<TestNode>(2);
 		assertNull(lru.add(a));
 		assertNull(lru.add(b));
 		assertEquals(lru.size(), 2);
@@ -66,14 +66,14 @@ public class LruListTest {
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ctorValidation() {
-		new LruList<Node>(0);
+		new LruList<TestNode>(0);
 	}
 
 	@Test
 	public void removeTail() {
-		Node a = new Node(), b = new Node(), c = new Node();
+		TestNode a = new TestNode(), b = new TestNode(), c = new TestNode();
 
-		LruList<Node> lru = new LruList<Node>(3);
+		LruList<TestNode> lru = new LruList<TestNode>(3);
 		lru.add(a); // lru: a
 		lru.add(b); // lru: b, a
 		lru.add(c); // lru: c, b, a
@@ -89,9 +89,9 @@ public class LruListTest {
 
 	@Test
 	public void fullScenario() {
-		Node a = new Node(), b = new Node(), c = new Node();
+		TestNode a = new TestNode(), b = new TestNode(), c = new TestNode();
 
-		LruList<Node> lru = new LruList<Node>(3);
+		LruList<TestNode> lru = new LruList<TestNode>(3);
 		assertEquals(lru.capacity(), 3);
 		lru.add(a); // lru: a
 		assertEquals(lru.size(), 1);
@@ -127,7 +127,38 @@ public class LruListTest {
 		assertEquals(lru.size(), 0);
 	}
 
-	private static final class Node implements LruNode {
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void nonNullAdd() {
+		LruList<TestNode> lru = new LruList<TestNode>(1);
+		lru.add(null);
+	}
+
+	@Test
+	public void addAsserts() {
+		LruList<TestNode> lru = new LruList<TestNode>(8);
+		TestNode node = new TestNode();
+		TestNode bad = new TestNode();
+
+		node.setLruNext(bad);
+		try {
+			lru.add(node);
+			fail();
+		} catch (AssertionError e) {
+			// expected
+		}
+		node.setLruNext(null);
+
+		node.setLruPrev(bad);
+		try {
+			lru.add(node);
+			fail();
+		} catch (AssertionError e) {
+			// expected
+		}
+		node.setLruPrev(null);
+	}
+
+	private static final class TestNode implements LruNode {
 
 		private LruNode next;
 
