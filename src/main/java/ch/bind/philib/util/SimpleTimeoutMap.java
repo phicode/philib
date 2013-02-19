@@ -24,8 +24,11 @@ package ch.bind.philib.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -35,8 +38,9 @@ import ch.bind.philib.math.Calc;
 import ch.bind.philib.validation.Validation;
 
 /**
- * An implementation of {@link TimeoutMap} which uses the {@link TreeMap} and {@link HashMap} from java.util for
- * internal data management. This implementation is threadsafe.
+ * An implementation of {@link TimeoutMap} which uses the {@link TreeMap} and
+ * {@link HashMap} from java.util for internal data management. This
+ * implementation is threadsafe.
  * 
  * @author Philipp Meinen
  * 
@@ -61,17 +65,11 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 	@Override
 	public V put(long timeout, K key, V value) {
 		Validation.notNegative(timeout, "timeout must not be negative");
-		long timestamp = System.currentTimeMillis() + timeout;
-		return _putWithTimestamp(timestamp, key, value);
+		long timestampNs = System.nanoTime() + (timeout * 1000000L);
+		return _putWithTimestampNs(timestampNs, key, value);
 	}
 
-	@Override
-	public V putWithTimestamp(long timestamp, K key, V value) {
-		Validation.notNegative(timestamp, "timestamp must not be negative");
-		return _putWithTimestamp(timestamp, key, value);
-	}
-
-	private V _putWithTimestamp(final long timestamp, final K key, final V value) {
+	private V _putWithTimestampNs(final long timestampNs, final K key, final V value) {
 		Validation.notNull(key, "key must not be null");
 		Validation.notNull(value, "value must not be null");
 		wlock.lock();
@@ -81,20 +79,19 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				timeoutToKey.remove(previous.timestampNs);
 			}
 
-			long actualTimestampNs = timestamp * 1000000L;
+			long actualTimestampNs = timestampNs;
 			// prevent duplicate timestamps, which should be rather rare due to
 			// the nanosecond resolution
-			while (timeoutToKey.get(actualTimestampNs) != null) {
-				// add a random number somewhere between so that we get some
-				// spread when many key-value pairs are added in short
-				// succession
-				actualTimestampNs += (long) (Math.random() * 250000); // 1/4ms
+			while (timeoutToKey.containsKey(actualTimestampNs)) {
+				// add a random 1us jitter so that we get some spread when many
+				// key-value pairs are added in short succession
+				actualTimestampNs += ((long) (Math.random() * 1000) + 1);
 			}
 			TOEntry<K, V> entry = new TOEntry<K, V>(actualTimestampNs, key, value);
 			timeoutToKey.put(actualTimestampNs, key);
 			keyToValue.put(key, entry);
 			putCond.signalAll();
-			return previous == null ? null : previous.getValue();
+			return previous == null ? null : previous.value;
 		} finally {
 			wlock.unlock();
 		}
@@ -135,20 +132,56 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 	public Map.Entry<K, V> pollTimeoutNow() {
 		wlock.lock();
 		try {
-			long nowNs = System.currentTimeMillis() * 1000000L;
-			return _pollTimedoutNs(nowNs);
+			return _pollTimedoutNs(System.nanoTime());
 		} finally {
 			wlock.unlock();
 		}
 	}
 
 	@Override
-	public Map.Entry<K, V> pollTimeout(long duration, TimeUnit timeUnit) {
-SimpleValidation.notNull(timeUnit);
-if (duration < 1) {
-return pollTimeout();
+	public Map.Entry<K, V> pollTimeoutBlocking() throws InterruptedException {
+		return pollTimeoutBlocking(0, TimeUnit.NANOSECONDS);
+	}
 
-}
+	@Override
+	public Map.Entry<K, V> pollTimeoutBlocking(long duration, TimeUnit timeUnit) throws InterruptedException {
+		Validation.notNull(timeUnit);
+		final long untilNs = duration == 0 ? 0 : System.nanoTime() + timeUnit.toNanos(duration);
+		wlock.lock();
+		try {
+			final Thread t = Thread.currentThread();
+			while (!t.isInterrupted()) {
+				long nowNs = System.nanoTime();
+				Entry<K, V> entry = _pollTimedoutNs(nowNs);
+				if (entry != null) {
+					return entry;
+				}
+				// never 0 since we reuse nowNs
+				long nextTimeoutNs = _getTimeToNextTimeoutNs(nowNs);
+
+				// wait until the timeout has been reached or a new event added
+				if (untilNs == 0) {
+					if (nextTimeoutNs == Long.MAX_VALUE) {
+						putCond.await();
+					}
+					else {
+						putCond.await(nextTimeoutNs, TimeUnit.NANOSECONDS);
+					}
+				}
+				else {
+					long awaitTimeoutNs = untilNs - nowNs;
+					if (awaitTimeoutNs < 1) {
+						return null;
+					}
+					awaitTimeoutNs = Math.min(awaitTimeoutNs, nextTimeoutNs);
+					putCond.await(awaitTimeoutNs, TimeUnit.NANOSECONDS);
+				}
+			}
+			throw new InterruptedException();
+		} finally {
+			wlock.unlock();
+		}
+	}
 
 	/**
 	 * Find entries that are timed out
@@ -214,16 +247,29 @@ return pollTimeout();
 	public long getTimeToNextTimeout() {
 		rlock.lock();
 		try {
-			if (timeoutToKey.isEmpty()) {
+			long nowNs = System.nanoTime();
+			long tNs = _getTimeToNextTimeoutNs(nowNs);
+			if (tNs == 0) {
+				return 0;
+			}
+			else if (tNs == Long.MAX_VALUE) {
 				return Long.MAX_VALUE;
 			}
-			Long lowest = timeoutToKey.firstKey();
-			long nowNs = System.currentTimeMillis() * 1000000L;
-			long diff = lowest.longValue() - nowNs;
-			return diff <= 0 ? 0 : Calc.ceilDiv(diff, 1000000L);
+			else {
+				return Calc.ceilDiv(tNs, 1000000L);
+			}
 		} finally {
 			rlock.unlock();
 		}
+	}
+
+	public long _getTimeToNextTimeoutNs(long nowNs) {
+		if (timeoutToKey.isEmpty()) {
+			return Long.MAX_VALUE;
+		}
+		Long lowest = timeoutToKey.firstKey();
+		long diff = lowest.longValue() - nowNs;
+		return diff < 0 ? 0 : diff;
 	}
 
 	static final class TOEntry<K, V> implements Map.Entry<K, V> {
