@@ -72,12 +72,21 @@ public interface TimeoutMap<K, V> {
 	 */
 	V remove(K key);
 
+
 	/**
-	 * finds the next entry which is timed out, based on the time of the invocation of this method.
+	 * <b>Nonblocking</b> poll for the next entry which is timed out, based on the time of the invocation of this method.
 	 * 
 	 * @return {@code null} if there is no timed-out entry in this map. otherwise the oldest timed-out entry.
 	 */
-	Map.Entry<K, V> pollTimeout();
+	Map.Entry<K, V> pollTimeoutNow();
+
+	/**
+	 * <b>Blocking</b> poll for the next entry which is timed out.
+	 * The parameters duration and timeUnit define for how long the method must wait for a timeout to occur.
+	 * 
+	 * @return {@code null} if there is no timed-out entry in this map within the given duration. otherwise the oldest timed-out entry.
+	 */
+	Map.Entry<K, V> pollTimeout(long duration, TimeUnit timeUnit) throws InterruptedException;
 
 	/**
 	 * removes all key-value pairs from this map.

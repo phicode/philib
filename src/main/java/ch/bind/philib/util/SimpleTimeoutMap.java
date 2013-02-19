@@ -56,6 +56,8 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 	private final Lock wlock = rwlock.writeLock();
 
+	private final Condition putCond = wlock.newCondition();
+
 	@Override
 	public V put(long timeout, K key, V value) {
 		Validation.notNegative(timeout, "timeout must not be negative");
@@ -91,6 +93,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 			TOEntry<K, V> entry = new TOEntry<K, V>(actualTimestampNs, key, value);
 			timeoutToKey.put(actualTimestampNs, key);
 			keyToValue.put(key, entry);
+			putCond.signalAll();
 			return previous == null ? null : previous.getValue();
 		} finally {
 			wlock.unlock();
@@ -129,7 +132,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 	}
 
 	@Override
-	public Map.Entry<K, V> pollTimeout() {
+	public Map.Entry<K, V> pollTimeoutNow() {
 		wlock.lock();
 		try {
 			long nowNs = System.currentTimeMillis() * 1000000L;
@@ -138,6 +141,14 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 			wlock.unlock();
 		}
 	}
+
+	@Override
+	public Map.Entry<K, V> pollTimeout(long duration, TimeUnit timeUnit) {
+SimpleValidation.notNull(timeUnit);
+if (duration < 1) {
+return pollTimeout();
+
+}
 
 	/**
 	 * Find entries that are timed out
