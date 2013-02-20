@@ -23,6 +23,10 @@
 package ch.bind.philib.lang;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+import java.util.concurrent.CountDownLatch;
 
 import org.testng.annotations.Test;
 
@@ -58,6 +62,48 @@ public class ThreadUtilTest {
 		Runnable wrapped = new ThreadUtil.ForeverRunner(r);
 		wrapped.run();
 		assertEquals(r.numStarts, 3);
+	}
+
+	@Test(timeOut = 1000)
+	public void interruptAndJoinWontStopOnFirstInterrupt() throws Exception {
+		final CountDownLatch started = new CountDownLatch(1);
+		final CountDownLatch stopped = new CountDownLatch(1);
+		Thread t = new Thread() {
+
+			@Override
+			public void run() {
+				started.countDown();
+				boolean second = false;
+				while (true) {
+					try {
+						Thread.sleep(100000);
+					} catch (InterruptedException e) {
+						if (second) {
+							return;
+						}
+						second = true;
+					}
+					stopped.countDown();
+				}
+			}
+		};
+		t.start();
+		started.await();
+		// give the other thread some time to enter sleep
+		Thread.sleep(50);
+		assertFalse(ThreadUtil.interruptAndJoin(t, 50));
+		assertTrue(ThreadUtil.interruptAndJoin(t, 50));
+		// the thread is no longer alive, successive calls must always return true
+		assertFalse(t.isAlive());
+		for (int i = 0; i < 10; i++) {
+			assertTrue(ThreadUtil.interruptAndJoin(t));
+		}
+	}
+
+	@Test
+	public void interruptAndJoinTrueOnNull() throws Exception {
+		assertTrue(ThreadUtil.interruptAndJoin(null));
+		assertTrue(ThreadUtil.interruptAndJoin(null, 100));
 	}
 
 	private static final class TestRunnable implements Runnable {

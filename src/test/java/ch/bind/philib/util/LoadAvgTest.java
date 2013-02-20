@@ -125,4 +125,24 @@ public class LoadAvgTest {
 		LOG.debug(String.format("after %3d%% load: %f\n", work, load));
 		return load;
 	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void ctorSec() {
+		LoadAvgSimple.forSeconds(0);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void ctorMsec() {
+		LoadAvgSimple.forMillis(0);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void ctorUsec() {
+		LoadAvgSimple.forMicros(0);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void ctorNsec() {
+		LoadAvgSimple.forNanos(0);
+	}
 }

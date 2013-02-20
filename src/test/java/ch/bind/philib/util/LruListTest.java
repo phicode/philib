@@ -133,6 +133,12 @@ public class LruListTest {
 		lru.add(null);
 	}
 
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void nonNullRemove() {
+		LruList<TestNode> lru = new LruList<TestNode>(1);
+		lru.remove(null);
+	}
+
 	@Test
 	public void addAsserts() {
 		LruList<TestNode> lru = new LruList<TestNode>(8);
@@ -151,6 +157,31 @@ public class LruListTest {
 		node.setLruPrev(bad);
 		try {
 			lru.add(node);
+			fail();
+		} catch (AssertionError e) {
+			// expected
+		}
+		node.setLruPrev(null);
+	}
+
+	@Test
+	public void removeAsserts() {
+		LruList<TestNode> lru = new LruList<TestNode>(8);
+		TestNode node = new TestNode();
+		TestNode bad = new TestNode();
+
+		node.setLruNext(bad);
+		try {
+			lru.remove(node);
+			fail();
+		} catch (AssertionError e) {
+			// expected
+		}
+		node.setLruNext(null);
+
+		node.setLruPrev(bad);
+		try {
+			lru.remove(node);
 			fail();
 		} catch (AssertionError e) {
 			// expected

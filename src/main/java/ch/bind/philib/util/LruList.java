@@ -63,10 +63,12 @@ public final class LruList<E extends LruNode> {
 	}
 
 	public void remove(final E node) {
+		Validation.notNull(node);
 		final LruNode prev = node.getLruPrev();
 		final LruNode next = node.getLruNext();
 
-		assert (next != null && prev != null);
+		assert (next != null);
+		assert (prev != null);
 
 		link(prev, next);
 
@@ -88,6 +90,9 @@ public final class LruList<E extends LruNode> {
 
 		final LruNode prev = node.getLruPrev();
 		final LruNode next = node.getLruNext();
+
+		assert (next != null);
+		assert (prev != null);
 
 		if (prev == headTail) {
 			// LRU with size 1 or the the node is already in head position
