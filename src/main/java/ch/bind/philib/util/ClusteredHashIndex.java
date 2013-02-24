@@ -108,8 +108,8 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 
 		Entry<K> entry = table[position];
 		while (entry != null) {
-			K entryKey = entry.getKey();
-			if (hash == entryKey.hashCode() && key.equals(entryKey)) {
+			final K entryKey = entry.getKey();
+			if (key == entryKey || (hash == entryKey.hashCode() && key.equals(entryKey))) {
 				return (T) entry;
 			}
 			entry = entry.getNextIndexEntry();
