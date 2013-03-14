@@ -89,20 +89,20 @@ public final class CounterRepo {
 		counters.clear();
 	}
 
-	public static String nameOf(String name) {
+	private static String nameOf(String name) {
 		return nullOrEmpty(name) ? DEFAULT_NAME : name;
 	}
 
-	public static String nameOf(String name, String postfix) {
+	private static String nameOf(String name, String postfix) {
 		String n = nameOf(name);
 		return nullOrEmpty(postfix) ? n : n + POSTFIX_SEP + postfix;
 	}
 
-	public static String nameOf(Class<?> clazz) {
+	private static String nameOf(Class<?> clazz) {
 		return clazz == null ? DEFAULT_NAME : clazz.getName();
 	}
 
-	public static String nameOf(Class<?> clazz, String postfix) {
+	private static String nameOf(Class<?> clazz, String postfix) {
 		String n = nameOf(clazz);
 		return nullOrEmpty(postfix) ? n : n + POSTFIX_SEP + postfix;
 	}
