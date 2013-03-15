@@ -24,10 +24,12 @@ package ch.bind.philib.math;
 
 public abstract class Calc {
 
-	protected Calc() {}
+	protected Calc() {
+	}
 
 	/**
-	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not evenly divisible by <i>divisor</i>.
+	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not
+	 * evenly divisible by <i>divisor</i>.
 	 * 
 	 * @param num a number > 0
 	 * @param divisor a number > 0
@@ -39,7 +41,8 @@ public abstract class Calc {
 	}
 
 	/**
-	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not evenly divisible by <i>divisor</i>.
+	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not
+	 * evenly divisible by <i>divisor</i>.
 	 * 
 	 * @param num a number > 0
 	 * @param divisor a number > 0
@@ -50,7 +53,7 @@ public abstract class Calc {
 		return ((num - 1) / divisor) + 1;
 	}
 
-	public static long unsignedAdd(long a, long b) {
+	public static long unsignedAdd(final long a, final long b) {
 		long r = a + b;
 		return isAddUnderOrOverflow(a, b, r) ? Long.MAX_VALUE : r;
 	}
@@ -78,15 +81,16 @@ public abstract class Calc {
 	 * @param a -
 	 * @param b -
 	 * @param r result of a + b
-	 * @return {@code true} if an over-, or overflow occurred, {@code false} otherwise.
+	 * @return {@code true} if an over-, or overflow occurred, {@code false}
+	 *         otherwise.
 	 */
-	public static boolean isAddUnderOrOverflow(long a, long b, long r) {
+	public static boolean isAddUnderOrOverflow(final long a, final long b, final long r) {
 		return ((a ^ r) & (b ^ r)) < 0;
 	}
 
 	/**
-	 * Calculate the sum of all values from 1 to <code>end</code>, including. That is:
-	 * <code>sum = 1 + 2 + 3 + ... + (end-1) + end</code> <br/>
+	 * Calculate the sum of all values from 1 to <code>end</code>, including.
+	 * That is: <code>sum = 1 + 2 + 3 + ... + (end-1) + end</code> <br/>
 	 * Examples:<br/>
 	 * <code>
 	 * f(0) = 0<br/>
@@ -109,11 +113,13 @@ public abstract class Calc {
 	}
 
 	/**
-	 * Calculates the sum of all values from <code>start</code> to <code>end</code>, including.
+	 * Calculates the sum of all values from <code>start</code> to
+	 * <code>end</code>, including.
 	 * 
 	 * @param start The start value of the sum-range.
 	 * @param end The end value of the sum-range.
-	 * @return The sum of all values from <code>start</code> to <code>end</code> , including.
+	 * @return The sum of all values from <code>start</code> to <code>end</code>
+	 *         , including.
 	 */
 
 	public static long sumOfRange(long start, long end) {
