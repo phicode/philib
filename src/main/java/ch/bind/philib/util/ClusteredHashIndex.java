@@ -24,6 +24,7 @@ package ch.bind.philib.util;
 
 import java.util.Arrays;
 
+import ch.bind.philib.lang.MurmurHash;
 import ch.bind.philib.util.ClusteredIndex.Entry;
 import ch.bind.philib.validation.Validation;
 
@@ -118,6 +119,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 	}
 
 	private int hashPosition(int hash) {
+		hash = MurmurHash.murmur3_finalize_mix32(hash);
 		int p = hash % table.length;
 		return Math.abs(p);
 	}

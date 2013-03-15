@@ -27,14 +27,16 @@ import ch.bind.philib.io.EndianCodec;
 /**
  * Implementation of the murmur hashing functions.
  * <p>
- * Based on Austin Appleby's <a href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
+ * Based on Austin Appleby's <a
+ * href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
  * </p>
  * 
  * @author Philipp Meinen
  */
 public final class MurmurHash {
 
-	private MurmurHash() {}
+	private MurmurHash() {
+	}
 
 	static final int MURMUR2_32_SEED = 0x9747B28C;
 
@@ -115,7 +117,7 @@ public final class MurmurHash {
 		}
 
 		hash ^= len;
-		hash = murmur3_fmix32(hash);
+		hash = murmur3_finalize_mix32(hash);
 		return hash;
 	}
 
@@ -126,7 +128,7 @@ public final class MurmurHash {
 		return k;
 	}
 
-	private static final int murmur3_fmix32(int hash) {
+	public static final int murmur3_finalize_mix32(int hash) {
 		hash ^= hash >>> 16;
 		hash *= 0x85EBCA6B;
 		hash ^= hash >>> 13;
