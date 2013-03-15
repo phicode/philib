@@ -23,8 +23,13 @@
 package ch.bind.philib.util;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
+import java.util.concurrent.CountDownLatch;
 
 import org.testng.annotations.Test;
+
+import ch.bind.philib.TestUtil;
 
 public class CounterTest {
 
@@ -80,5 +85,75 @@ public class CounterTest {
 		assertEquals(pm.toString(), "a[counts=1, total=100, min=100, max=100, avg=100.000]");
 		pm.reset();
 		assertEquals(pm.toString(), EXPECT_ZERO);
+	}
+
+	@Test
+	public void parallel() throws Exception {
+		if (!TestUtil.RUN_BENCHMARKS) {
+			return;
+		}
+		// warmup
+		for (int p = 1; p <= 16; p++) {
+			parallel(1000 * 1000, p);
+		}
+		// for real
+		for (int p = 1; p <= 16; p++) {
+			parallel(100 * 1000 * 1000, p);
+		}
+	}
+
+	private void parallel(int N, int p) throws Exception {
+		Counter counter = new Counter("parallel");
+		int n = N / p;
+		CountDownLatch ready = new CountDownLatch(p);
+		CountDownLatch start = new CountDownLatch(1);
+		CountDownLatch finished = new CountDownLatch(p);
+
+		for (int i = 0; i < p; i++) {
+			Runnable r = new C(counter, n, ready, start, finished);
+			Thread t = new Thread(r, getClass().getSimpleName() + "-parallel-" + i);
+			t.start();
+		}
+
+		ready.await();
+		long t0 = System.nanoTime();
+		start.countDown();
+		finished.await();
+		long t1 = System.nanoTime();
+		TestUtil.printBenchResults(getClass(), "count-parallel-" + p, "count", t1 - t0, N);
+	}
+
+	private static final class C implements Runnable {
+		final Counter counter;
+
+		final int n;
+
+		final CountDownLatch ready;
+
+		final CountDownLatch start;
+
+		final CountDownLatch finished;
+
+		C(Counter counter, int n, CountDownLatch ready, CountDownLatch start, CountDownLatch finished) {
+			this.counter = counter;
+			this.n = n;
+			this.ready = ready;
+			this.start = start;
+			this.finished = finished;
+		}
+
+		@Override
+		public void run() {
+			ready.countDown();
+			try {
+				start.await();
+			} catch (InterruptedException e) {
+				fail(e.getMessage());
+			}
+			for (int i = 0; i < n; i++) {
+				counter.count(i);
+			}
+			finished.countDown();
+		}
 	}
 }
