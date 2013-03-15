@@ -22,6 +22,9 @@
 
 package ch.bind.philib.util;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import ch.bind.philib.math.Calc;
 
 /** A simple counter where values can be added or the whole counter be reset. */
@@ -37,15 +40,6 @@ public final class Counter {
 
 	private long max = -1;
 
-	// TODO
-	// private double _50percent;
-	// private double _80percent;
-	// private double _90percent;
-	// private double _95percent;
-	// private double _99percent;
-	// private double _999promile;
-	// private double _999percent
-
 	Counter(String name) {
 		this.name = name;
 	}
@@ -58,15 +52,14 @@ public final class Counter {
 		if (value < 0) {
 			return;
 		}
-		synchronized (this) {
-			if (counts == 0) {
-				counts = 1;
+		synchronized(this) {
+			long c = counts++;
+			if (c == 0) {
 				min = value;
 				max = value;
 				total = value;
 			}
 			else {
-				counts++;
 				min = Math.min(min, value);
 				max = Math.max(max, value);
 				total = Calc.unsignedAdd(total, value);
