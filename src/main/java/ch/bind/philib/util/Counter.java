@@ -22,9 +22,6 @@
 
 package ch.bind.philib.util;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import ch.bind.philib.math.Calc;
 
 /** A simple counter where values can be added or the whole counter be reset. */
@@ -52,7 +49,7 @@ public final class Counter {
 		if (value < 0) {
 			return;
 		}
-		synchronized(this) {
+		synchronized (this) {
 			long c = counts++;
 			if (c == 0) {
 				min = value;
@@ -89,5 +86,30 @@ public final class Counter {
 		}
 		double avg = ((double) to) / c;
 		return String.format("%s[counts=%d, total=%d, min=%d, max=%d, avg=%.3f]", name, c, to, mi, ma, avg);
+	}
+
+	public void count(Counter counter) {
+		long c, mi, ma, to;
+		synchronized (counter) {
+			c = counter.counts;
+			mi = counter.min;
+			ma = counter.max;
+			to = counter.total;
+		}
+		if (c == 0) {
+			return;
+		}
+		synchronized (this) {
+			if (counts == 0) {
+				min = mi;
+				max = ma;
+			}
+			else {
+				min = Math.min(min, mi);
+				max = Math.max(max, ma);
+			}
+			counts += c;
+			total = Calc.unsignedAdd(total, to);
+		}
 	}
 }
