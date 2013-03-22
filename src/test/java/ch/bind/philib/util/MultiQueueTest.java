@@ -22,7 +22,7 @@
 
 package ch.bind.philib.util;
 
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -32,12 +32,56 @@ import java.util.concurrent.CountDownLatch;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.TestUtil;
 import ch.bind.philib.util.MultiQueue.Sub;
 
 public class MultiQueueTest {
 
 	@Test
-	public void multiq() throws Exception {
+	public void emptyQueue() {
+		MultiQueue<Long> q = new MultiQueue<Long>();
+		q.publish(1L);
+	}
+
+	@Test(timeOut = 1000)
+	public void nothingSentOnNullMsg() {
+		MultiQueue<Long> q = new MultiQueue<Long>();
+		Sub<Long> sub = q.subscribe();
+		q.publish(null);
+		// q.pollNonBlock();
+		q.close();
+	}
+
+	@Test(timeOut = 1000)
+	public void noSubscribeOnClosedQueue() {
+		MultiQueue<Long> q = new MultiQueue<Long>();
+		q.close();
+		assertNull(q.subscribe());
+	}
+
+	@Test(timeOut = 1000)
+	public void multipleSubscribers() {
+		MultiQueue<Long> q = new MultiQueue<Long>();
+		Sub<Long> sub1 = q.subscribe();
+		Sub<Long> sub2 = q.subscribe();
+		q.publish(1L);
+		q.publish(2L);
+		assertEquals(sub1.poll().longValue(), 1L);
+		assertEquals(sub1.poll().longValue(), 2L);
+		assertEquals(sub2.poll().longValue(), 1L);
+		q.close();
+		assertNull(sub1.poll());
+		assertEquals(sub2.poll().longValue(), 2L);
+		assertNull(sub2.poll());
+		assertNull(sub2.poll());
+	}
+
+	@Test
+	public void bench() throws Exception {
+		if (!TestUtil.RUN_BENCHMARKS) {
+			return;
+		}
+		// all messages at once
 		qtest(1, 100, 100);
 		qtest(1, 1000, 1000);
 		qtest(1, 10000, 10000);
@@ -45,10 +89,8 @@ public class MultiQueueTest {
 		qtest(100, 10000, 10000);
 		qtest(1000, 10000, 10000);
 		qtest(10000, 10000, 10000);
-	}
 
-	@Test
-	public void latency() throws Exception {
+		// bursts
 		qtest(1, 100000, 1);
 		qtest(1, 100000, 10);
 		qtest(1, 100000, 100);

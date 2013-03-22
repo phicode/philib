@@ -23,9 +23,12 @@
 package ch.bind.philib.util;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import ch.bind.philib.validation.Validation;
 
 public final class MultiQueue<E> {
 
@@ -158,17 +161,53 @@ public final class MultiQueue<E> {
 			cur = null;
 		}
 
+		/**
+		 * non blocking poll
+		 * @return
+		 */
+		public E pollNow() {
+			return poll(0, TimeUnit.NANOSECONDS);
+		}
+
+		/**
+		 * blocking poll
+		 * @return
+		 */
 		public E poll() {
-			Elem<E> c = this.cur;
-			if (c == null) {
+			if (this.cur == null) {
 				return null; // closed ; TODO: return error
 			}
 			try {
-				c.ready.await();
+				this.cur.ready.await();
 			} catch (InterruptedException e) {
 				unsubscribe();
 				return null;
 			}
+			return advance();
+		}
+
+		/**
+		 * blocking poll
+		 * @return
+		 */
+		public E poll(long timeout, TimeUnit timeUnit) {
+			Validation.notNull(timeUnit);
+			if (this.cur == null) {
+				return null; // closed ; TODO: return error
+			}
+			try {
+				if (!this.cur.ready.await(timeout, timeUnit)) {
+					return null;
+				}
+			} catch (InterruptedException e) {
+				unsubscribe();
+				return null;
+			}
+			return advance();
+		}
+
+		private E advance() {
+			final Elem<E> c = this.cur;
 			E value = c.value;
 			if (value == null) {
 				unsubscribe();
