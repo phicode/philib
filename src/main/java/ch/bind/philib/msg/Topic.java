@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.util;
+package ch.bind.philib.msg;
 
 import java.util.concurrent.Callable;
 

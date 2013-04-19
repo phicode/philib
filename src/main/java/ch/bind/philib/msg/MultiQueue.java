@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.util;
+package ch.bind.philib.msg;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +30,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import ch.bind.philib.validation.Validation;
 
+/**
+ * A queue for <i>n</i> producers and <i>m</i> consumers.
+ * 
+ * @author philipp meinen
+ * 
+ * @param <E>
+ */
 public final class MultiQueue<E> {
 
 	private final Lock mu = new ReentrantLock();
@@ -37,8 +44,6 @@ public final class MultiQueue<E> {
 	private Elem<E> head;
 
 	private Elem<E> tail;
-
-	private boolean closed;
 
 	public MultiQueue() {
 		Elem<E> e = new Elem<E>(this);
@@ -52,9 +57,6 @@ public final class MultiQueue<E> {
 		}
 		mu.lock();
 		try {
-			if (closed) {
-				return; // TODO: error
-			}
 			Elem<E> newHead = new Elem<E>(this);
 			Elem<E> oldHead = this.head;
 			this.head = newHead;
@@ -66,22 +68,9 @@ public final class MultiQueue<E> {
 		}
 	}
 
-	public void close() {
-		mu.lock();
-		try {
-			closed = true;
-			head.ready.countDown();
-		} finally {
-			mu.unlock();
-		}
-	}
-
 	public Sub<E> subscribe() {
 		mu.lock();
 		try {
-			if (closed) {
-				return null; // TODO: error
-			}
 			Sub<E> sub = new Sub<E>(head);
 			head.incRefs();
 			return sub;
