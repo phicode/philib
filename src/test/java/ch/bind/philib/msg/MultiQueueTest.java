@@ -33,7 +33,8 @@ import java.util.concurrent.CountDownLatch;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.util.MultiQueue.Sub;
+import ch.bind.philib.msg.MultiQueue;
+import ch.bind.philib.msg.MultiQueue.Sub;
 
 public class MultiQueueTest {
 
