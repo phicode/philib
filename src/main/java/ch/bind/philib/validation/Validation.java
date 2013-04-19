@@ -29,7 +29,8 @@ import java.util.Collection;
  */
 public abstract class Validation {
 
-	protected Validation() {}
+	protected Validation() {
+	}
 
 	public static void notNegative(int value) {
 		if (value < 0) {
@@ -87,6 +88,16 @@ public abstract class Validation {
 
 	public static void isFalse(boolean value, String message) {
 		if (value) {
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	public static void notNullOrEmpty(CharSequence value) {
+		notNullOrEmpty(value, "null or empty string provided");
+	}
+
+	public static void notNullOrEmpty(CharSequence value, String message) {
+		if (value == null || value.length() == 0) {
 			throw new IllegalArgumentException(message);
 		}
 	}
