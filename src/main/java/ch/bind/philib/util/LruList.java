@@ -80,6 +80,7 @@ public final class LruList<E extends LruNode> {
 		if (size == 0) {
 			return null;
 		}
+		@SuppressWarnings("unchecked")
 		final E node = (E) headTail.getLruPrev();
 		remove(node);
 		return node;
