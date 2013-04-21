@@ -20,9 +20,10 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.util;
+package ch.bind.philib.msg;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -33,8 +34,8 @@ import java.util.concurrent.CountDownLatch;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.msg.MultiQueue;
 import ch.bind.philib.msg.MultiQueue.Sub;
+import ch.bind.philib.util.Counter;
 
 public class MultiQueueTest {
 
@@ -49,15 +50,6 @@ public class MultiQueueTest {
 		MultiQueue<Long> q = new MultiQueue<Long>();
 		Sub<Long> sub = q.subscribe();
 		q.publish(null);
-		// q.pollNonBlock();
-		q.close();
-	}
-
-	@Test(timeOut = 1000)
-	public void noSubscribeOnClosedQueue() {
-		MultiQueue<Long> q = new MultiQueue<Long>();
-		q.close();
-		assertNull(q.subscribe());
 	}
 
 	@Test(timeOut = 1000)
@@ -67,14 +59,15 @@ public class MultiQueueTest {
 		Sub<Long> sub2 = q.subscribe();
 		q.publish(1L);
 		q.publish(2L);
+
 		assertEquals(sub1.poll().longValue(), 1L);
 		assertEquals(sub1.poll().longValue(), 2L);
+
 		assertEquals(sub2.poll().longValue(), 1L);
-		q.close();
-		assertNull(sub1.poll());
+		assertNull(sub1.pollNow());
+
 		assertEquals(sub2.poll().longValue(), 2L);
-		assertNull(sub2.poll());
-		assertNull(sub2.poll());
+		assertNull(sub2.pollNow());
 	}
 
 	@Test
@@ -135,7 +128,6 @@ public class MultiQueueTest {
 			}
 		}
 
-		q.close();
 		done.await();
 
 		Counter all = new Counter("all");

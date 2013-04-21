@@ -2,6 +2,6 @@ package ch.bind.philib.msg;
 
 public interface MessageHandler {
 
-	void handleMessage(Object message);
-	
+	boolean handleMessage(String channelName, Object message);
+
 }

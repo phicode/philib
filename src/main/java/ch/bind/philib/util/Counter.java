@@ -37,7 +37,7 @@ public final class Counter {
 
 	private long max = -1;
 
-	Counter(String name) {
+	public Counter(String name) {
 		this.name = name;
 	}
 
