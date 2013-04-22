@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
+ * Copyright (c) 2013 Philipp Meinen <philipp@bind.ch>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
@@ -28,11 +28,9 @@ import java.util.List;
 import ch.bind.philib.validation.Validation;
 
 /**
- * TODO
  * 
  * @author Philipp Meinen
  */
-
 public final class SimpleCowList<E> {
 
 	private final Class<E> clazz;
