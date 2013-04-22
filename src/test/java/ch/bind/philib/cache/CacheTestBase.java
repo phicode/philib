@@ -54,6 +54,8 @@ public abstract class CacheTestBase {
 	abstract <K, V> Cache<K, V> create(Cloner<V> valueCloner);
 
 	abstract int getMinCapacity();
+	
+	abstract int getBucketSize();
 
 	abstract int getDefaultCapacity();
 
@@ -63,6 +65,7 @@ public abstract class CacheTestBase {
 
 		final int min = getMinCapacity();
 		final int def = getDefaultCapacity();
+		final int bs = getBucketSize();
 
 		cache = this.<Integer, Integer> create();
 		assertEquals(cache.capacity(), def);
@@ -70,7 +73,7 @@ public abstract class CacheTestBase {
 		cache = this.<Integer, Integer> create(def * 4);
 		assertEquals(cache.capacity(), def * 4);
 
-		cache = this.<Integer, Integer> create(min - 1);
+		cache = this.<Integer, Integer> create(min - bs);
 		assertEquals(cache.capacity(), min);
 
 		cache = this.<Integer, Integer> create(0);

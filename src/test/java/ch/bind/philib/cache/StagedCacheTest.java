@@ -55,6 +55,11 @@ public class StagedCacheTest extends CacheTestBase {
 		return StagedCache.DEFAULT_CACHE_CAPACITY;
 	}
 
+	@Override
+	int getBucketSize() {
+		return 1;
+	}
+
 	@Test
 	public void stages() {
 		final int cap = 100000;

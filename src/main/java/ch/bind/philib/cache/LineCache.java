@@ -36,7 +36,7 @@ import ch.bind.philib.validation.Validation;
  */
 public final class LineCache<K, V> implements Cache<K, V> {
 
-	private static final int DEFAULT_ORDER = 4;
+	static final int DEFAULT_ORDER = 4;
 
 	// TODO: locks per bucket or just multiple locks
 	private final ReadWriteLock rwlock = new ReentrantReadWriteLock();
@@ -69,7 +69,8 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 	@SuppressWarnings("unchecked")
 	public LineCache(int capacity, int order, Cloner<V> valueCloner) {
-		Validation.isTrue(capacity > 0 && order > 0, "capacity and order must be greater than zero");
+		capacity = Math.max(DEFAULT_CAPACITY, capacity);
+		Validation.isTrue(order > 0, "capacity and order must be greater than zero");
 		Validation.isTrue(capacity % order == 0, "capacity must be a multiple of order");
 		this.lines = capacity / order;
 		this.order = order;

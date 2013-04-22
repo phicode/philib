@@ -54,6 +54,11 @@ public class SimpleCacheTest extends CacheTestBase {
 	int getDefaultCapacity() {
 		return Cache.DEFAULT_CAPACITY;
 	}
+	
+	@Override
+	int getBucketSize() {
+		return 1;
+	}
 
 	@Test
 	public void fullCacheWhereOldObjectGetRemoved() {
