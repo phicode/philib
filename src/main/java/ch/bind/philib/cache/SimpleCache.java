@@ -39,11 +39,15 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	private final Cloner<V> valueCloner;
 
 	public SimpleCache() {
-		this(DEFAULT_CACHE_CAPACITY);
+		this(DEFAULT_CAPACITY);
 	}
 
 	public SimpleCache(int capacity) {
 		this(capacity, null);
+	}
+
+	public SimpleCache(Cloner<V> valueCloner) {
+		this(DEFAULT_CAPACITY, valueCloner);
 	}
 
 	public SimpleCache(int capacity, Cloner<V> valueCloner) {
@@ -54,15 +58,16 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
+	@Deprecated
 	public void add(final K key, final V value) {
+		set(key, value);
+	}
+
+	@Override
+	public void set(final K key, final V value) {
 		Validation.notNull(key);
+		Validation.notNull(value);
 		SimpleCacheEntry<K, V> entry = index.get(key);
-		if (value == null) {
-			if (entry != null) {
-				removeLruAndIndex(entry);
-			}
-			return;
-		}
 		if (entry == null) {
 			entry = new SimpleCacheEntry<K, V>(key, value);
 			index.add(entry);

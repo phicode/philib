@@ -32,12 +32,11 @@ public class SyncCacheTest {
 
 	@Test
 	public void checkPassThrough() {
-		@SuppressWarnings("unchecked")
 		Cache<Integer, Integer> cache = Mockito.mock(Cache.class);
 		Cache<Integer, Integer> sync = SyncCache.wrap(cache);
 
-		sync.add(1, 2);
-		Mockito.verify(cache).add(1, 2);
+		sync.set(1, 2);
+		Mockito.verify(cache).set(1, 2);
 
 		Mockito.when(cache.get(1)).thenReturn(2);
 		Integer v = sync.get(1);

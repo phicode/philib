@@ -30,14 +30,20 @@ package ch.bind.philib.cache;
 public interface Cache<K, V> {
 
 	/** The default capacity of an object cache. */
-	public static final int DEFAULT_CACHE_CAPACITY = 256;
+	public static final int DEFAULT_CAPACITY = 256;
 
 	/**
-	 * Add a key-value-pair to the cache.
+	 * @deprecated use {@link #set(Object, Object)} instead.
+	 */
+	@Deprecated
+	void add(K key, V value);
+	
+	/**
+	 * Sets a key-value-pair to the cache.
 	 * 
 	 * @throws IllegalArgumentException if the key is {@code null}.
 	 */
-	void add(K key, V value);
+	void set(K key, V value);
 
 	/**
 	 * Query a value from the cache by its key.

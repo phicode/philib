@@ -51,7 +51,7 @@ public abstract class CacheTestBase {
 
 	abstract <K, V> Cache<K, V> create(int capacity);
 
-	abstract <K, V> Cache<K, V> create(int capacity, Cloner<V> valueCloner);
+	abstract <K, V> Cache<K, V> create(Cloner<V> valueCloner);
 
 	abstract int getMinCapacity();
 
@@ -84,9 +84,15 @@ public abstract class CacheTestBase {
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void addNullKey() {
+	public void setNullKey() {
 		Cache<String, String> cache = this.<String, String> create();
-		cache.add(null, "abc");
+		cache.set(null, "abc");
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void setNullValue() {
+		Cache<String, String> cache = this.<String, String> create();
+		cache.set("abc", null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -100,7 +106,7 @@ public abstract class CacheTestBase {
 		Cache<String, String> cache = this.<String, String> create();
 
 		assertNull(cache.get("1"));
-		cache.add("1", "one");
+		cache.set("1", "one");
 		assertEquals(cache.get("1"), "one");
 
 		cache.remove("2");
@@ -113,21 +119,18 @@ public abstract class CacheTestBase {
 	@Test
 	public void overwrite() {
 		Cache<String, String> cache = this.<String, String> create();
-		cache.add("1", "version 1");
-		cache.add("1", "version 2");
+		cache.set("1", "version 1");
+		cache.set("1", "version 2");
 		assertEquals(cache.get("1"), "version 2");
-		cache.add("1", null);
-		assertNull(cache.get("1"));
-		// overwrite again for full branch-coverage
-		cache.add("1", null);
+		cache.remove("1");
 		assertNull(cache.get("1"));
 	}
 
 	@Test
 	public void cloner() {
-		Cache<Integer, Integer> cache = this.<Integer, Integer> create(10, INTEGER_CLONER);
+		Cache<Integer, Integer> cache = this.<Integer, Integer> create(INTEGER_CLONER);
 		Integer one = Integer.valueOf(1);
-		cache.add(one, one);
+		cache.set(one, one);
 		Integer copy = cache.get(one);
 		assertNotNull(copy);
 		assertEquals(one.intValue(), copy.intValue());
@@ -159,7 +162,7 @@ public abstract class CacheTestBase {
 		Cache<Integer, byte[]> cache = this.<Integer, byte[]> create(cap);
 		long t1 = System.nanoTime() - t0;
 		for (int i = 0; i < cap; i++) {
-			cache.add(i, data.clone());
+			cache.set(i, data.clone());
 		}
 		long t2 = System.nanoTime() - t0 - t1;
 		int inMem = 0;
@@ -178,7 +181,7 @@ public abstract class CacheTestBase {
 		TestUtil.gcAndSleep(100);
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(String.format("JVM held on to %d out of %d added elements => %dMiB\n", inMem, cap, inMem / 2));
+			LOG.debug(String.format("JVM held on to %d out of %d elements => %dMiB\n", inMem, cap, inMem / 2));
 			LOG.debug(String.format("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
 					t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f));
 		}

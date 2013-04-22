@@ -61,7 +61,7 @@ public class ObjectPoolTest {
 		}
 
 		@Override
-		public void release(Integer value) {}
+		public void release(Integer value) { /* not needed */}
 
 		@Override
 		public boolean prepareForRecycle(Integer value) {

@@ -65,6 +65,7 @@ public class LruListTest {
 		assertEquals(lru.size(), 0);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ctorValidation() {
 		new LruList<TestNode>(0);
@@ -214,12 +215,6 @@ public class LruListTest {
 		@Override
 		public LruNode getLruPrev() {
 			return prev;
-		}
-
-		@Override
-		public void resetLruNode() {
-			next = null;
-			prev = null;
 		}
 	}
 }

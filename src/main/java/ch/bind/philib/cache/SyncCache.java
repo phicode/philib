@@ -43,10 +43,16 @@ public final class SyncCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public void add(K key, V value) {
+	@Deprecated
+	public void add(final K key, final V value) {
+		set(key, value);
+	}
+
+	@Override
+	public void set(K key, V value) {
 		lock.lock();
 		try {
-			cache.add(key, value);
+			cache.set(key, value);
 		} finally {
 			lock.unlock();
 		}

@@ -86,10 +86,4 @@ class SimpleCacheEntry<K, V> implements Entry<K>, LruNode {
 	public void setLruPrev(LruNode lruPrev) {
 		this.lruPrev = lruPrev;
 	}
-
-	@Override
-	public void resetLruNode() {
-		lruPrev = null;
-		lruNext = null;
-	}
 }

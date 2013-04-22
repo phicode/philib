@@ -27,6 +27,7 @@ import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
 
+@Test
 public class SimpleCacheTest extends CacheTestBase {
 
 	@Override
@@ -40,8 +41,8 @@ public class SimpleCacheTest extends CacheTestBase {
 	}
 
 	@Override
-	<K, V> Cache<K, V> create(int capacity, Cloner<V> valueCloner) {
-		return new SimpleCache<K, V>(capacity, valueCloner);
+	<K, V> Cache<K, V> create(Cloner<V> valueCloner) {
+		return new SimpleCache<K, V>(valueCloner);
 	}
 
 	@Override
@@ -51,21 +52,21 @@ public class SimpleCacheTest extends CacheTestBase {
 
 	@Override
 	int getDefaultCapacity() {
-		return Cache.DEFAULT_CACHE_CAPACITY;
+		return Cache.DEFAULT_CAPACITY;
 	}
 
 	@Test
 	public void fullCacheWhereOldObjectGetRemoved() {
-		final int testSize = Cache.DEFAULT_CACHE_CAPACITY;
+		final int testSize = Cache.DEFAULT_CAPACITY;
 
 		SimpleCache<String, String> cache = new SimpleCache<String, String>(testSize);
 
 		for (int i = 1; i <= testSize; i++) {
-			cache.add(itos(i), itos(i * i * i));
+			cache.set(itos(i), itos(i * i * i));
 		}
 
 		// the key 1, value 1 falls away
-		cache.add("-1", "-1");
+		cache.set("-1", "-1");
 
 		for (int i = 2; i <= testSize; i++) {
 			String v = cache.get(itos(i));
@@ -75,7 +76,7 @@ public class SimpleCacheTest extends CacheTestBase {
 		assertEquals("-1", cache.get("-1"));
 
 		// the key 2, value 8 falls away
-		cache.add("-2", "-2");
+		cache.set("-2", "-2");
 
 		for (int i = 3; i <= testSize; i++) {
 			String v = cache.get(itos(i));
@@ -92,7 +93,7 @@ public class SimpleCacheTest extends CacheTestBase {
 		SimpleCache<String, String> cache = new SimpleCache<String, String>(testSize);
 
 		for (int i = 1; i <= testSize; i++) {
-			cache.add(itos(i), itos(i * i));
+			cache.set(itos(i), itos(i * i));
 		}
 
 		// query the elements from 5000 to 8999 (4000 elements) so that
@@ -104,7 +105,7 @@ public class SimpleCacheTest extends CacheTestBase {
 		// insert 6000 new elements
 		// => 1-4999 and 9000-testSize get removed
 		for (int i = 10001; i <= 16000; i++) {
-			cache.add(itos(i), itos(i * i));
+			cache.set(itos(i), itos(i * i));
 		}
 
 		// elements 1 to 4999 == null
@@ -130,7 +131,7 @@ public class SimpleCacheTest extends CacheTestBase {
 		SimpleCache<String, String> cache = new SimpleCache<String, String>(100000);
 
 		for (int i = 1; i <= 100000; i++) {
-			cache.add(itos(i), itos(i * i));
+			cache.set(itos(i), itos(i * i));
 		}
 
 		// query every second element so that
@@ -142,7 +143,7 @@ public class SimpleCacheTest extends CacheTestBase {
 		// insert 50000 new elements
 		// => all odd numbers from 1-100000 get removed
 		for (int i = 100001; i <= 150000; i++) {
-			cache.add(itos(i), itos(i * i));
+			cache.set(itos(i), itos(i * i));
 		}
 
 		// all odd numbers from 1-100000 are null

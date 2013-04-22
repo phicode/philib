@@ -57,17 +57,29 @@ public final class Benchmark {
 		benchNormal(cache);
 	}
 
+	private static void line() {
+		Cache<Integer, String> cache = new LineCache<Integer, String>(COUNT, 4);
+		TestUtil.gcAndSleep();
+		benchNormal(cache);
+	}
+
 	private static void parallelSimple() {
 		Cache<Integer, String> cache = new SimpleCache<Integer, String>(COUNT);
-		TestUtil.gcAndSleep();
 		cache = new SyncCache<Integer, String>(cache);
+		TestUtil.gcAndSleep();
 		benchThreaded(cache, 4);
 	}
 
 	private static void parallelStaged() {
 		Cache<Integer, String> cache = new StagedCache<Integer, String>(COUNT);
-		TestUtil.gcAndSleep();
 		cache = new SyncCache<Integer, String>(cache);
+		TestUtil.gcAndSleep();
+		benchThreaded(cache, 4);
+	}
+
+	private static void parallelLine() {
+		Cache<Integer, String> cache = new LineCache<Integer, String>(COUNT, 4);
+		TestUtil.gcAndSleep();
 		benchThreaded(cache, 4);
 	}
 
@@ -139,7 +151,7 @@ public final class Benchmark {
 					hits++;
 				} else {
 					misses++;
-					cache.add(rand, Integer.toString(rand));
+					cache.set(rand, Integer.toString(rand));
 				}
 			}
 			final long tEnd = System.currentTimeMillis();
@@ -159,7 +171,9 @@ public final class Benchmark {
 	public static void main(String[] args) {
 		simple();
 		staged();
+		line();
 		parallelSimple();
 		parallelStaged();
+		parallelLine();
 	}
 }

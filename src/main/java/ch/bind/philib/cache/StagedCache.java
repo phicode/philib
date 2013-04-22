@@ -62,11 +62,11 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	}
 
 	public StagedCache(int capacity) {
-		this(capacity, null);
+		this(capacity, null, DEFAULT_OLD_GEN_RATIO, DEFAULT_OLD_GEN_AFTER_HITS);
 	}
 
-	public StagedCache(int capacity, Cloner<V> valueCloner) {
-		this(capacity, valueCloner, DEFAULT_OLD_GEN_RATIO, DEFAULT_OLD_GEN_AFTER_HITS);
+	public StagedCache(Cloner<V> valueCloner) {
+		this(DEFAULT_CACHE_CAPACITY, valueCloner, DEFAULT_OLD_GEN_RATIO, DEFAULT_OLD_GEN_AFTER_HITS);
 	}
 
 	public StagedCache(int capacity, Cloner<V> valueCloner, double oldGenRatio, int oldGenAfterHits) {
@@ -81,17 +81,18 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 		this.valueCloner = valueCloner;
 	}
 
+	@Override
+	@Deprecated
+	public void add(final K key, final V value) {
+		set(key, value);
+	}
+
 	// TODO: remove code duplication
 	@Override
-	public void add(final K key, final V value) {
+	public void set(final K key, final V value) {
 		Validation.notNull(key);
+		Validation.notNull(value);
 		StagedCacheEntry<K, V> entry = index.get(key);
-		if (value == null) {
-			if (entry != null) {
-				removeLruAndIndex(entry);
-			}
-			return;
-		}
 		if (entry == null) {
 			entry = new StagedCacheEntry<K, V>(key, value);
 			index.add(entry);

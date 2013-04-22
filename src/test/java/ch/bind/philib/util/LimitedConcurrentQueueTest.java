@@ -53,6 +53,7 @@ public class LimitedConcurrentQueueTest {
 		assertNull(lcq.poll());
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void noNegativeCtor() {
 		new LimitedConcurrentQueue<Integer>(-1);

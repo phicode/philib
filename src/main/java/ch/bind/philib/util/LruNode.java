@@ -31,9 +31,4 @@ public interface LruNode {
 	LruNode getLruNext();
 
 	LruNode getLruPrev();
-
-	/**
-	 * Set next and prev to {@code null}.
-	 */
-	void resetLruNode();
 }

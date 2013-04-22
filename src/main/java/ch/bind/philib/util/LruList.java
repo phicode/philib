@@ -67,13 +67,13 @@ public final class LruList<E extends LruNode> {
 		final LruNode prev = node.getLruPrev();
 		final LruNode next = node.getLruNext();
 
-		assert (next != null);
 		assert (prev != null);
+		assert (next != null);
 
 		link(prev, next);
 
 		size--;
-		node.resetLruNode();
+		reset(node);
 	}
 
 	public E removeTail() {
@@ -114,7 +114,7 @@ public final class LruList<E extends LruNode> {
 			LruNode node = headTail.getLruNext();
 			while (node != null) {
 				LruNode next = node.getLruNext();
-				node.resetLruNode();
+				reset(node);
 				node = next;
 			}
 		}
@@ -134,9 +134,14 @@ public final class LruList<E extends LruNode> {
 		return size < capacity;
 	}
 
-	private static void link(LruNode first, LruNode second) {
-		first.setLruNext(second);
-		second.setLruPrev(first);
+	private static void link(LruNode a, LruNode b) {
+		a.setLruNext(b);
+		b.setLruPrev(a);
+	}
+
+	private static void reset(LruNode node) {
+		node.setLruNext(null);
+		node.setLruPrev(null);
 	}
 
 	static final class HeadTailNode<E extends LruNode> implements LruNode {
@@ -163,12 +168,6 @@ public final class LruList<E extends LruNode> {
 		@Override
 		public LruNode getLruPrev() {
 			return prev;
-		}
-
-		@Override
-		public void resetLruNode() {
-			next = null;
-			prev = null;
 		}
 	}
 }

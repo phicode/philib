@@ -26,6 +26,8 @@ import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.TestUtil;
+
 public class LeakyBucketTest {
 
 	private static final long NS_PER_SEC = 1000000000L;
@@ -94,6 +96,7 @@ public class LeakyBucketTest {
 
 	@Test(timeOut = 1000)
 	public void takeWithRealTime() {
+		TestUtil.gcAndSleep(50);
 		LeakyBucket lb = LeakyBucket.withTakesPerSecond(25000, 1000);
 		assertEquals(lb.canTake(), 1000);
 		long start = System.nanoTime();

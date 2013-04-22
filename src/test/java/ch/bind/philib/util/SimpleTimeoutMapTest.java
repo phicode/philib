@@ -27,6 +27,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Map.Entry;
@@ -35,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.testng.annotations.Test;
+
+import ch.bind.philib.TestUtil;
 
 public class SimpleTimeoutMapTest {
 
@@ -181,6 +184,7 @@ public class SimpleTimeoutMapTest {
 			long start = System.nanoTime();
 			map.put(100, kv, kv);
 			while (map.pollTimeoutNow() == null) {
+				Thread.yield();
 			}
 			long time = System.nanoTime() - start;
 			totalNs += time;
@@ -190,6 +194,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void accuratePollTimeout() throws InterruptedException {
+		TestUtil.gcAndSleep(50);
 		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
 		Integer kv = 1;
 		long totalNs = 0;
@@ -206,6 +211,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void accuratePollTimeout2() throws InterruptedException {
+		TestUtil.gcAndSleep(50);
 		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
 		Integer kv = 1;
 		long totalNs = 0;
@@ -222,6 +228,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void accuratePollTimeout3() throws InterruptedException {
+		TestUtil.gcAndSleep(50);
 		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
 		Integer kv = 1;
 		long totalT1 = 0;
@@ -248,6 +255,7 @@ public class SimpleTimeoutMapTest {
 		final CountDownLatch started = new CountDownLatch(1);
 		final CountDownLatch finished = new CountDownLatch(1);
 		Thread t = new Thread(new Runnable() {
+
 			@Override
 			public void run() {
 				try {
@@ -257,6 +265,7 @@ public class SimpleTimeoutMapTest {
 						ok.set(true);
 					}
 				} catch (InterruptedException e) {
+					fail(e.getMessage());
 				}
 				finished.countDown();
 			}
