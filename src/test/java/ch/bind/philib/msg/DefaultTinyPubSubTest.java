@@ -305,6 +305,36 @@ public class DefaultTinyPubSubTest {
 		tail.assertMessages("1000", "bar");
 	}
 
+	// @Test(invocationCount = 1)
+	// public void longSyncChain() {
+	// TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+	// boolean sync = true;
+	// Forwarder head = new Forwarder("0", "1", pubsub, sync);
+	// RecordingMessageHandler tail = new RecordingMessageHandler();
+	// pubsub.subscribe("1000000", tail);
+	// for (int i = 1; i < 1000000; i++) {
+	// new Forwarder(Integer.toString(i), Integer.toString(i + 1), pubsub, sync);
+	// }
+	// pubsub.publishSync("0", "bar");
+	// tail.assertMessages("1000000", "bar");
+	// }
+
+	// TODO: ring
+	@Test(invocationCount = 1)
+	public void longAsyncChain() throws InterruptedException {
+		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		boolean sync = false;
+		Forwarder head = new Forwarder("0", "1", pubsub, sync);
+		RecordingMessageHandler tail = new RecordingMessageHandler();
+		pubsub.subscribe("1000000", tail);
+		for (int i = 1; i < 1000000; i++) {
+			new Forwarder(Integer.toString(i), Integer.toString(i + 1), pubsub, sync);
+		}
+		pubsub.publishAsync("0", "bar");
+		tail.awaitNumMsgs(1);
+		tail.assertMessages("1000000", "bar");
+	}
+
 	private static final class RecordingMessageHandler implements MessageHandler {
 
 		private Map<String, List<Object>> msgs = new HashMap<String, List<Object>>();
