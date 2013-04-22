@@ -23,19 +23,25 @@
 package ch.bind.philib.msg;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import ch.bind.philib.validation.Validation;
 
 /**
- * 
+ * A simple implementation of a copy-on-write list.<br />
+ * There are two modification methods: {@link #add(Object)} and {@link #remove(Object)}<br />
+ * and one read method: {@link #getView()} <br />
+ * Every modification through the {@code add} or {@code remove} methods will update the view. <br />
+ * The view is shared among all clients and must therefore <b>not be written to</b>.<br/>
+ * The modification methods are not optimized for speed since the intent of this cow-list is to guarantee fast reads.
  * @author Philipp Meinen
  */
 public final class SimpleCowList<E> {
 
 	private final Class<E> clazz;
 
-	private final List<E> all = new ArrayList<E>();
+	private final ArrayList<E> content = new ArrayList<E>(4);
+
+	private int numRemovesSinceTrim;
 
 	private volatile E[] empty;
 
@@ -50,8 +56,8 @@ public final class SimpleCowList<E> {
 		if (e == null) {
 			return false;
 		}
-		synchronized (all) {
-			boolean update = all.add(e);
+		synchronized (content) {
+			boolean update = content.add(e);
 			if (update) {
 				updateView();
 			}
@@ -63,21 +69,27 @@ public final class SimpleCowList<E> {
 		if (e == null) {
 			return false;
 		}
-		synchronized (all) {
-			boolean update = all.remove(e);
+		synchronized (content) {
+			boolean update = content.remove(e);
 			if (update) {
 				updateView();
+				if (numRemovesSinceTrim > content.size()) {
+					content.trimToSize();
+					numRemovesSinceTrim = 0;
+				} else {
+					numRemovesSinceTrim++;
+				}
 			}
 			return update;
 		}
 	}
 
 	private void updateView() {
-		int n = all.size();
+		int n = content.size();
 		if (n == 0) {
 			view = null;
 		} else {
-			view = all.toArray(mkArray(clazz, n));
+			view = content.toArray(mkArray(clazz, n));
 		}
 	}
 
