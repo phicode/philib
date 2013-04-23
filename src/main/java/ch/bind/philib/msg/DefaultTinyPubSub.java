@@ -53,7 +53,8 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 	private final ExecutorService executorService;
 
 	/**
-	 * Creates a {@code DefaultTinyPubSub} which publishes messages through the provided {@code ExecutorService}.
+	 * Creates a {@code DefaultTinyPubSub} which publishes messages through the
+	 * provided {@code ExecutorService}.
 	 */
 	public DefaultTinyPubSub(ExecutorService executorService) {
 		Validation.notNull(executorService);
@@ -74,6 +75,14 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		} finally {
 			wlock.unlock();
 		}
+	}
+
+	@Override
+	public Subscription forward(String fromChannelName, String toChannelName) {
+		Validation.notNullOrEmpty(fromChannelName);
+		Validation.notNullOrEmpty(toChannelName);
+		MessageHandler handler = new Forwarder(toChannelName, this);
+		return subscribe(fromChannelName, handler);
 	}
 
 	private void unsubscribe(Channel channel, Sub sub) {
@@ -110,7 +119,7 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 			try {
 				dlh.handleMessage(channelName, message);
 			} catch (Exception e) {
-				LOG.error("dead-letter MessageHandler failed unexpectedly: " + ExceptionUtil.buildMessageChain(e));
+				LOG.error("dead-letter MessageHandler failed: " + ExceptionUtil.buildMessageChain(e));
 			}
 		}
 	}
@@ -131,7 +140,8 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		Channel chan = rlockedGetChannel(channelName);
 		if (chan == null) {
 			syncNotifyDeadLetterHandlers(channelName, message);
-		} else {
+		}
+		else {
 			chan.publishSync(message);
 		}
 	}
@@ -142,7 +152,8 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		Channel chan = rlockedGetChannel(channelName);
 		if (chan == null) {
 			asyncNotifyDeadLetterHandlers(channelName, message);
-		} else {
+		}
+		else {
 			chan.publishAsync(message);
 		}
 	}
@@ -231,12 +242,13 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 				try {
 					handled |= handler.handleMessage(channelName, message);
 				} catch (Exception e) {
-					LOG.error("MessageHandler unexpectedly failed: " + ExceptionUtil.buildMessageChain(e));
+					LOG.error("MessageHandler failed: " + ExceptionUtil.buildMessageChain(e));
 				}
 			}
 		}
 		if (!handled) {
-			// sync-dead-letter handling is ok in this case since we are another thread in the async case or calling in
+			// sync-dead-letter handling is ok in this case since we are another
+			// thread in the async case or calling in
 			// synchronous mode
 			syncNotifyDeadLetterHandlers(channelName, message);
 		}
@@ -256,6 +268,24 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		@Override
 		public void run() {
 			DefaultTinyPubSub.this.publishMessage(channel, message);
+		}
+	}
+
+	private static final class Forwarder implements MessageHandler {
+
+		private final String to;
+
+		private final TinyPubSub pubsub;
+
+		Forwarder(String to, TinyPubSub pubsub) {
+			this.to = to;
+			this.pubsub = pubsub;
+		}
+
+		@Override
+		public boolean handleMessage(String channelName, Object message) {
+			pubsub.publishSync(to, message);
+			return true;
 		}
 	}
 }

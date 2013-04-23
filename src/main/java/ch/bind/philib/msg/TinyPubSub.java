@@ -26,6 +26,8 @@ public interface TinyPubSub {
 
 	Subscription subscribe(String channelName, MessageHandler handler);
 
+	Subscription forward(String fromChannelName, String toChannelName);
+
 	void addDeadLetterHandler(MessageHandler handler);
 
 	void removeDeadLetterHandler(MessageHandler handler);
