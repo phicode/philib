@@ -54,7 +54,7 @@ public abstract class CacheTestBase {
 	abstract <K, V> Cache<K, V> create(Cloner<V> valueCloner);
 
 	abstract int getMinCapacity();
-	
+
 	abstract int getBucketSize();
 
 	abstract int getDefaultCapacity();
@@ -160,7 +160,12 @@ public abstract class CacheTestBase {
 		long vmmax = Runtime.getRuntime().maxMemory();
 		vmmax = vmmax == Long.MAX_VALUE ? 16L * 1024 * 1024 * 1024 : (long) (vmmax * 1.05);
 
-		final int cap = (int) Calc.ceilDiv(vmmax, data.length);
+		int bs = getBucketSize();
+		int cap = (int) Calc.ceilDiv(vmmax, data.length);
+		if (cap % bs != 0) {
+			cap += (bs - (cap % bs));
+		}
+
 		long t0 = System.nanoTime();
 		Cache<Integer, byte[]> cache = this.<Integer, byte[]> create(cap);
 		long t1 = System.nanoTime() - t0;

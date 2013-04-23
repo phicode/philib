@@ -320,19 +320,19 @@ public class DefaultTinyPubSubTest {
 	// }
 
 	// TODO: ring
-	@Test(invocationCount = 1)
+	@Test
 	public void longAsyncChain() throws InterruptedException {
 		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
 		boolean sync = false;
 		Forwarder head = new Forwarder("0", "1", pubsub, sync);
 		RecordingMessageHandler tail = new RecordingMessageHandler();
-		pubsub.subscribe("1000000", tail);
+		pubsub.subscribe("100000", tail);
 		for (int i = 1; i < 1000000; i++) {
 			new Forwarder(Integer.toString(i), Integer.toString(i + 1), pubsub, sync);
 		}
 		pubsub.publishAsync("0", "bar");
 		tail.awaitNumMsgs(1);
-		tail.assertMessages("1000000", "bar");
+		tail.assertMessages("100000", "bar");
 	}
 
 	private static final class RecordingMessageHandler implements MessageHandler {
