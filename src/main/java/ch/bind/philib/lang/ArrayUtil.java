@@ -240,11 +240,28 @@ public abstract class ArrayUtil {
 			'C', 'D', 'E', 'F' };
 
 	/**
-	 * Overwrites the buffer's content with zeros. The buffer is cleared.
-	 * 
-	 * @param buf
+	 * @param buf -
+	 * @deprecated in favor of {@link #memclr(ByteBuffer)}.
 	 */
+	@Deprecated
 	public static void memsetZero(final ByteBuffer buf) {
+		memclr(buf);
+	}
+
+	/**
+	 * @param buf -
+	 * @deprecated in favor of {@link #memclr(byte[])}.
+	 */
+	@Deprecated
+	public static void memsetZero(final byte[] buf) {
+		memclr(buf);
+	}
+
+	/**
+	 * Overwrites the buffer's content with zeros.
+	 * @param buf -
+	 */
+	public static void memclr(final ByteBuffer buf) {
 		if (buf == null) {
 			return;
 		}
@@ -265,7 +282,11 @@ public abstract class ArrayUtil {
 		buf.clear();
 	}
 
-	public static void memsetZero(final byte[] buf) {
+	/**
+	 * Overwrites the buffer's content with zeros.
+	 * @param buf -
+	 */
+	public static void memclr(final byte[] buf) {
 		if (buf == null || buf.length == 0) {
 			return;
 		}
