@@ -48,13 +48,10 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 
 	private final Map<String, Channel> channels = new HashMap<String, Channel>();
 
-	private final SimpleCowList<MessageHandler> deadLetterHandlers = new SimpleCowList<MessageHandler>(MessageHandler.class);
-
 	private final ExecutorService executorService;
 
 	/**
-	 * Creates a {@code DefaultTinyPubSub} which publishes messages through the
-	 * provided {@code ExecutorService}.
+	 * Creates a {@code DefaultTinyPubSub} which publishes messages through the provided {@code ExecutorService}.
 	 */
 	public DefaultTinyPubSub(ExecutorService executorService) {
 		Validation.notNull(executorService);
@@ -102,46 +99,10 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 	}
 
 	@Override
-	public void addDeadLetterHandler(MessageHandler handler) {
-		Validation.notNull(handler);
-		deadLetterHandlers.add(handler);
-	}
-
-	@Override
-	public void removeDeadLetterHandler(MessageHandler handler) {
-		Validation.notNull(handler);
-		deadLetterHandlers.remove(handler);
-	}
-
-	private void syncNotifyDeadLetterHandlers(String channelName, Object message) {
-		final MessageHandler[] dlhs = deadLetterHandlers.getView();
-		for (MessageHandler dlh : dlhs) {
-			try {
-				dlh.handleMessage(channelName, message);
-			} catch (Exception e) {
-				LOG.error("dead-letter MessageHandler failed: " + ExceptionUtil.buildMessageChain(e));
-			}
-		}
-	}
-
-	private void asyncNotifyDeadLetterHandlers(final String channelName, final Object message) {
-		executorService.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				syncNotifyDeadLetterHandlers(channelName, message);
-			}
-		});
-	}
-
-	@Override
 	public void publishSync(String channelName, Object message) {
 		Validation.notNull(message);
 		Channel chan = rlockedGetChannel(channelName);
-		if (chan == null) {
-			syncNotifyDeadLetterHandlers(channelName, message);
-		}
-		else {
+		if (chan != null) {
 			chan.publishSync(message);
 		}
 	}
@@ -150,10 +111,7 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 	public void publishAsync(String channelName, Object message) {
 		Validation.notNull(message);
 		Channel chan = rlockedGetChannel(channelName);
-		if (chan == null) {
-			asyncNotifyDeadLetterHandlers(channelName, message);
-		}
-		else {
+		if (chan != null) {
 			chan.publishAsync(message);
 		}
 	}
@@ -232,25 +190,18 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		}
 	}
 
-	private void publishMessage(Channel channel, Object message) {
-		boolean handled = false;
+	private static void publishMessage(Channel channel, Object message) {
 		final Sub[] subs = channel.subs.getView();
 		final String channelName = channel.name;
 		for (Sub sub : subs) {
 			MessageHandler handler = sub.handler.get();
 			if (handler != null) {
 				try {
-					handled |= handler.handleMessage(channelName, message);
+					handler.handleMessage(channelName, message);
 				} catch (Exception e) {
 					LOG.error("MessageHandler failed: " + ExceptionUtil.buildMessageChain(e));
 				}
 			}
-		}
-		if (!handled) {
-			// sync-dead-letter handling is ok in this case since we are another
-			// thread in the async case or calling in
-			// synchronous mode
-			syncNotifyDeadLetterHandlers(channelName, message);
 		}
 	}
 
@@ -267,7 +218,7 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 
 		@Override
 		public void run() {
-			DefaultTinyPubSub.this.publishMessage(channel, message);
+			DefaultTinyPubSub.publishMessage(channel, message);
 		}
 	}
 
@@ -283,9 +234,8 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		}
 
 		@Override
-		public boolean handleMessage(String channelName, Object message) {
+		public void handleMessage(String channelName, Object message) {
 			pubsub.publishSync(to, message);
-			return true;
 		}
 	}
 }

@@ -172,30 +172,23 @@ public class DefaultTinyPubSubBenchmark implements Runnable {
 
 	private static final class Consumer implements MessageHandler {
 
-		private final TinyPubSub pubSub;
-
-		private final Subscription sub;
-
 		private AtomicLong numMessages = new AtomicLong();
 
 		private AtomicLong totalLatency = new AtomicLong();
 
 		public Consumer(TinyPubSub pubSub) {
-			this.pubSub = pubSub;
-			sub = pubSub.subscribe("foo", this);
+			pubSub.subscribe("foo", this);
 		}
 
 		@Override
-		public boolean handleMessage(String channelName, Object message) {
+		public void handleMessage(String channelName, Object message) {
 			long now = System.nanoTime();
 			if (message instanceof Long) {
 				Long sentAt = (Long) message;
 				long latency = now - sentAt;
 				numMessages.incrementAndGet();
 				totalLatency.addAndGet(latency);
-				return true;
 			}
-			return false;
 		}
 	}
 }

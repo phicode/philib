@@ -39,7 +39,7 @@ public final class SimpleCowList<E> {
 
 	private final Class<E> clazz;
 
-	private final ArrayList<E> content = new ArrayList<E>(4);
+	private final ArrayList<E> content = new ArrayList<E>();
 
 	private int numRemovesSinceTrim;
 

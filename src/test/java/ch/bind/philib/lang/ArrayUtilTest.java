@@ -30,7 +30,7 @@ import static ch.bind.philib.lang.ArrayUtil.extractBack;
 import static ch.bind.philib.lang.ArrayUtil.extractFront;
 import static ch.bind.philib.lang.ArrayUtil.find;
 import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
-import static ch.bind.philib.lang.ArrayUtil.memsetZero;
+import static ch.bind.philib.lang.ArrayUtil.memclr;
 import static ch.bind.philib.lang.ArrayUtil.pickRandom;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -294,8 +294,8 @@ public class ArrayUtilTest {
 
 	@Test
 	public void dontCareAboutNulls() {
-		memsetZero((byte[]) null);
-		memsetZero((ByteBuffer) null);
+		memclr((byte[]) null);
+		memclr((ByteBuffer) null);
 	}
 
 	@Test
@@ -304,7 +304,7 @@ public class ArrayUtilTest {
 		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
-			memsetZero(b);
+			memclr(b);
 			for (int j = 0; j < i; j++) {
 				assertTrue(b[j] == 0);
 			}
@@ -318,7 +318,7 @@ public class ArrayUtilTest {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
 			ByteBuffer bb = ByteBuffer.wrap(b);
-			memsetZero(bb);
+			memclr(bb);
 			for (int j = 0; j < i; j++) {
 				assertTrue(b[j] == 0);
 			}
@@ -334,7 +334,7 @@ public class ArrayUtilTest {
 			ByteBuffer bb = ByteBuffer.allocateDirect(i);
 			bb.put(b);
 			bb.clear();
-			memsetZero(bb);
+			memclr(bb);
 			bb.get(b);
 			for (int j = 0; j < i; j++) {
 				assertTrue(b[j] == 0);
