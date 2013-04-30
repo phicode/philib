@@ -310,7 +310,7 @@ public class DefaultTinyPubSubTest {
 
 		@Override
 		public void handleMessage(String channelName, Object message) {
-			throw new RuntimeException("some people actually dont protect their code ... so we will do that for them");
+			throw new RuntimeException("expected unit test exception");
 		}
 	}
 
