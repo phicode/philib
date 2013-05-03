@@ -141,6 +141,56 @@ public abstract class CacheTestBase {
 		assertTrue(one != copy);
 	}
 
+	private static final int UP_DOWN_CAP_COEFF = 5;
+
+	@Test
+	public void up() {
+		Cache<Integer, Integer> cache = this.<Integer, Integer> create();
+		int hit = 0, miss = 0;
+		final int N = cache.capacity() * UP_DOWN_CAP_COEFF;
+		Integer[] is = new Integer[N];
+		for (int i = 0; i < N; i++) {
+			is[i] = Integer.valueOf(i);
+		}
+		for (int i = 0; i < N; i++) {
+			cache.set(is[i], is[i]);
+			for (int j = 0; j <= i; j++) {
+				Integer v = null;
+				if ((v = cache.get(is[j])) != null) {
+					assertEquals(v, is[j]);
+					hit++;
+				} else {
+					miss++;
+				}
+			}
+		}
+		// System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
+	}
+
+	@Test
+	public void down() {
+		Cache<Integer, Integer> cache = this.<Integer, Integer> create();
+		int hit = 0, miss = 0;
+		final int N = cache.capacity() * UP_DOWN_CAP_COEFF;
+		Integer[] is = new Integer[N];
+		for (int i = 0; i < N; i++) {
+			is[i] = Integer.valueOf(i);
+		}
+		for (int i = 0; i < N; i++) {
+			cache.set(is[i], is[i]);
+			for (int j = i; j >= 0; j--) {
+				Integer v = null;
+				if ((v = cache.get(is[j])) != null) {
+					assertEquals(v, is[j]);
+					hit++;
+				} else {
+					miss++;
+				}
+			}
+		}
+		// System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
+	}
+
 	private static final Cloner<Integer> INTEGER_CLONER = new Cloner<Integer>() {
 
 		@Override
