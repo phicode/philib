@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg;
+package ch.bind.philib.util;
 
 import java.util.ArrayList;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Philipp Meinen <philipp@bind.ch>
+ * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
@@ -20,15 +20,43 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg;
+package ch.bind.philib.cache;
 
-public interface TinyPubSub {
+final class StagedLruCacheEntry<K, V> extends LruCacheEntry<K, V> {
 
-	Subscription subscribe(String channelName, MessageHandler handler);
+	private static final int TOGGLE_OLD_GEN_BIT = 0x40000000;
 
-	Subscription forward(String fromChannelName, String toChannelName);
+	private static final int NO_OLD_GEN_BITMASK = 0x3FFFFFFF;
 
-	void publishSync(String channelName, Object message);
+	// bits 0-29 are for the hit-counter, bit 30 is the old-gen toggle
+	// and bit 31 is the 'unused' sign-extension
+	private int hits;
 
-	void publishAsync(String channelName, Object message);
+	StagedLruCacheEntry(K key, V value) {
+		super(key, value);
+	}
+
+	int recordHit() {
+		// hits are only recorded for young-generation objects
+		// so we do not have to worry about an integer overflow
+		// additionally the hits are reset to zero once an entry
+		// moves back down from the old generation
+		return (++hits & NO_OLD_GEN_BITMASK);
+	}
+
+	void resetHits() {
+		hits = hits & TOGGLE_OLD_GEN_BIT;
+	}
+
+	boolean isInYoungGen() {
+		return (hits & TOGGLE_OLD_GEN_BIT) == 0;
+	}
+
+	void setInYoungGen() {
+		hits = (hits & NO_OLD_GEN_BITMASK);
+	}
+
+	void setInOldGen() {
+		hits = (hits | TOGGLE_OLD_GEN_BIT);
+	}
 }

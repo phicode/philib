@@ -27,32 +27,34 @@ import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.lang.Cloner;
+
 @Test
-public class StagedCacheTest extends CacheTestBase {
+public class StagedLruCacheTest extends CacheTestBase {
 
 	@Override
 	<K, V> Cache<K, V> create() {
-		return new StagedCache<K, V>();
+		return new StagedLruCache<K, V>();
 	}
 
 	@Override
 	<K, V> Cache<K, V> create(int capacity) {
-		return new StagedCache<K, V>(capacity);
+		return new StagedLruCache<K, V>(capacity);
 	}
 
 	@Override
 	<K, V> Cache<K, V> create(Cloner<V> valueCloner) {
-		return new StagedCache<K, V>(valueCloner);
+		return new StagedLruCache<K, V>(valueCloner);
 	}
 
 	@Override
 	int getMinCapacity() {
-		return StagedCache.MIN_CACHE_CAPACITY;
+		return StagedLruCache.MIN_CACHE_CAPACITY;
 	}
 
 	@Override
 	int getDefaultCapacity() {
-		return StagedCache.DEFAULT_CACHE_CAPACITY;
+		return StagedLruCache.DEFAULT_CACHE_CAPACITY;
 	}
 
 	@Override
@@ -63,7 +65,7 @@ public class StagedCacheTest extends CacheTestBase {
 	@Test
 	public void stages() {
 		final int cap = 100000;
-		Cache<Integer, Integer> cache = new StagedCache<Integer, Integer>(cap, null, 0.5, 2);
+		Cache<Integer, Integer> cache = new StagedLruCache<Integer, Integer>(cap, null, 0.5, 2);
 
 		set(cache, 0, 50000);
 
@@ -114,7 +116,7 @@ public class StagedCacheTest extends CacheTestBase {
 	@Test
 	public void removeOldEntry() {
 		// 1 entry old gen & 1 young gen
-		Cache<Integer, Integer> cache = new StagedCache<Integer, Integer>(StagedCache.MIN_CACHE_CAPACITY, null, 0.5, 2);
+		Cache<Integer, Integer> cache = new StagedLruCache<Integer, Integer>(StagedLruCache.MIN_CACHE_CAPACITY, null, 0.5, 2);
 		cache.set(1, 1);
 
 		// 'elevate' 1 to old-gen

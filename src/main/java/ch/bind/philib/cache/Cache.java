@@ -33,12 +33,6 @@ public interface Cache<K, V> {
 	public static final int DEFAULT_CAPACITY = 256;
 
 	/**
-	 * @deprecated use {@link #set(Object, Object)} instead.
-	 */
-	@Deprecated
-	void add(K key, V value);
-	
-	/**
 	 * Sets a key-value-pair to the cache.
 	 * 
 	 * @throws IllegalArgumentException if the key is {@code null}.

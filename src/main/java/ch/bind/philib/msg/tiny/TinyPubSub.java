@@ -20,40 +20,18 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache;
+package ch.bind.philib.msg.tiny;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import ch.bind.philib.msg.MessageHandler;
+import ch.bind.philib.msg.Subscription;
 
-import org.mockito.Mockito;
-import org.testng.annotations.Test;
+public interface TinyPubSub {
 
-public class SyncCacheTest {
+	Subscription subscribe(String channelName, MessageHandler handler);
 
-	@Test
-	public void checkPassThrough() {
-		Cache<Integer, Integer> cache = Mockito.mock(Cache.class);
-		Cache<Integer, Integer> sync = SyncCache.wrap(cache);
+	Subscription forward(String fromChannelName, String toChannelName);
 
-		sync.set(1, 2);
-		Mockito.verify(cache).set(1, 2);
+	void publishSync(String channelName, Object message);
 
-		Mockito.when(cache.get(1)).thenReturn(2);
-		Integer v = sync.get(1);
-		assertNotNull(v);
-		assertEquals(v.intValue(), 2);
-		Mockito.verify(cache).get(1);
-
-		sync.remove(99);
-		Mockito.verify(cache).remove(99);
-
-		Mockito.when(cache.capacity()).thenReturn(123);
-		assertEquals(sync.capacity(), 123);
-		Mockito.verify(cache).capacity();
-
-		sync.clear();
-		Mockito.verify(cache).clear();
-
-		Mockito.verifyNoMoreInteractions(cache);
-	}
+	void publishAsync(String channelName, Object message);
 }

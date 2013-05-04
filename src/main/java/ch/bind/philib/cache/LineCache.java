@@ -35,7 +35,7 @@ import ch.bind.philib.validation.Validation;
  */
 public final class LineCache<K, V> implements Cache<K, V> {
 
-	static final int DEFAULT_ORDER = 4;
+	static final int DEFAULT_ORDER = 8;
 
 	private final AtomicReferenceArray<Entry<K, V>> entries;
 
@@ -57,7 +57,6 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		this(DEFAULT_CAPACITY, DEFAULT_ORDER, valueCloner);
 	}
 
-	@SuppressWarnings("unchecked")
 	public LineCache(int capacity, int order, Cloner<V> valueCloner) {
 		capacity = Math.max(DEFAULT_CAPACITY, capacity);
 		Validation.isTrue(order > 0, "capacity and order must be greater than zero");
@@ -68,12 +67,6 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		this.entries = new AtomicReferenceArray<Entry<K, V>>(capacity);
 		this.valueCloner = valueCloner;
 		this.lineMask = lines - 1;
-	}
-
-	@Deprecated
-	@Override
-	public void add(final K key, final V value) {
-		set(key, value);
 	}
 
 	@Override

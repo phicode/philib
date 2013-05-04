@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
+import ch.bind.philib.lang.Cloner;
 import ch.bind.philib.math.Calc;
 
 /**
@@ -141,8 +142,9 @@ public abstract class CacheTestBase {
 		assertTrue(one != copy);
 	}
 
-	 private static final int UP_DOWN_CAP_COEFF = 5;
-//	private static final int UP_DOWN_CAP_COEFF = 150;
+	private static final int UP_DOWN_CAP_COEFF = 5;
+
+	// private static final int UP_DOWN_CAP_COEFF = 150;
 
 	@Test
 	public void up() {
@@ -166,11 +168,7 @@ public abstract class CacheTestBase {
 				}
 			}
 		}
-		System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
-		 if (cache instanceof LineCache) {
-		 LineCache lc = (LineCache) cache;
-		 lc.print();
-		 }
+		// System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
 	}
 
 	@Test
@@ -195,11 +193,7 @@ public abstract class CacheTestBase {
 				}
 			}
 		}
-		System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
-		 if (cache instanceof LineCache) {
-		 LineCache lc = (LineCache) cache;
-		 lc.print();
-		 }
+		// System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
 	}
 
 	private static final Cloner<Integer> INTEGER_CLONER = new Cloner<Integer>() {

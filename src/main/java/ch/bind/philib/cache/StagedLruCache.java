@@ -22,13 +22,14 @@
 
 package ch.bind.philib.cache;
 
+import ch.bind.philib.lang.Cloner;
 import ch.bind.philib.math.Calc;
 import ch.bind.philib.util.ClusteredHashIndex;
 import ch.bind.philib.util.ClusteredIndex;
 import ch.bind.philib.util.LruList;
 import ch.bind.philib.validation.Validation;
 
-public final class StagedCache<K, V> implements Cache<K, V> {
+public final class StagedLruCache<K, V> implements Cache<K, V> {
 
 	/** The minimum capacity of a staged cache. */
 	public static final int MIN_CACHE_CAPACITY = 64;
@@ -45,11 +46,11 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 
 	private static final double MAX_OLD_GEN_RATIO = 0.9;
 
-	private final LruList<StagedCacheEntry<K, V>> lruYoungGen;
+	private final LruList<StagedLruCacheEntry<K, V>> lruYoungGen;
 
-	private final LruList<StagedCacheEntry<K, V>> lruOldGen;
+	private final LruList<StagedLruCacheEntry<K, V>> lruOldGen;
 
-	private final ClusteredIndex<K, StagedCacheEntry<K, V>> index;
+	private final ClusteredIndex<K, StagedLruCacheEntry<K, V>> index;
 
 	private final int oldGenAfterHits;
 
@@ -57,44 +58,38 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 
 	private final Cloner<V> valueCloner;
 
-	public StagedCache() {
+	public StagedLruCache() {
 		this(DEFAULT_CACHE_CAPACITY);
 	}
 
-	public StagedCache(int capacity) {
+	public StagedLruCache(int capacity) {
 		this(capacity, null, DEFAULT_OLD_GEN_RATIO, DEFAULT_OLD_GEN_AFTER_HITS);
 	}
 
-	public StagedCache(Cloner<V> valueCloner) {
+	public StagedLruCache(Cloner<V> valueCloner) {
 		this(DEFAULT_CACHE_CAPACITY, valueCloner, DEFAULT_OLD_GEN_RATIO, DEFAULT_OLD_GEN_AFTER_HITS);
 	}
 
-	public StagedCache(int capacity, Cloner<V> valueCloner, double oldGenRatio, int oldGenAfterHits) {
+	public StagedLruCache(int capacity, Cloner<V> valueCloner, double oldGenRatio, int oldGenAfterHits) {
 		this.capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
 		this.oldGenAfterHits = oldGenAfterHits < 1 ? 1 : oldGenAfterHits;
 		oldGenRatio = Calc.clip(oldGenRatio, MIN_OLD_GEN_RATIO, MAX_OLD_GEN_RATIO);
 		int oldCap = (int) (this.capacity * oldGenRatio);
 		int youngCap = this.capacity - oldCap;
-		this.lruYoungGen = new LruList<StagedCacheEntry<K, V>>(youngCap);
-		this.lruOldGen = new LruList<StagedCacheEntry<K, V>>(oldCap);
-		this.index = new ClusteredHashIndex<K, StagedCacheEntry<K, V>>(capacity);
+		this.lruYoungGen = new LruList<StagedLruCacheEntry<K, V>>(youngCap);
+		this.lruOldGen = new LruList<StagedLruCacheEntry<K, V>>(oldCap);
+		this.index = new ClusteredHashIndex<K, StagedLruCacheEntry<K, V>>(capacity);
 		this.valueCloner = valueCloner;
 	}
 
+	// TODO: remove code duplication with LruCache
 	@Override
-	@Deprecated
-	public void add(final K key, final V value) {
-		set(key, value);
-	}
-
-	// TODO: remove code duplication
-	@Override
-	public void set(final K key, final V value) {
+	public synchronized void set(final K key, final V value) {
 		Validation.notNull(key);
 		Validation.notNull(value);
-		StagedCacheEntry<K, V> entry = index.get(key);
+		StagedLruCacheEntry<K, V> entry = index.get(key);
 		if (entry == null) {
-			entry = new StagedCacheEntry<K, V>(key, value);
+			entry = new StagedLruCacheEntry<K, V>(key, value);
 			index.add(entry);
 			addYoungGen(entry, false);
 		}
@@ -104,9 +99,9 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public V get(final K key) {
+	public synchronized V get(final K key) {
 		Validation.notNull(key);
-		final StagedCacheEntry<K, V> entry = index.get(key);
+		final StagedLruCacheEntry<K, V> entry = index.get(key);
 		if (entry == null) {
 			return null;
 		}
@@ -134,24 +129,24 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public void remove(final K key) {
+	public synchronized void remove(final K key) {
 		Validation.notNull(key);
 		removeLruAndIndex(index.get(key));
 	}
 
 	@Override
-	public int capacity() {
+	public synchronized int capacity() {
 		return capacity;
 	}
 
 	@Override
-	public void clear() {
+	public synchronized void clear() {
 		lruYoungGen.clear();
 		lruOldGen.clear();
 		index.clear();
 	}
 
-	private void removeLruAndIndex(final StagedCacheEntry<K, V> entry) {
+	private void removeLruAndIndex(final StagedLruCacheEntry<K, V> entry) {
 		if (entry != null) {
 			index.remove(entry);
 			if (entry.isInYoungGen()) {
@@ -163,13 +158,13 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 		}
 	}
 
-	private void addYoungGen(final StagedCacheEntry<K, V> entry, final boolean checkValue) {
+	private void addYoungGen(final StagedLruCacheEntry<K, V> entry, final boolean checkValue) {
 		if (checkValue && entry.getValue() == null) {
 			index.remove(entry);
 		}
 		else {
 			entry.setInYoungGen();
-			StagedCacheEntry<K, V> removed = lruYoungGen.add(entry);
+			StagedLruCacheEntry<K, V> removed = lruYoungGen.add(entry);
 			if (removed != null) {
 				// TODO: move to old gen if it has room
 				index.remove(removed);
@@ -177,13 +172,13 @@ public final class StagedCache<K, V> implements Cache<K, V> {
 		}
 	}
 
-	private void addOldGen(final StagedCacheEntry<K, V> entry) {
+	private void addOldGen(final StagedLruCacheEntry<K, V> entry) {
 		if (entry.getValue() == null) {
 			index.remove(entry);
 		}
 		else {
 			entry.setInOldGen();
-			StagedCacheEntry<K, V> removed = lruOldGen.add(entry);
+			StagedLruCacheEntry<K, V> removed = lruOldGen.add(entry);
 			if (removed != null) {
 				addYoungGen(removed, true);
 			}

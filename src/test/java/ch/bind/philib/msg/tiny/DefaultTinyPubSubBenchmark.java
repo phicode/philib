@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg;
+package ch.bind.philib.msg.tiny;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +34,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import ch.bind.philib.TestUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
+import ch.bind.philib.msg.MessageHandler;
+import ch.bind.philib.msg.tiny.DefaultTinyPubSub;
+import ch.bind.philib.msg.tiny.TinyPubSub;
 
 /**
  * @author Philipp Meinen

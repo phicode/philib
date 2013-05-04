@@ -20,9 +20,11 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg;
+package ch.bind.philib.util;
 
 import org.testng.annotations.Test;
+
+import ch.bind.philib.util.SimpleCowList;
 import static org.testng.Assert.*;
 
 public class SimpleCowListTest {

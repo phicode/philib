@@ -54,7 +54,7 @@ public final class ByteBufferManager implements ObjectManager<ByteBuffer> {
 	@Override
 	public boolean prepareForRecycle(final ByteBuffer buf) {
 		if (buf.capacity() == bufferSize && buf.isDirect() == directBuffer) {
-			ArrayUtil.memsetZero(buf);
+			ArrayUtil.memclr(buf);
 			return true;
 		}
 		return false;

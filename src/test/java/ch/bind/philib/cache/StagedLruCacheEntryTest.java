@@ -22,41 +22,36 @@
 
 package ch.bind.philib.cache;
 
-final class StagedCacheEntry<K, V> extends SimpleCacheEntry<K, V> {
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
-	private static final int TOGGLE_OLD_GEN_BIT = 0x40000000;
+import org.testng.annotations.Test;
 
-	private static final int NO_OLD_GEN_BITMASK = 0x3FFFFFFF;
+public class StagedLruCacheEntryTest {
 
-	// bits 0-29 are for the hit-counter, bit 30 is the old-gen toggle
-	// and bit 31 is the 'unused' sign-extension
-	private int hits;
+	@Test
+	public void toggleOldGenBit() {
+		StagedLruCacheEntry<Integer, Integer> x = new StagedLruCacheEntry<Integer, Integer>(1, 2);
+		assertTrue(x.isInYoungGen());
+		x.setInYoungGen();
+		assertTrue(x.isInYoungGen());
 
-	StagedCacheEntry(K key, V value) {
-		super(key, value);
-	}
+		x.setInOldGen();
+		assertFalse(x.isInYoungGen());
+		x.setInOldGen();
+		assertFalse(x.isInYoungGen());
 
-	int recordHit() {
-		// hits are only recorded for young-generation objects
-		// so we do not have to worry about an integer overflow
-		// additionally the hits are reset to zero once an entry
-		// moves back down from the old generation
-		return (++hits & NO_OLD_GEN_BITMASK);
-	}
+		x.setInYoungGen();
+		assertTrue(x.isInYoungGen());
 
-	void resetHits() {
-		hits = hits & TOGGLE_OLD_GEN_BIT;
-	}
+		assertEquals(x.recordHit(), 1);
+		assertTrue(x.isInYoungGen());
 
-	boolean isInYoungGen() {
-		return (hits & TOGGLE_OLD_GEN_BIT) == 0;
-	}
+		x.setInOldGen();
+		assertFalse(x.isInYoungGen());
 
-	void setInYoungGen() {
-		hits = (hits & NO_OLD_GEN_BITMASK);
-	}
-
-	void setInOldGen() {
-		hits = (hits | TOGGLE_OLD_GEN_BIT);
+		assertEquals(x.recordHit(), 2);
+		assertFalse(x.isInYoungGen());
 	}
 }

@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.cache;
+package ch.bind.philib.lang;
 
 public interface Cloner<T> {
 

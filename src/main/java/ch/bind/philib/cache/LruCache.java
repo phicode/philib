@@ -22,56 +22,51 @@
 
 package ch.bind.philib.cache;
 
+import ch.bind.philib.lang.Cloner;
 import ch.bind.philib.util.ClusteredHashIndex;
 import ch.bind.philib.util.ClusteredIndex;
 import ch.bind.philib.util.LruList;
 import ch.bind.philib.validation.Validation;
 
-public final class SimpleCache<K, V> implements Cache<K, V> {
+public final class LruCache<K, V> implements Cache<K, V> {
 
 	/** The minimum capacity of a cache. */
 	public static final int MIN_CACHE_CAPACITY = 8;
 
-	private final LruList<SimpleCacheEntry<K, V>> lru;
+	private final LruList<LruCacheEntry<K, V>> lru;
 
-	private final ClusteredIndex<K, SimpleCacheEntry<K, V>> index;
+	private final ClusteredIndex<K, LruCacheEntry<K, V>> index;
 
 	private final Cloner<V> valueCloner;
 
-	public SimpleCache() {
+	public LruCache() {
 		this(DEFAULT_CAPACITY);
 	}
 
-	public SimpleCache(int capacity) {
+	public LruCache(int capacity) {
 		this(capacity, null);
 	}
 
-	public SimpleCache(Cloner<V> valueCloner) {
+	public LruCache(Cloner<V> valueCloner) {
 		this(DEFAULT_CAPACITY, valueCloner);
 	}
 
-	public SimpleCache(int capacity, Cloner<V> valueCloner) {
+	public LruCache(int capacity, Cloner<V> valueCloner) {
 		capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
-		this.lru = new LruList<SimpleCacheEntry<K, V>>(capacity);
-		this.index = new ClusteredHashIndex<K, SimpleCacheEntry<K, V>>(capacity);
+		this.lru = new LruList<LruCacheEntry<K, V>>(capacity);
+		this.index = new ClusteredHashIndex<K, LruCacheEntry<K, V>>(capacity);
 		this.valueCloner = valueCloner;
 	}
 
 	@Override
-	@Deprecated
-	public void add(final K key, final V value) {
-		set(key, value);
-	}
-
-	@Override
-	public void set(final K key, final V value) {
+	public synchronized void set(final K key, final V value) {
 		Validation.notNull(key);
 		Validation.notNull(value);
-		SimpleCacheEntry<K, V> entry = index.get(key);
+		LruCacheEntry<K, V> entry = index.get(key);
 		if (entry == null) {
-			entry = new SimpleCacheEntry<K, V>(key, value);
+			entry = new LruCacheEntry<K, V>(key, value);
 			index.add(entry);
-			SimpleCacheEntry<K, V> removed = lru.add(entry);
+			LruCacheEntry<K, V> removed = lru.add(entry);
 			if (removed != null) {
 				index.remove(removed);
 			}
@@ -82,9 +77,9 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public V get(final K key) {
+	public synchronized V get(final K key) {
 		Validation.notNull(key);
-		SimpleCacheEntry<K, V> entry = index.get(key);
+		LruCacheEntry<K, V> entry = index.get(key);
 		if (entry == null) {
 			return null;
 		}
@@ -99,23 +94,23 @@ public final class SimpleCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public void remove(final K key) {
+	public synchronized void remove(final K key) {
 		Validation.notNull(key);
 		removeLruAndIndex(index.get(key));
 	}
 
 	@Override
-	public int capacity() {
+	public synchronized int capacity() {
 		return lru.capacity();
 	}
 
 	@Override
-	public void clear() {
+	public synchronized void clear() {
 		lru.clear();
 		index.clear();
 	}
 
-	private void removeLruAndIndex(final SimpleCacheEntry<K, V> entry) {
+	private void removeLruAndIndex(final LruCacheEntry<K, V> entry) {
 		if (entry != null) {
 			index.remove(entry);
 			lru.remove(entry);

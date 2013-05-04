@@ -36,6 +36,8 @@ public final class Benchmark {
 
 	private static final int LOOPCOUNT = 1024 * 1024 * 8;
 
+	private static final int NCPU = Runtime.getRuntime().availableProcessors();
+
 	// TODO: read/write ratios
 	// 99/1%
 	// 95/5%
@@ -46,13 +48,13 @@ public final class Benchmark {
 	// ...
 
 	private static void simple() {
-		Cache<Integer, String> cache = new SimpleCache<Integer, String>(COUNT);
+		Cache<Integer, String> cache = new LruCache<Integer, String>(COUNT);
 		TestUtil.gcAndSleep();
 		benchNormal(cache);
 	}
 
 	private static void staged() {
-		Cache<Integer, String> cache = new StagedCache<Integer, String>(COUNT);
+		Cache<Integer, String> cache = new StagedLruCache<Integer, String>(COUNT);
 		TestUtil.gcAndSleep();
 		benchNormal(cache);
 	}
@@ -64,23 +66,21 @@ public final class Benchmark {
 	}
 
 	private static void parallelSimple() {
-		Cache<Integer, String> cache = new SimpleCache<Integer, String>(COUNT);
-		cache = new SyncCache<Integer, String>(cache);
+		Cache<Integer, String> cache = new LruCache<Integer, String>(COUNT);
 		TestUtil.gcAndSleep();
-		benchThreaded(cache, 4);
+		benchThreaded(cache, NCPU);
 	}
 
 	private static void parallelStaged() {
-		Cache<Integer, String> cache = new StagedCache<Integer, String>(COUNT);
-		cache = new SyncCache<Integer, String>(cache);
+		Cache<Integer, String> cache = new StagedLruCache<Integer, String>(COUNT);
 		TestUtil.gcAndSleep();
-		benchThreaded(cache, 4);
+		benchThreaded(cache, NCPU);
 	}
 
 	private static void parallelLine() {
 		Cache<Integer, String> cache = new LineCache<Integer, String>(COUNT, 4);
 		TestUtil.gcAndSleep();
-		benchThreaded(cache, 4);
+		benchThreaded(cache, NCPU);
 	}
 
 	private static void benchNormal(Cache<Integer, String> cache) {

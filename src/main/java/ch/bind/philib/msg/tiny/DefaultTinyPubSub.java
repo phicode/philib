@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg;
+package ch.bind.philib.msg.tiny;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.lang.ExceptionUtil;
+import ch.bind.philib.msg.MessageHandler;
+import ch.bind.philib.msg.Subscription;
+import ch.bind.philib.util.SimpleCowList;
 import ch.bind.philib.validation.Validation;
 
 public final class DefaultTinyPubSub implements TinyPubSub {

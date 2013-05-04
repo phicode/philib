@@ -240,24 +240,6 @@ public abstract class ArrayUtil {
 			'C', 'D', 'E', 'F' };
 
 	/**
-	 * @param buf -
-	 * @deprecated in favor of {@link #memclr(ByteBuffer)}.
-	 */
-	@Deprecated
-	public static void memsetZero(final ByteBuffer buf) {
-		memclr(buf);
-	}
-
-	/**
-	 * @param buf -
-	 * @deprecated in favor of {@link #memclr(byte[])}.
-	 */
-	@Deprecated
-	public static void memsetZero(final byte[] buf) {
-		memclr(buf);
-	}
-
-	/**
 	 * Overwrites the buffer's content with zeros.
 	 * @param buf -
 	 */
@@ -266,7 +248,7 @@ public abstract class ArrayUtil {
 			return;
 		}
 		if (buf.hasArray()) {
-			memsetZero(buf.array());
+			memclr(buf.array());
 		}
 		else {
 			byte[] filler = getFiller();

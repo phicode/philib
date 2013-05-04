@@ -40,7 +40,7 @@ public final class ByteArrayManager implements ObjectManager<byte[]> {
 	@Override
 	public boolean prepareForRecycle(byte[] buf) {
 		if (buf.length == bufferSize) {
-			ArrayUtil.memsetZero(buf);
+			ArrayUtil.memclr(buf);
 			return true;
 		}
 		return false;
