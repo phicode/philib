@@ -141,7 +141,8 @@ public abstract class CacheTestBase {
 		assertTrue(one != copy);
 	}
 
-	private static final int UP_DOWN_CAP_COEFF = 5;
+	 private static final int UP_DOWN_CAP_COEFF = 5;
+//	private static final int UP_DOWN_CAP_COEFF = 150;
 
 	@Test
 	public void up() {
@@ -159,12 +160,17 @@ public abstract class CacheTestBase {
 				if ((v = cache.get(is[j])) != null) {
 					assertEquals(v, is[j]);
 					hit++;
-				} else {
+				}
+				else {
 					miss++;
 				}
 			}
 		}
-		// System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
+		System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
+		 if (cache instanceof LineCache) {
+		 LineCache lc = (LineCache) cache;
+		 lc.print();
+		 }
 	}
 
 	@Test
@@ -183,12 +189,17 @@ public abstract class CacheTestBase {
 				if ((v = cache.get(is[j])) != null) {
 					assertEquals(v, is[j]);
 					hit++;
-				} else {
+				}
+				else {
 					miss++;
 				}
 			}
 		}
-		// System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
+		System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
+		 if (cache instanceof LineCache) {
+		 LineCache lc = (LineCache) cache;
+		 lc.print();
+		 }
 	}
 
 	private static final Cloner<Integer> INTEGER_CLONER = new Cloner<Integer>() {
