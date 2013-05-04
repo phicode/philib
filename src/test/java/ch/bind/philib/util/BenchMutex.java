@@ -59,6 +59,7 @@ public class BenchMutex {
 
 	private static void startThread(final long n, final Lock mutex, final Semaphore start, final Semaphore stop) {
 		Runnable r = new Runnable() {
+
 			@Override
 			public void run() {
 				try {

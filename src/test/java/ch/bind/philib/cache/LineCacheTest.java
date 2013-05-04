@@ -46,7 +46,7 @@ public class LineCacheTest extends CacheTestBase {
 	<K, V> Cache<K, V> create(Cloner<V> valueCloner) {
 		return new LineCache<K, V>(valueCloner);
 	}
-	
+
 	@Override
 	int getBucketSize() {
 		return LineCache.DEFAULT_ORDER;

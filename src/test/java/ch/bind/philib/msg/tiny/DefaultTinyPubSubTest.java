@@ -44,8 +44,6 @@ import org.testng.annotations.Test;
 
 import ch.bind.philib.msg.MessageHandler;
 import ch.bind.philib.msg.Subscription;
-import ch.bind.philib.msg.tiny.DefaultTinyPubSub;
-import ch.bind.philib.msg.tiny.TinyPubSub;
 
 public class DefaultTinyPubSubTest {
 

@@ -28,8 +28,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import ch.bind.philib.validation.Validation;
 
 /**
- * A thread factory which generates thread names of the form
- * &lt;name&gt;-&lt;sequence&gt;
+ * A thread factory which generates thread names of the form &lt;name&gt;-&lt;sequence&gt;
  * 
  * @author philipp meinen
  */

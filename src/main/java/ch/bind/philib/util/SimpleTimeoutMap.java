@@ -38,9 +38,8 @@ import ch.bind.philib.math.Calc;
 import ch.bind.philib.validation.Validation;
 
 /**
- * An implementation of {@link TimeoutMap} which uses the {@link TreeMap} and
- * {@link HashMap} from java.util for internal data management. This
- * implementation is threadsafe.
+ * An implementation of {@link TimeoutMap} which uses the {@link TreeMap} and {@link HashMap} from java.util for
+ * internal data management. This implementation is threadsafe.
  * 
  * @author Philipp Meinen
  * 

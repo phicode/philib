@@ -22,10 +22,11 @@
 
 package ch.bind.philib.util;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
-import ch.bind.philib.util.SimpleCowList;
-import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 public class SimpleCowListTest {
 

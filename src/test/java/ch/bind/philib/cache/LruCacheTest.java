@@ -56,7 +56,7 @@ public class LruCacheTest extends CacheTestBase {
 	int getDefaultCapacity() {
 		return Cache.DEFAULT_CAPACITY;
 	}
-	
+
 	@Override
 	int getBucketSize() {
 		return 1;

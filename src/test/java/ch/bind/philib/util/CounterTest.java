@@ -124,6 +124,7 @@ public class CounterTest {
 	}
 
 	private static final class C implements Runnable {
+
 		final Counter counter;
 
 		final int n;
