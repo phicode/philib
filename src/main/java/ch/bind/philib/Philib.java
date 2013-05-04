@@ -33,7 +33,7 @@ public final class Philib {
 
 	public static final int PHILIB_VERSION_MAJOR = 0;
 
-	public static final int PHILIB_VERSION_MINOR = 6;
+	public static final int PHILIB_VERSION_MINOR = 7;
 
 	public static final int PHILIB_VERSION_PATCH = 0;
 
