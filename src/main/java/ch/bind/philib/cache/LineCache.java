@@ -23,12 +23,10 @@
 package ch.bind.philib.cache;
 
 import java.lang.ref.SoftReference;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
+import ch.bind.philib.lang.MurmurHash;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -38,22 +36,15 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 	static final int DEFAULT_ORDER = 4;
 
-	// TODO: locks per bucket or just multiple locks
-	private final ReadWriteLock rwlock = new ReentrantReadWriteLock();
+	private final AtomicReferenceArray<Entry<K, V>> entries;
 
-	private final Lock wlock = rwlock.writeLock();
-
-	private final Lock rlock = rwlock.readLock();
-
-	private final Entry<K, V>[] entries;
+	private final int lineMask;
 
 	private final int lines;
 
 	private final int order;
 
 	private final Cloner<V> valueCloner;
-
-	private final AtomicLong accessCounter = new AtomicLong();
 
 	public LineCache() {
 		this(DEFAULT_CAPACITY, DEFAULT_ORDER, null);
@@ -71,11 +62,13 @@ public final class LineCache<K, V> implements Cache<K, V> {
 	public LineCache(int capacity, int order, Cloner<V> valueCloner) {
 		capacity = Math.max(DEFAULT_CAPACITY, capacity);
 		Validation.isTrue(order > 0, "capacity and order must be greater than zero");
+		Validation.isTrue(Integer.bitCount(order) == 1, "order must be a power of two");
 		Validation.isTrue(capacity % order == 0, "capacity must be a multiple of order");
 		this.lines = capacity / order;
 		this.order = order;
-		this.entries = new Entry[capacity];
+		this.entries = new AtomicReferenceArray<Entry<K, V>>(capacity);
 		this.valueCloner = valueCloner;
+		this.lineMask = lines - 1;
 	}
 
 	@Deprecated
@@ -88,91 +81,97 @@ public final class LineCache<K, V> implements Cache<K, V> {
 	public void set(final K key, final V value) {
 		Validation.notNull(key);
 		Validation.notNull(value);
-		int hash = key.hashCode();
-		int line = Math.abs(hash) % lines;
-		int startIdx = line * order;
-		wlock.lock();
-		try {
-			int firstEmptyIndex = -1;
-			Entry<K, V> leastAccessCounterEntry = null;
-			int leastAccessIndex = -1;
+
+		final int hash = hash(key);
+		final int line = Math.abs(hash) & lineMask;
+		final int order = this.order;
+		final int startIdx = line * order;
+
+		final Entry<K, V> newe = new Entry<K, V>(key, hash, value);
+
+		while (true) {
+			int insertIdx = -1;
+			Entry<K, V> overwrite = null;
+
 			for (int o = 0; o < order; o++) {
-				int idx = startIdx + o;
-				Entry<K, V> e = entries[idx];
+				final int idx = startIdx + o;
+				final Entry<K, V> e = entries.get(idx);
 				if (e == null) {
-					firstEmptyIndex = firstEmptyIndex == -1 ? idx : firstEmptyIndex;
+					if (overwrite != null || insertIdx == -1) {
+						insertIdx = idx;
+						overwrite = null;
+					}
 					continue;
 				}
 				if (e.matches(key, hash)) {
-					e.value = new SoftReference<V>(value);
-					return;
-				}
-				if (leastAccessCounterEntry == null) {
-					leastAccessCounterEntry = e;
-					leastAccessIndex = idx;
-				} else {
-					if (e.lastAccess.get() < leastAccessCounterEntry.lastAccess.get()) {
-						leastAccessCounterEntry = e;
-						leastAccessIndex = idx;
+					if (entries.compareAndSet(idx, e, newe)) {
+						return;
 					}
+					break; // repeat while
+				}
+				if (insertIdx == -1) {
+					insertIdx = idx;
+					overwrite = e;
+				}
+				else if (overwrite != null && e.lastAccess.get() < overwrite.lastAccess.get()) {
+					System.out.println("facour throwing away " + e.key + " instead of " + overwrite.key + " access diff: " //
+							+ (overwrite.lastAccess.get() - e.lastAccess.get()));
+					insertIdx = idx;
+					overwrite = e;
 				}
 			}
-			if (firstEmptyIndex != -1) {
-				entries[firstEmptyIndex] = new Entry<K, V>(key, hash, value);
-			} else {
-				entries[leastAccessIndex] = new Entry<K, V>(key, hash, value);
+			if (entries.compareAndSet(insertIdx, overwrite, newe)) {
+				return;
 			}
-		} finally {
-			wlock.unlock();
 		}
+	}
+
+	private static final int hash(Object o) {
+		return MurmurHash.murmur3_finalize_mix32(o.hashCode());
 	}
 
 	@Override
 	public V get(final K key) {
 		Validation.notNull(key);
-		int hash = key.hashCode();
-		int line = Math.abs(hash) % lines;
-		int startIdx = line * order;
-		rlock.lock();
-		try {
-			for (int o = 0; o < order; o++) {
-				int idx = startIdx + o;
-				Entry<K, V> e = entries[idx];
-				if (e != null && e.matches(key, hash)) {
-					V value = e.value.get();
-					if (value == null) {
-						entries[idx] = null;
-						return null;
-					}
-					long access = accessCounter.incrementAndGet();
-					e.setLastAccessMaxVal(access);
-					return valueCloner == null ? value : valueCloner.clone(value);
+
+		final int hash = hash(key);
+		final int line = Math.abs(hash) & lineMask;
+		final int order = this.order;
+		final int startIdx = line * order;
+
+		for (int o = 0; o < order; o++) {
+			final int idx = startIdx + o;
+			final Entry<K, V> e = entries.get(idx);
+			if (e != null && e.matches(key, hash)) {
+				final V value = e.value.get();
+				if (value == null) {
+					// soft-reference was collected
+					entries.compareAndSet(idx, e, null);
+					return null;
 				}
+				e.setLastAccessMaxVal(System.nanoTime());
+				return valueCloner == null ? value : valueCloner.clone(value);
 			}
-			return null;
-		} finally {
-			rlock.unlock();
 		}
+		return null;
 	}
 
 	@Override
 	public void remove(final K key) {
 		Validation.notNull(key);
-		int hash = key.hashCode();
-		int line = Math.abs(hash) % lines;
-		int startIdx = line * order;
-		wlock.lock();
-		try {
-			for (int o = 0; o < order; o++) {
-				int idx = startIdx + o;
-				Entry<K, V> e = entries[idx];
-				if (e != null && e.matches(key, hash)) {
-					entries[idx] = null;
-					return;
-				}
+
+		final int hash = hash(key);
+		final int line = Math.abs(hash) & lineMask;
+		final int order = this.order;
+		final int startIdx = line * order;
+
+		for (int o = 0; o < order; o++) {
+			final int idx = startIdx + o;
+			final Entry<K, V> e = entries.get(idx);
+			if (e != null && e.matches(key, hash)) {
+				entries.compareAndSet(idx, e, null);
+				return;
 			}
-		} finally {
-			wlock.unlock();
 		}
 	}
 
@@ -183,11 +182,24 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 	@Override
 	public void clear() {
-		wlock.lock();
-		try {
-			Arrays.fill(entries, null);
-		} finally {
-			wlock.unlock();
+		int cap = order * lines;
+		for (int i = 0; i < cap; i++) {
+			entries.lazySet(i, null);
+		}
+		// write fence
+		entries.set(0, null);
+	}
+
+	void print() {
+		int cap = order * lines;
+		for (int i = 0; i < cap; i++) {
+			Entry<K, V> e = entries.get(i);
+			if (e == null) {
+				System.out.printf("%03d: <empty>\n", i);
+			}
+			else {
+				System.out.printf("%03d: %s -> %s\n", i, e.key, e.value.get());
+			}
 		}
 	}
 
@@ -199,7 +211,7 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 		final AtomicLong lastAccess = new AtomicLong();
 
-		SoftReference<V> value;
+		final SoftReference<V> value;
 
 		public Entry(K key, int hash, V value) {
 			this.key = key;
@@ -218,7 +230,7 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		}
 
 		boolean matches(final K k, final int h) {
-			return this.hash == h && this.key.equals(k);
+			return this.hash == h && (this.key == k || this.key.equals(k));
 		}
 	}
 }
