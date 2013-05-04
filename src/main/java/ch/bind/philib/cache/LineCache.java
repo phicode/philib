@@ -26,6 +26,7 @@ import java.lang.ref.SoftReference;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
+import ch.bind.philib.lang.Cloner;
 import ch.bind.philib.lang.MurmurHash;
 import ch.bind.philib.validation.Validation;
 
@@ -39,8 +40,6 @@ public final class LineCache<K, V> implements Cache<K, V> {
 	private final AtomicReferenceArray<Entry<K, V>> entries;
 
 	private final int lineMask;
-
-	private final int lines;
 
 	private final int order;
 
@@ -64,7 +63,7 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		Validation.isTrue(order > 0, "capacity and order must be greater than zero");
 		Validation.isTrue(Integer.bitCount(order) == 1, "order must be a power of two");
 		Validation.isTrue(capacity % order == 0, "capacity must be a multiple of order");
-		this.lines = capacity / order;
+		int lines = capacity / order;
 		this.order = order;
 		this.entries = new AtomicReferenceArray<Entry<K, V>>(capacity);
 		this.valueCloner = valueCloner;
@@ -84,7 +83,6 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 		final int hash = hash(key);
 		final int line = Math.abs(hash) & lineMask;
-		final int order = this.order;
 		final int startIdx = line * order;
 
 		final Entry<K, V> newe = new Entry<K, V>(key, hash, value);
@@ -114,8 +112,9 @@ public final class LineCache<K, V> implements Cache<K, V> {
 					overwrite = e;
 				}
 				else if (overwrite != null && e.lastAccess.get() < overwrite.lastAccess.get()) {
-					System.out.println("facour throwing away " + e.key + " instead of " + overwrite.key + " access diff: " //
-							+ (overwrite.lastAccess.get() - e.lastAccess.get()));
+					// System.out.println("facour throwing away " + e.key + " instead of " + overwrite.key +
+					// " access diff: " //
+					// + (overwrite.lastAccess.get() - e.lastAccess.get()));
 					insertIdx = idx;
 					overwrite = e;
 				}
@@ -136,7 +135,6 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 		final int hash = hash(key);
 		final int line = Math.abs(hash) & lineMask;
-		final int order = this.order;
 		final int startIdx = line * order;
 
 		for (int o = 0; o < order; o++) {
@@ -162,7 +160,6 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 		final int hash = hash(key);
 		final int line = Math.abs(hash) & lineMask;
-		final int order = this.order;
 		final int startIdx = line * order;
 
 		for (int o = 0; o < order; o++) {
@@ -177,30 +174,17 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 	@Override
 	public int capacity() {
-		return lines * order;
+		return entries.length();
 	}
 
 	@Override
 	public void clear() {
-		int cap = order * lines;
+		final int cap = entries.length();
 		for (int i = 0; i < cap; i++) {
 			entries.lazySet(i, null);
 		}
 		// write fence
 		entries.set(0, null);
-	}
-
-	void print() {
-		int cap = order * lines;
-		for (int i = 0; i < cap; i++) {
-			Entry<K, V> e = entries.get(i);
-			if (e == null) {
-				System.out.printf("%03d: <empty>\n", i);
-			}
-			else {
-				System.out.printf("%03d: %s -> %s\n", i, e.key, e.value.get());
-			}
-		}
 	}
 
 	private static final class Entry<K, V> {
