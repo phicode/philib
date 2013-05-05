@@ -43,6 +43,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.msg.MessageHandler;
 import ch.bind.philib.msg.Subscription;
 
@@ -175,7 +176,7 @@ public class PubSubVMTest {
 		mh.assertMessages("foo", "bar");
 	}
 
-	@Test(timeOut = 500 * 10000, invocationCount = 10000)
+	@Test(timeOut = 500 * 100, invocationCount = 100)
 	public void unsubscribeWhilePublishingIsRunning() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh1 = new RecordingMessageHandler();
@@ -193,26 +194,30 @@ public class PubSubVMTest {
 		while (!mh1.lock.hasQueuedThreads() && !mh2.lock.hasQueuedThreads()) {
 			Thread.yield();
 		}
-		RecordingMessageHandler first, second;
+		// for (int i = 0; i < 1000;i++) {
+		// mh1.assertMessages("foo"); // nothing received yet
+		// mh2.assertMessages("foo"); // nothing received yet
+		// }
+		RecordingMessageHandler active, cancel;
 		// now cancel the other subscription and make the publisher unstuck
 		if (mh1.lock.hasQueuedThreads()) {
 			assertFalse(mh2.lock.hasQueuedThreads());
+			active = mh1;
+			cancel = mh2;
 			s2.cancel();
-			first = mh1;
-			second = mh2;
 		} else {
 			assertFalse(mh1.lock.hasQueuedThreads());
+			active = mh2;
+			cancel = mh1;
 			s1.cancel();
-			first = mh2;
-			second = mh1;
 		}
 
-		first.assertMessages("foo"); // nothing received yet
-		first.lock.unlock();
-		second.lock.unlock();
-		first.awaitNumMsgs(1);
-		first.assertMessages("foo", "bar");
-		second.assertMessages("foo");
+		active.assertMessages("foo"); // nothing received yet
+		mh1.lock.unlock();
+		mh2.lock.unlock();
+		active.awaitNumMsgs(1);
+		active.assertMessages("foo", "bar");
+		cancel.assertMessages("foo");
 	}
 
 	@Test(timeOut = 500)
@@ -328,8 +333,6 @@ public class PubSubVMTest {
 
 		private int numMsgs;
 
-		// private boolean doHandleMessages = true;
-
 		private final ReentrantLock lock = new ReentrantLock();
 
 		private final Condition newMsg = lock.newCondition();
@@ -340,7 +343,6 @@ public class PubSubVMTest {
 			try {
 				assertNotNull(channelName);
 				assertNotNull(message);
-				// if (doHandleMessages) {
 				numMsgs++;
 				List<Object> l = msgs.get(channelName);
 				if (l == null) {
@@ -349,8 +351,6 @@ public class PubSubVMTest {
 				}
 				l.add(message);
 				newMsg.signalAll();
-				// }
-				// return doHandleMessages;
 			} finally {
 				lock.unlock();
 			}
