@@ -36,20 +36,50 @@ public final class NamedSeqThreadFactory implements ThreadFactory {
 
 	private final AtomicLong SEQ = new AtomicLong(0);
 
-	private final String name;
+	private final String prefix;
+
+	private final boolean daemon;
+
+	private final ThreadGroup group;
 
 	/**
 	 * @see NamedSeqThreadFactory
 	 * @param name The name which must be used for newly created threads.
 	 */
 	public NamedSeqThreadFactory(String name) {
+		this(name, false, null);
+	}
+
+	/**
+	 * @see NamedSeqThreadFactory
+	 * @param name The name which must be used for newly created threads.
+	 * @param daemon Newly created threads will have their daemon-flag set to the provided value.
+	 */
+	public NamedSeqThreadFactory(String name, boolean daemon) {
+		this(name, daemon, null);
+	}
+
+	/**
+	 * @see NamedSeqThreadFactory
+	 * @param name The name which must be used for newly created threads.
+	 */
+	public NamedSeqThreadFactory(String name, boolean daemon, ThreadGroup group) {
 		Validation.notNull(name);
-		this.name = name;
+		this.prefix = name + "-";
+		this.daemon = daemon;
+		this.group = group;
 	}
 
 	@Override
 	public Thread newThread(Runnable r) {
-		String threadname = name + "-" + SEQ.getAndIncrement();
-		return new Thread(r, threadname);
+		if (r == null) {
+			return null;
+		}
+		String name = prefix + SEQ.getAndIncrement();
+		Thread t = new Thread(group, r, name);
+		if (daemon) {
+			t.setDaemon(true);
+		}
+		return t;
 	}
 }
