@@ -61,24 +61,31 @@ public abstract class CacheTestBase {
 	abstract int getDefaultCapacity();
 
 	@Test
-	public void capacity() {
+	public void defaultCapacityOrMore() {
 		Cache<Integer, Integer> cache;
 
-		final int min = getMinCapacity();
 		final int def = getDefaultCapacity();
-		final int bs = getBucketSize();
 
 		cache = this.<Integer, Integer> create();
 		assertEquals(cache.capacity(), def);
 
 		cache = this.<Integer, Integer> create(def * 4);
 		assertEquals(cache.capacity(), def * 4);
+	}
 
-		cache = this.<Integer, Integer> create(min - bs);
-		assertEquals(cache.capacity(), min);
+	@Test
+	public void minCapacity() {
+		this.<Integer, Integer> create(getMinCapacity());
+	}
 
-		cache = this.<Integer, Integer> create(0);
-		assertEquals(cache.capacity(), min);
+	@Test(expectedExceptions = { IllegalArgumentException.class })
+	public void notLessThanMinCapacity() {
+		this.<Integer, Integer> create(getMinCapacity() - getBucketSize());
+	}
+
+	@Test(expectedExceptions = { IllegalArgumentException.class })
+	public void notZeroCapacity() {
+		this.<Integer, Integer> create(0);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)

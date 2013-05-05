@@ -54,7 +54,7 @@ public class LineCacheTest extends CacheTestBase {
 
 	@Override
 	int getMinCapacity() {
-		return Cache.DEFAULT_CAPACITY;
+		return LineCache.DEFAULT_ORDER;
 	}
 
 	@Override

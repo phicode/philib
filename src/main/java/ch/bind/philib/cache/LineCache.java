@@ -58,10 +58,10 @@ public final class LineCache<K, V> implements Cache<K, V> {
 	}
 
 	public LineCache(int capacity, int order, Cloner<V> valueCloner) {
-		capacity = Math.max(DEFAULT_CAPACITY, capacity);
-		Validation.isTrue(order > 0, "capacity and order must be greater than zero");
+		Validation.isTrue(capacity > 0 && order > 0, "capacity and order must be greater than zero");
 		Validation.isTrue(Integer.bitCount(order) == 1, "order must be a power of two");
 		Validation.isTrue(capacity % order == 0, "capacity must be a multiple of order");
+
 		int lines = capacity / order;
 		this.order = order;
 		this.entries = new AtomicReferenceArray<Entry<K, V>>(capacity);

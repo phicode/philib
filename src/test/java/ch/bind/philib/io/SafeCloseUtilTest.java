@@ -22,6 +22,11 @@
 
 package ch.bind.philib.io;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.testng.Assert.assertEquals;
 
 import java.io.Closeable;
@@ -30,7 +35,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
-import static org.mockito.Mockito.*;
 
 import org.slf4j.Logger;
 import org.testng.annotations.Test;
@@ -65,7 +69,7 @@ public class SafeCloseUtilTest {
 	public void selectorExc() {
 		S s = new S(true);
 		Logger l = mock(Logger.class);
-		SafeCloseUtil.close(s,l);
+		SafeCloseUtil.close(s, l);
 		assertEquals(s.numCalls, 1);
 		verify(l).error(anyString(), any(IOException.class));
 		verifyNoMoreInteractions(l);

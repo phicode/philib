@@ -31,15 +31,10 @@ import ch.bind.philib.validation.Validation;
 
 public final class StagedLruCache<K, V> implements Cache<K, V> {
 
-	/** The minimum capacity of a staged cache. */
-	public static final int MIN_CACHE_CAPACITY = 64;
-
-	/** The default capacity of an object cache. */
-	public static final int DEFAULT_CACHE_CAPACITY = 256;
-
-	/** The default capacity of an object cache. */
+	/** The default capacity of an object cache relative to its capacity. */
 	public static final double DEFAULT_OLD_GEN_RATIO = 0.25;
 
+	/** The number of hits after which an entry is put into the old-generation lru */
 	public static final int DEFAULT_OLD_GEN_AFTER_HITS = 10;
 
 	private static final double MIN_OLD_GEN_RATIO = 0.1;
@@ -59,7 +54,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 	private final Cloner<V> valueCloner;
 
 	public StagedLruCache() {
-		this(DEFAULT_CACHE_CAPACITY);
+		this(DEFAULT_CAPACITY);
 	}
 
 	public StagedLruCache(int capacity) {
@@ -67,12 +62,14 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 	}
 
 	public StagedLruCache(Cloner<V> valueCloner) {
-		this(DEFAULT_CACHE_CAPACITY, valueCloner, DEFAULT_OLD_GEN_RATIO, DEFAULT_OLD_GEN_AFTER_HITS);
+		this(DEFAULT_CAPACITY, valueCloner, DEFAULT_OLD_GEN_RATIO, DEFAULT_OLD_GEN_AFTER_HITS);
 	}
 
 	public StagedLruCache(int capacity, Cloner<V> valueCloner, double oldGenRatio, int oldGenAfterHits) {
-		this.capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
-		this.oldGenAfterHits = oldGenAfterHits < 1 ? 1 : oldGenAfterHits;
+		Validation.isTrue(capacity > 0, "capacity must be greater than 0");
+
+		this.capacity = capacity;
+		this.oldGenAfterHits = Math.max(1, oldGenAfterHits);
 		oldGenRatio = Calc.clip(oldGenRatio, MIN_OLD_GEN_RATIO, MAX_OLD_GEN_RATIO);
 		int oldCap = (int) (this.capacity * oldGenRatio);
 		int youngCap = this.capacity - oldCap;

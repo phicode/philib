@@ -49,12 +49,12 @@ public class StagedLruCacheTest extends CacheTestBase {
 
 	@Override
 	int getMinCapacity() {
-		return StagedLruCache.MIN_CACHE_CAPACITY;
+		return (int) (1 / StagedLruCache.DEFAULT_OLD_GEN_RATIO);
 	}
 
 	@Override
 	int getDefaultCapacity() {
-		return StagedLruCache.DEFAULT_CACHE_CAPACITY;
+		return Cache.DEFAULT_CAPACITY;
 	}
 
 	@Override
@@ -115,8 +115,8 @@ public class StagedLruCacheTest extends CacheTestBase {
 
 	@Test
 	public void removeOldEntry() {
-		// 1 entry old gen & 1 young gen
-		Cache<Integer, Integer> cache = new StagedLruCache<Integer, Integer>(StagedLruCache.MIN_CACHE_CAPACITY, null, 0.5, 2);
+		// 1 entry old generation & 1 young generation
+		Cache<Integer, Integer> cache = new StagedLruCache<Integer, Integer>(2, null, 0.5, 2);
 		cache.set(1, 1);
 
 		// 'elevate' 1 to old-gen

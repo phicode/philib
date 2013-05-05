@@ -30,9 +30,6 @@ import ch.bind.philib.validation.Validation;
 
 public final class LruCache<K, V> implements Cache<K, V> {
 
-	/** The minimum capacity of a cache. */
-	public static final int MIN_CACHE_CAPACITY = 8;
-
 	private final LruList<LruCacheEntry<K, V>> lru;
 
 	private final ClusteredIndex<K, LruCacheEntry<K, V>> index;
@@ -52,7 +49,7 @@ public final class LruCache<K, V> implements Cache<K, V> {
 	}
 
 	public LruCache(int capacity, Cloner<V> valueCloner) {
-		capacity = Math.max(MIN_CACHE_CAPACITY, capacity);
+		Validation.isTrue(capacity > 0, "capacity must be greater than 0");
 		this.lru = new LruList<LruCacheEntry<K, V>>(capacity);
 		this.index = new ClusteredHashIndex<K, LruCacheEntry<K, V>>(capacity);
 		this.valueCloner = valueCloner;

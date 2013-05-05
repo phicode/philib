@@ -49,7 +49,7 @@ public class LruCacheTest extends CacheTestBase {
 
 	@Override
 	int getMinCapacity() {
-		return LruCache.MIN_CACHE_CAPACITY;
+		return 1;
 	}
 
 	@Override
