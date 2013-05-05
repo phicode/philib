@@ -45,6 +45,22 @@ public final class Counter {
 		return name;
 	}
 
+	public synchronized long getNumCounts() {
+		return counts;
+	}
+
+	public synchronized long getTotal() {
+		return total;
+	}
+
+	public synchronized long getMin() {
+		return min;
+	}
+
+	public synchronized long getMax() {
+		return max;
+	}
+
 	public void count(long value) {
 		if (value < 0) {
 			return;

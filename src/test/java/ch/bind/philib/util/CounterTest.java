@@ -88,6 +88,53 @@ public class CounterTest {
 	}
 
 	@Test
+	public void countCounter() {
+		Counter a = new Counter("a");
+		Counter b = new Counter("b");
+
+		a.count(50);
+		a.count(150);
+		b.count(100);
+		b.count(a);
+
+		assertEquals(b.getTotal(), 50 + 100 + 150);
+		assertEquals(b.getNumCounts(), 3);
+		assertEquals(b.getMin(), 50);
+		assertEquals(b.getMax(), 150);
+	}
+
+	@Test
+	public void countCounter2() {
+		Counter a = new Counter("a");
+		Counter b = new Counter("b");
+
+		b.count(a);
+
+		assertEquals(b.getTotal(), 0);
+		assertEquals(b.getNumCounts(), 0);
+	}
+
+	@Test
+	public void countCounter3() {
+		Counter a = new Counter("a");
+		Counter b = new Counter("b");
+
+		a.count(50);
+		b.count(a);
+
+		assertEquals(b.getTotal(), 50);
+		assertEquals(b.getNumCounts(), 1);
+		assertEquals(b.getMin(), 50);
+		assertEquals(b.getMax(), 50);
+	}
+
+	@Test
+	public void name() {
+		Counter a = new Counter("a");
+		assertEquals(a.getName(), "a");
+	}
+
+	@Test
 	public void parallel() throws Exception {
 		if (!TestUtil.RUN_BENCHMARKS) {
 			return;

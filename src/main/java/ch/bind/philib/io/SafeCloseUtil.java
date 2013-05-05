@@ -40,6 +40,10 @@ public abstract class SafeCloseUtil {
 	public static void close(Closeable closeable) {
 		close(closeable, LOG);
 	}
+	
+	public static void close(Selector selector) {
+		close(selector, LOG);
+	}
 
 	public static void close(Closeable closeable, Logger logger) {
 		if (closeable == null) {
