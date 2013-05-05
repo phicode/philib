@@ -176,7 +176,7 @@ public class PubSubVMTest {
 		mh.assertMessages("foo", "bar");
 	}
 
-	@Test(timeOut = 500 * 100000, invocationCount = 100000)
+	@Test(timeOut = 500)
 	public void unsubscribeWhilePublishingIsRunning() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh1 = new RecordingMessageHandler();
