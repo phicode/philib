@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg.tiny;
+package ch.bind.philib.msg.vm;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,12 +35,14 @@ import ch.bind.philib.TestUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.msg.MessageHandler;
+import ch.bind.philib.msg.vm.PubSub;
+import ch.bind.philib.msg.vm.PubSubVM;
 
 /**
  * @author Philipp Meinen
  */
 
-public class DefaultTinyPubSubBenchmark implements Runnable {
+public class PubSubVMBenchmark implements Runnable {
 
 	private final int consumersPerProducer;
 
@@ -50,7 +52,7 @@ public class DefaultTinyPubSubBenchmark implements Runnable {
 
 	private final long incrementEvery = 1000L;
 
-	private TinyPubSub pubSub;
+	private PubSub pubSub;
 
 	private ExecutorService executorService;
 
@@ -58,7 +60,7 @@ public class DefaultTinyPubSubBenchmark implements Runnable {
 
 	private List<Consumer> consumers = new LinkedList<Consumer>();
 
-	public DefaultTinyPubSubBenchmark(int consumersPerProducer, int numThreads) {
+	public PubSubVMBenchmark(int consumersPerProducer, int numThreads) {
 		this.consumersPerProducer = consumersPerProducer;
 		this.numThreads = numThreads;
 	}
@@ -67,7 +69,7 @@ public class DefaultTinyPubSubBenchmark implements Runnable {
 		System.out.println("threads;publishers;consumers;messages;latency-ns;persec");
 		for (int ratio = 1; ratio < 9; ratio *= 2) {
 			for (int threads = 1; threads < 9; threads *= 2) {
-				new DefaultTinyPubSubBenchmark(ratio, threads).run();
+				new PubSubVMBenchmark(ratio, threads).run();
 				TestUtil.gcAndSleep(100);
 			}
 		}
@@ -117,7 +119,7 @@ public class DefaultTinyPubSubBenchmark implements Runnable {
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(numThreads, numThreads, 1L, TimeUnit.SECONDS, q);
 
 		executorService = tpe;
-		pubSub = new DefaultTinyPubSub(executorService);
+		pubSub = new PubSubVM(executorService);
 	}
 
 	private void stop() throws InterruptedException {
@@ -147,11 +149,11 @@ public class DefaultTinyPubSubBenchmark implements Runnable {
 
 	private static final class Producer implements Runnable {
 
-		private final TinyPubSub pubSub;
+		private final PubSub pubSub;
 
 		private final boolean async;
 
-		public Producer(TinyPubSub pubSub, boolean async) {
+		public Producer(PubSub pubSub, boolean async) {
 			super();
 			this.pubSub = pubSub;
 			this.async = async;
@@ -177,7 +179,7 @@ public class DefaultTinyPubSubBenchmark implements Runnable {
 
 		private AtomicLong totalLatency = new AtomicLong();
 
-		public Consumer(TinyPubSub pubSub) {
+		public Consumer(PubSub pubSub) {
 			pubSub.subscribe("foo", this);
 		}
 

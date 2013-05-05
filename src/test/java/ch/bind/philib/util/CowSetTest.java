@@ -28,49 +28,60 @@ import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
-public class SimpleCowListTest {
+public class CowSetTest {
 
 	@Test
 	public void isEmpty() {
-		SimpleCowList<Integer> scl = new SimpleCowList<Integer>(Integer.class);
-		assertTrue(scl.isEmpty());
-		assertTrue(scl.add(1));
-		assertFalse(scl.isEmpty());
-		assertTrue(scl.remove(new Integer(1))); // other integer object
-		assertTrue(scl.isEmpty());
+		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		assertTrue(cs.isEmpty());
+		assertTrue(cs.add(1));
+		assertFalse(cs.isEmpty());
+		assertTrue(cs.remove(new Integer(1))); // other integer object
+		assertTrue(cs.isEmpty());
 	}
 
 	@Test
 	public void emptyView() {
-		SimpleCowList<Integer> scl = new SimpleCowList<Integer>(Integer.class);
-		Integer[] empty1 = scl.getView();
-		scl.add(1);
-		assertEquals(scl.getView().length, 1);
-		scl.remove(1);
-		Integer[] empty2 = scl.getView();
+		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		Integer[] empty1 = cs.getView();
+		cs.add(1);
+		assertEquals(cs.getView().length, 1);
+		cs.remove(1);
+		Integer[] empty2 = cs.getView();
 		assertTrue(empty1 == empty2);
 	}
 
 	@Test
 	public void noNullAdd() {
-		SimpleCowList<Integer> scl = new SimpleCowList<Integer>(Integer.class);
-		assertFalse(scl.add(null));
+		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		assertFalse(cs.add(null));
 	}
 
 	@Test
 	public void noNullRemove() {
-		SimpleCowList<Integer> scl = new SimpleCowList<Integer>(Integer.class);
-		assertFalse(scl.remove(null));
+		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		assertFalse(cs.remove(null));
 	}
 
 	@Test
 	public void noViewUpdateOnFalseRemove() {
-		SimpleCowList<Integer> scl = new SimpleCowList<Integer>(Integer.class);
-		scl.add(55);
-		Integer[] v = scl.getView();
+		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		cs.add(55);
+		Integer[] v = cs.getView();
 		assertEquals(v.length, 1);
 		assertEquals(v[0], Integer.valueOf(55));
-		assertFalse(scl.remove(1));
-		assertTrue(v == scl.getView());
+		assertFalse(cs.remove(1));
+		assertTrue(v == cs.getView());
+	}
+
+	@Test
+	public void noDuplicates() {
+		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		Integer a = 55;
+		Integer b = new Integer(55); // different reference but equals
+		assertTrue(cs.add(a));
+		assertFalse(cs.add(a));
+		assertFalse(cs.add(b));
+		assertEquals(cs.getView().length, 1);
 	}
 }

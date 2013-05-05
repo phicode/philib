@@ -37,7 +37,6 @@ import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.PoolStats;
 import ch.bind.philib.validation.Validation;
 
-@Test(singleThreaded = true)
 public abstract class BufferPoolTestBase<T> {
 
 	abstract Pool<T> createPool(int bufferSize, int maxEntries);

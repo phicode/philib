@@ -20,11 +20,14 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg.tiny;
+package ch.bind.philib.msg.vm;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -36,12 +39,12 @@ import org.slf4j.LoggerFactory;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.msg.MessageHandler;
 import ch.bind.philib.msg.Subscription;
-import ch.bind.philib.util.SimpleCowList;
+import ch.bind.philib.util.CowSet;
 import ch.bind.philib.validation.Validation;
 
-public final class DefaultTinyPubSub implements TinyPubSub {
+public final class PubSubVM implements PubSub {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultTinyPubSub.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PubSubVM.class);
 
 	private final ReadWriteLock rwlock = new ReentrantReadWriteLock();
 
@@ -56,7 +59,7 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 	/**
 	 * Creates a {@code DefaultTinyPubSub} which publishes messages through the provided {@code ExecutorService}.
 	 */
-	public DefaultTinyPubSub(ExecutorService executorService) {
+	public PubSubVM(ExecutorService executorService) {
 		Validation.notNull(executorService);
 		this.executorService = executorService;
 	}
@@ -71,7 +74,11 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 				chan = new Channel(channelName);
 				channels.put(channelName, chan);
 			}
-			return chan.subscribe(handler);
+			Sub sub = chan.subscribe(handler);
+			if (sub == null) {
+				throw new IllegalArgumentException("double registration for channel='" + channelName + "' and handler: " + handler);
+			}
+			return sub;
 		} finally {
 			wlock.unlock();
 		}
@@ -79,9 +86,14 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 
 	@Override
 	public Subscription forward(String fromChannelName, String toChannelName) {
+		return forward(this, fromChannelName, toChannelName);
+	}
+
+	@Override
+	public Subscription forward(PubSub pubsub, String fromChannelName, String toChannelName) {
 		Validation.notNullOrEmpty(fromChannelName);
 		Validation.notNullOrEmpty(toChannelName);
-		MessageHandler handler = new Forwarder(toChannelName, this);
+		MessageHandler handler = new Forwarder(toChannelName, pubsub);
 		return subscribe(fromChannelName, handler);
 	}
 
@@ -138,11 +150,28 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		return chan;
 	}
 
+	@Override
+	public Map<String, Integer> activeChannels() {
+		Map<String, Integer> rv = null;
+		for (Entry<String, Channel> e : channels.entrySet()) {
+			String name = e.getKey();
+			Channel c = e.getValue();
+			int num = c.subs.size();
+			if (num > 0) {
+				if (rv == null) {
+					rv = new HashMap<String, Integer>();
+				}
+				rv.put(name, num);
+			}
+		}
+		return rv == null ? Collections.<String, Integer> emptyMap() : rv;
+	}
+
 	private final class Channel {
 
 		private final String name;
 
-		private final SimpleCowList<Sub> subs = new SimpleCowList<Sub>(Sub.class);
+		private final CowSet<Sub> subs = new CowSet<Sub>(Sub.class);
 
 		Channel(String name) {
 			this.name = name;
@@ -150,8 +179,10 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 
 		Sub subscribe(MessageHandler handler) {
 			Sub sub = new Sub(this, handler);
-			subs.add(sub);
-			return sub;
+			if (subs.add(sub)) {
+				return sub;
+			}
+			return null;
 		}
 
 		void publishSync(Object message) {
@@ -159,20 +190,24 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		}
 
 		void publishAsync(Object message) {
-			AsyncMessagePublisher msgPub = new AsyncMessagePublisher(this, message);
-			executorService.execute(msgPub);
+			AsyncPublisher pub = new AsyncPublisher(this, message);
+			executorService.execute(pub);
 		}
 	}
+
+	private static final AtomicIntegerFieldUpdater<Sub> SUB_ACTIVE_UPDATER = AtomicIntegerFieldUpdater.newUpdater(Sub.class, "active");
 
 	private final class Sub implements Subscription {
 
 		private final Channel channel;
 
-		private final AtomicReference<MessageHandler> handler;
+		private final MessageHandler handler;
+
+		volatile int active = 1;
 
 		public Sub(Channel channel, MessageHandler handler) {
 			this.channel = channel;
-			this.handler = new AtomicReference<MessageHandler>(handler);
+			this.handler = handler;
 		}
 
 		@Override
@@ -182,14 +217,38 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 
 		@Override
 		public void cancel() {
-			if (handler.getAndSet(null) != null) {
-				DefaultTinyPubSub.this.unsubscribe(channel, this);
+			if (SUB_ACTIVE_UPDATER.compareAndSet(this, 1, 0)) {
+				PubSubVM.this.unsubscribe(channel, this);
 			}
 		}
 
 		@Override
 		public boolean isActive() {
-			return handler.get() != null;
+			return active == 1;
+		}
+
+		@Override
+		public String toString() {
+			return "Subscription[active=" + isActive() + ", channel=" + getChannelName() + "]";
+		}
+
+		@Override
+		public int hashCode() {
+			// forward to the MessageHandler so that the CowSet reflects that reference
+			return System.identityHashCode(handler);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			// forward to the MessageHandler so that the CowSet reflects that reference
+			if (obj == this) {
+				return true;
+			}
+			if (obj instanceof Sub) {
+				Sub o = (Sub) obj;
+				return handler == o.handler;
+			}
+			return false;
 		}
 	}
 
@@ -197,10 +256,9 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		final Sub[] subs = channel.subs.getView();
 		final String channelName = channel.name;
 		for (Sub sub : subs) {
-			MessageHandler handler = sub.handler.get();
-			if (handler != null) {
+			if (sub.isActive()) {
 				try {
-					handler.handleMessage(channelName, message);
+					sub.handler.handleMessage(channelName, message);
 				} catch (Exception e) {
 					LOG.error("MessageHandler failed: " + ExceptionUtil.buildMessageChain(e));
 				}
@@ -208,20 +266,20 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 		}
 	}
 
-	private final class AsyncMessagePublisher implements Runnable {
+	private final class AsyncPublisher implements Runnable {
 
 		private final Channel channel;
 
 		private final Object message;
 
-		public AsyncMessagePublisher(Channel channel, Object message) {
+		public AsyncPublisher(Channel channel, Object message) {
 			this.channel = channel;
 			this.message = message;
 		}
 
 		@Override
 		public void run() {
-			DefaultTinyPubSub.publishMessage(channel, message);
+			PubSubVM.publishMessage(channel, message);
 		}
 	}
 
@@ -229,9 +287,9 @@ public final class DefaultTinyPubSub implements TinyPubSub {
 
 		private final String to;
 
-		private final TinyPubSub pubsub;
+		private final PubSub pubsub;
 
-		Forwarder(String to, TinyPubSub pubsub) {
+		Forwarder(String to, PubSub pubsub) {
 			this.to = to;
 			this.pubsub = pubsub;
 		}

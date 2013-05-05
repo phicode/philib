@@ -20,9 +20,10 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg.tiny;
+package ch.bind.philib.msg.vm;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -45,7 +46,7 @@ import org.testng.annotations.Test;
 import ch.bind.philib.msg.MessageHandler;
 import ch.bind.philib.msg.Subscription;
 
-public class DefaultTinyPubSubTest {
+public class PubSubVMTest {
 
 	private ExecutorService singleThreadExecutor;
 
@@ -62,39 +63,39 @@ public class DefaultTinyPubSubTest {
 
 	@Test(timeOut = 500)
 	public void syncEmptyPublish() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		pubsub.publishSync("foo", "bar");
 	}
 
 	@Test(timeOut = 500)
 	public void asyncEmptyPublish() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		pubsub.publishAsync("foo", "bar");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void noNullSubscribeChannelName() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		pubsub.subscribe(null, mh);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void noEmptySubscribeChannelName() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		pubsub.subscribe("", mh);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void noNullSubscribeMessageHandler() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		pubsub.subscribe("", null);
 	}
 
 	@Test(timeOut = 500)
 	public void syncMessages() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		Subscription s = pubsub.subscribe("foo", mh);
 		assertEquals(s.getChannelName(), "foo");
@@ -105,7 +106,7 @@ public class DefaultTinyPubSubTest {
 
 	@Test(timeOut = 500)
 	public void asyncMessages() throws InterruptedException {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		pubsub.subscribe("foo", mh);
 		pubsub.publishAsync("foo", "bar");
@@ -116,7 +117,7 @@ public class DefaultTinyPubSubTest {
 
 	@Test(timeOut = 500)
 	public void syncMessagesTwoSubscribers() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh1 = new RecordingMessageHandler();
 		RecordingMessageHandler mh2 = new RecordingMessageHandler();
 		pubsub.subscribe("foo", mh1);
@@ -129,7 +130,7 @@ public class DefaultTinyPubSubTest {
 
 	@Test(timeOut = 500)
 	public void asyncMessagesTwoSubscribers() throws InterruptedException {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh1 = new RecordingMessageHandler();
 		RecordingMessageHandler mh2 = new RecordingMessageHandler();
 		pubsub.subscribe("foo", mh1);
@@ -144,7 +145,7 @@ public class DefaultTinyPubSubTest {
 
 	@Test(timeOut = 500)
 	public void unsubscribe() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh1 = new RecordingMessageHandler();
 		RecordingMessageHandler mh2 = new RecordingMessageHandler();
 		Subscription s1 = pubsub.subscribe("foo", mh1);
@@ -166,7 +167,7 @@ public class DefaultTinyPubSubTest {
 
 	@Test(timeOut = 500)
 	public void noDeliveryOnOtherChannels() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		pubsub.subscribe("foo", mh);
 		pubsub.publishSync("foo", "bar");
@@ -174,36 +175,49 @@ public class DefaultTinyPubSubTest {
 		mh.assertMessages("foo", "bar");
 	}
 
-	@Test(timeOut = 500)
+	@Test(timeOut = 500 * 10000, invocationCount = 10000)
 	public void unsubscribeWhilePublishingIsRunning() throws InterruptedException {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh1 = new RecordingMessageHandler();
 		RecordingMessageHandler mh2 = new RecordingMessageHandler();
-		pubsub.subscribe("foo", mh1);
-		Subscription s = pubsub.subscribe("foo", mh2);
 
-		// lock the first message-handler so that the notification publisher can
-		// not proceed
+		Subscription s1 = pubsub.subscribe("foo", mh1);
+		Subscription s2 = pubsub.subscribe("foo", mh2);
+
+		// lock the message-handlers so that the notification publisher can not proceed
 		mh1.lock.lock();
+		mh2.lock.lock();
 		pubsub.publishAsync("foo", "bar");
 
 		// wait for the async publisher to start working
-		while (!mh1.lock.hasQueuedThreads()) {
+		while (!mh1.lock.hasQueuedThreads() && !mh2.lock.hasQueuedThreads()) {
 			Thread.yield();
 		}
-		// now cancel the second key and make the publisher unstuck
-		s.cancel();
+		RecordingMessageHandler first, second;
+		// now cancel the other subscription and make the publisher unstuck
+		if (mh1.lock.hasQueuedThreads()) {
+			assertFalse(mh2.lock.hasQueuedThreads());
+			s2.cancel();
+			first = mh1;
+			second = mh2;
+		} else {
+			assertFalse(mh1.lock.hasQueuedThreads());
+			s1.cancel();
+			first = mh2;
+			second = mh1;
+		}
 
-		mh1.assertMessages("foo");
-		mh1.lock.unlock();
-		mh1.awaitNumMsgs(1);
-		mh1.assertMessages("foo", "bar");
-		mh2.assertMessages("foo");
+		first.assertMessages("foo"); // nothing received yet
+		first.lock.unlock();
+		second.lock.unlock();
+		first.awaitNumMsgs(1);
+		first.assertMessages("foo", "bar");
+		second.assertMessages("foo");
 	}
 
 	@Test(timeOut = 500)
 	public void dontFailOnSubscriberException() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		pubsub.subscribe("foo", new ThrowingMessageHandler());
 		pubsub.subscribe("foo", mh);
@@ -213,7 +227,7 @@ public class DefaultTinyPubSubTest {
 
 	@Test(timeOut = 5000)
 	public void simpleFanInFanOut() {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		boolean sync = true;
 		FanOut root = new FanOut("root", "1.1", "1.2", pubsub, sync);
 		FanOut out1 = new FanOut("1.1", "2.1", "2.2", pubsub, sync);
@@ -232,7 +246,7 @@ public class DefaultTinyPubSubTest {
 	// TODO: ring
 	@Test(timeOut = 5000)
 	public void simpleChain() throws InterruptedException {
-		TinyPubSub pubsub = new DefaultTinyPubSub(singleThreadExecutor);
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		pubsub.forward("0", "1");
 		RecordingMessageHandler tail = new RecordingMessageHandler();
 		pubsub.subscribe("1000", tail);
@@ -244,6 +258,68 @@ public class DefaultTinyPubSubTest {
 		pubsub.publishAsync("0", "baz");
 		tail.awaitNumMsgs(2);
 		tail.assertMessages("1000", "bar", "baz");
+	}
+
+	@Test(timeOut = 500, expectedExceptions = { IllegalArgumentException.class }, expectedExceptionsMessageRegExp = "double registration for channel='foo' and handler: RecordingMessageHandler")
+	public void reregister() {
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
+		MessageHandler mh = new RecordingMessageHandler();
+		Subscription s = pubsub.subscribe("foo", mh);
+		assertNotNull(s);
+		pubsub.subscribe("foo", mh);
+	}
+
+	@Test(timeOut = 500)
+	public void activeChannels() {
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
+		assertTrue(pubsub.activeChannels().isEmpty());
+		MessageHandler mh1 = new RecordingMessageHandler();
+		MessageHandler mh2 = new RecordingMessageHandler();
+
+		Subscription s1 = pubsub.subscribe("foo", mh1);
+		Map<String, Integer> ac = pubsub.activeChannels();
+		assertEquals(ac.size(), 1);
+		assertEquals(ac.get("foo"), Integer.valueOf(1));
+
+		Subscription s2 = pubsub.subscribe("foo", mh2);
+		ac = pubsub.activeChannels();
+		assertEquals(ac.size(), 1);
+		assertEquals(ac.get("foo"), Integer.valueOf(2));
+
+		Subscription s3 = pubsub.subscribe("bar", mh1);
+		ac = pubsub.activeChannels();
+		assertEquals(ac.size(), 2);
+		assertEquals(ac.get("foo"), Integer.valueOf(2));
+		assertEquals(ac.get("bar"), Integer.valueOf(1));
+
+		Subscription s4 = pubsub.subscribe("baz", mh2);
+		ac = pubsub.activeChannels();
+		assertEquals(ac.size(), 3);
+		assertEquals(ac.get("foo"), Integer.valueOf(2));
+		assertEquals(ac.get("bar"), Integer.valueOf(1));
+		assertEquals(ac.get("baz"), Integer.valueOf(1));
+
+		s1.cancel();
+		ac = pubsub.activeChannels();
+		assertEquals(ac.size(), 3);
+		assertEquals(ac.get("foo"), Integer.valueOf(1));
+		assertEquals(ac.get("bar"), Integer.valueOf(1));
+		assertEquals(ac.get("baz"), Integer.valueOf(1));
+
+		s2.cancel();
+		ac = pubsub.activeChannels();
+		assertEquals(ac.size(), 2);
+		assertEquals(ac.get("bar"), Integer.valueOf(1));
+		assertEquals(ac.get("baz"), Integer.valueOf(1));
+
+		s3.cancel();
+		ac = pubsub.activeChannels();
+		assertEquals(ac.size(), 1);
+		assertEquals(ac.get("baz"), Integer.valueOf(1));
+
+		s4.cancel();
+		ac = pubsub.activeChannels();
+		assertTrue(pubsub.activeChannels().isEmpty());
 	}
 
 	private static final class RecordingMessageHandler implements MessageHandler {
@@ -307,6 +383,11 @@ public class DefaultTinyPubSubTest {
 				lock.unlock();
 			}
 		}
+
+		@Override
+		public String toString() {
+			return getClass().getSimpleName();
+		}
 	}
 
 	private static final class ThrowingMessageHandler implements MessageHandler {
@@ -325,13 +406,13 @@ public class DefaultTinyPubSubTest {
 
 		private final String to;
 
-		private final TinyPubSub pubsub;
+		private final PubSub pubsub;
 
 		private final boolean sync;
 
 		private final AtomicInteger numRecv = new AtomicInteger();
 
-		public FanIn(String fromA, String fromB, String to, TinyPubSub pubsub, boolean sync) {
+		public FanIn(String fromA, String fromB, String to, PubSub pubsub, boolean sync) {
 			this.fromA = fromA;
 			this.fromB = fromB;
 			this.to = to;
@@ -362,11 +443,11 @@ public class DefaultTinyPubSubTest {
 
 		private final String toB;
 
-		private final TinyPubSub pubsub;
+		private final PubSub pubsub;
 
 		private final boolean sync;
 
-		public FanOut(String from, String toA, String toB, TinyPubSub pubsub, boolean sync) {
+		public FanOut(String from, String toA, String toB, PubSub pubsub, boolean sync) {
 			this.from = from;
 			this.toA = toA;
 			this.toB = toB;

@@ -20,18 +20,28 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg.tiny;
+package ch.bind.philib.msg.vm;
+
+import java.util.Map;
 
 import ch.bind.philib.msg.MessageHandler;
 import ch.bind.philib.msg.Subscription;
 
-public interface TinyPubSub {
+public interface PubSub {
 
 	Subscription subscribe(String channelName, MessageHandler handler);
 
 	Subscription forward(String fromChannelName, String toChannelName);
+	
+	Subscription forward(PubSub pubsub, String fromChannelName, String toChannelName);
 
 	void publishSync(String channelName, Object message);
 
 	void publishAsync(String channelName, Object message);
+	
+	/**
+	 * Lists all channels with one or more subscriptions.
+	 * @return a {@link Map} with active channel names as key and the number of subscribers as value. 
+	 */
+	Map<String, Integer> activeChannels();
 }

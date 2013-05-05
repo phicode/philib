@@ -8,7 +8,7 @@
  F: NamedSeqThreadFactory can now set new thread's daemon flag and thread-group.
  F: Cache implementations are always thread-safe -> the SyncCache wrapper was removed
  F: Added a new Cache implementation: LineCache
- F: The new package "msg" contains a tiny in-vm pub-sub system
+ F: The new package "msg" contains a in-vm pub-sub system
  G: Added many unit tests
 
 === 0.6.0 ===

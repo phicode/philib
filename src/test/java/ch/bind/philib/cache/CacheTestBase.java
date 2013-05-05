@@ -43,7 +43,7 @@ import ch.bind.philib.math.Calc;
  * @author philipp meinen
  * 
  */
-@Test(singleThreaded = true)
+@Test
 public abstract class CacheTestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CacheTestBase.class);

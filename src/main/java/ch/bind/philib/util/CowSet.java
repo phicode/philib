@@ -22,32 +22,32 @@
 
 package ch.bind.philib.util;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import ch.bind.philib.validation.Validation;
 
 /**
- * A simple implementation of a copy-on-write list.<br />
+ * A simple implementation of a copy-on-write set.<br />
  * There are two modification methods: {@link #add(Object)} and {@link #remove(Object)}<br />
- * and one read method: {@link #getView()} <br />
- * Every modification through the {@code add} or {@code remove} methods will update the view. <br />
- * The view is shared among all clients and must therefore <b>not be written to</b>.<br/>
+ * and two read methods: {@link #getView()} and {@link #isEmpty()}<br />
+ * Every modification through the {@link #add(Object)} or {@link #remove(Object)} methods and a return value of
+ * {@code true} will update the view. <br />
+ * The view is shared among all clients and must therefore <b>not be modified!</b><br/>
  * The modification methods are not optimized for speed since the intent of this cow-list is to guarantee fast reads.
  * @author Philipp Meinen
  */
-public final class SimpleCowList<E> {
+public final class CowSet<E> {
 
 	private final Class<E> clazz;
 
-	private final ArrayList<E> content = new ArrayList<E>();
-
-	private int numRemovesSinceTrim;
+	private final Set<E> content = new HashSet<E>();
 
 	private volatile E[] empty;
 
 	private volatile E[] view;
 
-	public SimpleCowList(Class<E> clazz) {
+	public CowSet(Class<E> clazz) {
 		Validation.notNull(clazz);
 		this.clazz = clazz;
 	}
@@ -73,12 +73,6 @@ public final class SimpleCowList<E> {
 			boolean update = content.remove(e);
 			if (update) {
 				updateView();
-				if (numRemovesSinceTrim > content.size()) {
-					content.trimToSize();
-					numRemovesSinceTrim = 0;
-				} else {
-					numRemovesSinceTrim++;
-				}
 			}
 			return update;
 		}
@@ -107,6 +101,11 @@ public final class SimpleCowList<E> {
 	public boolean isEmpty() {
 		E[] v = view;
 		return v == null || v.length == 0;
+	}
+
+	public int size() {
+		E[] v = view;
+		return v == null ? 0 : v.length;
 	}
 
 	private E[] getEmpty() {
