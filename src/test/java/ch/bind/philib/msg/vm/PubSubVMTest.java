@@ -176,7 +176,7 @@ public class PubSubVMTest {
 		mh.assertMessages("foo", "bar");
 	}
 
-	@Test(timeOut = 500 * 100, invocationCount = 100)
+	@Test(timeOut = 500 * 100000, invocationCount = 100000)
 	public void unsubscribeWhilePublishingIsRunning() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh1 = new RecordingMessageHandler();
@@ -191,13 +191,10 @@ public class PubSubVMTest {
 		pubsub.publishAsync("foo", "bar");
 
 		// wait for the async publisher to start working
-		while (!mh1.lock.hasQueuedThreads() && !mh2.lock.hasQueuedThreads()) {
+		// hasQueueLength is unreliable this is why getQueueLength is used here
+		while (mh1.lock.getQueueLength() == 0 && mh2.lock.getQueueLength() == 0) {
 			Thread.yield();
 		}
-		// for (int i = 0; i < 1000;i++) {
-		// mh1.assertMessages("foo"); // nothing received yet
-		// mh2.assertMessages("foo"); // nothing received yet
-		// }
 		RecordingMessageHandler active, cancel;
 		// now cancel the other subscription and make the publisher unstuck
 		if (mh1.lock.hasQueuedThreads()) {
