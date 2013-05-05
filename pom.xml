@@ -14,7 +14,7 @@
 
 	<groupId>ch.bind</groupId>
 	<artifactId>philib</artifactId>
-	<version>0.7.0-SNAPSHOT</version>
+	<version>0.7.0</version>
 	<packaging>jar</packaging>
 
 	<name>philib</name>
@@ -45,11 +45,11 @@
 
 	<scm>
 		<!-- read only connection -->
-		<connection>scm:svn:http://svn.bind.ch/svn/philib/trunk</connection>
+		<connection>scm:svn:http://svn.bind.ch/svn/philib/tags/philib-0.7.0</connection>
 		<!-- read/write connection -->
-		<developerConnection>scm:svn:http://svn.bind.ch/svn/philib/trunk</developerConnection>
+		<developerConnection>scm:svn:http://svn.bind.ch/svn/philib/tags/philib-0.7.0</developerConnection>
 		<!-- browsable url -->
-		<url>http://svn.bind.ch/svn/philib/trunk</url>
+		<url>http://svn.bind.ch/svn/philib/tags/philib-0.7.0</url>
 	</scm>
 
 	<developers>
