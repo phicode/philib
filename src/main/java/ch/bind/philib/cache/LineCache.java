@@ -105,9 +105,6 @@ public final class LineCache<K, V> implements Cache<K, V> {
 					overwrite = e;
 				}
 				else if (overwrite != null && e.lastAccess.get() < overwrite.lastAccess.get()) {
-					// System.out.println("facour throwing away " + e.key + " instead of " + overwrite.key +
-					// " access diff: " //
-					// + (overwrite.lastAccess.get() - e.lastAccess.get()));
 					insertIdx = idx;
 					overwrite = e;
 				}
