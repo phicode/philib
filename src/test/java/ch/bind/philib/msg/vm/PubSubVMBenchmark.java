@@ -35,8 +35,6 @@ import ch.bind.philib.TestUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.msg.MessageHandler;
-import ch.bind.philib.msg.vm.PubSub;
-import ch.bind.philib.msg.vm.PubSubVM;
 
 /**
  * @author Philipp Meinen

@@ -32,9 +32,9 @@ public final class Benchmark {
 
 	private Benchmark() {}
 
-	private static final int COUNT = 512 * 1024;
+	private static final int COUNT = 1024 * 1024;
 
-	private static final int LOOPCOUNT = 1024 * 1024 * 8;
+	private static final int LOOPCOUNT = 1024 * 1024 * 16;
 
 	private static final int NCPU = Runtime.getRuntime().availableProcessors();
 
@@ -174,6 +174,8 @@ public final class Benchmark {
 		line();
 		parallelSimple();
 		parallelStaged();
-		parallelLine();
+		for (int i = 0; i < 1000; i++) {
+			parallelLine();
+		}
 	}
 }

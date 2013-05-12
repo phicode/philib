@@ -28,7 +28,7 @@ import ch.bind.philib.lang.MurmurHash;
 import ch.bind.philib.util.ClusteredIndex.Entry;
 import ch.bind.philib.validation.Validation;
 
-// TODO: round tablesize up (2^x) and use bitmasks
+// TODO: round table size up (2^x) and use bitmasks
 // TODO: strengthen hashcodes through an avalanche phase
 // TODO: concurrent version
 public final class ClusteredHashIndex<K, T extends Entry<K>> implements ClusteredIndex<K, T> {
@@ -43,7 +43,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 	@Override
 	public boolean add(final T entry) {
 		Validation.isTrue(entry != null && entry.getNextIndexEntry() == null && entry.getKey() != null, //
-				"newly added entries must not be null and cleared");
+				"newly added entries must be non-null and cleared");
 
 		final K key = entry.getKey();
 		final int hash = key.hashCode();
