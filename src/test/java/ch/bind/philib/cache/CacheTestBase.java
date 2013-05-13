@@ -242,7 +242,7 @@ public abstract class CacheTestBase {
 			}
 		}
 		// the JVM must have thrown away some of the soft-references
-		assertTrue(inMem < cap);
+		assertTrue(inMem < cap, inMem + " >= " + cap);
 		long t3 = System.nanoTime() - t0 - t1 - t2;
 
 		// remove all hard-referenced to SoftReference objects and give the JVM
