@@ -75,7 +75,7 @@ public class TestUtil {
 			return wl;
 		}
 		ArrayList<String> words = new ArrayList<String>(256 * 1024);
-		InputStream is = TestUtil.class.getResourceAsStream("/en_words");
+		InputStream is = TestUtil.class.getResourceAsStream("/words_en");
 		assertNotNull(is);
 		try {
 			InputStreamReader isr = new InputStreamReader(is, Charset.forName("US-ASCII"));
