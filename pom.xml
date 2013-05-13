@@ -45,11 +45,11 @@
 
 	<scm>
 		<!-- read only connection -->
-		<connection>scm:svn:http://svn.bind.ch/svn/philib/trunk</connection>
+		<connection>scm:git:https://github.com/PhiCode/philib</connection>
 		<!-- read/write connection -->
-		<developerConnection>scm:svn:http://svn.bind.ch/svn/philib/trunk</developerConnection>
+		<developerConnection>scm:git:git://git@bind.ch:philib</developerConnection>
 		<!-- browsable url -->
-		<url>http://svn.bind.ch/svn/philib/trunk</url>
+		<url>https://github.com/PhiCode/philib</url>
 	</scm>
 
 	<developers>
