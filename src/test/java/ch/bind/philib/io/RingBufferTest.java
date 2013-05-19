@@ -30,11 +30,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
+import ch.bind.philib.util.TLR;
 
 public class RingBufferTest {
 
@@ -82,7 +82,7 @@ public class RingBufferTest {
 
 	@Test
 	public void randomAccess() {
-		final Random rand = ThreadLocalRandom.current();
+		final Random rand = TLR.current();
 		final LinkedList<Byte> bufExp = new LinkedList<Byte>();
 		final RingBuffer ringBuf = new RingBuffer();
 		int size = 0;
@@ -136,7 +136,7 @@ public class RingBufferTest {
 		final long start = System.nanoTime();
 		RingBuffer ringBuf = new RingBuffer();
 		byte[] buf = new byte[PERF_CHUNKSIZE];
-		ThreadLocalRandom.current().nextBytes(buf);
+		TLR.current().nextBytes(buf);
 		long performed = 0;
 		while (performed < PERF_SIZE) {
 			ringBuf.write(buf);
@@ -270,7 +270,7 @@ public class RingBufferTest {
 
 	private byte[] genData(int num) {
 		byte[] d = new byte[num];
-		ThreadLocalRandom.current().nextBytes(d);
+		TLR.current().nextBytes(d);
 		return d;
 	}
 }

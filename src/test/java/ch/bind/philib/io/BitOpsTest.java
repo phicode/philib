@@ -26,11 +26,11 @@ import static ch.bind.philib.io.BitOps.findLowestSetBitIdx64;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
+import ch.bind.philib.util.TLR;
 
 public class BitOpsTest {
 
@@ -49,7 +49,7 @@ public class BitOpsTest {
 
 	@Test
 	public void randomBits() {
-		final Random rand = ThreadLocalRandom.current();
+		final Random rand = TLR.current();
 		for (int numBits = 1; numBits < 64; numBits++) {
 			for (int loop = 0; loop < TEST_LOOPS; loop++) {
 				long v = 0;

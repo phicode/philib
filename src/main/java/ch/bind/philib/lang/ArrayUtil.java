@@ -24,7 +24,8 @@ package ch.bind.philib.lang;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
+
+import ch.bind.philib.util.TLR;
 
 /**
  * Various functions for dealing with arrays which are not present in the standard {@link java.util.Arrays} class.
@@ -58,7 +59,7 @@ public abstract class ArrayUtil {
 		final int nDst = destination.length;
 		if (nSrc < nDst)
 			throw new IllegalArgumentException("the source arrays length must be greater or equal to the destination arrays length");
-		final Random rand = ThreadLocalRandom.current();
+		final Random rand = TLR.current();
 		final boolean[] taken = new boolean[nSrc];
 
 		for (int i = 0; i < nDst; i++) {
