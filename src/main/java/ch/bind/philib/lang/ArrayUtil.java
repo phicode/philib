@@ -24,6 +24,7 @@ package ch.bind.philib.lang;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Various functions for dealing with arrays which are not present in the standard {@link java.util.Arrays} class.
@@ -36,9 +37,6 @@ public abstract class ArrayUtil {
 	public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
 	protected ArrayUtil() {}
-
-	// java.util.Random is updated atomically => this is thread-safe
-	private static final Random rand = new Random();
 
 	/**
 	 * Fills the <code>destination</code> array with randomly picked values from the <code>source</code> array. No value
@@ -60,6 +58,7 @@ public abstract class ArrayUtil {
 		final int nDst = destination.length;
 		if (nSrc < nDst)
 			throw new IllegalArgumentException("the source arrays length must be greater or equal to the destination arrays length");
+		final Random rand = ThreadLocalRandom.current();
 		final boolean[] taken = new boolean[nSrc];
 
 		for (int i = 0; i < nDst; i++) {

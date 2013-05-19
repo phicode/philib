@@ -23,14 +23,13 @@
 package ch.bind.philib.lang;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
 
 public class MurmurHashBenchTest {
-
-	private static final Random r = new Random();
 
 	public static void main(String[] args) {
 		doBenchmark();
@@ -70,7 +69,7 @@ public class MurmurHashBenchTest {
 
 	private static void testSpeed2(final int size) {
 		byte[] b = new byte[size];
-		r.nextBytes(b);
+		ThreadLocalRandom.current().nextBytes(b);
 		long total = 0;
 		long sum = 0;
 		long tStart = System.nanoTime();
@@ -100,7 +99,7 @@ public class MurmurHashBenchTest {
 
 	private static void testSpeed3(final int size) {
 		byte[] b = new byte[size];
-		r.nextBytes(b);
+		ThreadLocalRandom.current().nextBytes(b);
 		long total = 0;
 		long sum = 0;
 		long tStart = System.nanoTime();

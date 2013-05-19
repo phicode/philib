@@ -25,6 +25,7 @@ package ch.bind.philib.io;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -40,7 +41,7 @@ public class EndianCodecTest {
 
 	@BeforeMethod
 	public void beforeMethod() {
-		rand = new Random();
+		rand = ThreadLocalRandom.current();
 		buf = new byte[4096];
 	}
 

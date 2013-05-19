@@ -25,6 +25,7 @@ package ch.bind.philib.cache;
 import static org.testng.Assert.fail;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import ch.bind.philib.TestUtil;
 
@@ -132,7 +133,7 @@ public final class Benchmark {
 
 		private final int loops;
 
-		private final Random random = new Random();
+		private final Random rand = ThreadLocalRandom.current();
 
 		Runner(Cache<Integer, String> cache, int loops) {
 			this.cache = cache;
@@ -145,13 +146,13 @@ public final class Benchmark {
 			// final int queryMax = COUNT;
 			final long tStart = System.currentTimeMillis();
 			for (int i = 0; i < loops; i++) {
-				Integer rand = random.nextInt(queryMax);
-				String v = cache.get(rand);
+				Integer key = rand.nextInt(queryMax);
+				String v = cache.get(key);
 				if (v != null) {
 					hits++;
 				} else {
 					misses++;
-					cache.set(rand, Integer.toString(rand));
+					cache.set(key, key.toString());
 				}
 			}
 			final long tEnd = System.currentTimeMillis();

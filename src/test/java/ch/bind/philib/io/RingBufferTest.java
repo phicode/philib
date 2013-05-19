@@ -30,14 +30,13 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
 
 public class RingBufferTest {
-
-	private final Random rand = new Random();
 
 	private static final int MB = 1024 * 1024;
 
@@ -83,8 +82,9 @@ public class RingBufferTest {
 
 	@Test
 	public void randomAccess() {
-		LinkedList<Byte> bufExp = new LinkedList<Byte>();
-		RingBuffer ringBuf = new RingBuffer();
+		final Random rand = ThreadLocalRandom.current();
+		final LinkedList<Byte> bufExp = new LinkedList<Byte>();
+		final RingBuffer ringBuf = new RingBuffer();
 		int size = 0;
 		long performed = 0;
 		while (performed < RANDOM_TEST_SIZE) {
@@ -136,7 +136,7 @@ public class RingBufferTest {
 		final long start = System.nanoTime();
 		RingBuffer ringBuf = new RingBuffer();
 		byte[] buf = new byte[PERF_CHUNKSIZE];
-		rand.nextBytes(buf);
+		ThreadLocalRandom.current().nextBytes(buf);
 		long performed = 0;
 		while (performed < PERF_SIZE) {
 			ringBuf.write(buf);
@@ -245,8 +245,7 @@ public class RingBufferTest {
 	@Test
 	public void clear() {
 		RingBuffer buf = new RingBuffer();
-		byte[] a = {
-				0, 1, 2, 3 };
+		byte[] a = { 0, 1, 2, 3 };
 		buf.write(a);
 		assertEquals(a.length, buf.available());
 		buf.clear();
@@ -271,7 +270,7 @@ public class RingBufferTest {
 
 	private byte[] genData(int num) {
 		byte[] d = new byte[num];
-		rand.nextBytes(d);
+		ThreadLocalRandom.current().nextBytes(d);
 		return d;
 	}
 }

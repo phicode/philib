@@ -40,6 +40,7 @@ import static org.testng.Assert.assertTrue;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.testng.annotations.Test;
 
@@ -300,7 +301,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void memsetArray() {
-		Random rand = new Random();
+		Random rand = ThreadLocalRandom.current();
 		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
@@ -313,7 +314,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void memsetArrayByteBuffer() {
-		Random rand = new Random();
+		Random rand = ThreadLocalRandom.current();
 		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
@@ -327,7 +328,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void memsetDirectByteBuffer() {
-		Random rand = new Random();
+		Random rand = ThreadLocalRandom.current();
 		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
