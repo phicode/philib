@@ -1,16 +1,8 @@
-rename all "selectable" to "event-handler" specific names
-
 100% RingBuffer test coverage
 
 hit/miss statistics into the LRU caches
 
-PRIO TASK
-  2  ThreadUtil unit-tests
-  2  ThreadUtil: boolean hasThread(String name, boolean alive)
-  
 bitstream codec
-
-is the memcached protocol documentation license MIT compatible ? (protocol.txt)
 
 journal file
 	
@@ -23,36 +15,3 @@ journal file
 	on listener:
 	committed(long correlationId)
 	committed(long startCid, long endCid)
-	
-
-=== NET ===
-
-EventHandler
-	add writeBacklog (ringQueue)
-
-sendBlocking
-- not on event-dispatcher-thread
-- add to end of writeBacklog
-- write as many non-blocking as possible -> then register for write
-- wait on specific (!!!) write-complete event
-
-nonBlockingWriteAsMuchAsPossible
-- add to end of writeBacklog
-- write as much as possible
-- if writeBacklog.isEmpty and registered-for-write: unregister
-- if writeBacklog.isNotEmpty and not-registered for write: register
-- wakeup event-dispatcher if: new registered-for-write not on dispatcher-thread
-- writeBacklog.shrink() !
-- return value boolean: more write possible or waiting for write
-
-connection
-- getWriteBacklog: long (in bytes)
-- isWriteableNow() -> we can write non-blocking without further filling up the writeBacklog
-
-precise buffer management: release where?
-	- receive must consume a passed on buffer whole, the event-handler can use the same buffer for every read
-	- send must not hold on to the buffer's data but store it in its own internal structures so that the sender can use it again
-
-
-BUGS:
-	Session.closed is invoked 2 times!
