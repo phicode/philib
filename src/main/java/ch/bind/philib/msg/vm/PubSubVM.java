@@ -56,7 +56,8 @@ public final class PubSubVM implements PubSub {
 	private final ExecutorService executorService;
 
 	/**
-	 * Creates a {@code DefaultTinyPubSub} which publishes messages through the provided {@code ExecutorService}.
+	 * Creates a {@code DefaultTinyPubSub} which publishes messages through the
+	 * provided {@code ExecutorService}.
 	 */
 	public PubSubVM(ExecutorService executorService) {
 		Validation.notNull(executorService);
@@ -220,13 +221,15 @@ public final class PubSubVM implements PubSub {
 
 		@Override
 		public int hashCode() {
-			// forward to the MessageHandler so that the CowSet reflects that reference
+			// forward to the MessageHandler so that the CowSet reflects that
+			// reference
 			return System.identityHashCode(handler);
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			// forward to the MessageHandler so that the CowSet reflects that reference
+			// a sub is just a wrapper for a MessageHandler
+			// to identify equality the handler reference is compared
 			if (obj == this) {
 				return true;
 			}
