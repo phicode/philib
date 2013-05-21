@@ -46,9 +46,9 @@ public class PubSubVMBenchmark implements Runnable {
 
 	private final int numThreads;
 
-	private final long runforms = 60000L;
+	private final long runForMs = 10000L;
 
-	private final long incrementEvery = 1000L;
+	private final long incrementEvery = 2000L;
 
 	private PubSub pubSub;
 
@@ -88,7 +88,7 @@ public class PubSubVMBenchmark implements Runnable {
 	@Override
 	public void run() {
 		try {
-			long numIncrements = runforms / incrementEvery;
+			long numIncrements = runForMs / incrementEvery;
 			setup();
 			final long start = System.currentTimeMillis();
 			for (int i = 0; i < numIncrements; i++) {
@@ -103,7 +103,7 @@ public class PubSubVMBenchmark implements Runnable {
 				printStats((i + 1) * incrementEvery);
 			}
 			stop();
-			printStats(runforms);
+			printStats(runForMs);
 			publishers.clear();
 			consumers.clear();
 		} catch (Exception e) {

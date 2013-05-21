@@ -58,7 +58,7 @@ public class PubSubVMTest {
 	@AfterMethod
 	public void afterMethod() {
 		List<Runnable> runnables = singleThreadExecutor.shutdownNow();
-		assertTrue(runnables.isEmpty());
+		assertTrue(runnables.isEmpty(), runnables.toString());
 	}
 
 	@Test(timeOut = 500)
@@ -279,12 +279,19 @@ public class PubSubVMTest {
 	public void asyncRing() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		boolean sync = false;
+		RingNode[] nodes = new RingNode[1000];
 		for (int i = 0; i < 1000; i++) {
 			String from = Integer.toString(i);
 			String to = i == 999 ? "0" : Integer.toString(i + 1);
-			new RingNode(from, to, pubsub, sync);
+			nodes[i] = new RingNode(from, to, pubsub, sync);
 		}
-		pubsub.publishAsync("1", 100000L);
+		pubsub.publishAsync("0", 1000000L);
+		// 1000 messages for each node
+		for (RingNode node : nodes) {
+			while (node.msgCount.get() != 1000) {
+				Thread.yield();
+			}
+		}
 	}
 
 	@Test(timeOut = 500, expectedExceptions = { IllegalArgumentException.class }, expectedExceptionsMessageRegExp = "double registration for channel='foo' and handler: RecordingMessageHandler")
@@ -491,6 +498,7 @@ public class PubSubVMTest {
 
 	private static final class RingNode implements MessageHandler {
 
+		public final AtomicInteger msgCount = new AtomicInteger();
 		private final String from;
 		private final String to;
 		private final PubSub pubsub;
@@ -509,6 +517,7 @@ public class PubSubVMTest {
 			assertEquals(channelName, from);
 			assertTrue(message instanceof Long);
 			if (!message.equals(0L)) {
+				msgCount.incrementAndGet();
 				Long next = ((Long) message).longValue() - 1;
 				if (sync) {
 					pubsub.publishSync(to, next);
