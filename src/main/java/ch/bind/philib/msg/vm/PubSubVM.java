@@ -83,19 +83,6 @@ public final class PubSubVM implements PubSub {
 		}
 	}
 
-	@Override
-	public Subscription forward(String fromChannelName, String toChannelName) {
-		return forward(this, fromChannelName, toChannelName);
-	}
-
-	@Override
-	public Subscription forward(PubSub pubsub, String fromChannelName, String toChannelName) {
-		Validation.notNullOrEmpty(fromChannelName);
-		Validation.notNullOrEmpty(toChannelName);
-		MessageHandler handler = new Forwarder(toChannelName, pubsub);
-		return subscribe(fromChannelName, handler);
-	}
-
 	private void unsubscribe(Channel channel, Sub sub) {
 		if (!channel.subs.remove(sub)) {
 			return;
@@ -279,23 +266,6 @@ public final class PubSubVM implements PubSub {
 		@Override
 		public void run() {
 			PubSubVM.publishMessage(channel, message);
-		}
-	}
-
-	private static final class Forwarder implements MessageHandler {
-
-		private final String to;
-
-		private final PubSub pubsub;
-
-		Forwarder(String to, PubSub pubsub) {
-			this.to = to;
-			this.pubsub = pubsub;
-		}
-
-		@Override
-		public void handleMessage(String channelName, Object message) {
-			pubsub.publishSync(to, message);
 		}
 	}
 }

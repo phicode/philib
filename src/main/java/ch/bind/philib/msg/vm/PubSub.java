@@ -29,19 +29,51 @@ import ch.bind.philib.msg.Subscription;
 
 public interface PubSub {
 
+	/**
+	 * subscribe a {@link MessageHandler} to a channel.
+	 * 
+	 * @param channelName
+	 * @param handler
+	 *            a non-null handler
+	 * @return an {@link Subscription} object if this is a new message handler,
+	 *         {@code null} otherwise.
+	 * @throws IllegalArgumentException
+	 *             if the {@code channelName} parameter is {@code null} or empty
+	 *             or if the {@code handler} parameter is {@code null}.
+	 */
 	Subscription subscribe(String channelName, MessageHandler handler);
 
-	Subscription forward(String fromChannelName, String toChannelName);
-
-	Subscription forward(PubSub pubsub, String fromChannelName, String toChannelName);
-
+	/**
+	 * 
+	 * @param channelName
+	 * @param message
+	 *            the non-null message to be sent
+	 * @throws IllegalArgumentException
+	 *             if the {@code channelName} parameter is {@code null} or empty
+	 *             or if the {@code message} parameter is {@code null}.
+	 */
 	void publishSync(String channelName, Object message);
 
+	/**
+	 * 
+	 * @param channelName
+	 * @param message
+	 *            the non-null message to be sent
+	 * @throws IllegalArgumentException
+	 *             if the {@code channelName} parameter is {@code null} or empty
+	 *             or if the {@code message} parameter is {@code null}.
+	 */
 	void publishAsync(String channelName, Object message);
 
 	/**
-	 * Lists all channels with one or more subscriptions.
-	 * @return a {@link Map} with active channel names as key and the number of subscribers as value.
+	 * Lists all channels with one or more subscriptions.<br />
+	 * The returned {@link Map} is a representation of the state at the time of
+	 * the invocation of this method. New subscriptions or cancelled
+	 * subscriptions which happen after the invocation of this method will not
+	 * be reflected in maps of previous queries.
+	 * 
+	 * @return a {@link Map} with active channel names as key and the number of
+	 *         subscribers as value.
 	 */
 	Map<String, Integer> activeChannels();
 }

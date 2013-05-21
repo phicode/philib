@@ -184,7 +184,8 @@ public class PubSubVMTest {
 		Subscription s1 = pubsub.subscribe("foo", mh1);
 		Subscription s2 = pubsub.subscribe("foo", mh2);
 
-		// lock the message-handlers so that the notification publisher can not proceed
+		// lock the message-handlers so that the notification publisher can not
+		// proceed
 		mh1.lock.lock();
 		mh2.lock.lock();
 		pubsub.publishAsync("foo", "bar");
@@ -244,21 +245,46 @@ public class PubSubVMTest {
 		mh.assertMessages("end", "bar", "bar", "bar", "bar", "bar", "bar");
 	}
 
-	// TODO: ring
 	@Test(timeOut = 5000)
 	public void simpleChain() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
-		pubsub.forward("0", "1");
+		new Forwarder("0", "1", pubsub);
 		RecordingMessageHandler tail = new RecordingMessageHandler();
 		pubsub.subscribe("1000", tail);
 		for (int i = 1; i < 1000; i++) {
-			pubsub.forward(Integer.toString(i), Integer.toString(i + 1));
+			new Forwarder(Integer.toString(i), Integer.toString(i + 1), pubsub);
 		}
 		pubsub.publishSync("0", "bar");
 		tail.assertMessages("1000", "bar");
 		pubsub.publishAsync("0", "baz");
 		tail.awaitNumMsgs(2);
 		tail.assertMessages("1000", "bar", "baz");
+	}
+
+	// TODO: make sure that sync rings are broken up through eventual async
+	// calls
+	// @Test(timeOut = 5000)
+	// public void syncRing() throws InterruptedException {
+	// PubSub pubsub = new PubSubVM(singleThreadExecutor);
+	// boolean sync = true;
+	// for (int i = 0; i < 1000; i++) {
+	// String from = Integer.toString(i);
+	// String to = i == 999 ? "0" : Integer.toString(i + 1);
+	// new RingNode(from, to, pubsub, sync);
+	// }
+	// pubsub.publishSync("1", 100000L);
+	// }
+
+	@Test(timeOut = 5000)
+	public void asyncRing() throws InterruptedException {
+		PubSub pubsub = new PubSubVM(singleThreadExecutor);
+		boolean sync = false;
+		for (int i = 0; i < 1000; i++) {
+			String from = Integer.toString(i);
+			String to = i == 999 ? "0" : Integer.toString(i + 1);
+			new RingNode(from, to, pubsub, sync);
+		}
+		pubsub.publishAsync("1", 100000L);
 	}
 
 	@Test(timeOut = 500, expectedExceptions = { IllegalArgumentException.class }, expectedExceptionsMessageRegExp = "double registration for channel='foo' and handler: RecordingMessageHandler")
@@ -369,8 +395,7 @@ public class PubSubVMTest {
 				List<Object> l = msgs.get(channelName);
 				if (messages == null || messages.length == 0) {
 					assertNull(l);
-				}
-				else {
+				} else {
 					assertNotNull(l);
 					assertEquals(l.size(), messages.length);
 					assertEquals(l, Arrays.asList(messages));
@@ -424,8 +449,7 @@ public class PubSubVMTest {
 			numRecv.incrementAndGet();
 			if (sync) {
 				pubsub.publishSync(to, message);
-			}
-			else {
+			} else {
 				pubsub.publishAsync(to, message);
 			}
 		}
@@ -458,11 +482,61 @@ public class PubSubVMTest {
 			if (sync) {
 				pubsub.publishSync(toA, message);
 				pubsub.publishSync(toB, message);
-			}
-			else {
+			} else {
 				pubsub.publishAsync(toA, message);
 				pubsub.publishAsync(toB, message);
 			}
+		}
+	}
+
+	private static final class RingNode implements MessageHandler {
+
+		private final String from;
+		private final String to;
+		private final PubSub pubsub;
+		private final boolean sync;
+
+		public RingNode(String from, String to, PubSub pubsub, boolean sync) {
+			this.from = from;
+			this.to = to;
+			this.pubsub = pubsub;
+			this.sync = sync;
+			pubsub.subscribe(from, this);
+		}
+
+		@Override
+		public void handleMessage(String channelName, Object message) {
+			assertEquals(channelName, from);
+			assertTrue(message instanceof Long);
+			if (!message.equals(0L)) {
+				Long next = ((Long) message).longValue() - 1;
+				if (sync) {
+					pubsub.publishSync(to, next);
+				} else {
+					pubsub.publishAsync(to, next);
+				}
+			}
+		}
+	}
+
+	private static final class Forwarder implements MessageHandler {
+
+		private final String from;
+		private final String to;
+
+		private final PubSub pubsub;
+
+		Forwarder(String from, String to, PubSub pubsub) {
+			this.from = from;
+			this.to = to;
+			this.pubsub = pubsub;
+			pubsub.subscribe(from, this);
+		}
+
+		@Override
+		public void handleMessage(String channelName, Object message) {
+			assertEquals(channelName, from);
+			pubsub.publishSync(to, message);
 		}
 	}
 }
