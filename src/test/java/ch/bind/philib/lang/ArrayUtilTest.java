@@ -22,7 +22,7 @@
 
 package ch.bind.philib.lang;
 
-import static ch.bind.philib.lang.ArrayUtil.EMPTY_BYTE_ARRAY;
+import static ch.bind.philib.lang.ArrayUtil.*;
 import static ch.bind.philib.lang.ArrayUtil.append;
 import static ch.bind.philib.lang.ArrayUtil.concat;
 import static ch.bind.philib.lang.ArrayUtil.contains;
@@ -443,5 +443,131 @@ public class ArrayUtilTest {
 		assertEquals(find(a, _1, 18), 18);
 
 		assertEquals(find(a, _1, 19), -1);
+	}
+
+	@Test
+	public void appendNullX() {
+		String x = "foo";
+		String[] xs = null;
+		String[] res = append(String.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), String[].class);
+		assertEquals(res.length, 1);
+		assertTrue(res[0] == x);
+	}
+
+	@Test
+	public void appendNullXOtherType() {
+		String x = "foo";
+		String[] xs = null;
+		Object[] res = append(Object.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), Object[].class);
+		assertEquals(res.length, 1);
+		assertTrue(res[0] == x);
+	}
+
+	@Test
+	public void appendXY() {
+		String x = "foo";
+		String[] xs = { "bar" };
+		String[] res = append(String.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), String[].class);
+		assertEquals(res.length, 2);
+		assertTrue(res[0] == xs[0]);
+		assertTrue(res[1] == x);
+	}
+
+	@Test
+	public void appendXYOtherType() {
+		String x = "foo";
+		String[] xs = { "bar" };
+		Object[] res = append(Object.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), Object[].class);
+		assertEquals(res.length, 2);
+		assertTrue(res[0] == xs[0]);
+		assertTrue(res[1] == x);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void appendNoNullClazz() {
+		String[] xs = { "bar" };
+		append((Class<String>) null, xs, "quack");
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void appendNoNullValue() {
+		String[] xs = { "bar" };
+		append(String.class, xs, null);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void removeReferenceNoNullClazz() {
+		String[] from = { "bar" };
+		removeReference((Class<String>) null, from, "foo");
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void removeReferenceNoNullFrom() {
+		String[] from = null;
+		removeReference(String.class, from, "foo");
+	}
+
+	@Test
+	public void removeReferenceNone() {
+		String[] from = {
+				"a", "b", "c" };
+		String[] res = removeReference(String.class, from, "d");
+		assertTrue(from == res);
+	}
+	
+	@Test
+	public void removeReferenceFront() {
+		String[] from = {
+				"a", "b", "c" };
+		String[] res = removeReference(String.class, from, "a");
+		assertEquals(res.length, 2);
+		assertEquals(res[0], "b");
+		assertEquals(res[1], "c");
+	}
+	
+	@Test
+	public void removeReferenceMid() {
+		String[] from = {
+				"a", "b", "c" };
+		String[] res = removeReference(String.class, from, "b");
+		assertEquals(res.length, 2);
+		assertEquals(res[0], "a");
+		assertEquals(res[1], "c");
+	}
+	
+	@Test
+	public void removeReferenceBack() {
+		String[] from = {
+				"a", "b", "c" };
+		String[] res = removeReference(String.class, from, "c");
+		assertEquals(res.length, 2);
+		assertEquals(res[0], "a");
+		assertEquals(res[1], "b");
+	}
+	
+	@Test
+	public void removeReferenceMultiple() {
+		String[] from = {
+				"a", "b", "c", "c" };
+		String[] res = removeReference(String.class, from, "c");
+		assertEquals(res.length, 2);
+		assertEquals(res[0], "a");
+		assertEquals(res[1], "b");
+	}
+	
+	@Test
+	public void removeReferenceAll() {
+		String[] from = {
+				"c", "c", "c", "c" };
+		String[] res = removeReference(String.class, from, "c");
+		assertEquals(res.length, 0);
 	}
 }

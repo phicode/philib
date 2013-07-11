@@ -26,9 +26,11 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 import ch.bind.philib.util.TLR;
+import ch.bind.philib.validation.Validation;
 
 /**
- * Various functions for dealing with arrays which are not present in the standard {@link java.util.Arrays} class.
+ * Various functions for dealing with arrays which are not present in the
+ * standard {@link java.util.Arrays} class.
  * 
  * @author Philipp Meinen
  * @since 2009-06-10
@@ -37,18 +39,25 @@ public abstract class ArrayUtil {
 
 	public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-	protected ArrayUtil() {}
+	protected ArrayUtil() {
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T[] newArray(Class<T> clazz, int size) {
+		return (T[]) java.lang.reflect.Array.newInstance(clazz, size);
+	}
 
 	/**
-	 * Fills the <code>destination</code> array with randomly picked values from the <code>source</code> array. No value
-	 * will be picked twice.
+	 * Fills the <code>destination</code> array with randomly picked values from
+	 * the <code>source</code> array. No value will be picked twice.
 	 * 
-	 * @param source The array from which random values must be picked. The content of this array will not be altered.
-	 * @param destination The array which must be filled with random values. Previous values within this array will be
-	 *            overwritten.
+	 * @param source The array from which random values must be picked. The
+	 *            content of this array will not be altered.
+	 * @param destination The array which must be filled with random values.
+	 *            Previous values within this array will be overwritten.
 	 * @throws NullPointerException If either of the two parameters is null.
-	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller then the <code>destination</code>
-	 *             -array.
+	 * @throws IllegalArgumentException If the <code>source</code>-array is
+	 *             smaller then the <code>destination</code> -array.
 	 */
 	public static <T> void pickRandom(final T[] source, final T[] destination) {
 		if (source == null)
@@ -76,7 +85,8 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
+	 * @return a new byte array with the combined length of {@code a} and
+	 *         {@code b}, containing a copy of their content.
 	 */
 	public static byte[] concat(byte[] a, byte[] b) {
 		// override null arrays
@@ -99,9 +109,10 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
-	 *         if the combined length exceeds {@code capacity} the returned array {@code a} will have
-	 *         {@code a.length == capacity}.
+	 * @return a new byte array with the combined length of {@code a} and
+	 *         {@code b}, containing a copy of their content. if the combined
+	 *         length exceeds {@code capacity} the returned array {@code a} will
+	 *         have {@code a.length == capacity}.
 	 */
 	public static byte[] append(byte[] a, byte[] b, int capacity) {
 		// override null arrays
@@ -125,6 +136,47 @@ public abstract class ArrayUtil {
 			System.arraycopy(b, 0, rv, la, fromB);
 		}
 		return rv;
+	}
+
+	public static <T> T[] append(Class<T> clazz, T[] a, T b) {
+		Validation.notNull(clazz);
+		Validation.notNull(b);
+		if (a == null) {
+			T[] ts = newArray(clazz, 1);
+			ts[0] = b;
+			return ts;
+		}
+		int l = a.length;
+		T[] ts = newArray(clazz, l + 1);
+		System.arraycopy(a, 0, ts, 0, l);
+		ts[l] = b;
+		return ts;
+	}
+
+	public static <T> T[] removeReference(Class<T> clazz, T[] from, T what) {
+		Validation.notNull(clazz);
+		Validation.notNull(from);
+		int l = from.length;
+		int num = 0;
+		for (int i = 0; i < l; i++) {
+			if (from[i] == what) {
+				num++;
+			}
+		}
+		if (num == 0) {
+			return from;
+		}
+		int newLen = l - num;
+		T[] to = newArray(clazz, newLen);
+		if (newLen == 0) {
+			return to;
+		}
+		for (int i = 0, j = 0; i < l; i++) {
+			if (from[i] != what) {
+				to[j++] = from[i];
+			}
+		}
+		return to;
 	}
 
 	public static byte[] extractBack(byte[] data, int len) {

@@ -25,6 +25,7 @@ package ch.bind.philib.util;
 import java.util.HashSet;
 import java.util.Set;
 
+import ch.bind.philib.lang.ArrayUtil;
 import ch.bind.philib.validation.Validation;
 
 /**
@@ -83,7 +84,7 @@ public final class CowSet<E> {
 		if (n == 0) {
 			view = null;
 		} else {
-			view = content.toArray(mkArray(clazz, n));
+			view = content.toArray(ArrayUtil.newArray(clazz, n));
 		}
 	}
 
@@ -111,13 +112,9 @@ public final class CowSet<E> {
 	private E[] getEmpty() {
 		E[] e = empty;
 		if (e == null) {
-			e = mkArray(clazz, 0);
+			e = ArrayUtil.newArray(clazz, 0);
 			empty = e;
 		}
 		return e;
-	}
-
-	private static <E> E[] mkArray(Class<E> clazz, int size) {
-		return (E[]) java.lang.reflect.Array.newInstance(clazz, size);
 	}
 }
