@@ -22,7 +22,7 @@
 
 package ch.bind.philib.lang;
 
-import static ch.bind.philib.lang.ArrayUtil.*;
+import static ch.bind.philib.lang.ArrayUtil.EMPTY_BYTE_ARRAY;
 import static ch.bind.philib.lang.ArrayUtil.append;
 import static ch.bind.philib.lang.ArrayUtil.concat;
 import static ch.bind.philib.lang.ArrayUtil.contains;
@@ -32,6 +32,7 @@ import static ch.bind.philib.lang.ArrayUtil.find;
 import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
 import static ch.bind.philib.lang.ArrayUtil.memclr;
 import static ch.bind.philib.lang.ArrayUtil.pickRandom;
+import static ch.bind.philib.lang.ArrayUtil.remove;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -504,70 +505,70 @@ public class ArrayUtilTest {
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void removeReferenceNoNullClazz() {
+	public void removeNoNullClazz() {
 		String[] from = { "bar" };
-		removeReference((Class<String>) null, from, "foo");
+		remove((Class<String>) null, from, "foo");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void removeReferenceNoNullFrom() {
+	public void removeNoNullFrom() {
 		String[] from = null;
-		removeReference(String.class, from, "foo");
+		remove(String.class, from, "foo");
 	}
 
 	@Test
-	public void removeReferenceNone() {
+	public void removeNone() {
 		String[] from = {
 				"a", "b", "c" };
-		String[] res = removeReference(String.class, from, "d");
+		String[] res = remove(String.class, from, "d");
 		assertTrue(from == res);
 	}
 	
 	@Test
-	public void removeReferenceFront() {
+	public void removeFront() {
 		String[] from = {
 				"a", "b", "c" };
-		String[] res = removeReference(String.class, from, "a");
+		String[] res = remove(String.class, from, "a");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "b");
 		assertEquals(res[1], "c");
 	}
 	
 	@Test
-	public void removeReferenceMid() {
+	public void removeMid() {
 		String[] from = {
 				"a", "b", "c" };
-		String[] res = removeReference(String.class, from, "b");
+		String[] res = remove(String.class, from, "b");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "a");
 		assertEquals(res[1], "c");
 	}
 	
 	@Test
-	public void removeReferenceBack() {
+	public void removeBack() {
 		String[] from = {
 				"a", "b", "c" };
-		String[] res = removeReference(String.class, from, "c");
+		String[] res = remove(String.class, from, "c");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "a");
 		assertEquals(res[1], "b");
 	}
 	
 	@Test
-	public void removeReferenceMultiple() {
+	public void removeMultiple() {
 		String[] from = {
 				"a", "b", "c", "c" };
-		String[] res = removeReference(String.class, from, "c");
+		String[] res = remove(String.class, from, "c");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "a");
 		assertEquals(res[1], "b");
 	}
 	
 	@Test
-	public void removeReferenceAll() {
+	public void removeAll() {
 		String[] from = {
 				"c", "c", "c", "c" };
-		String[] res = removeReference(String.class, from, "c");
+		String[] res = remove(String.class, from, "c");
 		assertEquals(res.length, 0);
 	}
 }

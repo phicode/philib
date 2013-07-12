@@ -153,13 +153,13 @@ public abstract class ArrayUtil {
 		return ts;
 	}
 
-	public static <T> T[] removeReference(Class<T> clazz, T[] from, T what) {
+	public static <T> T[] remove(Class<T> clazz, T[] from, T what) {
 		Validation.notNull(clazz);
 		Validation.notNull(from);
 		int l = from.length;
 		int num = 0;
 		for (int i = 0; i < l; i++) {
-			if (from[i] == what) {
+			if (CompareUtil.equals(from[i], what)) {
 				num++;
 			}
 		}
@@ -172,7 +172,7 @@ public abstract class ArrayUtil {
 			return to;
 		}
 		for (int i = 0, j = 0; i < l; i++) {
-			if (from[i] != what) {
+			if (!CompareUtil.equals(from[i], what)) {
 				to[j++] = from[i];
 			}
 		}
