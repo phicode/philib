@@ -21,6 +21,8 @@
  */
 package ch.bind.philib.lang;
 
+import java.util.concurrent.ThreadFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +35,8 @@ public abstract class ThreadUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ThreadUtil.class);
 
-	protected ThreadUtil() {}
+	protected ThreadUtil() {
+	}
 
 	public static void sleepUntilMs(long time) throws InterruptedException {
 		long diff = time - System.currentTimeMillis();
@@ -44,7 +47,9 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param t the thread which must be interrupted and joined with a default timeout
+	 * @param t
+	 *            the thread which must be interrupted and joined with a default
+	 *            timeout
 	 * @return {@code true} for OK, {@code false} in case of an error.
 	 */
 	public static boolean interruptAndJoin(Thread t) {
@@ -52,9 +57,11 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param t the thread which must be interrupted
-	 * @param waitTime a specific timeout for the join operation. A negative or zero value means to no timeout is
-	 *            implied.
+	 * @param t
+	 *            the thread which must be interrupted
+	 * @param waitTime
+	 *            a specific timeout for the join operation. A negative or zero
+	 *            value means to no timeout is implied.
 	 * @return {@code true} for OK, {@code false} in case of an error.
 	 */
 	public static boolean interruptAndJoin(Thread t, long waitTime) {
@@ -81,8 +88,9 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * Wrapper for a runnable. The wrapper will delegate calls to Runnable.run() to the wrapped object. If the wrapped
-	 * run() method terminates unexpectedly the run method will be called again.
+	 * Wrapper for a runnable. The wrapper will delegate calls to Runnable.run()
+	 * to the wrapped object. If the wrapped run() method terminates
+	 * unexpectedly the run method will be called again.
 	 */
 	public static final class ForeverRunner implements Runnable {
 
@@ -105,6 +113,79 @@ public abstract class ThreadUtil {
 				} catch (Throwable e) {
 					LOG.error("runnable crashed with an error, will not restart. thread: " + Thread.currentThread().getName(), e);
 				}
+			}
+		}
+	}
+
+	public static final ThreadFactory DEFAULT_THREAD_FACTORY = new ThreadFactory() {
+
+		@Override
+		public Thread newThread(Runnable r) {
+			return new Thread(r);
+		}
+	};
+
+	/**
+	 * Creates the number of requested threads or none at all.
+	 * 
+	 * @param runnables
+	 * @param threadFactory
+	 */
+	public static Thread[] createThreads(Runnable[] runnables) {
+		return createThreads(runnables, DEFAULT_THREAD_FACTORY);
+	}
+
+	/**
+	 * Creates the number of requested threads or none at all.
+	 * 
+	 * @param runnables
+	 * @param threadFactory
+	 */
+	public static Thread[] createThreads(Runnable[] runnables, ThreadFactory threadFactory) {
+		Validation.isTrue(runnables != null && runnables.length > 0, "more than one runnables must be provided");
+		Validation.noNullValues(runnables, "no runnables must be null");
+		if (threadFactory == null) {
+			threadFactory = DEFAULT_THREAD_FACTORY;
+		}
+		final int n = runnables.length;
+		Thread[] threads = new Thread[n];
+		for (int i = 0; i < n; i++) {
+			threads[i] = threadFactory.newThread(runnables[i]);
+		}
+		return threads;
+	}
+
+	/**
+	 * 
+	 * @param threads
+	 * @return retval: all ok/1ormore-nok
+	 */
+	public static boolean interruptAndJoinThreads(Thread[] threads) {
+		return interruptAndJoinThreads(threads, 0);
+	}
+
+	/**
+	 * 
+	 * @param threads
+	 * @param waitTimePerThread
+	 * @return retval: all ok/1ormore-nok
+	 */
+	public static boolean interruptAndJoinThreads(Thread[] threads, long waitTimePerThread) {
+		boolean allOk = true;
+		if (threads != null && threads.length > 0) {
+			for (Thread t : threads) {
+				if (!interruptAndJoin(t, waitTimePerThread)) {
+					allOk = false;
+				}
+			}
+		}
+		return allOk;
+	}
+
+	public static void startThreads(Thread[] threads) {
+		if (threads != null && threads.length > 0) {
+			for (Thread t : threads) {
+				t.start();
 			}
 		}
 	}
