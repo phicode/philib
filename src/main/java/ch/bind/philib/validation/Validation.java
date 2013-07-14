@@ -29,7 +29,8 @@ import java.util.Collection;
  */
 public abstract class Validation {
 
-	protected Validation() {}
+	protected Validation() {
+	}
 
 	public static void notNegative(int value) {
 		if (value < 0) {
@@ -118,6 +119,16 @@ public abstract class Validation {
 	public static <T> void notNullOrEmpty(T[] value, String message) {
 		if (value == null || value.length == 0) {
 			throw new IllegalArgumentException(message);
+		}
+	}
+
+	public static <T> void noNullValues(T[] values) {
+		noNullValues(values, "array must only contain non-null values");
+	}
+
+	public static <T> void noNullValues(T[] values, String message) {
+		for (T v : values) {
+			notNull(v, message);
 		}
 	}
 }
