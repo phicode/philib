@@ -61,7 +61,7 @@ public class ArrayUtilTest {
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void sourceSmallerThenDestination() {
+	public void sourceSmallerThanDestination() {
 		Object[] src = new Object[1];
 		Object[] dst = new Object[2];
 		pickRandom(src, dst);
@@ -379,7 +379,7 @@ public class ArrayUtilTest {
 		assertFalse(contains(abc, xyz));
 		assertFalse(contains(xyz, abc));
 
-		// search longer then data
+		// search longer than data
 		assertEquals(find(abc, xabc), -1);
 		assertFalse(contains(abc, xabc));
 

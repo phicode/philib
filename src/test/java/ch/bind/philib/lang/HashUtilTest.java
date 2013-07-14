@@ -232,7 +232,7 @@ public class HashUtilTest {
 		}
 		final long t2 = System.currentTimeMillis() - tStart - t0 - t1;
 		double collFactor = ((double) colls) / ((double) n);
-		// less then 1.5%
+		// less than 1.5%
 		assertTrue(collFactor < 0.015);
 		System.out.printf("t0=%d, t1=%d, t2=%d, collisions=%d/%d, highColl=%d\n", t0, t1, t2, colls, n, highColl);
 
