@@ -23,12 +23,15 @@
 package ch.bind.philib.conf;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,7 +63,7 @@ public class ConfigTest {
 	@Test
 	public void loadMultiple() throws IOException {
 		URL[] urls = { URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.a"), //
-		        URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.b") };
+				URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.b") };
 
 		Config c = new Config(urls);
 
@@ -79,8 +82,8 @@ public class ConfigTest {
 
 	@Test
 	public void oneResource() throws IOException {
-		URL[] urls = { URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.a"), //
-		        URLs.forFile("/tmp/does-not-exist") };
+		List<URL> urls = Arrays.asList(URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.a"), //
+				URLs.forFile("/tmp/does-not-exist"));
 
 		Config c = new Config(urls);
 
@@ -99,10 +102,61 @@ public class ConfigTest {
 	@Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "no resources found")
 	public void atLeastOneResource() throws IOException {
 		URL[] urls = { URLs.forFile("/tmp/does-not-exist-1"), //
-		        URLs.forFile("/tmp/does-not-exist-2") };
+				URLs.forFile("/tmp/does-not-exist-2") };
 
 		Config c = new Config(urls);
 		c.load();
+	}
+
+	@Test
+	public void nullOnNotFound() throws IOException {
+		URL url = URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.a");
+		Config c = new Config(url);
+		c.load();
+		assertEquals(c.get("a"), "1");
+		assertNull(c.get("foo"));
+	}
+
+	@Test
+	public void getWithDefault() throws IOException {
+		URL url = URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.a");
+		Config c = new Config(url);
+		c.load();
+		assertEquals(c.get("a", "notfound"), "1");
+		assertEquals(c.get("foo", "notfound"), "notfound");
+	}
+
+	@Test
+	public void changingConfig() throws IOException {
+		URL urla = URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.a");
+		URL urlb = URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.b");
+		Config c = new Config(urla);
+		RecordingConfigValueListener l = new RecordingConfigValueListener();
+		c.addListener(l);
+		c.load();
+		assertEquals(c.get("a"), "1");
+		assertEquals(c.get("b"), "2");
+		assertEquals(c.get("c"), "3");
+		assertEquals(l.added.size(), 3);
+		assertEquals(l.removed.size(), 0);
+		assertEquals(l.changed.size(), 0);
+
+		l.clearNotifications();
+		c.setURL(urlb);
+		c.load();
+
+		assertEquals(c.get("a"), "1");
+		assertEquals(c.get("b"), "22");
+		assertEquals(c.get("d"), "4");
+
+		assertEquals(l.added.size(), 1);
+		assertTrue(l.added.contains("d"));
+
+		assertEquals(l.removed.size(), 1);
+		assertTrue(l.removed.contains("c"));
+
+		assertEquals(l.changed.size(), 1);
+		assertTrue(l.changed.contains("b"));
 	}
 
 	private static final class RecordingConfigValueListener implements ConfigValueListener {
@@ -116,6 +170,12 @@ public class ConfigTest {
 		public void changed(String key, String oldValue, String newValue) {
 			changed.add(key);
 			current.put(key, newValue);
+		}
+
+		public void clearNotifications() {
+			changed.clear();
+			removed.clear();
+			added.clear();
 		}
 
 		@Override

@@ -25,9 +25,10 @@ package ch.bind.philib.conf;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -40,30 +41,48 @@ import ch.bind.philib.validation.Validation;
 /**
  * @author Philipp Meinen
  */
-public class Config {
+public final class Config {
 
 	private final CowSet<ConfigValueListener> listeners = new CowSet<ConfigValueListener>(ConfigValueListener.class);
 
-	private final URL[] urls;
+	private final List<URL> urls = new LinkedList<URL>();
 
 	private boolean loading;
 
 	private volatile Map<String, String> config;
 
 	public Config(URL url) {
-		Validation.notNull(url);
-		urls = new URL[] { url };
+		setURL(url);
 	}
 
 	public Config(URL[] urls) {
-		Validation.notNullOrEmpty(urls);
-		this.urls = Arrays.copyOf(urls, urls.length);
+		setURLs(urls);
 	}
 
 	public Config(Collection<URL> urls) {
-		Validation.notNull(urls);
-		this.urls = urls.toArray(new URL[urls.size()]);
-		Validation.notNullOrEmpty(this.urls);
+		setURLs(urls);
+	}
+
+	public synchronized void setURL(URL url) {
+		Validation.notNull(url);
+		urls.clear();
+		urls.add(url);
+	}
+
+	public synchronized void setURLs(URL[] urls) {
+		Validation.notNullOrEmpty(urls);
+		this.urls.clear();
+		for (URL url : urls) {
+			this.urls.add(url);
+		}
+	}
+
+	public synchronized void setURLs(Collection<URL> urls) {
+		Validation.notNullOrEmpty(urls);
+		this.urls.clear();
+		for (URL url : urls) {
+			this.urls.add(url);
+		}
 	}
 
 	public void addListener(ConfigValueListener listener) {
@@ -77,7 +96,8 @@ public class Config {
 	/**
 	 * Loads all configuration urls. At least one URL
 	 * 
-	 * @throws IOException in case no url could be opened.
+	 * @throws IOException
+	 *             in case no url could be opened.
 	 */
 	public synchronized void load() throws IOException {
 		if (loading) {
@@ -180,5 +200,10 @@ public class Config {
 	public String get(String key) {
 		Map<String, String> c = config;
 		return c == null ? null : c.get(key);
+	}
+
+	public String get(String key, String def) {
+		String v = get(key);
+		return v == null ? def : v;
 	}
 }
