@@ -12,7 +12,7 @@
 		</server>
 	</servers>
 
-2. run checkHeaders.sh and checkVersions.sh
+2. run "check.sh headers" and "check.sh updates"
 
 3. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn clean test install
 

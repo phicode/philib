@@ -4,6 +4,10 @@
       B = bugfix
       G = general
 
+=== 0.8.0 ===
+ F: configuration management in ch.bind.philib.conf
+ F: additional ArrayUtil methods: append, remove
+
 === 0.7.0 ===
  F: NamedSeqThreadFactory can now set new thread's daemon flag and thread-group.
  F: Cache implementations are always thread-safe -> the SyncCache wrapper was removed
