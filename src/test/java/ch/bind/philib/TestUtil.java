@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
+ * Copyright (c) 2013 Philipp Meinen <philipp@bind.ch>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
@@ -44,7 +44,8 @@ public class TestUtil {
 
 	public static final boolean RUN_BENCHMARKS = "true".equalsIgnoreCase(System.getProperty("runBenchmarks"));
 
-	private TestUtil() {}
+	private TestUtil() {
+	}
 
 	public static void gcAndSleep() {
 		gcAndSleep(DEFAULT_SLEEPTIME_MS);
@@ -64,7 +65,7 @@ public class TestUtil {
 		double perS = amount / (timeNs / 1000000000f);
 		double perMs = amount / (timeNs / 1000000f);
 		System.out.printf("Bench [%-20s] %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms%n", //
-				clazz.getSimpleName(), amount, description, timeNs, perS, shortUnit, perMs, shortUnit);
+		        clazz.getSimpleName(), amount, description, timeNs, perS, shortUnit, perMs, shortUnit);
 	}
 
 	private static volatile SoftReference<List<String>> wordlist;

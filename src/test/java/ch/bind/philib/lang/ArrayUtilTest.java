@@ -32,6 +32,7 @@ import static ch.bind.philib.lang.ArrayUtil.find;
 import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
 import static ch.bind.philib.lang.ArrayUtil.memclr;
 import static ch.bind.philib.lang.ArrayUtil.pickRandom;
+import static ch.bind.philib.lang.ArrayUtil.remove;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -443,5 +444,131 @@ public class ArrayUtilTest {
 		assertEquals(find(a, _1, 18), 18);
 
 		assertEquals(find(a, _1, 19), -1);
+	}
+
+	@Test
+	public void appendNullX() {
+		String x = "foo";
+		String[] xs = null;
+		String[] res = append(String.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), String[].class);
+		assertEquals(res.length, 1);
+		assertTrue(res[0] == x);
+	}
+
+	@Test
+	public void appendNullXOtherType() {
+		String x = "foo";
+		String[] xs = null;
+		Object[] res = append(Object.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), Object[].class);
+		assertEquals(res.length, 1);
+		assertTrue(res[0] == x);
+	}
+
+	@Test
+	public void appendXY() {
+		String x = "foo";
+		String[] xs = { "bar" };
+		String[] res = append(String.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), String[].class);
+		assertEquals(res.length, 2);
+		assertTrue(res[0] == xs[0]);
+		assertTrue(res[1] == x);
+	}
+
+	@Test
+	public void appendXYOtherType() {
+		String x = "foo";
+		String[] xs = { "bar" };
+		Object[] res = append(Object.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), Object[].class);
+		assertEquals(res.length, 2);
+		assertTrue(res[0] == xs[0]);
+		assertTrue(res[1] == x);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void appendNoNullClazz() {
+		String[] xs = { "bar" };
+		append((Class<String>) null, xs, "quack");
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void appendNoNullValue() {
+		String[] xs = { "bar" };
+		append(String.class, xs, null);
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void removeNoNullClazz() {
+		String[] from = { "bar" };
+		remove((Class<String>) null, from, "foo");
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void removeNoNullFrom() {
+		String[] from = null;
+		remove(String.class, from, "foo");
+	}
+
+	@Test
+	public void removeNone() {
+		String[] from = {
+				"a", "b", "c" };
+		String[] res = remove(String.class, from, "d");
+		assertTrue(from == res);
+	}
+	
+	@Test
+	public void removeFront() {
+		String[] from = {
+				"a", "b", "c" };
+		String[] res = remove(String.class, from, "a");
+		assertEquals(res.length, 2);
+		assertEquals(res[0], "b");
+		assertEquals(res[1], "c");
+	}
+	
+	@Test
+	public void removeMid() {
+		String[] from = {
+				"a", "b", "c" };
+		String[] res = remove(String.class, from, "b");
+		assertEquals(res.length, 2);
+		assertEquals(res[0], "a");
+		assertEquals(res[1], "c");
+	}
+	
+	@Test
+	public void removeBack() {
+		String[] from = {
+				"a", "b", "c" };
+		String[] res = remove(String.class, from, "c");
+		assertEquals(res.length, 2);
+		assertEquals(res[0], "a");
+		assertEquals(res[1], "b");
+	}
+	
+	@Test
+	public void removeMultiple() {
+		String[] from = {
+				"a", "b", "c", "c" };
+		String[] res = remove(String.class, from, "c");
+		assertEquals(res.length, 2);
+		assertEquals(res[0], "a");
+		assertEquals(res[1], "b");
+	}
+	
+	@Test
+	public void removeAll() {
+		String[] from = {
+				"c", "c", "c", "c" };
+		String[] res = remove(String.class, from, "c");
+		assertEquals(res.length, 0);
 	}
 }
