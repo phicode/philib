@@ -42,14 +42,14 @@ public class URLsTest {
 	}
 
 	// platform dependent
-	@Test(enabled= false)
+	@Test(enabled = false)
 	public void forFile() throws IOException {
 		URL a = URLs.forFile("foo"); // relative
 		URL b = URLs.forFile("/bar"); // absolute
 
 		String workDir = System.getProperty("user.dir");
-//		workDir = workDir.replace('\\', '/');
-//		workDir = workDir.startsWith("/") ? workDir : "/" + workDir;
+		// workDir = workDir.replace('\\', '/');
+		// workDir = workDir.startsWith("/") ? workDir : "/" + workDir;
 		assertEquals(a.toString(), "file:" + workDir + "/foo");
 
 		assertEquals(b.toExternalForm(), "file:/bar");

@@ -36,6 +36,7 @@ public final class TLR {
 	}
 
 	private static ThreadLocal<Random> tlr = new ThreadLocal<Random>() {
+		@Override
 		protected Random initialValue() {
 			return new Random();
 		};
