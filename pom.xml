@@ -48,7 +48,7 @@
 		<!-- read only connection -->
 		<connection>scm:git:https://github.com/PhiCode/philib</connection>
 		<!-- read/write connection -->
-		<developerConnection>scm:git:git://git@bind.ch:philib</developerConnection>
+		<developerConnection>scm:git:git://git@bind.ch/philib</developerConnection>
 		<!-- browsable url -->
 		<url>https://github.com/PhiCode/philib</url>
 	</scm>
