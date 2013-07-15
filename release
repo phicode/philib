@@ -18,7 +18,7 @@
 
 4. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:prepare -DpushChanges=false
 
-5. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:perform
+5. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:perform -DlocalCheckout=true
 
 6. login @ https://oss.sonatype.org/index.html
 
