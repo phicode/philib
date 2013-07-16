@@ -63,6 +63,10 @@ public abstract class StringUtil {
 		sb.append('=');
 		sb.append(obj);
 	}
+	
+	public static void firstObj(StringBuilder sb, Object obj) {
+		sb.append(obj);
+	}
 
 	public static void addObj(StringBuilder sb, String name, Object obj) {
 		sb.append(", ");
