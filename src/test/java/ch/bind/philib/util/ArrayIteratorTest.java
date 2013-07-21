@@ -36,8 +36,7 @@ public class ArrayIteratorTest {
 
 	@Test
 	public void regular() {
-		Integer[] xs = {
-				1, 2, 3, };
+		Integer[] xs = { 1, 2, 3, };
 		ArrayIterator<Integer> iter = new ArrayIterator<Integer>(xs);
 
 		assertTrue(iter.hasNext());
@@ -50,6 +49,29 @@ public class ArrayIteratorTest {
 
 		assertTrue(iter.hasNext());
 		assertEquals(iter.next().intValue(), 3);
+		verifyNoRemove(iter);
+
+		verifyEnd(iter);
+	}
+
+	@Test
+	public void regularWithModifications() {
+		Integer[] xs = { 1, 2, 3, };
+		ArrayIterator<Integer> iter = new ArrayIterator<Integer>(xs);
+
+		xs[0] = 5;
+		assertTrue(iter.hasNext());
+		assertEquals(iter.next().intValue(), 5);
+		verifyNoRemove(iter);
+
+		xs[1] = 6;
+		assertTrue(iter.hasNext());
+		assertEquals(iter.next().intValue(), 6);
+		verifyNoRemove(iter);
+
+		xs[2] = 7;
+		assertTrue(iter.hasNext());
+		assertEquals(iter.next().intValue(), 7);
 		verifyNoRemove(iter);
 
 		verifyEnd(iter);

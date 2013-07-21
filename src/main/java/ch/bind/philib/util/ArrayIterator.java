@@ -36,6 +36,12 @@ public final class ArrayIterator<E> implements Iterator<E> {
 
 	private int nextIdx;
 
+	/**
+	 * Creates an array iterator which will iterate over the provided array.
+	 * 
+	 * @param data
+	 *            the data to iterate over, may be null or empty.
+	 */
 	public ArrayIterator(E[] data) {
 		this.data = data;
 	}
