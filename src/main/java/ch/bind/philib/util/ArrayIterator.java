@@ -37,7 +37,7 @@ public final class ArrayIterator<E> implements Iterator<E> {
 	private int nextIdx;
 
 	public ArrayIterator(E[] data) {
-		this.data = data == null ? null : data.clone();
+		this.data = data;
 	}
 
 	@Override
