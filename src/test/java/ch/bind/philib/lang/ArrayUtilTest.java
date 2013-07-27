@@ -32,6 +32,7 @@ import static ch.bind.philib.lang.ArrayUtil.find;
 import static ch.bind.philib.lang.ArrayUtil.formatShortHex;
 import static ch.bind.philib.lang.ArrayUtil.memclr;
 import static ch.bind.philib.lang.ArrayUtil.pickRandom;
+import static ch.bind.philib.lang.ArrayUtil.prepend;
 import static ch.bind.philib.lang.ArrayUtil.remove;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -456,12 +457,34 @@ public class ArrayUtilTest {
 		assertEquals(res.length, 1);
 		assertTrue(res[0] == x);
 	}
+	
+	@Test
+	public void prependNullX() {
+		String x = "foo";
+		String[] xs = null;
+		String[] res = prepend(String.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), String[].class);
+		assertEquals(res.length, 1);
+		assertTrue(res[0] == x);
+	}
 
 	@Test
 	public void appendNullXOtherType() {
 		String x = "foo";
 		String[] xs = null;
 		Object[] res = append(Object.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), Object[].class);
+		assertEquals(res.length, 1);
+		assertTrue(res[0] == x);
+	}
+	
+	@Test
+	public void prependNullXOtherType() {
+		String x = "foo";
+		String[] xs = null;
+		Object[] res = prepend(Object.class, xs, x);
 		assertNotNull(res);
 		assertEquals(res.getClass(), Object[].class);
 		assertEquals(res.length, 1);
@@ -479,6 +502,18 @@ public class ArrayUtilTest {
 		assertTrue(res[0] == xs[0]);
 		assertTrue(res[1] == x);
 	}
+	
+	@Test
+	public void prependXY() {
+		String x = "foo";
+		String[] xs = { "bar" };
+		String[] res = prepend(String.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), String[].class);
+		assertEquals(res.length, 2);
+		assertTrue(res[0] == x);
+		assertTrue(res[1] == xs[0]);
+	}
 
 	@Test
 	public void appendXYOtherType() {
@@ -491,11 +526,29 @@ public class ArrayUtilTest {
 		assertTrue(res[0] == xs[0]);
 		assertTrue(res[1] == x);
 	}
+	
+	@Test
+	public void prependXYOtherType() {
+		String x = "foo";
+		String[] xs = { "bar" };
+		Object[] res = prepend(Object.class, xs, x);
+		assertNotNull(res);
+		assertEquals(res.getClass(), Object[].class);
+		assertEquals(res.length, 2);
+		assertTrue(res[0] == x);
+		assertTrue(res[1] == xs[0]);
+	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void appendNoNullClazz() {
 		String[] xs = { "bar" };
 		append((Class<String>) null, xs, "quack");
+	}
+	
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void prependNoNullClazz() {
+		String[] xs = { "bar" };
+		prepend((Class<String>) null, xs, "quack");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -504,6 +557,12 @@ public class ArrayUtilTest {
 		append(String.class, xs, null);
 	}
 
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void prependNoNullValue() {
+		String[] xs = { "bar" };
+		prepend(String.class, xs, null);
+	}
+	
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void removeNoNullClazz() {
 		String[] from = { "bar" };

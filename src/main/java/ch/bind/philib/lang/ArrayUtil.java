@@ -85,8 +85,7 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and
-	 *         {@code b}, containing a copy of their content.
+	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
 	 */
 	public static byte[] concat(byte[] a, byte[] b) {
 		// override null arrays
@@ -109,8 +108,8 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and
-	 *         {@code b}, containing a copy of their content. if the combined
+	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
+	 *         if the combined
 	 *         length exceeds {@code capacity} the returned array {@code a} will
 	 *         have {@code a.length == capacity}.
 	 */
@@ -129,13 +128,27 @@ public abstract class ArrayUtil {
 		byte[] rv = new byte[len];
 		if (la >= capacity) {
 			System.arraycopy(a, 0, rv, 0, capacity);
-		}
-		else {
+		} else {
 			System.arraycopy(a, 0, rv, 0, la);
 			int fromB = Math.min(capacity - la, lb);
 			System.arraycopy(b, 0, rv, la, fromB);
 		}
 		return rv;
+	}
+
+	public static <T> T[] prepend(Class<T> clazz, T[] a, T b) {
+		Validation.notNull(clazz);
+		Validation.notNull(b);
+		if (a == null) {
+			T[] ts = newArray(clazz, 1);
+			ts[0] = b;
+			return ts;
+		}
+		int l = a.length;
+		T[] ts = newArray(clazz, l + 1);
+		System.arraycopy(a, 0, ts, 1, l);
+		ts[0] = b;
+		return ts;
 	}
 
 	public static <T> T[] append(Class<T> clazz, T[] a, T b) {
@@ -278,21 +291,20 @@ public abstract class ArrayUtil {
 		assert (v >= 0 && v < 256);
 		if (v < 16) {
 			sb.append('0');
-		}
-		else {
+		} else {
 			sb.append(TO_HEX[v >>> 4]);
 		}
 		sb.append(TO_HEX[v & 15]);
 	}
 
-	private static final char[] TO_HEX = {
-			'0', '1', '2', '3', //
-			'4', '5', '6', '7', //
-			'8', '9', 'A', 'B', //
-			'C', 'D', 'E', 'F' };
+	private static final char[] TO_HEX = { '0', '1', '2', '3', //
+	        '4', '5', '6', '7', //
+	        '8', '9', 'A', 'B', //
+	        'C', 'D', 'E', 'F' };
 
 	/**
 	 * Overwrites the buffer's content with zeros.
+	 * 
 	 * @param buf -
 	 */
 	public static void memclr(final ByteBuffer buf) {
@@ -301,8 +313,7 @@ public abstract class ArrayUtil {
 		}
 		if (buf.hasArray()) {
 			memclr(buf.array());
-		}
-		else {
+		} else {
 			byte[] filler = getFiller();
 			int filLen = filler.length;
 			buf.clear();
@@ -318,6 +329,7 @@ public abstract class ArrayUtil {
 
 	/**
 	 * Overwrites the buffer's content with zeros.
+	 * 
 	 * @param buf -
 	 */
 	public static void memclr(final byte[] buf) {
