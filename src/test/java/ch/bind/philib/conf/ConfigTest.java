@@ -23,6 +23,7 @@
 package ch.bind.philib.conf;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -63,7 +64,7 @@ public class ConfigTest {
 	@Test
 	public void loadMultiple() throws IOException {
 		URL[] urls = { URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.a"), //
-				URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.b") };
+		        URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.b") };
 
 		Config c = new Config(urls);
 
@@ -83,7 +84,7 @@ public class ConfigTest {
 	@Test
 	public void oneResource() throws IOException {
 		List<URL> urls = Arrays.asList(URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.a"), //
-				URLs.forFile("/tmp/does-not-exist"));
+		        URLs.forFile("/tmp/does-not-exist"));
 
 		Config c = new Config(urls);
 
@@ -102,19 +103,27 @@ public class ConfigTest {
 	@Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "no resources found")
 	public void atLeastOneResource() throws IOException {
 		URL[] urls = { URLs.forFile("/tmp/does-not-exist-1"), //
-				URLs.forFile("/tmp/does-not-exist-2") };
+		        URLs.forFile("/tmp/does-not-exist-2") };
 
 		Config c = new Config(urls);
 		c.load();
 	}
 
 	@Test
-	public void nullOnNotFound() throws IOException {
+	public void get() throws IOException {
 		URL url = URLs.forClasspathResource("/ch/bind/philib/config/ConfigTest.a");
 		Config c = new Config(url);
 		c.load();
 		assertEquals(c.get("a"), "1");
 		assertNull(c.get("foo"));
+
+		assertNotNull(c.getInt("a"));
+		assertTrue(c.getInt("a").intValue() == 1);
+		assertNull(c.getInt("foo"));
+
+		assertNotNull(c.getLong("a"));
+		assertTrue(c.getLong("a").longValue() == 1L);
+		assertNull(c.getLong("foo"));
 	}
 
 	@Test
@@ -124,6 +133,12 @@ public class ConfigTest {
 		c.load();
 		assertEquals(c.get("a", "notfound"), "1");
 		assertEquals(c.get("foo", "notfound"), "notfound");
+
+		assertTrue(c.getInt("a", 1234) == 1);
+		assertTrue(c.getInt("foo", 1234) == 1234);
+
+		assertTrue(c.getLong("a", 1234) == 1L);
+		assertTrue(c.getLong("foo", 1234) == 1234);
 	}
 
 	@Test

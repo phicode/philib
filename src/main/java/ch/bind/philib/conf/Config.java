@@ -206,4 +206,24 @@ public final class Config {
 		String v = get(key);
 		return v == null ? def : v;
 	}
+
+	public Integer getInt(String key) {
+		String v = get(key);
+		return v == null ? null : Integer.parseInt(v);
+	}
+
+	public int getInt(String key, int def) {
+		String v = get(key);
+		return v == null ? def : Integer.parseInt(v);
+	}
+
+	public Long getLong(String key) {
+		String v = get(key);
+		return v == null ? null : Long.parseLong(v);
+	}
+
+	public long getLong(String key, long def) {
+		String v = get(key);
+		return v == null ? def : Long.parseLong(v);
+	}
 }
