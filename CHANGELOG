@@ -4,6 +4,13 @@
       B = bugfix
       G = general
 
+=== 0.9.0 ===
+ F: minor method additions:
+    - Config.{getInt, getLong}
+    - ArrayUtil.prepend
+    - one missing StringUtil method
+ F: ArrayUtil API change: the ctor will no longer clone the provided data
+
 === 0.8.0 ===
  F: configuration management in ch.bind.philib.conf
  F: additional ArrayUtil methods: append, remove
