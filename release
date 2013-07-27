@@ -27,3 +27,5 @@
 8. select the release in question and "Close" it
 
 9. refresh, select again and "Release"
+
+10. git push --tags
