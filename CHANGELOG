@@ -4,6 +4,9 @@
       B = bugfix
       G = general
 
+=== 0.9.1 ===
+ B: config: ignore null urls
+
 === 0.9.0 ===
  F: minor method additions:
     - Config.{getInt, getLong}
