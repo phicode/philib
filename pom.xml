@@ -14,7 +14,7 @@
 
 	<groupId>ch.bind</groupId>
 	<artifactId>philib</artifactId>
-	<version>philib-0.9.1-SNAPSHOT</version>
+	<version>0.9.1</version>
 	<packaging>jar</packaging>
 
 	<name>philib</name>
@@ -50,7 +50,7 @@
 		<developerConnection>scm:git:git@bind.ch:philib</developerConnection>
 		<!-- browsable url -->
 		<url>https://github.com/PhiCode/philib</url>
-	  <tag>HEAD</tag>
+	  <tag>philib-0.9.1</tag>
   </scm>
 
 	<developers>
