@@ -43,189 +43,209 @@ import ch.bind.philib.validation.Validation;
  */
 public final class Config {
 
-    private final CowSet<ConfigValueListener> listeners = new CowSet<ConfigValueListener>(ConfigValueListener.class);
+	private final CowSet<ConfigValueListener> listeners = new CowSet<ConfigValueListener>(ConfigValueListener.class);
 
-    private final List<URL> urls = new LinkedList<URL>();
+	private final List<URL> urls = new LinkedList<URL>();
 
-    private boolean loading;
+	private boolean loading;
 
-    private volatile Map<String, String> config;
+	private volatile Map<String, String> config;
 
-    public Config(URL url) {
-        setURL(url);
-    }
+	public Config(URL url) {
+		setURL(url);
+	}
 
-    public Config(URL[] urls) {
-        setURLs(urls);
-    }
+	public Config(URL[] urls) {
+		setURLs(urls);
+	}
 
-    public Config(Collection<URL> urls) {
-        setURLs(urls);
-    }
+	public Config(Collection<URL> urls) {
+		setURLs(urls);
+	}
 
-    public synchronized void setURL(URL url) {
-        Validation.notNull(url);
-        urls.clear();
-        urls.add(url);
-    }
+	public synchronized void setURL(URL url) {
+		Validation.notNull(url);
+		urls.clear();
+		urls.add(url);
+	}
 
-    public synchronized void setURLs(URL[] urls) {
-        Validation.notNullOrEmpty(urls);
-        this.urls.clear();
-        for (URL url : urls) {
-            this.urls.add(url);
-        }
-    }
+	public synchronized void setURLs(URL[] urls) {
+		Validation.notNullOrEmpty(urls);
+		this.urls.clear();
+		for (URL url : urls) {
+			this.urls.add(url);
+		}
+	}
 
-    public synchronized void setURLs(Collection<URL> urls) {
-        Validation.notNullOrEmpty(urls);
-        this.urls.clear();
-        for (URL url : urls) {
-            this.urls.add(url);
-        }
-    }
+	public synchronized void setURLs(Collection<URL> urls) {
+		Validation.notNullOrEmpty(urls);
+		this.urls.clear();
+		for (URL url : urls) {
+			this.urls.add(url);
+		}
+	}
 
-    public void addListener(ConfigValueListener listener) {
-        listeners.add(listener);
-    }
+	public void addListener(ConfigValueListener listener) {
+		listeners.add(listener);
+	}
 
-    public void removeListener(ConfigValueListener listener) {
-        listeners.remove(listener);
-    }
+	public void removeListener(ConfigValueListener listener) {
+		listeners.remove(listener);
+	}
 
-    /**
-     * Loads all configuration urls. At least one URL
-     * 
-     * @throws IOException
-     *             in case no url could be opened.
-     */
-    public synchronized void load() throws IOException {
-        if (loading) {
-            return;
-        }
-        loading = true;
-        int numSuccess = 0;
-        Exception lastExc = null;
-        Map<String, String> newConfig = new HashMap<String, String>();
-        try {
-            for (URL url : urls) {
-                if (url == null) {
-                    continue;
-                }
-                InputStream is = null;
-                try {
-                    is = url.openStream();
-                    Properties props = new Properties();
-                    props.load(is);
-                    Map<String, String> m = toMap(props);
-                    newConfig.putAll(m);
-                    numSuccess++;
-                } catch (IOException e) {
-                    lastExc = e;
-                } finally {
-                    SafeCloseUtil.close(is);
-                }
-            }
-            if (numSuccess < 1) {
-                throw new IOException("no resources found", lastExc);
-            }
-            if (config != null) {
-                notifyDifferences(newConfig, config);
-            } else {
-                notifyAdded(newConfig);
-            }
-            config = newConfig;
-        } finally {
-            loading = false;
-        }
-    }
+	/**
+	 * Loads all configuration urls. At least one URL
+	 * 
+	 * @throws IOException
+	 *             in case no url could be opened.
+	 */
+	public synchronized void load() throws IOException {
+		if (loading) {
+			return;
+		}
+		loading = true;
+		int numSuccess = 0;
+		Exception lastExc = null;
+		Map<String, String> newConfig = new HashMap<String, String>();
+		try {
+			for (URL url : urls) {
+				if (url == null) {
+					continue;
+				}
+				InputStream is = null;
+				try {
+					is = url.openStream();
+					Properties props = new Properties();
+					props.load(is);
+					Map<String, String> m = toMap(props);
+					newConfig.putAll(m);
+					numSuccess++;
+				} catch (IOException e) {
+					lastExc = e;
+				} finally {
+					SafeCloseUtil.close(is);
+				}
+			}
+			if (numSuccess < 1) {
+				throw new IOException("no resources found", lastExc);
+			}
+			if (config != null) {
+				notifyDifferences(newConfig, config);
+			} else {
+				notifyAdded(newConfig);
+			}
+			config = newConfig;
+		} finally {
+			loading = false;
+		}
+	}
 
-    public static Map<String, String> toMap(Properties p) {
-        Map<String, String> m = new HashMap<String, String>();
-        for (String key : p.stringPropertyNames()) {
-            m.put(key, p.getProperty(key));
-        }
-        return m;
-    }
+	public static Map<String, String> toMap(Properties p) {
+		Map<String, String> m = new HashMap<String, String>();
+		for (String key : p.stringPropertyNames()) {
+			m.put(key, p.getProperty(key));
+		}
+		return m;
+	}
 
-    private void notifyDifferences(Map<String, String> newConfig, Map<String, String> oldConfig) {
-        if (listeners.isEmpty()) {
-            return;
-        }
-        Set<String> newKeys = newConfig.keySet();
-        Set<String> oldKeys = oldConfig.keySet();
-        for (String newKey : newKeys) {
-            if (oldKeys.contains(newKey)) {
-                String valNew = newConfig.get(newKey);
-                String valOld = oldConfig.get(newKey);
-                if (!CompareUtil.equals(valNew, valOld)) {
-                    notifyChanged(newKey, valOld, valNew);
-                }
-            } else {
-                notifyAdded(newKey, newConfig.get(newKey));
-            }
-        }
-        for (String key : oldKeys) {
-            if (!newKeys.contains(key)) {
-                notifyRemoved(key, oldConfig.get(key));
-            }
-        }
-    }
+	private void notifyDifferences(Map<String, String> newConfig, Map<String, String> oldConfig) {
+		if (listeners.isEmpty()) {
+			return;
+		}
+		Set<String> newKeys = newConfig.keySet();
+		Set<String> oldKeys = oldConfig.keySet();
+		for (String newKey : newKeys) {
+			if (oldKeys.contains(newKey)) {
+				String valNew = newConfig.get(newKey);
+				String valOld = oldConfig.get(newKey);
+				if (!CompareUtil.equals(valNew, valOld)) {
+					notifyChanged(newKey, valOld, valNew);
+				}
+			} else {
+				notifyAdded(newKey, newConfig.get(newKey));
+			}
+		}
+		for (String key : oldKeys) {
+			if (!newKeys.contains(key)) {
+				notifyRemoved(key, oldConfig.get(key));
+			}
+		}
+	}
 
-    private void notifyAdded(Map<String, String> m) {
-        if (listeners.isEmpty()) {
-            return;
-        }
-        for (String key : m.keySet()) {
-            notifyAdded(key, m.get(key));
-        }
-    }
+	private void notifyAdded(Map<String, String> m) {
+		if (listeners.isEmpty()) {
+			return;
+		}
+		for (String key : m.keySet()) {
+			notifyAdded(key, m.get(key));
+		}
+	}
 
-    private void notifyAdded(String key, String value) {
-        for (ConfigValueListener l : listeners.getView()) {
-            l.added(key, value);
-        }
-    }
+	private void notifyAdded(String key, String value) {
+		for (ConfigValueListener l : listeners.getView()) {
+			l.added(key, value);
+		}
+	}
 
-    private void notifyRemoved(String key, String oldValue) {
-        for (ConfigValueListener l : listeners.getView()) {
-            l.removed(key, oldValue);
-        }
-    }
+	private void notifyRemoved(String key, String oldValue) {
+		for (ConfigValueListener l : listeners.getView()) {
+			l.removed(key, oldValue);
+		}
+	}
 
-    private void notifyChanged(String key, String oldValue, String newValue) {
-        for (ConfigValueListener l : listeners.getView()) {
-            l.changed(key, oldValue, newValue);
-        }
-    }
+	private void notifyChanged(String key, String oldValue, String newValue) {
+		for (ConfigValueListener l : listeners.getView()) {
+			l.changed(key, oldValue, newValue);
+		}
+	}
 
-    public String get(String key) {
-        Map<String, String> c = config;
-        return c == null ? null : c.get(key);
-    }
+	public String get(String key) {
+		Map<String, String> c = config;
+		return c == null ? null : c.get(key);
+	}
 
-    public String get(String key, String def) {
-        String v = get(key);
-        return v == null ? def : v;
-    }
+	public String get(String key, String def) {
+		String v = get(key);
+		return v == null ? def : v;
+	}
 
-    public Integer getInt(String key) {
-        String v = get(key);
-        return v == null ? null : Integer.parseInt(v);
-    }
+	public Integer getInt(String key) {
+		String v = get(key);
+		return v == null ? null : Integer.parseInt(v);
+	}
 
-    public int getInt(String key, int def) {
-        String v = get(key);
-        return v == null ? def : Integer.parseInt(v);
-    }
+	public int getInt(String key, int def) {
+		String v = get(key);
+		return v == null ? def : Integer.parseInt(v);
+	}
 
-    public Long getLong(String key) {
-        String v = get(key);
-        return v == null ? null : Long.parseLong(v);
-    }
+	public Long getLong(String key) {
+		String v = get(key);
+		return v == null ? null : Long.parseLong(v);
+	}
 
-    public long getLong(String key, long def) {
-        String v = get(key);
-        return v == null ? def : Long.parseLong(v);
-    }
+	public long getLong(String key, long def) {
+		String v = get(key);
+		return v == null ? def : Long.parseLong(v);
+	}
+
+	public Boolean getBool(String key) {
+		String v = get(key);
+		return v == null ? null : Boolean.parseBoolean(v);
+	}
+
+	public boolean getBool(String key, boolean def) {
+		String v = get(key);
+		return v == null ? def : Boolean.parseBoolean(v);
+	}
+
+	public Double getDouble(String key) {
+		String v = get(key);
+		return v == null ? null : Double.parseDouble(v);
+	}
+
+	public double getDouble(String key, double def) {
+		String v = get(key);
+		return v == null ? def : Double.parseDouble(v);
+	}
 }
