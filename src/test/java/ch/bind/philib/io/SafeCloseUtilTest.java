@@ -50,7 +50,7 @@ public class SafeCloseUtilTest {
 
 	@Test
 	public void selector() {
-		S s = new S(false);
+		Sel s = new Sel(false);
 		SafeCloseUtil.close(s);
 		assertEquals(s.numCalls, 1);
 	}
@@ -67,7 +67,7 @@ public class SafeCloseUtilTest {
 
 	@Test
 	public void selectorExc() {
-		S s = new S(true);
+		Sel s = new Sel(true);
 		Logger l = mock(Logger.class);
 		SafeCloseUtil.close(s, l);
 		assertEquals(s.numCalls, 1);
@@ -100,13 +100,13 @@ public class SafeCloseUtilTest {
 		}
 	}
 
-	private static final class S extends Selector {
+	private static final class Sel extends Selector {
 
 		final boolean doThrow;
 
 		int numCalls;
 
-		S(boolean doThrow) {
+		Sel(boolean doThrow) {
 			this.doThrow = doThrow;
 		}
 
@@ -120,42 +120,42 @@ public class SafeCloseUtilTest {
 
 		@Override
 		public boolean isOpen() {
-			throw new UnsupportedOperationException();
+			throw new AssertionError();
 		}
 
 		@Override
 		public SelectorProvider provider() {
-			throw new UnsupportedOperationException();
+			throw new AssertionError();
 		}
 
 		@Override
 		public Set<SelectionKey> keys() {
-			throw new UnsupportedOperationException();
+			throw new AssertionError();
 		}
 
 		@Override
 		public Set<SelectionKey> selectedKeys() {
-			throw new UnsupportedOperationException();
+			throw new AssertionError();
 		}
 
 		@Override
 		public int selectNow() throws IOException {
-			throw new UnsupportedOperationException();
+			throw new AssertionError();
 		}
 
 		@Override
 		public int select(long timeout) throws IOException {
-			throw new UnsupportedOperationException();
+			throw new AssertionError();
 		}
 
 		@Override
 		public int select() throws IOException {
-			throw new UnsupportedOperationException();
+			throw new AssertionError();
 		}
 
 		@Override
 		public Selector wakeup() {
-			throw new UnsupportedOperationException();
+			throw new AssertionError();
 		}
 	}
 }
