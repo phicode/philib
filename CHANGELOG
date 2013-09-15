@@ -4,6 +4,9 @@
       B = bugfix
       G = general
 
+=== 0.9.3 ===
+ F: generic SafeCloseUtil.close(Object) using reflection
+
 === 0.9.2 ===
  F: config: add getBool and getDouble
 
