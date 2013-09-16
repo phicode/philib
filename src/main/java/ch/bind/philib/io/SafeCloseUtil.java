@@ -22,7 +22,6 @@
 package ch.bind.philib.io;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.slf4j.Logger;
@@ -33,58 +32,58 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class SafeCloseUtil {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SafeCloseUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SafeCloseUtil.class);
 
-	protected SafeCloseUtil() {
-	}
+    protected SafeCloseUtil() {
+    }
 
-	public static void close(Closeable closeable) {
-		close(closeable, LOG);
-	}
+    public static void close(Closeable closeable) {
+        close(closeable, LOG);
+    }
 
-	public static void close(Object obj) {
-		close(obj, LOG);
-	}
+    public static void close(Object obj) {
+        close(obj, LOG);
+    }
 
-	public static void close(Closeable closeable, Logger logger) {
-		if (closeable == null) {
-			return;
-		}
-		if (logger == null) {
-			logger = LOG;
-		}
-		try {
-			closeable.close();
-		} catch (IOException e) {
-			logger.error("error while closing an object: " + e.getMessage(), e);
-		}
-	}
+    public static void close(Closeable closeable, Logger logger) {
+        if (closeable == null) {
+            return;
+        }
+        if (logger == null) {
+            logger = LOG;
+        }
+        try {
+            closeable.close();
+        } catch (Exception e) {
+            logger.error("error while closing an object: " + e.getMessage(), e);
+        }
+    }
 
-	public static void close(Object obj, Logger logger) {
-		if (obj == null) {
-			return;
-		}
-		if (obj instanceof Closeable) {
-			close((Closeable) obj, logger);
-			return;
-		}
-		if (logger == null) {
-			logger = LOG;
-		}
-		Method closeMethod;
-		try {
-			closeMethod = obj.getClass().getMethod("close");
-		} catch (NoSuchMethodException e) {
-			LOG.warn("close method not found on class: " + obj.getClass().getName());
-			return;
-		} catch (SecurityException e) {
-			LOG.warn("cannot access close method on class: " + obj.getClass().getName());
-			return;
-		}
-		try {
-			closeMethod.invoke(obj);
-		} catch (Exception e) {
-			logger.error("error while closing a selector: " + e.getMessage(), e);
-		}
-	}
+    public static void close(Object obj, Logger logger) {
+        if (obj == null) {
+            return;
+        }
+        if (obj instanceof Closeable) {
+            close((Closeable) obj, logger);
+            return;
+        }
+        if (logger == null) {
+            logger = LOG;
+        }
+        Method closeMethod;
+        try {
+            closeMethod = obj.getClass().getMethod("close");
+        } catch (NoSuchMethodException e) {
+            LOG.warn("close method not found on class: " + obj.getClass().getName());
+            return;
+        } catch (SecurityException e) {
+            LOG.warn("cannot access close method on class: " + obj.getClass().getName());
+            return;
+        }
+        try {
+            closeMethod.invoke(obj);
+        } catch (Exception e) {
+            logger.error("error while closing a selector: " + e.getMessage(), e);
+        }
+    }
 }
