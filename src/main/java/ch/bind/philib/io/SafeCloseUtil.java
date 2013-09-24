@@ -55,7 +55,7 @@ public abstract class SafeCloseUtil {
         try {
             closeable.close();
         } catch (Exception e) {
-            logger.error("error while closing an object: " + e.getMessage(), e);
+            logger.error("error while closing a resource: " + e.getMessage(), e);
         }
     }
 
@@ -83,7 +83,7 @@ public abstract class SafeCloseUtil {
         try {
             closeMethod.invoke(obj);
         } catch (Exception e) {
-            logger.error("error while closing a selector: " + e.getMessage(), e);
+            logger.error("error while closing a resource: " + e.getMessage(), e);
         }
     }
 }
