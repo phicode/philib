@@ -29,8 +29,7 @@
 		<javac.showWarnings>true</javac.showWarnings>
 		<javac.showDeprecation>true</javac.showDeprecation>
 
-		<!-- the following two properties are adjusted if the profile 'bench' is 
-			activated -->
+		<!-- the following two properties are adjusted if the profile 'bench' is activated -->
 		<runBenchmarks>false</runBenchmarks>
 		<testMaxMemory>128</testMaxMemory>
 	</properties>
@@ -50,8 +49,8 @@
 		<developerConnection>scm:git:git@bind.ch:philib</developerConnection>
 		<!-- browsable url -->
 		<url>https://github.com/PhiCode/philib</url>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<developers>
 		<developer>
@@ -113,6 +112,7 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.4.1</version>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -151,19 +151,41 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.9</version>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
 				<configuration>
-					<!-- <workspace>${basedir}</workspace> -->
-					<workspaceCodeStylesURL>./settings/eclipse-formatting.xml</workspaceCodeStylesURL>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>2.4.0</version>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>bundle-manifest</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<instructions>
+						<Export-Package>ch.bind.philib.*</Export-Package>
+					</instructions>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
 	<profiles>
-		<!-- set a property to when the bench profile is manually activated. This 
-			property is accessed by the 'TestUtil' -->
+		<!-- set a property to when the bench profile is manually activated. This property is accessed by the 'TestUtil' -->
 		<profile>
 			<id>bench</id>
 			<properties>
@@ -177,8 +199,7 @@
 			<id>release-sign-artifacts</id>
 			<activation>
 				<property>
-					<!-- the 'maven-release-plugin' with goal:'release:perform' sets 'performRelease' 
-						property to 'true' -->
+					<!-- the 'maven-release-plugin' with goal:'release:perform' sets 'performRelease' property to 'true' -->
 					<name>performRelease</name>
 					<value>true</value>
 				</property>
