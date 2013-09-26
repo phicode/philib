@@ -203,8 +203,15 @@ public abstract class ThreadUtil {
 	public static void startThreads(Thread[] threads) {
 		if (threads != null && threads.length > 0) {
 			for (Thread t : threads) {
-				t.start();
+				if (t != null) {
+					t.start();
+				}
 			}
 		}
+	}
+
+	public static void startThreads(Collection<? extends Thread> threads) {
+		Thread[] ts = ArrayUtil.toArray(Thread.class, threads);
+		startThreads(ts);
 	}
 }

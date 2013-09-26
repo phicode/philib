@@ -26,6 +26,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.testng.annotations.Test;
@@ -34,7 +37,7 @@ public class ThreadUtilTest {
 
 	@Test
 	public void normal() throws Exception {
-		TestRunnable r = new TestRunnable(false, false);
+		RestartTestRunnable r = new RestartTestRunnable(false, false);
 		Runnable wrapped = new ThreadUtil.ForeverRunner(r);
 		wrapped.run();
 		assertEquals(r.numStarts, 1);
@@ -42,7 +45,7 @@ public class ThreadUtilTest {
 
 	@Test
 	public void exception() throws Exception {
-		TestRunnable r = new TestRunnable(true, false);
+		RestartTestRunnable r = new RestartTestRunnable(true, false);
 		Runnable wrapped = new ThreadUtil.ForeverRunner(r);
 		wrapped.run();
 		assertEquals(r.numStarts, 2);
@@ -50,7 +53,7 @@ public class ThreadUtilTest {
 
 	@Test
 	public void error() throws Exception {
-		TestRunnable r = new TestRunnable(false, true);
+		RestartTestRunnable r = new RestartTestRunnable(false, true);
 		Runnable wrapped = new ThreadUtil.ForeverRunner(r);
 		wrapped.run();
 		assertEquals(r.numStarts, 2);
@@ -58,7 +61,7 @@ public class ThreadUtilTest {
 
 	@Test
 	public void exceptionThenError() throws Exception {
-		TestRunnable r = new TestRunnable(true, true);
+		RestartTestRunnable r = new RestartTestRunnable(true, true);
 		Runnable wrapped = new ThreadUtil.ForeverRunner(r);
 		wrapped.run();
 		assertEquals(r.numStarts, 3);
@@ -68,25 +71,7 @@ public class ThreadUtilTest {
 	public void interruptAndJoinWontStopOnFirstInterrupt() throws Exception {
 		final CountDownLatch started = new CountDownLatch(1);
 		final CountDownLatch stopped = new CountDownLatch(1);
-		Thread t = new Thread() {
-
-			@Override
-			public void run() {
-				started.countDown();
-				boolean second = false;
-				while (true) {
-					try {
-						Thread.sleep(100000);
-					} catch (InterruptedException e) {
-						if (second) {
-							return;
-						}
-						second = true;
-					}
-					stopped.countDown();
-				}
-			}
-		};
+		Thread t = new Thread(new InterruptTestRunnable(started, stopped, 1));
 		t.start();
 		started.await();
 		// give the other thread some time to enter sleep
@@ -106,7 +91,67 @@ public class ThreadUtilTest {
 		assertTrue(ThreadUtil.interruptAndJoin(null, 100));
 	}
 
-	private static final class TestRunnable implements Runnable {
+	@Test
+	public void interruptAndJoinThreadsTrueOnNull() throws Exception {
+		assertTrue(ThreadUtil.interruptAndJoinThreads((Thread[]) null));
+		assertTrue(ThreadUtil.interruptAndJoinThreads((Thread[]) null, 100));
+		assertTrue(ThreadUtil.interruptAndJoinThreads((Collection<Thread>) null));
+		assertTrue(ThreadUtil.interruptAndJoinThreads((Collection<Thread>) null, 100));
+	}
+
+	@Test
+	public void interruptAndJoinThreads() throws Exception {
+		final int N = 10;
+		final CountDownLatch started = new CountDownLatch(N);
+		final CountDownLatch stopped = new CountDownLatch(N);
+		List<Thread> ts = new ArrayList<Thread>();
+		for (int i = 0; i < N; i++) {
+			Thread t = new Thread(new InterruptTestRunnable(started, stopped, 1));
+			ts.add(t);
+		}
+		ThreadUtil.startThreads(ts);
+		started.await();
+		// give the other threads some time to enter sleep
+		Thread.sleep(50);
+		assertFalse(ThreadUtil.interruptAndJoinThreads(ts, 25));
+		assertTrue(ThreadUtil.interruptAndJoinThreads(ts, 25));
+		for (Thread t : ts) {
+			assertFalse(t.isAlive());
+		}
+	}
+
+	private static final class InterruptTestRunnable implements Runnable {
+
+		private final CountDownLatch started;
+		private final CountDownLatch stopped;
+
+		private final int numIgnoreInterrupt;
+
+		public InterruptTestRunnable(CountDownLatch started, CountDownLatch stopped, int numIgnoreInterrupt) {
+			this.started = started;
+			this.stopped = stopped;
+			this.numIgnoreInterrupt = numIgnoreInterrupt;
+		}
+
+		@Override
+		public void run() {
+			started.countDown();
+			int ignoredInterrupts = 0;
+			while (true) {
+				try {
+					Thread.sleep(100000);
+				} catch (InterruptedException e) {
+					if (ignoredInterrupts >= numIgnoreInterrupt) {
+						break;
+					}
+					ignoredInterrupts++;
+				}
+			}
+			stopped.countDown();
+		}
+	}
+
+	private static final class RestartTestRunnable implements Runnable {
 
 		private boolean throwException;
 
@@ -114,7 +159,7 @@ public class ThreadUtilTest {
 
 		private int numStarts;
 
-		TestRunnable(boolean throwException, boolean throwError) {
+		RestartTestRunnable(boolean throwException, boolean throwError) {
 			this.throwException = throwException;
 			this.throwError = throwError;
 		}
