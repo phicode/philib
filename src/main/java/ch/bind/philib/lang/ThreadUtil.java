@@ -21,6 +21,7 @@
  */
 package ch.bind.philib.lang;
 
+import java.util.Collection;
 import java.util.concurrent.ThreadFactory;
 
 import org.slf4j.Logger;
@@ -165,7 +166,6 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * 
 	 * @param threads
 	 * @param waitTimePerThread
 	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
@@ -180,6 +180,24 @@ public abstract class ThreadUtil {
 			}
 		}
 		return allOk;
+	}
+
+	/**
+	 * @param threads
+	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
+	 */
+	public static boolean interruptAndJoinThreads(Collection<? extends Thread> threads) {
+		return interruptAndJoinThreads(threads, 0);
+	}
+
+	/**
+	 * @param threads
+	 * @param waitTimePerThread
+	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
+	 */
+	public static boolean interruptAndJoinThreads(Collection<? extends Thread> threads, long waitTimePerThread) {
+		Thread[] ts = ArrayUtil.toArray(Thread.class, threads);
+		return interruptAndJoinThreads(ts, waitTimePerThread);
 	}
 
 	public static void startThreads(Thread[] threads) {
