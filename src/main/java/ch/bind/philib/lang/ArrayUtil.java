@@ -23,6 +23,7 @@
 package ch.bind.philib.lang;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Random;
 
 import ch.bind.philib.util.TLR;
@@ -56,8 +57,8 @@ public abstract class ArrayUtil {
 	 * @param destination The array which must be filled with random values.
 	 *            Previous values within this array will be overwritten.
 	 * @throws NullPointerException If either of the two parameters is null.
-	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller than the <code>destination</code>
-	 *             -array.
+	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller than the
+	 *             <code>destination</code> -array.
 	 */
 	public static <T> void pickRandom(final T[] source, final T[] destination) {
 		if (source == null)
@@ -85,7 +86,8 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
+	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a
+	 *         copy of their content.
 	 */
 	public static byte[] concat(byte[] a, byte[] b) {
 		// override null arrays
@@ -108,7 +110,8 @@ public abstract class ArrayUtil {
 	 * 
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
-	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a copy of their content.
+	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a
+	 *         copy of their content.
 	 *         if the combined
 	 *         length exceeds {@code capacity} the returned array {@code a} will
 	 *         have {@code a.length == capacity}.
@@ -361,5 +364,14 @@ public abstract class ArrayUtil {
 			nullFiller = f;
 		}
 		return f;
+	}
+
+	public static <T> T[] toArray(Class<T> clazz, Collection<? extends T> collection) {
+		if (collection == null || collection.isEmpty()) {
+			return newArray(clazz, 0);
+		}
+		int n = collection.size();
+		T[] arr = newArray(clazz, n);
+		return collection.toArray(arr);
 	}
 }

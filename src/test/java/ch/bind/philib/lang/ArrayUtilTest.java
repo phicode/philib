@@ -34,13 +34,16 @@ import static ch.bind.philib.lang.ArrayUtil.memclr;
 import static ch.bind.philib.lang.ArrayUtil.pickRandom;
 import static ch.bind.philib.lang.ArrayUtil.prepend;
 import static ch.bind.philib.lang.ArrayUtil.remove;
+import static ch.bind.philib.lang.ArrayUtil.toArray;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import org.testng.annotations.Test;
@@ -457,7 +460,7 @@ public class ArrayUtilTest {
 		assertEquals(res.length, 1);
 		assertTrue(res[0] == x);
 	}
-	
+
 	@Test
 	public void prependNullX() {
 		String x = "foo";
@@ -479,7 +482,7 @@ public class ArrayUtilTest {
 		assertEquals(res.length, 1);
 		assertTrue(res[0] == x);
 	}
-	
+
 	@Test
 	public void prependNullXOtherType() {
 		String x = "foo";
@@ -502,7 +505,7 @@ public class ArrayUtilTest {
 		assertTrue(res[0] == xs[0]);
 		assertTrue(res[1] == x);
 	}
-	
+
 	@Test
 	public void prependXY() {
 		String x = "foo";
@@ -526,7 +529,7 @@ public class ArrayUtilTest {
 		assertTrue(res[0] == xs[0]);
 		assertTrue(res[1] == x);
 	}
-	
+
 	@Test
 	public void prependXYOtherType() {
 		String x = "foo";
@@ -544,7 +547,7 @@ public class ArrayUtilTest {
 		String[] xs = { "bar" };
 		append((Class<String>) null, xs, "quack");
 	}
-	
+
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void prependNoNullClazz() {
 		String[] xs = { "bar" };
@@ -562,7 +565,7 @@ public class ArrayUtilTest {
 		String[] xs = { "bar" };
 		prepend(String.class, xs, null);
 	}
-	
+
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void removeNoNullClazz() {
 		String[] from = { "bar" };
@@ -577,57 +580,79 @@ public class ArrayUtilTest {
 
 	@Test
 	public void removeNone() {
-		String[] from = {
-				"a", "b", "c" };
+		String[] from = { "a", "b", "c" };
 		String[] res = remove(String.class, from, "d");
 		assertTrue(from == res);
 	}
-	
+
 	@Test
 	public void removeFront() {
-		String[] from = {
-				"a", "b", "c" };
+		String[] from = { "a", "b", "c" };
 		String[] res = remove(String.class, from, "a");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "b");
 		assertEquals(res[1], "c");
 	}
-	
+
 	@Test
 	public void removeMid() {
-		String[] from = {
-				"a", "b", "c" };
+		String[] from = { "a", "b", "c" };
 		String[] res = remove(String.class, from, "b");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "a");
 		assertEquals(res[1], "c");
 	}
-	
+
 	@Test
 	public void removeBack() {
-		String[] from = {
-				"a", "b", "c" };
+		String[] from = { "a", "b", "c" };
 		String[] res = remove(String.class, from, "c");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "a");
 		assertEquals(res[1], "b");
 	}
-	
+
 	@Test
 	public void removeMultiple() {
-		String[] from = {
-				"a", "b", "c", "c" };
+		String[] from = { "a", "b", "c", "c" };
 		String[] res = remove(String.class, from, "c");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "a");
 		assertEquals(res[1], "b");
 	}
-	
+
 	@Test
 	public void removeAll() {
-		String[] from = {
-				"c", "c", "c", "c" };
+		String[] from = { "c", "c", "c", "c" };
 		String[] res = remove(String.class, from, "c");
 		assertEquals(res.length, 0);
+	}
+
+	@Test
+	public void toArrayNull() {
+		Object x = toArray(Integer.class, null);
+		assertNotNull(x);
+		assertTrue(x.getClass() == Integer[].class);
+		assertEquals(((Integer[]) x).length, 0);
+	}
+
+	@Test
+	public void toArrayEmpty() {
+		List<String> l = new ArrayList<String>();
+		Object x = toArray(Object.class, l);
+		assertNotNull(x);
+		assertTrue(x.getClass() == Object[].class);
+		assertEquals(((Object[]) x).length, 0);
+	}
+
+	@Test
+	public void toArrayNormal() {
+		List<String> l = Arrays.asList("a", "b");
+		Object x = toArray(String.class, l);
+		assertNotNull(x);
+		assertTrue(x.getClass() == String[].class);
+		assertEquals(((String[]) x).length, 2);
+		assertEquals(((String[]) x)[0], "a");
+		assertEquals(((String[]) x)[1], "b");
 	}
 }
