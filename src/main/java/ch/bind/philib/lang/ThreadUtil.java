@@ -158,7 +158,7 @@ public abstract class ThreadUtil {
 	/**
 	 * 
 	 * @param threads
-	 * @return retval: all ok/1ormore-nok
+	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
 	 */
 	public static boolean interruptAndJoinThreads(Thread[] threads) {
 		return interruptAndJoinThreads(threads, 0);
@@ -168,7 +168,7 @@ public abstract class ThreadUtil {
 	 * 
 	 * @param threads
 	 * @param waitTimePerThread
-	 * @return retval: all ok/1ormore-nok
+	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
 	 */
 	public static boolean interruptAndJoinThreads(Thread[] threads, long waitTimePerThread) {
 		boolean allOk = true;
