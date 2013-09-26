@@ -150,4 +150,16 @@ public class ThreadUtilTest {
 		// probably even this 5 milliseconds are too flaky
 		assertTrue(elapsed < 5 * 1000 * 1000);
 	}
+
+	@Test
+	public void sleepUntilRegular() throws InterruptedException {
+		long start = System.currentTimeMillis();
+		for (int i = 1; i <= 100; i++) {
+			ThreadUtil.sleepUntilMs(start + i);
+		}
+		long elapsed = System.currentTimeMillis() - start;
+		assertTrue(elapsed >= 100);
+		// this is probably also flaky as hell due to different scheduling behaviour of different platforms. lets see how well it does. 		
+		assertTrue(elapsed <= 125);
+	}
 }
