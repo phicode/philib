@@ -134,4 +134,20 @@ public class ThreadUtilTest {
 			}
 		}
 	}
+
+	@Test
+	public void sleepUntilMsIntoThePast() throws InterruptedException {
+		// 1000 times no sleep at all
+		long elapsed = 0;
+		for (int i = 0; i < 1000; i++) {
+			long tms = System.currentTimeMillis();
+			long tns = System.nanoTime();
+			ThreadUtil.sleepUntilMs(tms - 10);
+			elapsed += (System.nanoTime() - tns);
+		}
+		// this should finish within less than 200us
+		// but that would make the test very flaky
+		// probably even this 5 milliseconds are too flaky
+		assertTrue(elapsed < 5 * 1000 * 1000);
+	}
 }
