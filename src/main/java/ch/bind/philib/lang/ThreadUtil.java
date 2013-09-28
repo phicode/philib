@@ -21,7 +21,9 @@
  */
 package ch.bind.philib.lang;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
 import org.slf4j.Logger;
@@ -127,33 +129,38 @@ public abstract class ThreadUtil {
 	};
 
 	/**
-	 * Creates the number of requested threads or none at all.
+	 * Creates a thread for each non-null runnable in the provided array.<br/>
+	 * A standard {@link ThreadFactory} is used to create threads.<br/>
+	 * The newly created threads are not started.
 	 * 
-	 * @param runnables
-	 * @param threadFactory
+	 * @param runnables -
 	 */
 	public static Thread[] createThreads(Runnable[] runnables) {
 		return createThreads(runnables, DEFAULT_THREAD_FACTORY);
 	}
 
 	/**
-	 * Creates the number of requested threads or none at all.
+	 * Creates a thread for each non-null runnable in the provided array.<br/>
+	 * The provided {@link ThreadFactory} is used to create threads.<br/>
+	 * The newly created threads are not started.
 	 * 
-	 * @param runnables
-	 * @param threadFactory
+	 * @param runnables -
+	 * @param threadFactory -
 	 */
 	public static Thread[] createThreads(Runnable[] runnables, ThreadFactory threadFactory) {
-		Validation.isTrue(runnables != null && runnables.length > 0, "more than one runnables must be provided");
-		Validation.noNullValues(runnables, "no runnables must be null");
+		if (runnables == null) {
+			return new Thread[0];
+		}
 		if (threadFactory == null) {
 			threadFactory = DEFAULT_THREAD_FACTORY;
 		}
-		final int n = runnables.length;
-		Thread[] threads = new Thread[n];
-		for (int i = 0; i < n; i++) {
-			threads[i] = threadFactory.newThread(runnables[i]);
+		List<Thread> ts = new ArrayList<Thread>(runnables.length);
+		for (Runnable r : runnables) {
+			if (r != null) {
+				ts.add(threadFactory.newThread(r));
+			}
 		}
-		return threads;
+		return ArrayUtil.toArray(Thread.class, ts);
 	}
 
 	/**
