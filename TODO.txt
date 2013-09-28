@@ -4,14 +4,3 @@ hit/miss statistics into the LRU caches
 
 bitstream codec
 
-journal file
-	
-	long commit(byte[] data)
-	long commit(List<byte[]> data)
-	long commit(byte[][] data);
-	  ^
-	  |
-	  +---- correlation-id
-	on listener:
-	committed(long correlationId)
-	committed(long startCid, long endCid)
