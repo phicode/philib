@@ -30,6 +30,7 @@ import java.util.concurrent.CountDownLatch;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
+import ch.bind.philib.math.Calc;
 
 public class CounterTest {
 
@@ -88,6 +89,17 @@ public class CounterTest {
 	}
 
 	@Test
+	public void countNullCounter() {
+		Counter a = new Counter("a");
+		a.count(5);
+		a.count(null);
+		assertEquals(a.getNumCounts(), 1);
+		assertEquals(a.getTotal(), 5);
+		assertEquals(a.getMin(), 5);
+		assertEquals(a.getMax(), 5);
+	}
+
+	@Test
 	public void countCounter() {
 		Counter a = new Counter("a");
 		Counter b = new Counter("b");
@@ -129,6 +141,24 @@ public class CounterTest {
 	}
 
 	@Test
+	public void aggregate() {
+		// count a number of times, check, count again
+		final int N = 100;
+		final int M = 100;
+		Counter a = new Counter("a");
+		for (int n = 1; n <= N; n++) {
+			for (int m = 1; m <= M; m++) {
+				a.count(m);
+			}
+			assertEquals(a.getNumCounts(), n * M);
+			assertEquals(a.getTotal(), n * Calc.sumOfRange(M));
+			assertEquals(a.getMin(), 1);
+			assertEquals(a.getMax(), 100);
+		}
+
+	}
+
+	@Test
 	public void name() {
 		Counter a = new Counter("a");
 		assertEquals(a.getName(), "a");
@@ -141,11 +171,18 @@ public class CounterTest {
 		}
 		// warmup
 		for (int p = 1; p <= 16; p++) {
-			parallel(1000 * 1000, p);
+			parallel(5 * 1000 * 1000, p);
 		}
+
+		for (int i = 0; i < 1000; i++) {
+			System.out.println("TODO: remove the sleep");
+		}
+		Thread.sleep(60000);
+		System.out.println("lets go");
+
 		// for real
 		for (int p = 1; p <= 16; p++) {
-			parallel(100 * 1000 * 1000, p);
+			parallel(500 * 1000 * 1000, p);
 		}
 	}
 
