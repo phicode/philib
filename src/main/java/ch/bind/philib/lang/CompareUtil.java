@@ -29,17 +29,19 @@ package ch.bind.philib.lang;
  */
 public abstract class CompareUtil {
 
-	protected CompareUtil() {}
+	protected CompareUtil() {
+	}
 
 	/**
-	 * A null-safe equality checking method.<br/>
-	 * results:
+	 * A null-safe equality helper.
 	 * 
 	 * <pre>
-	 *  a / b | null  | a           |
-	 * ------------------------------
-	 *  null  | true  | false       |
-	 *     b  | false | a.equals(b) |
+	 * input                   return value
+	 * ------------------------------------
+	 * a == b               => true
+	 * a == null, b != null => false
+	 * a != null, b == null => false
+	 * otherwise            => a.equals(b)
 	 * </pre>
 	 * 
 	 * @param a -
@@ -63,6 +65,22 @@ public abstract class CompareUtil {
 		return a.equals(b);
 	}
 
+	/**
+	 * A null-safe compare helper.
+	 * 
+	 * <pre>
+	 * input                   return value
+	 * ------------------------------------
+	 * a == b                =>  0
+	 * a == null, b != null  => -1
+	 * a != null, b == null  =>  1
+	 * otherwise             =>  a.compareTo(b)
+	 * </pre>
+	 * 
+	 * @param a -
+	 * @param b -
+	 * @return see above
+	 */
 	public static <T> int compare(final Comparable<T> a, final T b) {
 		if (a == b)
 			return 0;
@@ -76,42 +94,152 @@ public abstract class CompareUtil {
 		return a.compareTo(b);
 	}
 
+	/**
+	 * Helper for compareTo implementations.
+	 * Normalized negative number to -1 and positive non-zero numbers to 1.
+	 * 
+	 * @param diff the value which shall be normalized
+	 * @return see above
+	 */
 	public static final int normalize(int diff) {
 		return diff < 0 ? -1 : (diff == 0 ? 0 : 1);
 	}
 
+	/**
+	 * Helper for compareTo implementations.
+	 * Normalized negative number to -1 and positive non-zero numbers to 1.
+	 * 
+	 * @param diff the value which shall be normalized
+	 * @return see above
+	 */
 	public static final int normalize(long diff) {
 		return (diff < 0 ? -1 : (diff == 0 ? 0 : 1));
 	}
 
+	/**
+	 * Helper for compareTo implementations.<br/>
+	 * Boolean version which considers {@code false<true}
+	 * 
+	 * <pre>
+	 * a     b 
+	 * -----------------------
+	 * true  true    =>  0
+	 * true  false   =>  1  
+	 * false false   =>  0
+	 * false true    => -1
+	 * </pre>
+	 * 
+	 * @param a -
+	 * @param b -
+	 * @return see above
+	 */
 	public static int diff(boolean a, boolean b) {
 		return (a == b ? 0 : (a ? 1 : -1));
 	}
 
+	/**
+	 * Helper for compareTo implementations.<br/>
+	 * Byte version which masks the input values so that an unsigned comparison is performed.
+	 * 
+	 * <pre>
+	 * Masks -128 -&gt; 127 =&gt; 0 -&gt; 255
+	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
+	 * </pre>
+	 * 
+	 * @param a -
+	 * @param b -
+	 * @return see above
+	 */
 	public static final int diff(byte a, byte b) {
 		return diff(a & 0xFF, b & 0xFF);
 	}
 
+	/**
+	 * Helper for compareTo implementations.
+	 * 
+	 * <pre>
+	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
+	 * </pre>
+	 * 
+	 * @param a -
+	 * @param b -
+	 * @return see above
+	 */
 	public static final int diff(char a, char b) {
 		return a == b ? 0 : (a < b ? -1 : 1);
 	}
 
+	/**
+	 * Helper for compareTo implementations.
+	 * 
+	 * <pre>
+	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; => &#x7b; -1, 0, 1 &#x7d;
+	 * </pre>
+	 * 
+	 * @param a -
+	 * @param b -
+	 * @return see above
+	 */
 	public static final int diff(short a, short b) {
 		return a == b ? 0 : (a < b ? -1 : 1);
 	}
 
+	/**
+	 * Helper for compareTo implementations.
+	 * 
+	 * <pre>
+	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
+	 * </pre>
+	 * 
+	 * @param a -
+	 * @param b -
+	 * @return see above
+	 */
 	public static final int diff(int a, int b) {
 		return a == b ? 0 : (a < b ? -1 : 1);
 	}
 
+	/**
+	 * Helper for compareTo implementations.
+	 * 
+	 * <pre>
+	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
+	 * </pre>
+	 * 
+	 * @param a -
+	 * @param b -
+	 * @return see above
+	 */
 	public static final int diff(long a, long b) {
 		return a == b ? 0 : (a < b ? -1 : 1);
 	}
 
+	/**
+	 * Helper for compareTo implementations.
+	 * 
+	 * <pre>
+	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
+	 * </pre>
+	 * 
+	 * @param a -
+	 * @param b -
+	 * @return see above
+	 */
 	public static final int diff(float a, float b) {
 		return a == b ? 0 : (a < b ? -1 : 1);
 	}
 
+	/**
+	 * Helper for compareTo implementations.
+	 * 
+	 * <pre>
+	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
+	 * </pre>
+	 * 
+	 * @param a -
+	 * @param b -
+	 * @return see above
+	 */
 	public static final int diff(double a, double b) {
 		return a == b ? 0 : (a < b ? -1 : 1);
 	}
