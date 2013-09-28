@@ -82,7 +82,7 @@ public class ServiceStateTest {
 		}
 	}
 
-	@Test(timeOut = 1000)
+	@Test(timeOut = 1500)
 	public void awaitStates() throws InterruptedException {
 		TestUtil.gcAndSleep(50);
 		final ServiceState state = new ServiceState();
