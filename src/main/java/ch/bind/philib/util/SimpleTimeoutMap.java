@@ -155,7 +155,8 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				if (entry != null) {
 					return entry;
 				}
-				// never 0 since we reuse nowNs
+				
+				// never negative
 				long nextTimeoutNs = _getTimeToNextTimeoutNs(nowNs);
 
 				// wait until the timeout has been reached or a new event added
