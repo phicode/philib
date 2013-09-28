@@ -19,7 +19,7 @@
 
 	<name>philib</name>
 	<description>utility classes by Philipp Meinen &lt;philipp@bind.ch&gt;</description>
-	<url>http://svn.bind.ch/svn/philib</url>
+	<url>https://github.com/PhiCode/philib</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
