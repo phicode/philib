@@ -89,8 +89,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 			entry = new StagedLruCacheEntry<K, V>(key, value);
 			index.add(entry);
 			addYoungGen(entry, false);
-		}
-		else {
+		} else {
 			entry.setValue(value);
 		}
 	}
@@ -114,12 +113,10 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 				entry.resetHits();
 				lruYoungGen.remove(entry);
 				addOldGen(entry);
-			}
-			else {
+			} else {
 				lruYoungGen.moveToHead(entry);
 			}
-		}
-		else {
+		} else {
 			lruOldGen.moveToHead(entry);
 		}
 		return valueCloner == null ? value : valueCloner.clone(value);
@@ -148,8 +145,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 			index.remove(entry);
 			if (entry.isInYoungGen()) {
 				lruYoungGen.remove(entry);
-			}
-			else {
+			} else {
 				lruOldGen.remove(entry);
 			}
 		}
@@ -158,8 +154,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 	private void addYoungGen(final StagedLruCacheEntry<K, V> entry, final boolean checkValue) {
 		if (checkValue && entry.getValue() == null) {
 			index.remove(entry);
-		}
-		else {
+		} else {
 			entry.setInYoungGen();
 			StagedLruCacheEntry<K, V> removed = lruYoungGen.add(entry);
 			if (removed != null) {
@@ -172,8 +167,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 	private void addOldGen(final StagedLruCacheEntry<K, V> entry) {
 		if (entry.getValue() == null) {
 			index.remove(entry);
-		}
-		else {
+		} else {
 			entry.setInOldGen();
 			StagedLruCacheEntry<K, V> removed = lruOldGen.add(entry);
 			if (removed != null) {

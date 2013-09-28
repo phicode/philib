@@ -24,7 +24,8 @@ package ch.bind.philib.math;
 
 public abstract class Calc {
 
-	protected Calc() {}
+	protected Calc() {
+	}
 
 	/**
 	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not evenly divisible by <i>divisor</i>.

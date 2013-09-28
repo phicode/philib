@@ -155,7 +155,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				if (entry != null) {
 					return entry;
 				}
-				
+
 				// never negative
 				long nextTimeoutNs = _getTimeToNextTimeoutNs(nowNs);
 
@@ -163,12 +163,10 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				if (untilNs == 0) {
 					if (nextTimeoutNs == Long.MAX_VALUE) {
 						putCond.await();
-					}
-					else {
+					} else {
 						putCond.await(nextTimeoutNs, TimeUnit.NANOSECONDS);
 					}
-				}
-				else {
+				} else {
 					long awaitTimeoutNs = untilNs - nowNs;
 					if (awaitTimeoutNs < 1) {
 						return null;
@@ -251,11 +249,9 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 			long tNs = _getTimeToNextTimeoutNs(nowNs);
 			if (tNs == 0) {
 				return 0;
-			}
-			else if (tNs == Long.MAX_VALUE) {
+			} else if (tNs == Long.MAX_VALUE) {
 				return Long.MAX_VALUE;
-			}
-			else {
+			} else {
 				return Calc.ceilDiv(tNs, 1000000L);
 			}
 		} finally {
@@ -313,7 +309,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				@SuppressWarnings("rawtypes")
 				Map.Entry other = (Map.Entry) obj;
 				return CompareUtil.equals(this.key, other.getKey()) && //
-						CompareUtil.equals(this.value, other.getValue());
+				        CompareUtil.equals(this.value, other.getValue());
 			}
 			return false;
 		}

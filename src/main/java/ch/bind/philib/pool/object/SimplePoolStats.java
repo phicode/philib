@@ -77,6 +77,6 @@ public final class SimplePoolStats implements PoolStats {
 	@Override
 	public String toString() {
 		return String.format("creates=%d, takes=%d, recycled=%d, released=%d",//
-				creates.get(), takes.get(), recycled.get(), released.get());
+		        creates.get(), takes.get(), recycled.get(), released.get());
 	}
 }

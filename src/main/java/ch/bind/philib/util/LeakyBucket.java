@@ -136,8 +136,7 @@ public final class LeakyBucket {
 		if (timeNs < lastRecalcNs) {
 			// it seems that someone adjusted his clock backwards
 			lastRecalcNs = timeNs;
-		}
-		else {
+		} else {
 			long diff = timeNs - lastRecalcNs;
 			long newlyAvailable = diff / takeIntervalNs;
 			if (newlyAvailable > 0) {

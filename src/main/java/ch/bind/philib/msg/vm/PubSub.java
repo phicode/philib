@@ -35,8 +35,7 @@ public interface PubSub {
 	 * @param channelName
 	 * @param handler
 	 *            a non-null handler
-	 * @return an {@link Subscription} object if this is a new message handler,
-	 *         {@code null} otherwise.
+	 * @return an {@link Subscription} object if this is a new message handler, {@code null} otherwise.
 	 * @throws IllegalArgumentException
 	 *             if the {@code channelName} parameter is {@code null} or empty
 	 *             or if the {@code handler} parameter is {@code null}.

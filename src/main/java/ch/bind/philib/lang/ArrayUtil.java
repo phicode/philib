@@ -57,8 +57,8 @@ public abstract class ArrayUtil {
 	 * @param destination The array which must be filled with random values.
 	 *            Previous values within this array will be overwritten.
 	 * @throws NullPointerException If either of the two parameters is null.
-	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller than the
-	 *             <code>destination</code> -array.
+	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller than the <code>destination</code>
+	 *             -array.
 	 */
 	public static <T> void pickRandom(final T[] source, final T[] destination) {
 		if (source == null)

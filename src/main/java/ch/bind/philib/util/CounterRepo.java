@@ -37,7 +37,8 @@ public final class CounterRepo {
 
 	private final ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<String, Counter>();
 
-	public CounterRepo() {}
+	public CounterRepo() {
+	}
 
 	public Counter forClass(Class<?> clazz) {
 		return get(nameOf(clazz));

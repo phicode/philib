@@ -27,7 +27,8 @@ package ch.bind.philib.lang;
  */
 public abstract class ExceptionUtil {
 
-	protected ExceptionUtil() {}
+	protected ExceptionUtil() {
+	}
 
 	/**
 	 * Returns a one-line representation of an exception. The goal of this method is to provide messages which are

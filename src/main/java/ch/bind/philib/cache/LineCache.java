@@ -103,8 +103,7 @@ public final class LineCache<K, V> implements Cache<K, V> {
 				if (insertIdx == -1) {
 					insertIdx = idx;
 					overwrite = e;
-				}
-				else if (overwrite != null && e.lastAccess.get() < overwrite.lastAccess.get()) {
+				} else if (overwrite != null && e.lastAccess.get() < overwrite.lastAccess.get()) {
 					insertIdx = idx;
 					overwrite = e;
 				}

@@ -42,7 +42,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 	@Override
 	public boolean add(final T entry) {
 		Validation.isTrue(entry != null && entry.getNextIndexEntry() == null && entry.getKey() != null, //
-				"newly added entries must be non-null and cleared");
+		        "newly added entries must be non-null and cleared");
 
 		final K key = entry.getKey();
 		final int hash = key.hashCode();
@@ -86,8 +86,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 			if (scanPrev == null) {
 				// first entry in the table
 				table[position] = entry.getNextIndexEntry();
-			}
-			else {
+			} else {
 				// there are entries before this one
 				scanPrev.setNextIndexEntry(entry.getNextIndexEntry());
 			}

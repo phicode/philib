@@ -27,7 +27,8 @@ package ch.bind.philib.lang;
  */
 public abstract class StringUtil {
 
-	protected StringUtil() {}
+	protected StringUtil() {
+	}
 
 	public static String extractBack(String s, char delim) {
 		if (s == null || s.isEmpty()) {
@@ -63,7 +64,7 @@ public abstract class StringUtil {
 		sb.append('=');
 		sb.append(obj);
 	}
-	
+
 	public static void firstObj(StringBuilder sb, Object obj) {
 		sb.append(obj);
 	}

@@ -36,6 +36,7 @@ import ch.bind.philib.validation.Validation;
  * {@code true} will update the view. <br />
  * The view is shared among all clients and must therefore <b>not be modified!</b><br/>
  * The modification methods are not optimized for speed since the intent of this cow-list is to guarantee fast reads.
+ * 
  * @author Philipp Meinen
  */
 public final class CowSet<E> {

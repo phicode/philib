@@ -26,7 +26,8 @@ import java.nio.ByteBuffer;
 
 public final class BufferUtil {
 
-	private BufferUtil() {}
+	private BufferUtil() {
+	}
 
 	public static ByteBuffer append(ByteBuffer dst, ByteBuffer src) {
 		int cap = dst.capacity();
@@ -61,7 +62,7 @@ public final class BufferUtil {
 		// a new, bigger buffer is required
 		ByteBuffer buf = dst.isDirect() ? //
 		ByteBuffer.allocateDirect(required)
-				: ByteBuffer.allocate(required);
+		        : ByteBuffer.allocate(required);
 		buf.put(dst);
 		buf.put(src);
 		buf.flip(); // pos=0; lim=required

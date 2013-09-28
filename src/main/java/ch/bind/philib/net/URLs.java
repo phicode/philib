@@ -29,14 +29,14 @@ import java.net.URL;
 /** @author Philipp Meinen */
 public abstract class URLs {
 
-    URLs() {
-    }
+	URLs() {
+	}
 
-    public static URL forClasspathResource(String name) {
-        return URLs.class.getResource(name);
-    }
+	public static URL forClasspathResource(String name) {
+		return URLs.class.getResource(name);
+	}
 
-    public static URL forFile(String path) throws MalformedURLException {
-        return (new File(path)).toURI().toURL();
-    }
+	public static URL forFile(String path) throws MalformedURLException {
+		return (new File(path)).toURI().toURL();
+	}
 }
