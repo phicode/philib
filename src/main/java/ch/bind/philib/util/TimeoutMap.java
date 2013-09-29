@@ -27,7 +27,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A map which additionaly to normal map operations allows the user to supply a timeout. The oldest timed-out entry in
- * the map can be found through two {@link TimeoutMap#findTimedout} methods.
+ * the map can be found through the non-blocking {@link TimeoutMap#pollTimeoutNow()} method or two blocking methods:
+ * {@link TimeoutMap#pollTimeoutBlocking()} and {@link TimeoutMap#pollTimeoutBlocking(long, TimeUnit)}.
  * 
  * @author Philipp Meinen
  * 
@@ -114,7 +115,8 @@ public interface TimeoutMap<K, V> {
 	boolean containsKey(K key);
 
 	/**
-	 * @return {@link Long.MAX_VALUE} if the TimeoutMap is empty. Otherwise the time until the next entry times out (in
+	 * @return {@link java.lang.Long.MAX_VALUE} if the TimeoutMap is empty. Otherwise the time until the next entry
+	 *         times out (in
 	 *         milliseconds since the epoch). A return value of zero indicates that there is at least one entry which
 	 *         has already timed out.
 	 */

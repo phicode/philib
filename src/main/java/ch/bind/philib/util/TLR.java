@@ -27,9 +27,10 @@ import java.util.Random;
 /**
  * Thread local random. <br />
  * 
+ * TODO: deprecate in favor of java.util.concurrent.ThreadLocalRandom once
+ * everyone is using java 7.
+ * 
  * @author phil
- * @TODO deprecate in favor of java.util.concurrent.ThreadLocalRandom once
- *       everyone is using java 7.
  */
 public final class TLR {
 	private TLR() {

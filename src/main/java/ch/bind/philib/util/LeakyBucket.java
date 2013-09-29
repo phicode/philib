@@ -89,7 +89,7 @@ public final class LeakyBucket {
 	/**
 	 * @param timeNs a relative timestamp as provided by {@code System.nanoTime()} and <b>not</b>
 	 *            {@code System.currentTimeMillis()}.
-	 * @return
+	 * @return the number of items that can be taken immediately
 	 */
 	public long canTake(long timeNs) {
 		recalculate(timeNs);
@@ -103,7 +103,7 @@ public final class LeakyBucket {
 	/**
 	 * @param timeNs a relative timestamp as provided by {@code System.nanoTime()} and <b>not</b>
 	 *            {@code System.currentTimeMillis()}.
-	 * @return
+	 * @return the number of nanoseconds until an item can be taken
 	 */
 	public long nextTakeNs(long timeNs) {
 		recalculate(timeNs);

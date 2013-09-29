@@ -38,7 +38,8 @@ public interface ObjectManager<T> {
 	 * 
 	 * @param value The object which must be prepared for reuse.
 	 * @return {@code true} if this object can be reused, {@code false} otherwise (for example if the size of the
-	 *         offered buffer is too small). After returning {@code false} {@link destroy(T)} will be called.
+	 *         offered buffer is too small). After returning {@code false} {@link #release(Object)} will be
+	 *         called.
 	 */
 	boolean prepareForRecycle(T value);
 
