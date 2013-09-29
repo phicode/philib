@@ -169,8 +169,7 @@ public abstract class CacheTestBase {
 				if ((v = cache.get(is[j])) != null) {
 					assertEquals(v, is[j]);
 					hit++;
-				}
-				else {
+				} else {
 					miss++;
 				}
 			}
@@ -194,8 +193,7 @@ public abstract class CacheTestBase {
 				if ((v = cache.get(is[j])) != null) {
 					assertEquals(v, is[j]);
 					hit++;
-				}
-				else {
+				} else {
 					miss++;
 				}
 			}
@@ -253,7 +251,7 @@ public abstract class CacheTestBase {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(String.format("JVM held on to %d out of %d elements => %dMiB\n", inMem, cap, inMem / 2));
 			LOG.debug(String.format("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
-					t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f));
+			        t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f));
 		}
 	}
 
