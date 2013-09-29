@@ -174,12 +174,6 @@ public class CounterTest {
 			parallel(5 * 1000 * 1000, p);
 		}
 
-		for (int i = 0; i < 1000; i++) {
-			System.out.println("TODO: remove the sleep");
-		}
-		Thread.sleep(60000);
-		System.out.println("lets go");
-
 		// for real
 		for (int p = 1; p <= 16; p++) {
 			parallel(500 * 1000 * 1000, p);
