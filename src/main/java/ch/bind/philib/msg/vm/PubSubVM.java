@@ -26,17 +26,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.msg.MessageHandler;
+import ch.bind.philib.msg.PubSub;
 import ch.bind.philib.msg.Subscription;
 import ch.bind.philib.util.CowSet;
 import ch.bind.philib.validation.Validation;
@@ -45,15 +45,11 @@ public final class PubSubVM implements PubSub {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PubSubVM.class);
 
-	private final ReadWriteLock rwlock = new ReentrantReadWriteLock();
-
-	private final Lock rlock = rwlock.readLock();
-
-	private final Lock wlock = rwlock.writeLock();
-
-	private final Map<String, Channel> channels = new HashMap<String, Channel>();
+	private final ConcurrentMap<String, Channel> chans = new ConcurrentHashMap<String, Channel>();
 
 	private final ExecutorService executorService;
+
+	private final Object subscriberLock = new Object();
 
 	/**
 	 * Creates a {@code DefaultTinyPubSub} which publishes messages through the
@@ -67,20 +63,13 @@ public final class PubSubVM implements PubSub {
 	@Override
 	public Subscription subscribe(String channelName, MessageHandler handler) {
 		Validation.notNull(handler);
-		wlock.lock();
-		try {
-			Channel chan = getChannel(channelName);
-			if (chan == null) {
-				chan = new Channel(channelName);
-				channels.put(channelName, chan);
-			}
+		synchronized (subscriberLock) {
+			Channel chan = getOrCreateChan(channelName);
 			Sub sub = chan.subscribe(handler);
 			if (sub == null) {
 				throw new IllegalArgumentException("double registration for channel='" + channelName + "' and handler: " + handler);
 			}
 			return sub;
-		} finally {
-			wlock.unlock();
 		}
 	}
 
@@ -89,58 +78,43 @@ public final class PubSubVM implements PubSub {
 			return;
 		}
 		if (channel.subs.isEmpty()) {
-			wlock.lock();
-			try {
+			synchronized (subscriberLock) {
 				if (channel.subs.isEmpty()) {
-					channels.remove(channel.name);
+					chans.remove(channel.name);
 				}
-			} finally {
-				wlock.unlock();
 			}
 		}
 	}
 
 	@Override
-	public void publishSync(String channelName, Object message) {
+	public void publish(String channelName, Object message) {
 		Validation.notNull(message);
-		Channel chan = rlockedGetChannel(channelName);
+		Channel chan = getChan(channelName);
 		if (chan != null) {
-			chan.publishSync(message);
+			AsyncPublisher pub = new AsyncPublisher(chan, message);
+			executorService.execute(pub);
 		}
 	}
 
-	@Override
-	public void publishAsync(String channelName, Object message) {
-		Validation.notNull(message);
-		Channel chan = rlockedGetChannel(channelName);
+	private Channel getChan(String channelName) {
+		Validation.notNullOrEmpty(channelName);
+		return chans.get(channelName);
+	}
+
+	private Channel getOrCreateChan(String channelName) {
+		Channel chan = getChan(channelName);
 		if (chan != null) {
-			chan.publishAsync(message);
+			return chan;
 		}
-	}
-
-	private Channel rlockedGetChannel(String channelName) {
-		rlock.lock();
-		try {
-			return getChannel(channelName);
-		} finally {
-			rlock.unlock();
-		}
-	}
-
-	private Channel getChannel(String channelName) {
-		// fast path without channel null-or-empty check
-		Channel chan = channels.get(channelName);
-		if (chan == null) {
-			// channel does not exist, verify that the supplied name is valid
-			Validation.notNullOrEmpty(channelName);
-		}
-		return chan;
+		chan = new Channel(channelName);
+		Channel other = chans.putIfAbsent(channelName, chan);
+		return other == null ? chan : other;
 	}
 
 	@Override
 	public Map<String, Integer> activeChannels() {
 		Map<String, Integer> rv = null;
-		for (Entry<String, Channel> e : channels.entrySet()) {
+		for (Entry<String, Channel> e : chans.entrySet()) {
 			String name = e.getKey();
 			Channel c = e.getValue();
 			int num = c.subs.size();
@@ -170,15 +144,6 @@ public final class PubSubVM implements PubSub {
 				return sub;
 			}
 			return null;
-		}
-
-		void publishSync(Object message) {
-			publishMessage(this, message);
-		}
-
-		void publishAsync(Object message) {
-			AsyncPublisher pub = new AsyncPublisher(this, message);
-			executorService.execute(pub);
 		}
 	}
 

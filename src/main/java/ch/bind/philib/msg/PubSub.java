@@ -20,12 +20,9 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg.vm;
+package ch.bind.philib.msg;
 
 import java.util.Map;
-
-import ch.bind.philib.msg.MessageHandler;
-import ch.bind.philib.msg.Subscription;
 
 public interface PubSub {
 
@@ -43,6 +40,7 @@ public interface PubSub {
 	Subscription subscribe(String channelName, MessageHandler handler);
 
 	/**
+	 * Asynchronously published a message to all subscribers of a channel.
 	 * 
 	 * @param channelName
 	 * @param message
@@ -51,18 +49,7 @@ public interface PubSub {
 	 *             if the {@code channelName} parameter is {@code null} or empty
 	 *             or if the {@code message} parameter is {@code null}.
 	 */
-	void publishSync(String channelName, Object message);
-
-	/**
-	 * 
-	 * @param channelName
-	 * @param message
-	 *            the non-null message to be sent
-	 * @throws IllegalArgumentException
-	 *             if the {@code channelName} parameter is {@code null} or empty
-	 *             or if the {@code message} parameter is {@code null}.
-	 */
-	void publishAsync(String channelName, Object message);
+	void publish(String channelName, Object message);
 
 	/**
 	 * Lists all channels with one or more subscriptions.<br />

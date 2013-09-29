@@ -44,6 +44,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import ch.bind.philib.msg.MessageHandler;
+import ch.bind.philib.msg.PubSub;
 import ch.bind.philib.msg.Subscription;
 
 public class PubSubVMTest {
@@ -62,15 +63,9 @@ public class PubSubVMTest {
 	}
 
 	@Test(timeOut = 500)
-	public void syncEmptyPublish() {
+	public void emptyPublish() {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
-		pubsub.publishSync("foo", "bar");
-	}
-
-	@Test(timeOut = 500)
-	public void asyncEmptyPublish() {
-		PubSub pubsub = new PubSubVM(singleThreadExecutor);
-		pubsub.publishAsync("foo", "bar");
+		pubsub.publish("foo", "bar");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -94,84 +89,64 @@ public class PubSubVMTest {
 	}
 
 	@Test(timeOut = 500)
-	public void syncMessages() {
-		PubSub pubsub = new PubSubVM(singleThreadExecutor);
-		RecordingMessageHandler mh = new RecordingMessageHandler();
-		Subscription s = pubsub.subscribe("foo", mh);
-		assertEquals(s.getChannelName(), "foo");
-		pubsub.publishSync("foo", "bar");
-		pubsub.publishSync("foo", "baz");
-		mh.assertMessages("foo", "bar", "baz");
-	}
-
-	@Test(timeOut = 500)
-	public void asyncMessages() throws InterruptedException {
+	public void standardPublish() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		pubsub.subscribe("foo", mh);
-		pubsub.publishAsync("foo", "bar");
-		pubsub.publishAsync("foo", "baz");
-		mh.awaitNumMsgs(2);
+		pubsub.publish("foo", "bar");
+		pubsub.publish("foo", "baz");
 		mh.assertMessages("foo", "bar", "baz");
 	}
 
 	@Test(timeOut = 500)
-	public void syncMessagesTwoSubscribers() {
+	public void publishToTwoSubscribers() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh1 = new RecordingMessageHandler();
 		RecordingMessageHandler mh2 = new RecordingMessageHandler();
 		pubsub.subscribe("foo", mh1);
 		pubsub.subscribe("foo", mh2);
-		pubsub.publishSync("foo", "bar");
-		pubsub.publishSync("foo", "baz");
+		pubsub.publish("foo", "bar");
+		pubsub.publish("foo", "baz");
 		mh1.assertMessages("foo", "bar", "baz");
 		mh2.assertMessages("foo", "bar", "baz");
 	}
 
 	@Test(timeOut = 500)
-	public void asyncMessagesTwoSubscribers() throws InterruptedException {
+	public void unsubscribe() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh1 = new RecordingMessageHandler();
 		RecordingMessageHandler mh2 = new RecordingMessageHandler();
-		pubsub.subscribe("foo", mh1);
-		pubsub.subscribe("foo", mh2);
-		pubsub.publishAsync("foo", "bar");
-		pubsub.publishAsync("foo", "baz");
-		mh1.awaitNumMsgs(2);
-		mh2.awaitNumMsgs(2);
-		mh1.assertMessages("foo", "bar", "baz");
-		mh2.assertMessages("foo", "bar", "baz");
-	}
 
-	@Test(timeOut = 500)
-	public void unsubscribe() {
-		PubSub pubsub = new PubSubVM(singleThreadExecutor);
-		RecordingMessageHandler mh1 = new RecordingMessageHandler();
-		RecordingMessageHandler mh2 = new RecordingMessageHandler();
 		Subscription s1 = pubsub.subscribe("foo", mh1);
 		Subscription s2 = pubsub.subscribe("foo", mh2);
 		assertNotNull(s1);
 		assertNotNull(s2);
 		assertTrue(s1.isActive() && s2.isActive());
-		pubsub.publishSync("foo", "bar");
+
+		pubsub.publish("foo", "bar");
+		mh1.assertMessages("foo", "bar");
 		s1.cancel();
 		assertTrue(!s1.isActive() && s2.isActive());
-		pubsub.publishSync("foo", "baz");
+
+		pubsub.publish("foo", "baz");
+		mh2.assertMessages("foo", "bar", "baz");
 		s2.cancel();
 		assertTrue(!s1.isActive() && !s2.isActive());
-		pubsub.publishSync("foo", "xxx");
+
+		pubsub.publish("foo", "xxx");
+		s2.cancel(); // noop
+
 		mh1.assertMessages("foo", "bar");
 		mh2.assertMessages("foo", "bar", "baz");
-		s2.cancel(); // noop
 	}
 
 	@Test(timeOut = 500)
-	public void noDeliveryOnOtherChannels() {
+	public void noDeliveryOnOtherChannels() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		pubsub.subscribe("foo", mh);
-		pubsub.publishSync("foo", "bar");
-		pubsub.publishSync("yyy", "zzz");
+		pubsub.publish("foo", "bar");
+		pubsub.publish("yyy", "zzz");
 		mh.assertMessages("foo", "bar");
 	}
 
@@ -188,9 +163,9 @@ public class PubSubVMTest {
 		// proceed
 		mh1.lock.lock();
 		mh2.lock.lock();
-		pubsub.publishAsync("foo", "bar");
+		pubsub.publish("foo", "bar");
 
-		// wait for the async publisher to start working
+		// wait for the publisher to start working
 		// hasQueueLength is unreliable this is why getQueueLength is used here
 		while (mh1.lock.getQueueLength() == 0 && mh2.lock.getQueueLength() == 0) {
 			Thread.yield();
@@ -212,36 +187,32 @@ public class PubSubVMTest {
 		active.assertMessages("foo"); // nothing received yet
 		mh1.lock.unlock();
 		mh2.lock.unlock();
-		active.awaitNumMsgs(1);
 		active.assertMessages("foo", "bar");
 		cancel.assertMessages("foo");
 	}
 
 	@Test(timeOut = 500)
-	public void dontFailOnSubscriberException() {
+	public void dontFailOnSubscriberException() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		pubsub.subscribe("foo", new ThrowingMessageHandler());
 		pubsub.subscribe("foo", mh);
-		pubsub.publishSync("foo", "bar");
+		pubsub.publish("foo", "bar");
 		mh.assertMessages("foo", "bar");
 	}
 
 	@Test(timeOut = 5000)
-	public void simpleFanInFanOut() {
+	public void simpleFanInFanOut() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
-		boolean sync = true;
-		FanOut root = new FanOut("root", "1.1", "1.2", pubsub, sync);
-		FanOut out1 = new FanOut("1.1", "2.1", "2.2", pubsub, sync);
-		FanOut out2 = new FanOut("1.2", "2.2", "2.3", pubsub, sync);
-		FanIn in1 = new FanIn("2.1", "2.2", "3.1", pubsub, sync);
-		FanIn in2 = new FanIn("2.2", "2.3", "3.2", pubsub, sync);
-		FanIn end = new FanIn("3.1", "3.2", "end", pubsub, sync);
+		new FanOut("root", "1.1", "1.2", pubsub);
+		new FanOut("1.1", "2.1", "2.2", pubsub);
+		new FanOut("1.2", "2.2", "2.3", pubsub);
+		new FanIn("2.1", "2.2", "3.1", pubsub);
+		new FanIn("2.2", "2.3", "3.2", pubsub);
+		new FanIn("3.1", "3.2", "end", pubsub);
 		RecordingMessageHandler mh = new RecordingMessageHandler();
 		pubsub.subscribe("end", mh);
-		pubsub.publishSync("root", "bar");
-		assertEquals(in1.numRecv.get(), 3);
-		assertEquals(in2.numRecv.get(), 3);
+		pubsub.publish("root", "bar");
 		mh.assertMessages("end", "bar", "bar", "bar", "bar", "bar", "bar");
 	}
 
@@ -254,38 +225,22 @@ public class PubSubVMTest {
 		for (int i = 1; i < 1000; i++) {
 			new Forwarder(Integer.toString(i), Integer.toString(i + 1), pubsub);
 		}
-		pubsub.publishSync("0", "bar");
+		pubsub.publish("0", "bar");
 		tail.assertMessages("1000", "bar");
-		pubsub.publishAsync("0", "baz");
-		tail.awaitNumMsgs(2);
+		pubsub.publish("0", "baz");
 		tail.assertMessages("1000", "bar", "baz");
 	}
 
-	// TODO: make sure that sync rings are broken up through eventual async
-	// calls
-	// @Test(timeOut = 5000)
-	// public void syncRing() throws InterruptedException {
-	// PubSub pubsub = new PubSubVM(singleThreadExecutor);
-	// boolean sync = true;
-	// for (int i = 0; i < 1000; i++) {
-	// String from = Integer.toString(i);
-	// String to = i == 999 ? "0" : Integer.toString(i + 1);
-	// new RingNode(from, to, pubsub, sync);
-	// }
-	// pubsub.publishSync("1", 100000L);
-	// }
-
 	@Test(timeOut = 5000)
-	public void asyncRing() throws InterruptedException {
+	public void ring() throws InterruptedException {
 		PubSub pubsub = new PubSubVM(singleThreadExecutor);
-		boolean sync = false;
 		RingNode[] nodes = new RingNode[1000];
 		for (int i = 0; i < 1000; i++) {
 			String from = Integer.toString(i);
 			String to = i == 999 ? "0" : Integer.toString(i + 1);
-			nodes[i] = new RingNode(from, to, pubsub, sync);
+			nodes[i] = new RingNode(from, to, pubsub);
 		}
-		pubsub.publishAsync("0", 1000000L);
+		pubsub.publish("0", 1000000L);
 		// 1000 messages for each node
 		for (RingNode node : nodes) {
 			while (node.msgCount.get() != 1000) {
@@ -396,7 +351,10 @@ public class PubSubVMTest {
 			}
 		}
 
-		public void assertMessages(String channelName, Object... messages) {
+		public void assertMessages(String channelName, Object... messages) throws InterruptedException {
+			if (messages != null && messages.length > 0) {
+				awaitNumMsgs(messages.length);
+			}
 			lock.lock();
 			try {
 				List<Object> l = msgs.get(channelName);
@@ -436,16 +394,11 @@ public class PubSubVMTest {
 
 		private final PubSub pubsub;
 
-		private final boolean sync;
-
-		private final AtomicInteger numRecv = new AtomicInteger();
-
-		public FanIn(String fromA, String fromB, String to, PubSub pubsub, boolean sync) {
+		public FanIn(String fromA, String fromB, String to, PubSub pubsub) {
 			this.fromA = fromA;
 			this.fromB = fromB;
 			this.to = to;
 			this.pubsub = pubsub;
-			this.sync = sync;
 			pubsub.subscribe(fromA, this);
 			pubsub.subscribe(fromB, this);
 		}
@@ -453,12 +406,7 @@ public class PubSubVMTest {
 		@Override
 		public void handleMessage(String channelName, Object message) {
 			assertTrue(channelName.equals(fromA) || channelName.equals(fromB));
-			numRecv.incrementAndGet();
-			if (sync) {
-				pubsub.publishSync(to, message);
-			} else {
-				pubsub.publishAsync(to, message);
-			}
+			pubsub.publish(to, message);
 		}
 	}
 
@@ -472,27 +420,19 @@ public class PubSubVMTest {
 
 		private final PubSub pubsub;
 
-		private final boolean sync;
-
-		public FanOut(String from, String toA, String toB, PubSub pubsub, boolean sync) {
+		public FanOut(String from, String toA, String toB, PubSub pubsub) {
 			this.from = from;
 			this.toA = toA;
 			this.toB = toB;
 			this.pubsub = pubsub;
-			this.sync = sync;
 			pubsub.subscribe(from, this);
 		}
 
 		@Override
 		public void handleMessage(String channelName, Object message) {
 			assertEquals(channelName, from);
-			if (sync) {
-				pubsub.publishSync(toA, message);
-				pubsub.publishSync(toB, message);
-			} else {
-				pubsub.publishAsync(toA, message);
-				pubsub.publishAsync(toB, message);
-			}
+			pubsub.publish(toA, message);
+			pubsub.publish(toB, message);
 		}
 	}
 
@@ -502,13 +442,11 @@ public class PubSubVMTest {
 		private final String from;
 		private final String to;
 		private final PubSub pubsub;
-		private final boolean sync;
 
-		public RingNode(String from, String to, PubSub pubsub, boolean sync) {
+		public RingNode(String from, String to, PubSub pubsub) {
 			this.from = from;
 			this.to = to;
 			this.pubsub = pubsub;
-			this.sync = sync;
 			pubsub.subscribe(from, this);
 		}
 
@@ -519,11 +457,7 @@ public class PubSubVMTest {
 			if (!message.equals(0L)) {
 				msgCount.incrementAndGet();
 				Long next = ((Long) message).longValue() - 1;
-				if (sync) {
-					pubsub.publishSync(to, next);
-				} else {
-					pubsub.publishAsync(to, next);
-				}
+				pubsub.publish(to, next);
 			}
 		}
 	}
@@ -545,7 +479,7 @@ public class PubSubVMTest {
 		@Override
 		public void handleMessage(String channelName, Object message) {
 			assertEquals(channelName, from);
-			pubsub.publishSync(to, message);
+			pubsub.publish(to, message);
 		}
 	}
 }

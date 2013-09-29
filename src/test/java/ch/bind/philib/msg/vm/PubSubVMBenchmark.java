@@ -35,6 +35,7 @@ import ch.bind.philib.TestUtil;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.msg.MessageHandler;
+import ch.bind.philib.msg.PubSub;
 
 /**
  * @author Philipp Meinen
@@ -113,8 +114,9 @@ public class PubSubVMBenchmark implements Runnable {
 	}
 
 	private void setup() {
-		BlockingQueue<Runnable> q = new LinkedBlockingQueue<Runnable>();
-		ThreadPoolExecutor tpe = new ThreadPoolExecutor(numThreads, numThreads, 1L, TimeUnit.SECONDS, q);
+		int capacity = 65536;
+		BlockingQueue<Runnable> q = new LinkedBlockingQueue<Runnable>(capacity);
+		ThreadPoolExecutor tpe = new ThreadPoolExecutor(numThreads, numThreads, 0L, TimeUnit.MILLISECONDS, q);
 
 		executorService = tpe;
 		pubSub = new PubSubVM(executorService);
@@ -128,14 +130,14 @@ public class PubSubVMBenchmark implements Runnable {
 			}
 		}
 		executorService.shutdown();
-		if (!executorService.awaitTermination(1000, TimeUnit.MILLISECONDS)) {
-			System.err.println("executor-service did not terminate within 1 second");
+		if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
+			System.err.println("executor-service did not terminate within 1 minute");
 			System.exit(1);
 		}
 	}
 
 	private void create(int idx) {
-		Producer p = new Producer(pubSub, false);
+		Producer p = new Producer(pubSub);
 		Thread t = new Thread(p, "publisher-" + idx);
 		publishers.add(t);
 		t.start();
@@ -149,12 +151,8 @@ public class PubSubVMBenchmark implements Runnable {
 
 		private final PubSub pubSub;
 
-		private final boolean async;
-
-		public Producer(PubSub pubSub, boolean async) {
-			super();
+		public Producer(PubSub pubSub) {
 			this.pubSub = pubSub;
-			this.async = async;
 		}
 
 		@Override
@@ -162,11 +160,7 @@ public class PubSubVMBenchmark implements Runnable {
 			final Thread t = Thread.currentThread();
 			while (!t.isInterrupted()) {
 				Long now = System.nanoTime();
-				if (async) {
-					pubSub.publishAsync("foo", now);
-				} else {
-					pubSub.publishSync("foo", now);
-				}
+				pubSub.publish("foo", now);
 			}
 		}
 	}
@@ -183,10 +177,9 @@ public class PubSubVMBenchmark implements Runnable {
 
 		@Override
 		public void handleMessage(String channelName, Object message) {
-			long now = System.nanoTime();
 			if (message instanceof Long) {
 				Long sentAt = (Long) message;
-				long latency = now - sentAt;
+				long latency = System.nanoTime() - sentAt;
 				numMessages.incrementAndGet();
 				totalLatency.addAndGet(latency);
 			}
