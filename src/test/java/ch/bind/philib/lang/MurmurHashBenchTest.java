@@ -22,10 +22,11 @@
 
 package ch.bind.philib.lang;
 
+import static org.testng.Assert.assertTrue;
+
 import org.testng.annotations.Test;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.util.TLR;
 
 public class MurmurHashBenchTest {
 
@@ -43,16 +44,16 @@ public class MurmurHashBenchTest {
 
 	private static void doBenchmark() {
 		System.out.printf("MurmurHash optimized in: %dns%n", MurmurHash.optimize());
-		for (int i = 0; i < 2; i++) {
-			testSpeed2(1);
-			testSpeed2(2);
-			testSpeed2(3);
-			testSpeed2(4);
-			testSpeed3(1);
-			testSpeed3(2);
-			testSpeed3(3);
-			testSpeed3(4);
-		}
+//		for (int i = 0; i < 2; i++) {
+//			testSpeed2(1);
+//			testSpeed2(2);
+//			testSpeed2(3);
+//			testSpeed2(4);
+//			testSpeed3(1);
+//			testSpeed3(2);
+//			testSpeed3(3);
+//			testSpeed3(4);
+//		}
 		int size = 8;
 		for (int i = 0; i < 14; i++) {
 			testSpeed2(size);
@@ -65,9 +66,21 @@ public class MurmurHashBenchTest {
 		}
 	}
 
+	private static final byte[] FILLER = new byte[65536];
+	static {
+		for (int i = 0; i < FILLER.length; i++) {
+			FILLER[i] = (byte) i;
+		}
+	}
+
+	private static void fill(byte[] dst) {
+		assertTrue(dst != null && dst.length <= FILLER.length);
+		System.arraycopy(FILLER, 0, dst, 0, dst.length);
+	}
+
 	private static void testSpeed2(final int size) {
 		byte[] b = new byte[size];
-		TLR.current().nextBytes(b);
+		fill(b);
 		long total = 0;
 		long sum = 0;
 		long tStart = System.nanoTime();
@@ -97,7 +110,7 @@ public class MurmurHashBenchTest {
 
 	private static void testSpeed3(final int size) {
 		byte[] b = new byte[size];
-		TLR.current().nextBytes(b);
+		fill(b);
 		long total = 0;
 		long sum = 0;
 		long tStart = System.nanoTime();
