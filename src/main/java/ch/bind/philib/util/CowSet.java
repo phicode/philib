@@ -32,10 +32,11 @@ import ch.bind.philib.validation.Validation;
  * A simple implementation of a copy-on-write set.<br />
  * There are two modification methods: {@link #add(Object)} and {@link #remove(Object)}<br />
  * and two read methods: {@link #getView()} and {@link #isEmpty()}<br />
- * Every modification through the {@link #add(Object)} or {@link #remove(Object)} methods and a return value of
- * {@code true} will update the view. <br />
+ * Every modification through the {@link #add(Object)} or {@link #remove(Object)} methods and a
+ * return value of {@code true} will update the view. <br />
  * The view is shared among all clients and must therefore <b>not be modified!</b><br/>
- * The modification methods are not optimized for speed since the intent of this cow-list is to guarantee fast reads.
+ * The modification methods are not optimized for speed since the intent of this cow-list is to
+ * guarantee fast reads.
  * 
  * @author Philipp Meinen
  */
@@ -82,11 +83,7 @@ public final class CowSet<E> {
 
 	private void updateView() {
 		int n = content.size();
-		if (n == 0) {
-			view = null;
-		} else {
-			view = content.toArray(ArrayUtil.newArray(clazz, n));
-		}
+		view = (n == 0) ? null : ArrayUtil.toArray(clazz, content);
 	}
 
 	/**
