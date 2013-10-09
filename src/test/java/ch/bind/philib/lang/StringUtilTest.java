@@ -56,10 +56,15 @@ public class StringUtilTest {
 
 		sb = start(a);
 		firstObj(sb, "a", a);
-		addObj(sb, "b");
-		addObj(sb, "c", "c");
+		addObj(sb, "b", "b");
 		out = end(sb);
-		assertEquals(out, "String[a=a, b, c=c]");
+		assertEquals(out, "String[a=a, b=b]");
+
+		sb = start(a);
+		firstObj(sb, a);
+		addObj(sb, "b");
+		out = end(sb);
+		assertEquals(out, "String[a, b]");
 	}
 
 	@Test
@@ -92,5 +97,34 @@ public class StringUtilTest {
 		addLong(sb, "c", 3);
 		out = end(sb);
 		assertEquals(out, "Long[a=1, 2, c=3]");
+	}
+
+	@Test
+	public void count() {
+		assertEquals(StringUtil.count(null, ' '), 0);
+		assertEquals(StringUtil.count("", ' '), 0);
+		assertEquals(StringUtil.count("a", ' '), 0);
+		assertEquals(StringUtil.count("a ", ' '), 1);
+		assertEquals(StringUtil.count(" a", ' '), 1);
+		assertEquals(StringUtil.count("a b", ' '), 1);
+		assertEquals(StringUtil.count("a  b", ' '), 2);
+		assertEquals(StringUtil.count("a b c", ' '), 2);
+	}
+
+	@Test
+	public void split() {
+		String[] abc = { "abc" };
+		String[] a_b = { "a", "b" };
+
+		assertEquals(StringUtil.split(null, ' '), StringUtil.EMPTY_STRING_ARRAY);
+		assertEquals(StringUtil.split("", ' '), StringUtil.EMPTY_STRING_ARRAY);
+		assertEquals(StringUtil.split(" ", ' '), StringUtil.EMPTY_STRING_ARRAY);
+		assertEquals(StringUtil.split("   ", ' '), StringUtil.EMPTY_STRING_ARRAY);
+		assertEquals(StringUtil.split("abc", ' '), abc);
+		assertEquals(StringUtil.split("abc ", ' '), abc);
+		assertEquals(StringUtil.split(" abc", ' '), abc);
+		assertEquals(StringUtil.split("a b", ' '), a_b);
+		assertEquals(StringUtil.split("a  b", ' '), a_b);
+		assertEquals(StringUtil.split(" a  b ", ' '), a_b);
 	}
 }

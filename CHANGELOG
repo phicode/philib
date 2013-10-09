@@ -3,6 +3,9 @@
       F = feature
       B = bugfix
       G = general
+=== 0.11.0 ===
+ F: added StringUtil.count(String, int):int
+ F: added Stringutil.split(String, int):String[]
 
 === 0.10.0 ===
  F: generic SafeCloseUtil.close(Object) using reflection
