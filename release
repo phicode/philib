@@ -28,4 +28,4 @@
 
 9. refresh, select again and "Release"
 
-10. git push --all
+10. git push && git push --tags
