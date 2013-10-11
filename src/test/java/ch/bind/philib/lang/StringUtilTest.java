@@ -35,6 +35,9 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.test.Bench;
+import ch.bind.philib.test.Bencher;
+
 public class StringUtilTest {
 
 	@Test
@@ -112,6 +115,39 @@ public class StringUtilTest {
 	}
 
 	@Test
+	public void countBench() throws InterruptedException {
+		for (int i = 16; i <= 1024; i *= 2) {
+			Bench.runBench(new CountBencher(i));
+		}
+	}
+
+	private static final class CountBencher implements Bencher {
+		private final String str;
+
+		public CountBencher(int len) {
+			StringBuilder sb = new StringBuilder(len);
+			for (int i = 0; i < len; i++) {
+				sb.append('.');
+			}
+			this.str = sb.toString();
+		}
+
+		@Override
+		public void run(long n) {
+			long total = 0;
+			for (long i = 0; i < n; i++) {
+				total += StringUtil.count(str, '.');
+			}
+			assertEquals(total, str.length() * n);
+		}
+
+		@Override
+		public String getName() {
+			return "StringUtil.count-" + str.length();
+		}
+	}
+
+	@Test
 	public void split() {
 		String[] abc = { "abc" };
 		String[] a_b = { "a", "b" };
@@ -126,5 +162,39 @@ public class StringUtilTest {
 		assertEquals(StringUtil.split("a b", ' '), a_b);
 		assertEquals(StringUtil.split("a  b", ' '), a_b);
 		assertEquals(StringUtil.split(" a  b ", ' '), a_b);
+	}
+
+	@Test
+	public void splitBench() throws InterruptedException {
+		for (int i = 16; i <= 1024; i *= 2) {
+			Bench.runBench(new SplitBencher(i));
+		}
+	}
+
+	private static final class SplitBencher implements Bencher {
+
+		private final String str;
+
+		public SplitBencher(int len) {
+			StringBuilder sb = new StringBuilder(len);
+			for (int i = 0; i < len; i += 2) {
+				sb.append(".a");
+			}
+			this.str = sb.toString();
+		}
+
+		@Override
+		public void run(long n) {
+			long total = 0;
+			for (long i = 0; i < n; i++) {
+				total += StringUtil.split(str, '.').length;
+			}
+			assertEquals(total, str.length() * n / 2);
+		}
+
+		@Override
+		public String getName() {
+			return "StringUtil.split-" + str.length();
+		}
 	}
 }
