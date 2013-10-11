@@ -35,6 +35,7 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
+import ch.bind.philib.TestUtil;
 import ch.bind.philib.test.Bench;
 import ch.bind.philib.test.Bencher;
 
@@ -116,8 +117,10 @@ public class StringUtilTest {
 
 	@Test
 	public void countBench() throws InterruptedException {
-		for (int i = 16; i <= 1024; i *= 2) {
-			Bench.runBench(new CountBencher(i));
+		if (TestUtil.RUN_BENCHMARKS) {
+			for (int i = 16; i <= 1024; i *= 2) {
+				Bench.runBench(new CountBencher(i));
+			}
 		}
 	}
 
@@ -166,8 +169,10 @@ public class StringUtilTest {
 
 	@Test
 	public void splitBench() throws InterruptedException {
-		for (int i = 16; i <= 1024; i *= 2) {
-			Bench.runBench(new SplitBencher(i));
+		if (TestUtil.RUN_BENCHMARKS) {
+			for (int i = 16; i <= 1024; i *= 2) {
+				Bench.runBench(new SplitBencher(i));
+			}
 		}
 	}
 
