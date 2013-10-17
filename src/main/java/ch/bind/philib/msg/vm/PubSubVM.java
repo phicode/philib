@@ -34,10 +34,10 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.bind.philib.exp.msg.MessageHandler;
+import ch.bind.philib.exp.msg.PubSub;
+import ch.bind.philib.exp.msg.Subscription;
 import ch.bind.philib.lang.ExceptionUtil;
-import ch.bind.philib.msg.MessageHandler;
-import ch.bind.philib.msg.PubSub;
-import ch.bind.philib.msg.Subscription;
 import ch.bind.philib.util.CowSet;
 import ch.bind.philib.validation.Validation;
 

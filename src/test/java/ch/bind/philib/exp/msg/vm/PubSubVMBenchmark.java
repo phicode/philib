@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg.vm;
+package ch.bind.philib.exp.msg.vm;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,10 +32,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.bind.philib.TestUtil;
+import ch.bind.philib.exp.msg.MessageHandler;
+import ch.bind.philib.exp.msg.PubSub;
 import ch.bind.philib.lang.ExceptionUtil;
 import ch.bind.philib.lang.ThreadUtil;
-import ch.bind.philib.msg.MessageHandler;
-import ch.bind.philib.msg.PubSub;
+import ch.bind.philib.msg.vm.PubSubVM;
 
 /**
  * @author Philipp Meinen

@@ -20,7 +20,7 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.msg.vm;
+package ch.bind.philib.exp.msg.vm;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -43,9 +43,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import ch.bind.philib.msg.MessageHandler;
-import ch.bind.philib.msg.PubSub;
-import ch.bind.philib.msg.Subscription;
+import ch.bind.philib.exp.msg.MessageHandler;
+import ch.bind.philib.exp.msg.PubSub;
+import ch.bind.philib.exp.msg.Subscription;
+import ch.bind.philib.msg.vm.PubSubVM;
 
 public class PubSubVMTest {
 
