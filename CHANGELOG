@@ -4,6 +4,9 @@
       B = bugfix
       G = general
 
+=== 0.12.0 ===
+ F: moved toString helpers from StringUtil to a new ToString class
+
 === 0.11.0 ===
  F: added StringUtil.count(String, int):int
  F: added Stringutil.split(String, int):String[]

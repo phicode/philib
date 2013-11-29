@@ -50,69 +50,6 @@ public abstract class StringUtil {
 		return s.substring(start, l);
 	}
 
-	public static StringBuilder start(Object obj) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(obj.getClass().getSimpleName());
-		sb.append('[');
-		return sb;
-	}
-
-	public static String end(StringBuilder sb) {
-		return sb.append(']').toString();
-	}
-
-	public static void firstObj(StringBuilder sb, String name, Object obj) {
-		sb.append(name);
-		sb.append('=');
-		sb.append(obj);
-	}
-
-	public static void firstObj(StringBuilder sb, Object obj) {
-		sb.append(obj);
-	}
-
-	public static void addObj(StringBuilder sb, String name, Object obj) {
-		sb.append(", ");
-		firstObj(sb, name, obj);
-	}
-
-	public static void addObj(StringBuilder sb, Object obj) {
-		sb.append(", ");
-		sb.append(obj);
-	}
-
-	public static void firstInt(StringBuilder sb, String name, int v) {
-		sb.append(name);
-		sb.append('=');
-		sb.append(v);
-	}
-
-	public static void addInt(StringBuilder sb, String name, int v) {
-		sb.append(", ");
-		firstInt(sb, name, v);
-	}
-
-	public static void addInt(StringBuilder sb, int v) {
-		sb.append(", ");
-		sb.append(v);
-	}
-
-	public static void firstLong(StringBuilder sb, String name, long v) {
-		sb.append(name);
-		sb.append('=');
-		sb.append(v);
-	}
-
-	public static void addLong(StringBuilder sb, String name, long v) {
-		sb.append(", ");
-		firstLong(sb, name, v);
-	}
-
-	public static void addLong(StringBuilder sb, long v) {
-		sb.append(", ");
-		sb.append(v);
-	}
-
 	/**
 	 * Counts the number of times the character with the given unicode {@code value} occurs.
 	 * 
@@ -185,5 +122,77 @@ public abstract class StringUtil {
 		String[] rv = new String[i];
 		System.arraycopy(parts, 0, rv, 0, i);
 		return rv;
+	}
+
+	/** @deprecated use {@link ToString#start(Object)} instead. */
+	@Deprecated
+	public static StringBuilder start(Object obj) {
+		return ToString.start(obj);
+	}
+
+	/** @deprecated use {@link ToString#end(StringBuilder)} instead. */
+	@Deprecated
+	public static String end(StringBuilder sb) {
+		return ToString.end(sb);
+	}
+
+	/** @deprecated use {@link ToString#first(StringBuilder, String, Object)} instead. */
+	@Deprecated
+	public static void firstObj(StringBuilder sb, String name, Object obj) {
+		ToString.first(sb, name, obj);
+	}
+
+	/** @deprecated use {@link ToString#first(StringBuilder, Object)} instead. */
+	@Deprecated
+	public static void firstObj(StringBuilder sb, Object obj) {
+		ToString.first(sb, obj);
+	}
+
+	/** @deprecated use {@link ToString#append(StringBuilder, String, Object)} instead. */
+	@Deprecated
+	public static void addObj(StringBuilder sb, String name, Object obj) {
+		ToString.append(sb, name, obj);
+	}
+
+	/** @deprecated use {@link ToString#append(StringBuilder, Object)} instead. */
+	@Deprecated
+	public static void addObj(StringBuilder sb, Object obj) {
+		ToString.append(sb, obj);
+	}
+
+	/** @deprecated use {@link ToString#first(StringBuilder, String, int)} instead. */
+	@Deprecated
+	public static void firstInt(StringBuilder sb, String name, int v) {
+		ToString.first(sb, name, v);
+	}
+
+	/** @deprecated use {@link ToString#append(StringBuilder, String, int)} instead. */
+	@Deprecated
+	public static void addInt(StringBuilder sb, String name, int v) {
+		ToString.append(sb, name, v);
+	}
+
+	/** @deprecated use {@link ToString#append(StringBuilder, int)} instead. */
+	@Deprecated
+	public static void addInt(StringBuilder sb, int v) {
+		ToString.append(sb, v);
+	}
+
+	/** @deprecated use {@link ToString#first(StringBuilder, String, long)} instead. */
+	@Deprecated
+	public static void firstLong(StringBuilder sb, String name, long v) {
+		ToString.first(sb, name, v);
+	}
+
+	/** @deprecated use {@link ToString#append(StringBuilder, String, long)} instead. */
+	@Deprecated
+	public static void addLong(StringBuilder sb, String name, long v) {
+		ToString.append(sb, name, v);
+	}
+
+	/** @deprecated use {@link ToString#append(StringBuilder, long)} instead. */
+	@Deprecated
+	public static void addLong(StringBuilder sb, long v) {
+		ToString.append(sb, v);
 	}
 }
