@@ -6,6 +6,7 @@
 
 === 0.12.0 ===
  F: moved toString helpers from StringUtil to a new ToString class
+ F: a micro-benchmarking utility
 
 === 0.11.0 ===
  F: added StringUtil.count(String, int):int
