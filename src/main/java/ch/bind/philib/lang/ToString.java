@@ -5,153 +5,153 @@ public final class ToString {
 	private ToString() {
 	}
 
-	public static StringBuilder start(Object obj) {
-		StringBuilder sb = new StringBuilder();
+	public static StringBuilder start(final Object obj) {
+		final StringBuilder sb = new StringBuilder();
 		sb.append(obj.getClass().getSimpleName());
 		sb.append('[');
 		return sb;
 	}
 
-	public static String end(StringBuilder sb) {
+	public static String end(final StringBuilder sb) {
 		return sb.append(']').toString();
 	}
 
-	public static StringBuilder first(StringBuilder sb, String name, Object obj) {
+	public static StringBuilder first(final StringBuilder sb, final String name, final Object obj) {
 		sb.append(name).append('=').append(obj);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, Object obj) {
+	public static StringBuilder first(final StringBuilder sb, final Object obj) {
 		sb.append(obj);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, String name, boolean val) {
+	public static StringBuilder first(final StringBuilder sb, final String name, final boolean val) {
 		sb.append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, boolean val) {
+	public static StringBuilder first(final StringBuilder sb, final boolean val) {
 		sb.append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, String name, char val) {
+	public static StringBuilder first(final StringBuilder sb, final String name, final char val) {
 		sb.append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, char val) {
+	public static StringBuilder first(final StringBuilder sb, final char val) {
 		sb.append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, String name, int val) {
+	public static StringBuilder first(final StringBuilder sb, final String name, final int val) {
 		sb.append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, int val) {
+	public static StringBuilder first(final StringBuilder sb, final int val) {
 		sb.append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, String name, long val) {
+	public static StringBuilder first(final StringBuilder sb, final String name, final long val) {
 		sb.append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, long val) {
+	public static StringBuilder first(final StringBuilder sb, final long val) {
 		sb.append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, String name, float val) {
+	public static StringBuilder first(final StringBuilder sb, final String name, final float val) {
 		sb.append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, float val) {
+	public static StringBuilder first(final StringBuilder sb, final float val) {
 		sb.append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, String name, double val) {
+	public static StringBuilder first(final StringBuilder sb, final String name, final double val) {
 		sb.append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder first(StringBuilder sb, double val) {
+	public static StringBuilder first(final StringBuilder sb, final double val) {
 		sb.append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, String name, Object obj) {
+	public static StringBuilder append(final StringBuilder sb, final String name, final Object obj) {
 		sb.append(", ").append(name).append('=').append(obj);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, Object obj) {
+	public static StringBuilder append(final StringBuilder sb, final Object obj) {
 		sb.append(", ").append(obj);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, String name, boolean val) {
+	public static StringBuilder append(final StringBuilder sb, final String name, final boolean val) {
 		sb.append(", ").append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, boolean val) {
+	public static StringBuilder append(final StringBuilder sb, final boolean val) {
 		sb.append(", ").append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, String name, char val) {
+	public static StringBuilder append(final StringBuilder sb, final String name, final char val) {
 		sb.append(", ").append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, char val) {
+	public static StringBuilder append(final StringBuilder sb, final char val) {
 		sb.append(", ").append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, String name, int val) {
+	public static StringBuilder append(final StringBuilder sb, final String name, final int val) {
 		sb.append(", ").append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, int val) {
+	public static StringBuilder append(final StringBuilder sb, final int val) {
 		sb.append(", ").append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, String name, long val) {
+	public static StringBuilder append(final StringBuilder sb, final String name, final long val) {
 		sb.append(", ").append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, long val) {
+	public static StringBuilder append(final StringBuilder sb, final long val) {
 		sb.append(", ").append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, String name, float val) {
+	public static StringBuilder append(final StringBuilder sb, final String name, final float val) {
 		sb.append(", ").append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, float val) {
+	public static StringBuilder append(final StringBuilder sb, final float val) {
 		sb.append(", ").append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, String name, double val) {
+	public static StringBuilder append(final StringBuilder sb, final String name, final double val) {
 		sb.append(", ").append(name).append('=').append(val);
 		return sb;
 	}
 
-	public static StringBuilder append(StringBuilder sb, double val) {
+	public static StringBuilder append(final StringBuilder sb, final double val) {
 		sb.append(", ").append(val);
 		return sb;
 	}
