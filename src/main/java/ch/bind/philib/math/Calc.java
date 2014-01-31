@@ -28,27 +28,29 @@ public abstract class Calc {
 	}
 
 	/**
-	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not evenly divisible by <i>divisor</i>.
+	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not evenly divisible by
+	 * <i>divisor</i>.
 	 * 
-	 * @param num a number > 0
-	 * @param divisor a number > 0
+	 * @param num a number &gt;= 0
+	 * @param divisor a number &gt; 0
 	 * @return rounded up {@code num/divisor}
 	 */
 	public static long ceilDiv(long num, long divisor) {
-		assert (num > 0 && divisor > 0);
-		return ((num - 1) / divisor) + 1;
+		assert (num >= 0 && divisor > 0);
+		return (num + divisor - 1) / divisor;
 	}
 
 	/**
-	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not evenly divisible by <i>divisor</i>.
+	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not evenly divisible by
+	 * <i>divisor</i>.
 	 * 
-	 * @param num a number > 0
-	 * @param divisor a number > 0
+	 * @param num a number &gt;= 0
+	 * @param divisor a number &gt; 0
 	 * @return rounded up {@code num/divisor}
 	 */
 	public static int ceilDiv(int num, int divisor) {
-		assert (num > 0 && divisor > 0);
-		return ((num - 1) / divisor) + 1;
+		assert (num >= 0 && divisor > 0);
+		return (num + divisor - 1) / divisor;
 	}
 
 	public static long unsignedAdd(final long a, final long b) {

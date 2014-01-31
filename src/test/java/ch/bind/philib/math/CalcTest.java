@@ -61,6 +61,9 @@ public class CalcTest {
 
 	@Test
 	public void ceilDivInt() {
+		assertEquals(Calc.ceilDiv(0, 1), 0);
+		assertEquals(Calc.ceilDiv(0, Integer.MAX_VALUE), 0);
+
 		assertEquals(Calc.ceilDiv(3, 1), 3);
 		assertEquals(Calc.ceilDiv(3, 2), 2);
 		assertEquals(Calc.ceilDiv(3, 3), 1);
@@ -74,6 +77,9 @@ public class CalcTest {
 
 	@Test
 	public void ceilDivLong() {
+		assertEquals(Calc.ceilDiv(0L, 1), 0);
+		assertEquals(Calc.ceilDiv(0L, Long.MAX_VALUE), 0);
+
 		assertEquals(Calc.ceilDiv(3L, 1), 3);
 		assertEquals(Calc.ceilDiv(3L, 2), 2);
 		assertEquals(Calc.ceilDiv(3L, 3), 1);
