@@ -43,7 +43,7 @@ import ch.bind.philib.validation.Validation;
  */
 public final class Config {
 
-	private final CowSet<ConfigValueListener> listeners = new CowSet<ConfigValueListener>(ConfigValueListener.class);
+	private final CowSet<ConfigListener> listeners = new CowSet<ConfigListener>(ConfigListener.class);
 
 	private final List<URL> urls = new LinkedList<URL>();
 
@@ -85,11 +85,11 @@ public final class Config {
 		}
 	}
 
-	public void addListener(ConfigValueListener listener) {
+	public void addListener(ConfigListener listener) {
 		listeners.add(listener);
 	}
 
-	public void removeListener(ConfigValueListener listener) {
+	public void removeListener(ConfigListener listener) {
 		listeners.remove(listener);
 	}
 
@@ -182,19 +182,19 @@ public final class Config {
 	}
 
 	private void notifyAdded(String key, String value) {
-		for (ConfigValueListener l : listeners.getView()) {
+		for (ConfigListener l : listeners.getView()) {
 			l.added(key, value);
 		}
 	}
 
 	private void notifyRemoved(String key, String oldValue) {
-		for (ConfigValueListener l : listeners.getView()) {
+		for (ConfigListener l : listeners.getView()) {
 			l.removed(key, oldValue);
 		}
 	}
 
 	private void notifyChanged(String key, String oldValue, String newValue) {
-		for (ConfigValueListener l : listeners.getView()) {
+		for (ConfigListener l : listeners.getView()) {
 			l.changed(key, oldValue, newValue);
 		}
 	}

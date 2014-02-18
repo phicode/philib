@@ -30,9 +30,9 @@ import ch.bind.philib.validation.Validation;
 /**
  * @author Philipp Meinen
  */
-public final class FilteringConfigValueListener implements ConfigValueListener {
+public final class FilteringListener implements ConfigListener {
 
-	private final ConfigValueListener listener;
+	private final ConfigListener listener;
 
 	private final Set<String> filteredProperties = new HashSet<String>();
 
@@ -44,7 +44,7 @@ public final class FilteringConfigValueListener implements ConfigValueListener {
 
 	private boolean includeRemovals = true;
 
-	public FilteringConfigValueListener(ConfigValueListener listener) {
+	public FilteringListener(ConfigListener listener) {
 		Validation.notNull(listener);
 		this.listener = listener;
 	}

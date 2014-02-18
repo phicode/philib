@@ -243,7 +243,7 @@ public class ConfigTest {
 		assertTrue(l.changed.contains("b"));
 	}
 
-	private static final class RecordingConfigValueListener implements ConfigValueListener {
+	private static final class RecordingConfigValueListener implements ConfigListener {
 
 		Map<String, String> current = new HashMap<String, String>();
 		Set<String> changed = new HashSet<String>();

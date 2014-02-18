@@ -30,12 +30,12 @@ import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
-public class FilteringConfigValueListenerTest {
+public class FilteringListenerTest {
 
 	@Test
 	public void whiteBlackList() {
-		ConfigValueListener l = mock(ConfigValueListener.class);
-		FilteringConfigValueListener f = new FilteringConfigValueListener(l);
+		ConfigListener l = mock(ConfigListener.class);
+		FilteringListener f = new FilteringListener(l);
 		assertTrue(f.isBlacklist());
 
 		f.addFilterProperty("b");
@@ -58,8 +58,8 @@ public class FilteringConfigValueListenerTest {
 
 	@Test
 	public void includeAdditions() {
-		ConfigValueListener l = mock(ConfigValueListener.class);
-		FilteringConfigValueListener f = new FilteringConfigValueListener(l);
+		ConfigListener l = mock(ConfigListener.class);
+		FilteringListener f = new FilteringListener(l);
 		assertTrue(f.isIncludeAdditions());
 
 		f.added("a", "a");
@@ -74,8 +74,8 @@ public class FilteringConfigValueListenerTest {
 
 	@Test
 	public void includeChanges() {
-		ConfigValueListener l = mock(ConfigValueListener.class);
-		FilteringConfigValueListener f = new FilteringConfigValueListener(l);
+		ConfigListener l = mock(ConfigListener.class);
+		FilteringListener f = new FilteringListener(l);
 		assertTrue(f.isIncludeChanges());
 
 		f.changed("a", "a1", "a2");
@@ -90,8 +90,8 @@ public class FilteringConfigValueListenerTest {
 
 	@Test
 	public void includeRemovals() {
-		ConfigValueListener l = mock(ConfigValueListener.class);
-		FilteringConfigValueListener f = new FilteringConfigValueListener(l);
+		ConfigListener l = mock(ConfigListener.class);
+		FilteringListener f = new FilteringListener(l);
 		assertTrue(f.isIncludeRemovals());
 
 		f.removed("a", "a");
