@@ -18,7 +18,7 @@ public class Bench {
 
 		long n = 10;
 		while (true) {
-			// System.out.println("runnting " + bench.getName() + "(" + n + ")");
+			// System.out.println("running " + bench.getName() + "(" + n + ")");
 			long tNs = runBenchAndMeasure(bench, n);
 			if (tNs > desiredRuntimeNs) {
 				printStats(bench.getName(), tNs, n);
