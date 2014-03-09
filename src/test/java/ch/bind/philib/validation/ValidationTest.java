@@ -22,11 +22,15 @@
 
 package ch.bind.philib.validation;
 
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
+
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.testng.annotations.Test;
 
-public class SimpleValidationTest {
+public class ValidationTest {
 
 	@Test
 	public void isFalse() {
@@ -123,5 +127,51 @@ public class SimpleValidationTest {
 		} catch (IllegalArgumentException e) {
 			// expected
 		}
+	}
+
+	@Test
+	public void notNullOrEmptyMap() {
+		HashMap<String, String> a = null;
+		try {
+			Validation.notNullOrEmpty(a);
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+
+		a = new HashMap<String, String>();
+		try {
+			Validation.notNullOrEmpty(a);
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+
+		a.put("foo", "bar");
+		HashMap<String, String> b = Validation.notNullOrEmpty(a);
+		assertTrue(a == b);
+	}
+
+	@Test
+	public void notNullOrEmptyCollection() {
+		LinkedList<String> a = null;
+		try {
+			Validation.notNullOrEmpty(a);
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+
+		a = new LinkedList<String>();
+		try {
+			Validation.notNullOrEmpty(a);
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+
+		a.add("foo");
+		LinkedList<String> b = Validation.notNullOrEmpty(a);
+		assertTrue(a == b);
 	}
 }

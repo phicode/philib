@@ -23,6 +23,7 @@
 package ch.bind.philib.validation;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Philipp Meinen
@@ -32,103 +33,128 @@ public abstract class Validation {
 	protected Validation() {
 	}
 
-	public static void notNegative(int value) {
+	public static int notNegative(int value) {
 		if (value < 0) {
 			throw new IllegalArgumentException("value must not be negative");
 		}
+		return value;
 	}
 
-	public static void notNegative(int value, String message) {
+	public static int notNegative(int value, String message) {
 		if (value < 0) {
 			throw new IllegalArgumentException(message);
 		}
+		return value;
 	}
 
-	public static void notNegative(long value) {
+	public static long notNegative(long value) {
 		if (value < 0) {
 			throw new IllegalArgumentException("value must not be negative");
 		}
+		return value;
 	}
 
-	public static void notNegative(long value, String message) {
+	public static long notNegative(long value, String message) {
 		if (value < 0) {
 			throw new IllegalArgumentException(message);
 		}
+		return value;
 	}
 
-	public static void notNull(Object obj) {
+	public static <T> T notNull(T obj) {
 		if (obj == null) {
 			throw new IllegalArgumentException("object must not be null");
 		}
+		return obj;
 	}
 
-	public static void notNull(Object obj, String message) {
+	public static <T> T notNull(T obj, String message) {
 		if (obj == null) {
 			throw new IllegalArgumentException(message);
 		}
+		return obj;
 	}
 
-	public static void isTrue(boolean value) {
+	public static boolean isTrue(boolean value) {
 		if (!value) {
 			throw new IllegalArgumentException("value must be true");
 		}
+		return value;
 	}
 
-	public static void isTrue(boolean value, String message) {
+	public static boolean isTrue(boolean value, String message) {
 		if (!value) {
 			throw new IllegalArgumentException(message);
 		}
+		return value;
 	}
 
-	public static void isFalse(boolean value) {
+	public static boolean isFalse(boolean value) {
 		if (value) {
 			throw new IllegalArgumentException("value must be false");
 		}
+		return value;
 	}
 
-	public static void isFalse(boolean value, String message) {
+	public static boolean isFalse(boolean value, String message) {
 		if (value) {
 			throw new IllegalArgumentException(message);
 		}
+		return value;
 	}
 
-	public static void notNullOrEmpty(CharSequence value) {
-		notNullOrEmpty(value, "null or empty string provided");
+	public static <T extends CharSequence> T notNullOrEmpty(T value) {
+		return notNullOrEmpty(value, "null or empty char sequence provided");
 	}
 
-	public static void notNullOrEmpty(CharSequence value, String message) {
+	public static <T extends CharSequence> T notNullOrEmpty(T value, String message) {
 		if (value == null || value.length() == 0) {
 			throw new IllegalArgumentException(message);
 		}
+		return value;
 	}
 
-	public static void notNullOrEmpty(Collection<?> value) {
-		notNullOrEmpty(value, "null or empty collection provided");
+	public static <T extends Collection<?>> T notNullOrEmpty(T value) {
+		return notNullOrEmpty(value, "null or empty collection provided");
 	}
 
-	public static void notNullOrEmpty(Collection<?> value, String message) {
+	public static <T extends Collection<?>> T notNullOrEmpty(T value, String message) {
 		if (value == null || value.isEmpty()) {
 			throw new IllegalArgumentException(message);
 		}
+		return value;
 	}
 
-	public static <T> void notNullOrEmpty(T[] value) {
-		notNullOrEmpty(value, "null or empty array provided");
+	public static <T extends Map<?, ?>> T notNullOrEmpty(T value) {
+		return notNullOrEmpty(value, "null or empty collection provided");
 	}
 
-	public static <T> void notNullOrEmpty(T[] value, String message) {
-		if (value == null || value.length == 0) {
+	public static <T extends Map<?, ?>> T notNullOrEmpty(T value, String message) {
+		if (value == null || value.isEmpty()) {
 			throw new IllegalArgumentException(message);
 		}
+		return value;
 	}
 
-	public static <T> void noNullValues(T[] values) {
-		noNullValues(values, "array must only contain non-null values");
+	public static <T> T[] notNullOrEmpty(T[] values) {
+		return notNullOrEmpty(values, "null or empty array provided");
 	}
 
-	public static <T> void noNullValues(T[] values, String message) {
+	public static <T> T[] notNullOrEmpty(T[] values, String message) {
+		if (values == null || values.length == 0) {
+			throw new IllegalArgumentException(message);
+		}
+		return values;
+	}
+
+	public static <T> T[] noNullValues(T[] values) {
+		return noNullValues(values, "array must only contain non-null values");
+	}
+
+	public static <T> T[] noNullValues(T[] values, String message) {
 		for (T v : values) {
 			notNull(v, message);
 		}
+		return values;
 	}
 }
