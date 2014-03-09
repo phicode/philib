@@ -9,6 +9,7 @@
  F: a micro-benchmarking utility
  F: renamed config.ConfigValueListener -> config.ConfigListener
  F: added config.LoggingListener
+ F: validation: return the verified value for shorter code in constructors.
 
 === 0.11.0 ===
  F: added StringUtil.count(String, int):int
