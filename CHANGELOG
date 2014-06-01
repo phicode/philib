@@ -5,10 +5,11 @@
       G = general
 
 === 0.12.0 ===
- F: moved toString helpers from StringUtil to a new ToString class
+ F: ToString: moved toString helpers from StringUtil to a new ToString class
  F: a micro-benchmarking utility
- F: renamed config.ConfigValueListener -> config.ConfigListener
- F: added config.LoggingListener
+ F: conf: renamed ConfigValueListener -> ConfigListener
+ F: conf: added LoggingListener
+ F: conf: added an initializing constructor Config(Map<String,String>) 
  F: validation: return the verified value for shorter code in constructors.
 
 === 0.11.0 ===
