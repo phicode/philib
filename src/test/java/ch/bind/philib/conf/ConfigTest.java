@@ -243,6 +243,21 @@ public class ConfigTest {
 		assertTrue(l.changed.contains("b"));
 	}
 
+	@Test
+	public void initializingConstructor() throws IOException {
+		Map<String, String> values = new HashMap<String, String>();
+		values.put("a", "1");
+		Config c = new Config(values);
+		assertEquals(c.get("a"), "1");
+		assertEquals(c.getInt("a"), Integer.valueOf(1));
+		assertNull(c.get("b"));
+
+		c.load();
+		assertEquals(c.get("a"), "1");
+		assertEquals(c.getInt("a"), Integer.valueOf(1));
+		assertNull(c.get("b"));
+	}
+
 	private static final class RecordingConfigValueListener implements ConfigListener {
 
 		Map<String, String> current = new HashMap<String, String>();

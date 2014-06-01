@@ -63,6 +63,10 @@ public final class Config {
 		setURLs(urls);
 	}
 
+	public Config(Map<String, String> config) {
+		this.config = new HashMap<String, String>(config);
+	}
+
 	public synchronized void setURL(URL url) {
 		Validation.notNull(url);
 		urls.clear();
@@ -100,7 +104,7 @@ public final class Config {
 	 *             in case no url could be opened.
 	 */
 	public synchronized void load() throws IOException {
-		if (loading) {
+		if (loading || urls.isEmpty()) {
 			return;
 		}
 		loading = true;
@@ -126,6 +130,7 @@ public final class Config {
 					SafeCloseUtil.close(is);
 				}
 			}
+
 			if (numSuccess < 1) {
 				throw new IOException("no resources found", lastExc);
 			}
