@@ -67,6 +67,11 @@
 		</developer>
 	</developers>
 
+	<ciManagement>
+	    <system>jenkins</system>
+	    <url>https://bind.ch/jenkins/job/philib/</url>
+	</ciManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
