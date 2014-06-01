@@ -51,4 +51,8 @@ public final class LoggingListener implements ConfigListener {
 	public void added(String key, String value) {
 		log.info("added '%s': '%s'", key, value);
 	}
+	
+	public Logger getLogger() {
+	    return log;
+    }
 }
