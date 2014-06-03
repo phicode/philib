@@ -49,6 +49,12 @@ public abstract class ArrayUtil {
 	protected ArrayUtil() {
 	}
 
+	/**
+	 * shorthand for {@code java.lang.reflect.Array.newInstance(clazz, size)}
+	 * @param clazz -
+	 * @param size -
+	 * @return -
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T[] newArray(Class<T> clazz, int size) {
 		return (T[]) java.lang.reflect.Array.newInstance(clazz, size);
