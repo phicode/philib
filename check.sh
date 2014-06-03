@@ -21,6 +21,10 @@ check_coverage() {
 	mvn cobertura:cobertura
 }
 
+check_coverage_xml() {
+	mvn cobertura:cobertura -Dcobertura.report.format=xml
+}
+
 case $1 in
 	headers)
 		check_headers
@@ -30,6 +34,9 @@ case $1 in
 		;;
 	coverage)
 		check_coverage
+		;;
+	coverage_xml)
+		check_coverage_xml
 		;;
 	all)
 		check_headers
@@ -43,5 +50,6 @@ case $1 in
 		echo "  headers"
 		echo "  updates"
 		echo "  coverage"
+		echo "  coverage_xml"
 		;;
 esac
