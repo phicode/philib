@@ -153,7 +153,6 @@ public abstract class ArrayUtil {
 
 	public static <T> T[] prepend(Class<T> clazz, T[] a, T b) {
 		Validation.notNull(clazz);
-		Validation.notNull(b);
 		if (a == null) {
 			T[] ts = newArray(clazz, 1);
 			ts[0] = b;
@@ -168,7 +167,6 @@ public abstract class ArrayUtil {
 
 	public static <T> T[] append(Class<T> clazz, T[] a, T b) {
 		Validation.notNull(clazz);
-		Validation.notNull(b);
 		if (a == null) {
 			T[] ts = newArray(clazz, 1);
 			ts[0] = b;

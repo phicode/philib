@@ -554,16 +554,18 @@ public class ArrayUtilTest {
 		prepend((Class<String>) null, xs, "quack");
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void appendNoNullValue() {
+	@Test
+	public void appendNullValue() {
 		String[] xs = { "bar" };
-		append(String.class, xs, null);
+		String[] exp = { "bar", null };
+		assertEquals(append(String.class, xs, null), exp);
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void prependNoNullValue() {
+	@Test
+	public void prependNullValue() {
 		String[] xs = { "bar" };
-		prepend(String.class, xs, null);
+		String[] exp = { null, "bar" };
+		assertEquals(prepend(String.class, xs, null), exp);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
