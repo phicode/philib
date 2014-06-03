@@ -119,12 +119,13 @@ public class StringUtilTest {
 	public void countBench() throws InterruptedException {
 		if (TestUtil.RUN_BENCHMARKS) {
 			for (int i = 16; i <= 1024; i *= 2) {
-				Bench.runBench(new CountBencher(i));
+				Bench.run(new CountBencher(i));
 			}
 		}
 	}
 
 	private static final class CountBencher implements Bencher {
+
 		private final String str;
 
 		public CountBencher(int len) {
@@ -137,11 +138,12 @@ public class StringUtilTest {
 
 		@Override
 		public void run(long n) {
+			String s = str;
 			long total = 0;
 			for (long i = 0; i < n; i++) {
-				total += StringUtil.count(str, '.');
+				total += StringUtil.count(s, '.');
 			}
-			assertEquals(total, str.length() * n);
+			assertEquals(total, s.length() * n);
 		}
 
 		@Override
@@ -171,7 +173,7 @@ public class StringUtilTest {
 	public void splitBench() throws InterruptedException {
 		if (TestUtil.RUN_BENCHMARKS) {
 			for (int i = 16; i <= 1024; i *= 2) {
-				Bench.runBench(new SplitBencher(i));
+				Bench.run(new SplitBencher(i));
 			}
 		}
 	}
