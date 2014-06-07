@@ -31,10 +31,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.spi.SelectorProvider;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.testng.annotations.Test;
@@ -49,10 +45,10 @@ public class SafeCloseUtilTest {
 	}
 
 	@Test
-	public void selector() {
-		Sel s = new Sel(false);
-		SafeCloseUtil.close(s);
-		assertEquals(s.numCalls, 1);
+	public void closeableNotImplemented() {
+		NonCloseable o = new NonCloseable(false);
+		SafeCloseUtil.close(o);
+		assertEquals(o.numCalls, 1);
 	}
 
 	@Test
@@ -66,11 +62,11 @@ public class SafeCloseUtilTest {
 	}
 
 	@Test
-	public void selectorExc() {
-		Sel s = new Sel(true);
+	public void closeableNotImplementedExc() {
+		NonCloseable o = new NonCloseable(true);
 		Logger l = mock(Logger.class);
-		SafeCloseUtil.close(s, l);
-		assertEquals(s.numCalls, 1);
+		SafeCloseUtil.close(o, l);
+		assertEquals(o.numCalls, 1);
 		verify(l).error(anyString(), any(IOException.class));
 		verifyNoMoreInteractions(l);
 	}
@@ -78,7 +74,12 @@ public class SafeCloseUtilTest {
 	@Test
 	public void dontFailOnNull() {
 		SafeCloseUtil.close((Closeable) null);
-		SafeCloseUtil.close((Selector) null);
+		SafeCloseUtil.close((Object) null);
+	}
+	
+	@Test
+	public void dontFailOnNoCloseMethod() {
+		SafeCloseUtil.close(new Object());
 	}
 
 	private static final class C implements Closeable {
@@ -100,62 +101,22 @@ public class SafeCloseUtilTest {
 		}
 	}
 
-	private static final class Sel extends Selector {
+	private static final class NonCloseable {
 
 		final boolean doThrow;
 
 		int numCalls;
 
-		Sel(boolean doThrow) {
+		NonCloseable(boolean doThrow) {
 			this.doThrow = doThrow;
 		}
 
-		@Override
+		@SuppressWarnings("unused")
 		public void close() throws IOException {
 			numCalls++;
 			if (doThrow) {
 				throw new IOException("testing " + SafeCloseUtilTest.class.getSimpleName());
 			}
-		}
-
-		@Override
-		public boolean isOpen() {
-			throw new AssertionError();
-		}
-
-		@Override
-		public SelectorProvider provider() {
-			throw new AssertionError();
-		}
-
-		@Override
-		public Set<SelectionKey> keys() {
-			throw new AssertionError();
-		}
-
-		@Override
-		public Set<SelectionKey> selectedKeys() {
-			throw new AssertionError();
-		}
-
-		@Override
-		public int selectNow() throws IOException {
-			throw new AssertionError();
-		}
-
-		@Override
-		public int select(long timeout) throws IOException {
-			throw new AssertionError();
-		}
-
-		@Override
-		public int select() throws IOException {
-			throw new AssertionError();
-		}
-
-		@Override
-		public Selector wakeup() {
-			throw new AssertionError();
 		}
 	}
 }
