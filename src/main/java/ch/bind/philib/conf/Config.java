@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -181,8 +182,8 @@ public final class Config {
 		if (listeners.isEmpty()) {
 			return;
 		}
-		for (String key : m.keySet()) {
-			notifyAdded(key, m.get(key));
+		for (Entry<String,String> e : m.entrySet()) {
+			notifyAdded(e.getKey(), e.getValue());
 		}
 	}
 
