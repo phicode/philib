@@ -30,6 +30,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -309,5 +310,37 @@ public class SimpleTimeoutMapTest {
 	public void noNullValue() {
 		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
 		map.put(0, 1, null);
+	}
+
+	@Test
+	public void pollAllTimeoutNow() throws InterruptedException {
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		List<Entry<Integer, Integer>> tos = map.pollAllTimeoutNow();
+		assertNotNull(tos);
+		assertTrue(tos.isEmpty());
+
+		// timeout in 15sec
+		map.put(15000L, 1, 1);
+		tos = map.pollAllTimeoutNow();
+		assertNotNull(tos);
+		assertTrue(tos.isEmpty());
+
+		// 1 timeout immediately
+		map.put(1L, 2, 2);
+		Thread.sleep(5);
+		tos = map.pollAllTimeoutNow();
+		assertNotNull(tos);
+		assertEquals(tos.size(), 1);
+		assertEquals(tos.get(0).getKey().intValue(), 2);
+
+		// 2 timeouts immediately
+		map.put(1L, 3, 3);
+		map.put(10L, 4, 4);
+		Thread.sleep(15);
+		tos = map.pollAllTimeoutNow();
+		assertNotNull(tos);
+		assertEquals(tos.size(), 2);
+		assertEquals(tos.get(0).getKey().intValue(), 3);
+		assertEquals(tos.get(1).getKey().intValue(), 4);
 	}
 }

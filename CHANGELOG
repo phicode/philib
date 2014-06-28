@@ -11,6 +11,7 @@
  F: conf: added LoggingListener
  F: conf: added an initializing constructor Config(Map<String,String>) 
  F: validation: return the verified value for shorter code in constructors.
+ F: util: new TimeoutMap method: pollAllTimeoutNow
 
 === 0.11.0 ===
  F: added StringUtil.count(String, int):int

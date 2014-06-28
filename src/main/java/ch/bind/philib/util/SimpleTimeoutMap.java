@@ -22,7 +22,10 @@
 
 package ch.bind.philib.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -38,7 +41,8 @@ import ch.bind.philib.math.Calc;
 import ch.bind.philib.validation.Validation;
 
 /**
- * An implementation of {@link TimeoutMap} which uses the {@link TreeMap} and {@link HashMap} from java.util for
+ * An implementation of {@link TimeoutMap} which uses the {@link TreeMap} and {@link HashMap} from
+ * java.util for
  * internal data management. This implementation is threadsafe.
  * 
  * @author Philipp Meinen
@@ -129,12 +133,35 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 	@Override
 	public Map.Entry<K, V> pollTimeoutNow() {
+		long ns = System.nanoTime();
 		wlock.lock();
 		try {
-			return _pollTimedoutNs(System.nanoTime());
+			return _pollTimedoutNs(ns);
 		} finally {
 			wlock.unlock();
 		}
+	}
+
+	@Override
+	public List<Map.Entry<K, V>> pollAllTimeoutNow() {
+		long ns = System.nanoTime();
+		List<Map.Entry<K, V>> rv = null;
+		wlock.lock();
+		try {
+			while (true) {
+				Map.Entry<K, V> e = _pollTimedoutNs(ns);
+				if (e == null) {
+					break;
+				}
+				if (rv == null) {
+					rv = new ArrayList<Map.Entry<K, V>>();
+				}
+				rv.add(e);
+			}
+		} finally {
+			wlock.unlock();
+		}
+		return rv != null ? rv : Collections.<Map.Entry<K, V>> emptyList();
 	}
 
 	@Override

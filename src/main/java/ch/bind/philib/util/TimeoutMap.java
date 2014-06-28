@@ -22,6 +22,8 @@
 
 package ch.bind.philib.util;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -73,6 +75,14 @@ public interface TimeoutMap<K, V> {
 	Map.Entry<K, V> pollTimeoutNow();
 
 	/**
+	 * <b>Nonblocking</b> poll for all timed out entries, based on the time of the invocation of this
+	 * method.
+	 * 
+	 * @return {@link Collections#EMPTY_LIST} if there is are no timed out entries in this map.
+	 */
+	List<Map.Entry<K,V>> pollAllTimeoutNow();
+
+	/**
 	 * <b>Blocking</b> poll for the next entry which is timed out.
 	 * 
 	 * @return {@code null} if there is no timed-out entry in this map within the given duration. otherwise the oldest
@@ -83,7 +93,7 @@ public interface TimeoutMap<K, V> {
 	/**
 	 * <b>Blocking</b> poll for the next entry which is timed out. The parameters duration and timeUnit define for how
 	 * long the method must wait for a timeout to occur.
-	 * 
+	 *
 	 * @return {@code null} if there is no timed-out entry in this map within the given duration. otherwise the oldest
 	 *         timed-out entry.
 	 */
