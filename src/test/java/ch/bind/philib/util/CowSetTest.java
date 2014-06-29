@@ -22,11 +22,11 @@
 
 package ch.bind.philib.util;
 
+import org.testng.annotations.Test;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-
-import org.testng.annotations.Test;
 
 public class CowSetTest {
 
@@ -83,5 +83,13 @@ public class CowSetTest {
 		assertFalse(cs.add(a));
 		assertFalse(cs.add(b));
 		assertEquals(cs.getView().length, 1);
+	}
+
+	@Test
+	public void size() {
+		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		assertEquals(cs.size(), 0);
+		cs.add(1);
+		assertEquals(cs.size(), 1);
 	}
 }
