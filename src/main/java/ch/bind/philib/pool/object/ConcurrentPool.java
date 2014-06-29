@@ -35,6 +35,7 @@ import ch.bind.philib.validation.Validation;
  */
 public final class ConcurrentPool<T> implements Pool<T> {
 
+	// TODO: fixed size pool, 'selected' by threads through their id
 	private final PoolThreadLocal poolByThread = new PoolThreadLocal();
 
 	private final PoolBase<T>[] pools;
