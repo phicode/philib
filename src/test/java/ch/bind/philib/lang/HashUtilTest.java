@@ -254,7 +254,7 @@ public class HashUtilTest {
 		// t0, t1, t2, t3, colls, n);
 	}
 
-	private static final int hash(long a, int b, short c, byte d) {
+	private static int hash(long a, int b, short c, byte d) {
 		int h = HashUtil.startHash(a);
 		h = HashUtil.nextHash(h, b);
 		h = HashUtil.nextHash(h, c);

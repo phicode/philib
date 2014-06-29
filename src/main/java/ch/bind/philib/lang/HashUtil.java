@@ -54,84 +54,84 @@ public abstract class HashUtil {
 	protected HashUtil() {
 	}
 
-	public static final int startHash(final boolean value) {
+	public static int startHash(final boolean value) {
 		return nextHash(MURMUR2_32_SEED, value);
 	}
 
-	public static final int startHash(final byte value) {
+	public static int startHash(final byte value) {
 		return nextHash(MURMUR2_32_SEED, value);
 	}
 
-	public static final int startHash(final char value) {
+	public static int startHash(final char value) {
 		return nextHash(MURMUR2_32_SEED, value);
 	}
 
-	public static final int startHash(final short value) {
+	public static int startHash(final short value) {
 		return nextHash(MURMUR2_32_SEED, value);
 	}
 
-	public static final int startHash(final int value) {
+	public static int startHash(final int value) {
 		return nextHash(MURMUR2_32_SEED, value);
 	}
 
-	public static final int startHash(final long value) {
+	public static int startHash(final long value) {
 		return nextHash(MURMUR2_32_SEED, value);
 	}
 
-	public static final int startHash(final float value) {
+	public static int startHash(final float value) {
 		return nextHash(MURMUR2_32_SEED, value);
 	}
 
-	public static final int startHash(final double value) {
+	public static int startHash(final double value) {
 		return nextHash(MURMUR2_32_SEED, value);
 	}
 
-	public static final int startHash(final Object obj) {
+	public static int startHash(final Object obj) {
 		return nextHash(MURMUR2_32_SEED, obj);
 	}
 
-	public static final int nextHash(int hash, final boolean value) {
+	public static int nextHash(int hash, final boolean value) {
 		return murmur2a_8bit(hash, (value ? 1 : 0));
 	}
 
-	public static final int nextHash(int hash, final byte value) {
+	public static int nextHash(int hash, final byte value) {
 		return murmur2a_8bit(hash, (value & 0xFF));
 	}
 
-	public static final int nextHash(int hash, final char value) {
+	public static int nextHash(int hash, final char value) {
 		return murmur2a_16bit(hash, value);
 	}
 
-	public static final int nextHash(int hash, final short value) {
+	public static int nextHash(int hash, final short value) {
 		return murmur2a_16bit(hash, value);
 	}
 
-	public static final int nextHash(int hash, final int value) {
+	public static int nextHash(int hash, final int value) {
 		return murmur2a_32bit(hash, value);
 	}
 
-	public static final int nextHash(int hash, final long value) {
+	public static int nextHash(int hash, final long value) {
 		return murmur2a_64bit(hash, value);
 	}
 
-	public static final int nextHash(final int hash, final float value) {
+	public static int nextHash(final int hash, final float value) {
 		return nextHash(hash, fromFloat(value));
 	}
 
-	public static final int nextHash(final int hash, final double value) {
+	public static int nextHash(final int hash, final double value) {
 		return nextHash(hash, fromDouble(value));
 	}
 
-	public static final int nextHash(int hash, final Object obj) {
+	public static int nextHash(int hash, final Object obj) {
 		int objHash = ((obj == null) ? 0 : obj.hashCode());
 		return murmur2a_32bit(hash, objHash);
 	}
 
-	public static final int fromFloat(final float value) {
+	public static int fromFloat(final float value) {
 		return Float.floatToIntBits(value);
 	}
 
-	public static final long fromDouble(final double value) {
+	public static long fromDouble(final double value) {
 		return Double.doubleToLongBits(value);
 	}
 }

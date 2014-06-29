@@ -29,25 +29,21 @@ import ch.bind.philib.io.EndianCodec;
  * <p>
  * Based on Austin Appleby's <a href="http://code.google.com/p/smhasher">smhasher</a> public domain code.
  * </p>
- * 
+ *
  * @author Philipp Meinen
  */
 public final class MurmurHash {
 
+	static final int MURMUR2_32_SEED = 0x9747B28C;
+	private static final int MURMUR2_32_M = 0x5BD1E995;
+	private static final int MURMUR2_32_R = 24;
+	private static final int MURMUR3_32_C1 = 0xCC9E2D51;
+	private static final int MURMUR3_32_C2 = 0x1B873593;
+
 	private MurmurHash() {
 	}
 
-	static final int MURMUR2_32_SEED = 0x9747B28C;
-
-	private static final int MURMUR2_32_M = 0x5BD1E995;
-
-	private static final int MURMUR2_32_R = 24;
-
-	private static final int MURMUR3_32_C1 = 0xCC9E2D51;
-
-	private static final int MURMUR3_32_C2 = 0x1B873593;
-
-	public static final int murmur2(byte[] key) {
+	public static int murmur2(byte[] key) {
 		final int len = key.length;
 		final int limitOffset = len & 0xFFFFFFFC;
 
@@ -62,31 +58,31 @@ public final class MurmurHash {
 		}
 
 		switch (len & 0x3) {
-		case 3:
-			hash ^= ((key[off + 2] & 0xFF) << 16);
-		case 2:
-			hash ^= ((key[off + 1] & 0xFF) << 8);
-		case 1:
-			hash ^= (key[off] & 0xFF);
+			case 3:
+				hash ^= ((key[off + 2] & 0xFF) << 16);
+			case 2:
+				hash ^= ((key[off + 1] & 0xFF) << 8);
+			case 1:
+				hash ^= (key[off] & 0xFF);
 
-			hash *= MURMUR2_32_M;
+				hash *= MURMUR2_32_M;
 		}
 
 		return murmur2_finalize(hash);
 	}
 
-	private static final int murmur2_finalize(int hash) {
+	private static int murmur2_finalize(int hash) {
 		hash ^= (hash >>> 13);
 		hash *= MURMUR2_32_M;
 		hash ^= (hash >>> 15);
 		return hash;
 	}
 
-	public static final int murmur3(byte[] key) {
+	public static int murmur3(byte[] key) {
 		return murmur3(key, MURMUR2_32_SEED);
 	}
 
-	public static final int murmur3(byte[] key, int seed) {
+	public static int murmur3(byte[] key, int seed) {
 		final int len = key.length;
 		final int limitOffset = len & 0xFFFFFFFC;
 
@@ -105,14 +101,14 @@ public final class MurmurHash {
 
 		int k = 0;
 		switch (len & 0x3) {
-		case 3:
-			k ^= ((key[off + 2] & 0xFF) << 16);
-		case 2:
-			k ^= ((key[off + 1] & 0xFF) << 8);
-		case 1:
-			k ^= (key[off] & 0xFF);
+			case 3:
+				k ^= ((key[off + 2] & 0xFF) << 16);
+			case 2:
+				k ^= ((key[off + 1] & 0xFF) << 8);
+			case 1:
+				k ^= (key[off] & 0xFF);
 
-			hash ^= murmur3_round32(k);
+				hash ^= murmur3_round32(k);
 		}
 
 		hash ^= len;
@@ -120,14 +116,14 @@ public final class MurmurHash {
 		return hash;
 	}
 
-	private static final int murmur3_round32(int k) {
+	private static int murmur3_round32(int k) {
 		k *= MURMUR3_32_C1;
 		k = Integer.rotateLeft(k, 15);
 		k *= MURMUR3_32_C2;
 		return k;
 	}
 
-	public static final int murmur3_finalize_mix32(int hash) {
+	public static int murmur3_finalize_mix32(int hash) {
 		hash ^= hash >>> 16;
 		hash *= 0x85EBCA6B;
 		hash ^= hash >>> 13;
@@ -136,8 +132,8 @@ public final class MurmurHash {
 		return hash;
 	}
 
-	public static final long optimize() {
-		byte[] b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+	public static long optimize() {
+		byte[] b = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 		final long s = System.nanoTime();
 		for (int i = 0; i < 12000; i++) {
 			murmur2(b);
@@ -146,7 +142,7 @@ public final class MurmurHash {
 		return System.nanoTime() - s;
 	}
 
-	public static final int murmur2a(byte[] key) {
+	public static int murmur2a(byte[] key) {
 		return murmur2a(key, MURMUR2_32_SEED);
 	}
 
@@ -167,12 +163,12 @@ public final class MurmurHash {
 
 		int t = 0;
 		switch (len & 0x3) {
-		case 3:
-			t ^= ((key[off + 2] & 0xFF) << 16);
-		case 2:
-			t ^= ((key[off + 1] & 0xFF) << 8);
-		case 1:
-			t ^= (key[off] & 0xFF);
+			case 3:
+				t ^= ((key[off + 2] & 0xFF) << 16);
+			case 2:
+				t ^= ((key[off + 1] & 0xFF) << 8);
+			case 1:
+				t ^= (key[off] & 0xFF);
 		}
 
 		hash = murmur2_mmix(hash, t);
@@ -181,7 +177,7 @@ public final class MurmurHash {
 		return murmur2_finalize(hash);
 	}
 
-	private static final int murmur2_mmix(int hash, int k) {
+	private static int murmur2_mmix(int hash, int k) {
 		k *= MURMUR2_32_M;
 		k ^= (k >>> MURMUR2_32_R);
 		k *= MURMUR2_32_M;

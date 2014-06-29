@@ -70,8 +70,11 @@ public class BenchMutex {
 				}
 				for (int i = 0; i < n; i++) {
 					mutex.lock();
-					BenchMutex.m++;
-					mutex.unlock();
+					try {
+						BenchMutex.m++;
+					} finally {
+						mutex.unlock();
+					}
 				}
 				stop.release();
 			}

@@ -287,7 +287,7 @@ public final class RingBuffer implements DoubleSidedBuffer {
 	// this also seems to boosts performance, maybe because src and dst are
 	// strongly-typed and therefore better optimizable to a memcpy in the JIT'ed
 	// code
-	private static final void ac(byte[] src, int srcPos, byte[] dst, int dstPos, int length) {
+	private static void ac(byte[] src, int srcPos, byte[] dst, int dstPos, int length) {
 		System.arraycopy(src, srcPos, dst, dstPos, length);
 	}
 }
