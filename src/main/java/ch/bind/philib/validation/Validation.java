@@ -79,28 +79,28 @@ public abstract class Validation {
 		if (!value) {
 			throw new IllegalArgumentException("value must be true");
 		}
-		return value;
+		return true;
 	}
 
 	public static boolean isTrue(boolean value, String message) {
 		if (!value) {
 			throw new IllegalArgumentException(message);
 		}
-		return value;
+		return true;
 	}
 
 	public static boolean isFalse(boolean value) {
 		if (value) {
 			throw new IllegalArgumentException("value must be false");
 		}
-		return value;
+		return false;
 	}
 
 	public static boolean isFalse(boolean value, String message) {
 		if (value) {
 			throw new IllegalArgumentException(message);
 		}
-		return value;
+		return false;
 	}
 
 	public static <T extends CharSequence> T notNullOrEmpty(T value) {
@@ -148,10 +148,11 @@ public abstract class Validation {
 	}
 
 	public static <T> T[] noNullValues(T[] values) {
-		return noNullValues(values, "array must only contain non-null values");
+		return noNullValues(values, "array contains null values");
 	}
 
 	public static <T> T[] noNullValues(T[] values, String message) {
+		notNull(values);
 		for (T v : values) {
 			notNull(v, message);
 		}

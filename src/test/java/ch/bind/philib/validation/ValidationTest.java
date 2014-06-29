@@ -22,13 +22,17 @@
 
 package ch.bind.philib.validation;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 public class ValidationTest {
 
@@ -105,6 +109,18 @@ public class ValidationTest {
 		} catch (IllegalArgumentException e) {
 			// expected
 		}
+		try {
+			Validation.notNegative(-1L);
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+		try {
+			Validation.notNegative(-1L, "foo");
+			fail("should throw");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
 	}
 
 	@Test
@@ -131,15 +147,14 @@ public class ValidationTest {
 
 	@Test
 	public void notNullOrEmptyMap() {
-		HashMap<String, String> a = null;
 		try {
-			Validation.notNullOrEmpty(a);
+			Validation.notNullOrEmpty((Map<String, String>) null);
 			fail("should throw");
 		} catch (Exception e) {
 			assertTrue(e instanceof IllegalArgumentException);
 		}
 
-		a = new HashMap<String, String>();
+		Map<String, String> a = new HashMap<String, String>();
 		try {
 			Validation.notNullOrEmpty(a);
 			fail("should throw");
@@ -148,21 +163,19 @@ public class ValidationTest {
 		}
 
 		a.put("foo", "bar");
-		HashMap<String, String> b = Validation.notNullOrEmpty(a);
-		assertTrue(a == b);
+		assertSame(Validation.notNullOrEmpty(a), a);
 	}
 
 	@Test
 	public void notNullOrEmptyCollection() {
-		LinkedList<String> a = null;
 		try {
-			Validation.notNullOrEmpty(a);
+			Validation.notNullOrEmpty((List<String>) null);
 			fail("should throw");
 		} catch (Exception e) {
 			assertTrue(e instanceof IllegalArgumentException);
 		}
 
-		a = new LinkedList<String>();
+		List<String> a = new LinkedList<String>();
 		try {
 			Validation.notNullOrEmpty(a);
 			fail("should throw");
@@ -171,7 +184,67 @@ public class ValidationTest {
 		}
 
 		a.add("foo");
-		LinkedList<String> b = Validation.notNullOrEmpty(a);
-		assertTrue(a == b);
+		assertSame(Validation.notNullOrEmpty(a), a);
+	}
+
+	@Test
+	public void notNullOrEmptyCharSequence() {
+		assertEquals(Validation.notNullOrEmpty("a"), "a");
+		assertEquals(Validation.notNullOrEmpty("b", "msg"), "b");
+
+		try {
+			Validation.notNullOrEmpty((CharSequence) null);
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+		try {
+			Validation.notNullOrEmpty((CharSequence) "");
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+		try {
+			Validation.notNullOrEmpty((CharSequence) null, "msg");
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+		try {
+			Validation.notNullOrEmpty((CharSequence) "", "msg");
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+	}
+
+	@Test
+	public void noNullValues() {
+		String[] a = null;
+		try {
+			Validation.noNullValues(a);
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+
+		a = new String[]{"a"};
+		Validation.noNullValues(a);
+
+		a = new String[]{null, "a"};
+		try {
+			Validation.noNullValues(a);
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
+
+		a = new String[]{"a", null};
+		try {
+			Validation.noNullValues(a);
+			fail("should throw");
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalArgumentException);
+		}
 	}
 }

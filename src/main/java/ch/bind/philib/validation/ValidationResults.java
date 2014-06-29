@@ -29,8 +29,8 @@ import java.util.LinkedList;
  */
 public final class ValidationResults implements Serializable {
 
+	static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private static final long serialVersionUID = 8465822377127857280L;
-
 	private final LinkedList<String> errors;
 
 	public ValidationResults() {
@@ -77,8 +77,6 @@ public final class ValidationResults implements Serializable {
 		if (errors.size() > 0)
 			throw new ValidationException(this);
 	}
-
-	static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	@Override
 	public String toString() {
