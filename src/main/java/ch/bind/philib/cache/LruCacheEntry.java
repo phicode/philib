@@ -22,10 +22,10 @@
 
 package ch.bind.philib.cache;
 
-import java.lang.ref.SoftReference;
-
 import ch.bind.philib.util.ClusteredIndex.Entry;
 import ch.bind.philib.util.LruNode;
+
+import java.lang.ref.SoftReference;
 
 class LruCacheEntry<K, V> implements Entry<K>, LruNode {
 

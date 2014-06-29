@@ -22,17 +22,15 @@
 
 package ch.bind.philib.cache;
 
-import java.lang.ref.SoftReference;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReferenceArray;
-
 import ch.bind.philib.lang.Cloner;
 import ch.bind.philib.lang.MurmurHash;
 import ch.bind.philib.validation.Validation;
 
-/**
- * @author Philipp Meinen
- */
+import java.lang.ref.SoftReference;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReferenceArray;
+
+/** @author Philipp Meinen */
 public final class LineCache<K, V> implements Cache<K, V> {
 
 	static final int DEFAULT_ORDER = 8;
@@ -114,7 +112,7 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		}
 	}
 
-	private static final int hash(Object o) {
+	private static int hash(Object o) {
 		return MurmurHash.murmur3_finalize_mix32(o.hashCode());
 	}
 
