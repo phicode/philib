@@ -22,10 +22,10 @@
 
 package ch.bind.philib.conf;
 
+import ch.bind.philib.validation.Validation;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import ch.bind.philib.validation.Validation;
 
 /**
  * @author Philipp Meinen

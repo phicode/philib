@@ -25,6 +25,7 @@ package ch.bind.philib.conf;
 /**
  * @deprecated use {@link ConfigListener} instead.
  */
-@Deprecated
+@Deprecated // TODO: remove in version >= 0.13
 public interface ConfigValueListener extends ConfigListener {
+
 }

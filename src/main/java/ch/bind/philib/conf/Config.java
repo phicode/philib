@@ -22,10 +22,16 @@
 
 package ch.bind.philib.conf;
 
+import ch.bind.philib.io.SafeCloseUtil;
+import ch.bind.philib.lang.CompareUtil;
+import ch.bind.philib.util.CowSet;
+import ch.bind.philib.validation.Validation;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,11 +39,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-
-import ch.bind.philib.io.SafeCloseUtil;
-import ch.bind.philib.lang.CompareUtil;
-import ch.bind.philib.util.CowSet;
-import ch.bind.philib.validation.Validation;
 
 /**
  * @author Philipp Meinen
@@ -77,9 +78,7 @@ public final class Config {
 	public synchronized void setURLs(URL[] urls) {
 		Validation.notNullOrEmpty(urls);
 		this.urls.clear();
-		for (URL url : urls) {
-			this.urls.add(url);
-		}
+		Collections.addAll(this.urls, urls);
 	}
 
 	public synchronized void setURLs(Collection<URL> urls) {
@@ -100,9 +99,8 @@ public final class Config {
 
 	/**
 	 * Loads all configuration urls. At least one URL
-	 * 
-	 * @throws IOException
-	 *             in case no url could be opened.
+	 *
+	 * @throws IOException in case no url could be opened.
 	 */
 	public synchronized void load() throws IOException {
 		if (loading || urls.isEmpty()) {
@@ -182,7 +180,7 @@ public final class Config {
 		if (listeners.isEmpty()) {
 			return;
 		}
-		for (Entry<String,String> e : m.entrySet()) {
+		for (Entry<String, String> e : m.entrySet()) {
 			notifyAdded(e.getKey(), e.getValue());
 		}
 	}
