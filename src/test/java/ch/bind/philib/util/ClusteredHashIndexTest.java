@@ -22,20 +22,19 @@
 
 package ch.bind.philib.util;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import ch.bind.philib.util.ClusteredIndex.Entry;
+import org.testng.annotations.Test;
 
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 
-import org.testng.annotations.Test;
-
-import ch.bind.philib.util.ClusteredIndex.Entry;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 public class ClusteredHashIndexTest {
 

@@ -22,18 +22,17 @@
 
 package ch.bind.philib.lang;
 
-import static org.testng.Assert.assertTrue;
+import ch.bind.philib.TestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
-
-import ch.bind.philib.TestUtil;
+import static org.testng.Assert.assertTrue;
 
 public class MurmurHashTest {
 

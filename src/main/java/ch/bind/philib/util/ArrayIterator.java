@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
 
 /**
  * An {@code Iterator} over an array.
- * 
+ *
  * @author Philipp Meinen
  */
 public final class ArrayIterator<E> implements Iterator<E> {
@@ -38,9 +38,8 @@ public final class ArrayIterator<E> implements Iterator<E> {
 
 	/**
 	 * Creates an array iterator which will iterate over the provided array.
-	 * 
-	 * @param data
-	 *            the data to iterate over, may be null or empty.
+	 *
+	 * @param data the data to iterate over, may be null or empty.
 	 */
 	public ArrayIterator(E[] data) {
 		this.data = data;

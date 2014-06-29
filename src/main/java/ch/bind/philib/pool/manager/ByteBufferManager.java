@@ -22,9 +22,9 @@
 
 package ch.bind.philib.pool.manager;
 
-import java.nio.ByteBuffer;
-
 import ch.bind.philib.lang.ArrayUtil;
+
+import java.nio.ByteBuffer;
 
 public final class ByteBufferManager implements ObjectManager<ByteBuffer> {
 

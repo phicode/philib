@@ -22,10 +22,7 @@
 
 package ch.bind.philib.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,7 +30,10 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 public class StaticIntMapTest {
 
@@ -49,7 +49,7 @@ public class StaticIntMapTest {
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "null or empty collection provided")
 	public void noEmptyCreateCollection() {
-		StaticIntMap.create(Collections.<TestDummy> emptyList());
+		StaticIntMap.create(Collections.<TestDummy>emptyList());
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "null or empty array provided")
@@ -60,7 +60,7 @@ public class StaticIntMapTest {
 	@Test(expectedExceptions = NullPointerException.class)
 	public void noNullElementsInCreateArray() {
 		TestDummy a = new TestDummy(1, "a");
-		StaticIntMap.create(new TestDummy[] { a, null });
+		StaticIntMap.create(new TestDummy[]{a, null});
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -80,7 +80,7 @@ public class StaticIntMapTest {
 	public void oneElement() {
 		TestDummy a = new TestDummy(1, "a");
 		String other = "b";
-		StaticIntMap<String> map = StaticIntMap.create(new TestDummy[] { a });
+		StaticIntMap<String> map = StaticIntMap.create(new TestDummy[]{a});
 		assertEquals(map.size(), 1);
 		for (int i = -1000; i < 1000; i++) {
 			if (i == 1) {
@@ -100,7 +100,7 @@ public class StaticIntMapTest {
 		TestDummy a = new TestDummy(1, "a");
 		TestDummy b = new TestDummy(2, "b");
 		String other = "c";
-		StaticIntMap<String> map = StaticIntMap.create(new TestDummy[] { a, b });
+		StaticIntMap<String> map = StaticIntMap.create(new TestDummy[]{a, b});
 		assertEquals(map.size(), 2);
 		for (int i = -1000; i < 1000; i++) {
 			if (i == 1) {

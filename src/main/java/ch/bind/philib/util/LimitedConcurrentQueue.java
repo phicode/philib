@@ -22,10 +22,10 @@
 
 package ch.bind.philib.util;
 
+import ch.bind.philib.validation.Validation;
+
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import ch.bind.philib.validation.Validation;
 
 public final class LimitedConcurrentQueue<T> {
 
@@ -49,7 +49,7 @@ public final class LimitedConcurrentQueue<T> {
 	}
 
 	public boolean offer(T value) {
-		for (;;) {
+		for (; ; ) {
 			final int s = size.get();
 			if (s >= capacity) {
 				return false;

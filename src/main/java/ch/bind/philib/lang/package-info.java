@@ -22,7 +22,7 @@
 
 /**
  * Provides classes with helper-methods for language and therefore data related tasks.
- * 
+ *
  * @author Philipp Meinen
  */
 

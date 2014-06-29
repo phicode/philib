@@ -22,19 +22,18 @@
 
 package ch.bind.philib.io;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import ch.bind.philib.TestUtil;
+import ch.bind.philib.util.TLR;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.testng.annotations.Test;
-
-import ch.bind.philib.TestUtil;
-import ch.bind.philib.util.TLR;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 public class RingBufferTest {
 
@@ -245,7 +244,7 @@ public class RingBufferTest {
 	@Test
 	public void clear() {
 		RingBuffer buf = new RingBuffer();
-		byte[] a = { 0, 1, 2, 3 };
+		byte[] a = {0, 1, 2, 3};
 		buf.write(a);
 		assertEquals(a.length, buf.available());
 		buf.clear();

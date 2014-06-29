@@ -22,7 +22,7 @@
 
 package ch.bind.philib;
 
-import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -30,7 +30,7 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertNotNull;
 
 // this is here to satisfy the code-coverage tool emma
 // by invoking the private constructors.

@@ -22,16 +22,17 @@
 
 package ch.bind.philib.cache;
 
-import static org.testng.Assert.fail;
-
-import java.util.Random;
-
 import ch.bind.philib.TestUtil;
 import ch.bind.philib.util.TLR;
 
+import java.util.Random;
+
+import static org.testng.Assert.fail;
+
 public final class Benchmark {
 
-	private Benchmark() {}
+	private Benchmark() {
+	}
 
 	private static final int COUNT = 1024 * 1024;
 

@@ -22,19 +22,18 @@
 
 package ch.bind.philib.lang;
 
+import ch.bind.philib.TestUtil;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static ch.bind.philib.lang.HashUtil.nextHash;
 import static ch.bind.philib.lang.HashUtil.startHash;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.testng.annotations.Test;
-
-import ch.bind.philib.TestUtil;
 
 public class HashUtilTest {
 

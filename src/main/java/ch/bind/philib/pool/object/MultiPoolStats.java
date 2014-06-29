@@ -25,7 +25,7 @@ import ch.bind.philib.pool.PoolStats;
 
 /**
  * Collects buffer statistics from multiple pools in a concurrent environment.
- * 
+ *
  * @author Philipp Meinen
  */
 final class MultiPoolStats implements PoolStats {

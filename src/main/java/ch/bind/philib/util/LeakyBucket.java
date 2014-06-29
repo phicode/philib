@@ -26,7 +26,7 @@ import ch.bind.philib.validation.Validation;
 
 /**
  * An implementation of the leaky bucket pattern for throughput control.
- * 
+ *
  * @author Philipp Meinen
  */
 public final class LeakyBucket {
@@ -88,7 +88,7 @@ public final class LeakyBucket {
 
 	/**
 	 * @param timeNs a relative timestamp as provided by {@code System.nanoTime()} and <b>not</b>
-	 *            {@code System.currentTimeMillis()}.
+	 *               {@code System.currentTimeMillis()}.
 	 * @return the number of items that can be taken immediately
 	 */
 	public long canTake(long timeNs) {
@@ -102,7 +102,7 @@ public final class LeakyBucket {
 
 	/**
 	 * @param timeNs a relative timestamp as provided by {@code System.nanoTime()} and <b>not</b>
-	 *            {@code System.currentTimeMillis()}.
+	 *               {@code System.currentTimeMillis()}.
 	 * @return the number of nanoseconds until an item can be taken
 	 */
 	public long nextTakeNs(long timeNs) {

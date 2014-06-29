@@ -22,14 +22,13 @@
 
 package ch.bind.philib.lang;
 
+import ch.bind.philib.TestUtil;
+import org.testng.annotations.Test;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
-
-import org.testng.annotations.Test;
-
-import ch.bind.philib.TestUtil;
 
 public class ServiceStateTest {
 

@@ -22,15 +22,15 @@
 
 package ch.bind.philib.util;
 
+import ch.bind.philib.validation.Validation;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
-import ch.bind.philib.validation.Validation;
-
 /**
  * A statically initialized and immutable map of {@code int -> T}.
- * 
+ *
  * @author Philipp Meinen
  */
 public final class StaticIntMap<T> {
@@ -45,12 +45,11 @@ public final class StaticIntMap<T> {
 	}
 
 	/**
-	 * 
 	 * @param elements
 	 * @return A fully initialized {@code StaticIntMap}.
 	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i> or contains
-	 *             duplicate keys.
-	 * @throws NullPointerException If any value in {@code elements} is a {@code null}-value.
+	 *                                  duplicate keys.
+	 * @throws NullPointerException     If any value in {@code elements} is a {@code null}-value.
 	 */
 	public static <T> StaticIntMap<T> create(Collection<? extends IntPair<T>> elements) {
 		Validation.notNullOrEmpty(elements);
@@ -64,8 +63,8 @@ public final class StaticIntMap<T> {
 	 * @param elements
 	 * @return A fully initialized {@code StaticIntMap}.
 	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i> or contains
-	 *             duplicate keys.
-	 * @throws NullPointerException If any value in {@code elements} is a {@code null}-value.
+	 *                                  duplicate keys.
+	 * @throws NullPointerException     If any value in {@code elements} is a {@code null}-value.
 	 */
 	public static <T> StaticIntMap<T> create(IntPair<T>[] elements) {
 		Validation.notNullOrEmpty(elements);

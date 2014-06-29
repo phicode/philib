@@ -22,11 +22,11 @@
 
 package ch.bind.philib.util;
 
-import java.util.Arrays;
-
 import ch.bind.philib.lang.MurmurHash;
 import ch.bind.philib.util.ClusteredIndex.Entry;
 import ch.bind.philib.validation.Validation;
+
+import java.util.Arrays;
 
 // TODO: round table size up (2^x) and use bitmasks
 // TODO: concurrent version
@@ -42,7 +42,7 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 	@Override
 	public boolean add(final T entry) {
 		Validation.isTrue(entry != null && entry.getNextIndexEntry() == null && entry.getKey() != null, //
-		        "newly added entries must be non-null and cleared");
+				"newly added entries must be non-null and cleared");
 
 		final K key = entry.getKey();
 		final int hash = key.hashCode();

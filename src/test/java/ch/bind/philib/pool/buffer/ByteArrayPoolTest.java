@@ -22,9 +22,8 @@
 
 package ch.bind.philib.pool.buffer;
 
-import org.testng.annotations.Test;
-
 import ch.bind.philib.pool.Pool;
+import org.testng.annotations.Test;
 
 @Test
 public class ByteArrayPoolTest extends BufferPoolTestBase<byte[]> {

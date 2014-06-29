@@ -31,28 +31,27 @@ import java.util.concurrent.TimeUnit;
  * A map which additionaly to normal map operations allows the user to supply a timeout. The oldest timed-out entry in
  * the map can be found through the non-blocking {@link TimeoutMap#pollTimeoutNow()} method or two blocking methods:
  * {@link TimeoutMap#pollTimeoutBlocking()} and {@link TimeoutMap#pollTimeoutBlocking(long, TimeUnit)}.
- * 
- * @author Philipp Meinen
- * 
+ *
  * @param <K> type parameter for the map's keys.
  * @param <V> type parameter for the map's values.
+ * @author Philipp Meinen
  */
 public interface TimeoutMap<K, V> {
 
 	/**
 	 * Add a key-value pair with an associated timeout to the map. The resulting timeout-timestamp is the current time
 	 * plus the supplied timeout.
-	 * 
+	 *
 	 * @param timeout the timeout for this key-value pair (in milliseconds)
-	 * @param key -
-	 * @param value -
+	 * @param key     -
+	 * @param value   -
 	 * @return the value which was previously associated with the given key or {@code null} if none.
 	 */
 	V put(long timeout, K key, V value);
 
 	/**
 	 * Searches a value by its key
-	 * 
+	 *
 	 * @param key
 	 * @return {@code null} if the key does not exist.
 	 */
@@ -60,7 +59,7 @@ public interface TimeoutMap<K, V> {
 
 	/**
 	 * removes an entry by it's key
-	 * 
+	 *
 	 * @param key the key for which an entry must be removed.
 	 * @return {@code null} if there was no entry for this key in that map, otherwise the value of the removed entry.
 	 */
@@ -69,7 +68,7 @@ public interface TimeoutMap<K, V> {
 	/**
 	 * <b>Nonblocking</b> poll for the next entry which is timed out, based on the time of the invocation of this
 	 * method.
-	 * 
+	 *
 	 * @return {@code null} if there is no timed-out entry in this map. otherwise the oldest timed-out entry.
 	 */
 	Map.Entry<K, V> pollTimeoutNow();
@@ -77,16 +76,16 @@ public interface TimeoutMap<K, V> {
 	/**
 	 * <b>Nonblocking</b> poll for all timed out entries, based on the time of the invocation of this
 	 * method.
-	 * 
+	 *
 	 * @return {@link Collections#EMPTY_LIST} if there is are no timed out entries in this map.
 	 */
-	List<Map.Entry<K,V>> pollAllTimeoutNow();
+	List<Map.Entry<K, V>> pollAllTimeoutNow();
 
 	/**
 	 * <b>Blocking</b> poll for the next entry which is timed out.
-	 * 
+	 *
 	 * @return {@code null} if there is no timed-out entry in this map within the given duration. otherwise the oldest
-	 *         timed-out entry.
+	 * timed-out entry.
 	 */
 	Map.Entry<K, V> pollTimeoutBlocking() throws InterruptedException;
 
@@ -95,7 +94,7 @@ public interface TimeoutMap<K, V> {
 	 * long the method must wait for a timeout to occur.
 	 *
 	 * @return {@code null} if there is no timed-out entry in this map within the given duration. otherwise the oldest
-	 *         timed-out entry.
+	 * timed-out entry.
 	 */
 	Map.Entry<K, V> pollTimeoutBlocking(long duration, TimeUnit timeUnit) throws InterruptedException;
 
@@ -106,7 +105,7 @@ public interface TimeoutMap<K, V> {
 
 	/**
 	 * query the number of entries in this map.
-	 * 
+	 *
 	 * @return the number of entries in this map.
 	 */
 	int size();
@@ -118,7 +117,7 @@ public interface TimeoutMap<K, V> {
 
 	/**
 	 * Check for the existence of a key.
-	 * 
+	 *
 	 * @param key -
 	 * @return {@code true} if there is an entry identified by that key in this map, {@code false otherwise}.
 	 */
@@ -126,9 +125,9 @@ public interface TimeoutMap<K, V> {
 
 	/**
 	 * @return {@link java.lang.Long.MAX_VALUE} if the TimeoutMap is empty. Otherwise the time until the next entry
-	 *         times out (in
-	 *         milliseconds since the epoch). A return value of zero indicates that there is at least one entry which
-	 *         has already timed out.
+	 * times out (in
+	 * milliseconds since the epoch). A return value of zero indicates that there is at least one entry which
+	 * has already timed out.
 	 */
 	long getTimeToNextTimeout();
 }

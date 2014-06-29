@@ -22,12 +22,11 @@
 
 package ch.bind.philib.pool.buffer;
 
-import java.nio.ByteBuffer;
-
-import org.testng.annotations.Test;
-
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.manager.ByteBufferManager;
+import org.testng.annotations.Test;
+
+import java.nio.ByteBuffer;
 
 @Test
 public class ByteBufferPoolTest extends BufferPoolTestBase<ByteBuffer> {

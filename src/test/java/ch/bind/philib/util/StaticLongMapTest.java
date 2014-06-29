@@ -22,10 +22,7 @@
 
 package ch.bind.philib.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,7 +30,10 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 public class StaticLongMapTest {
 
@@ -49,7 +49,7 @@ public class StaticLongMapTest {
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "null or empty collection provided")
 	public void noEmptyCreateCollection() {
-		StaticLongMap.create(Collections.<TestDummy> emptyList());
+		StaticLongMap.create(Collections.<TestDummy>emptyList());
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "null or empty array provided")
@@ -60,7 +60,7 @@ public class StaticLongMapTest {
 	@Test(expectedExceptions = NullPointerException.class)
 	public void noNullElementsInCreateArray() {
 		TestDummy a = new TestDummy(1, "a");
-		StaticLongMap.create(new TestDummy[] { a, null });
+		StaticLongMap.create(new TestDummy[]{a, null});
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -80,7 +80,7 @@ public class StaticLongMapTest {
 	public void oneElement() {
 		TestDummy a = new TestDummy(1, "a");
 		String other = "b";
-		StaticLongMap<String> map = StaticLongMap.create(new TestDummy[] { a });
+		StaticLongMap<String> map = StaticLongMap.create(new TestDummy[]{a});
 		assertEquals(map.size(), 1);
 		for (int i = -1000; i < 1000; i++) {
 			if (i == 1) {
@@ -100,7 +100,7 @@ public class StaticLongMapTest {
 		TestDummy a = new TestDummy(1, "a");
 		TestDummy b = new TestDummy(2, "b");
 		String other = "c";
-		StaticLongMap<String> map = StaticLongMap.create(new TestDummy[] { a, b });
+		StaticLongMap<String> map = StaticLongMap.create(new TestDummy[]{a, b});
 		assertEquals(map.size(), 2);
 		for (int i = -1000; i < 1000; i++) {
 			if (i == 1) {

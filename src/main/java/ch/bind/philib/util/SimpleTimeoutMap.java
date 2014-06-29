@@ -22,6 +22,10 @@
 
 package ch.bind.philib.util;
 
+import ch.bind.philib.lang.CompareUtil;
+import ch.bind.philib.math.Calc;
+import ch.bind.philib.validation.Validation;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,19 +40,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import ch.bind.philib.lang.CompareUtil;
-import ch.bind.philib.math.Calc;
-import ch.bind.philib.validation.Validation;
-
 /**
  * An implementation of {@link TimeoutMap} which uses the {@link TreeMap} and {@link HashMap} from
  * java.util for
  * internal data management. This implementation is threadsafe.
- * 
- * @author Philipp Meinen
- * 
+ *
  * @param <K> type parameter for the map's keys.
  * @param <V> type parameter for the map's values.
+ * @author Philipp Meinen
  * @see TimeoutMap
  */
 public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
@@ -161,7 +160,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 		} finally {
 			wlock.unlock();
 		}
-		return rv != null ? rv : Collections.<Map.Entry<K, V>> emptyList();
+		return rv != null ? rv : Collections.<Map.Entry<K, V>>emptyList();
 	}
 
 	@Override
@@ -210,7 +209,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
 	/**
 	 * Find entries that are timed out
-	 * 
+	 *
 	 * @param timestamp The timeout cap. Anything older than that is timed out
 	 * @return the oldest timed out entry
 	 */
@@ -336,7 +335,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				@SuppressWarnings("rawtypes")
 				Map.Entry other = (Map.Entry) obj;
 				return CompareUtil.equals(this.key, other.getKey()) && //
-				        CompareUtil.equals(this.value, other.getValue());
+						CompareUtil.equals(this.value, other.getValue());
 			}
 			return false;
 		}

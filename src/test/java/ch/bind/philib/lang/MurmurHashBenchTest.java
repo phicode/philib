@@ -22,11 +22,10 @@
 
 package ch.bind.philib.lang;
 
-import static org.testng.Assert.assertTrue;
-
+import ch.bind.philib.TestUtil;
 import org.testng.annotations.Test;
 
-import ch.bind.philib.TestUtil;
+import static org.testng.Assert.assertTrue;
 
 public class MurmurHashBenchTest {
 
@@ -67,6 +66,7 @@ public class MurmurHashBenchTest {
 	}
 
 	private static final byte[] FILLER = new byte[65536];
+
 	static {
 		for (int i = 0; i < FILLER.length; i++) {
 			FILLER[i] = (byte) i;
@@ -105,7 +105,7 @@ public class MurmurHashBenchTest {
 		double mbPerSec = total / (time / 1000000000f) / (1024f * 1024f);
 		double nsPerByte = ((double) time) / ((double) total);
 		System.out.printf("murmur2 size=%5d total=%6d sum=%20d %5.3fms %3.3fmb/sec %.3fns/byte%n", //
-		        size, total, sum, (time / 1000000f), mbPerSec, nsPerByte);
+				size, total, sum, (time / 1000000f), mbPerSec, nsPerByte);
 	}
 
 	private static void testSpeed3(final int size) {
@@ -135,6 +135,6 @@ public class MurmurHashBenchTest {
 		double mbPerSec = total / (time / 1000000000f) / (1024f * 1024f);
 		double nsPerByte = ((double) time) / ((double) total);
 		System.out.printf("murmur3 size=%5d total=%6d sum=%20d %5.3fms %3.3fmb/sec %.3fns/byte%n", //
-		        size, total, sum, (time / 1000000f), mbPerSec, nsPerByte);
+				size, total, sum, (time / 1000000f), mbPerSec, nsPerByte);
 	}
 }

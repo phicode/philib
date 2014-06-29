@@ -22,11 +22,11 @@
 
 package ch.bind.philib.util;
 
+import ch.bind.philib.TestUtil;
+
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import ch.bind.philib.TestUtil;
 
 public class BenchMutex {
 

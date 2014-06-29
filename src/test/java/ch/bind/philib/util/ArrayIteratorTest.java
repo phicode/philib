@@ -22,21 +22,21 @@
 
 package ch.bind.philib.util;
 
+import org.testng.annotations.Test;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
-import org.testng.annotations.Test;
-
 public class ArrayIteratorTest {
 
 	@Test
 	public void regular() {
-		Integer[] xs = { 1, 2, 3, };
+		Integer[] xs = {1, 2, 3,};
 		ArrayIterator<Integer> iter = new ArrayIterator<Integer>(xs);
 
 		assertTrue(iter.hasNext());
@@ -56,7 +56,7 @@ public class ArrayIteratorTest {
 
 	@Test
 	public void regularWithModifications() {
-		Integer[] xs = { 1, 2, 3, };
+		Integer[] xs = {1, 2, 3,};
 		ArrayIterator<Integer> iter = new ArrayIterator<Integer>(xs);
 
 		xs[0] = 5;

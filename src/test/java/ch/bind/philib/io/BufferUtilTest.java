@@ -22,15 +22,14 @@
 
 package ch.bind.philib.io;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import ch.bind.philib.lang.ArrayUtil;
+import org.testng.annotations.Test;
 
 import java.nio.ByteBuffer;
 
-import org.testng.annotations.Test;
-
-import ch.bind.philib.lang.ArrayUtil;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class BufferUtilTest {
 

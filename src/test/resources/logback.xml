@@ -6,11 +6,11 @@
 		</encoder>
 	</appender>
 
-	<logger name="ch.bind" level="INFO" />
-	<logger name="ch.bind.philib.lang.ThreadUtil" level="OFF" />
-	<logger name="ch.bind.philib.msg.vm.PubSubVM" level="OFF" />
+	<logger name="ch.bind" level="INFO"/>
+	<logger name="ch.bind.philib.lang.ThreadUtil" level="OFF"/>
+	<logger name="ch.bind.philib.msg.vm.PubSubVM" level="OFF"/>
 
 	<root level="WARN">
-		<appender-ref ref="STDOUT" />
+		<appender-ref ref="STDOUT"/>
 	</root>
 </configuration>

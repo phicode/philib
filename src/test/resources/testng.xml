@@ -4,7 +4,7 @@
 <suite name="philib" verbose="1" parallel="false">
 	<test name="all">
 		<packages>
-			<package name="ch.bind.philib.*" />
+			<package name="ch.bind.philib.*"/>
 		</packages>
 	</test>
 </suite>

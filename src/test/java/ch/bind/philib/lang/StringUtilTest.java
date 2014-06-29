@@ -153,8 +153,8 @@ public class StringUtilTest {
 
 	@Test
 	public void split() {
-		String[] abc = { "abc" };
-		String[] a_b = { "a", "b" };
+		String[] abc = {"abc"};
+		String[] a_b = {"a", "b"};
 
 		assertEquals(StringUtil.split(null, ' '), StringUtil.EMPTY_STRING_ARRAY);
 		assertEquals(StringUtil.split("", ' '), StringUtil.EMPTY_STRING_ARRAY);

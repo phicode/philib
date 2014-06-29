@@ -21,9 +21,9 @@
  */
 package ch.bind.philib.pool.object;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import ch.bind.philib.pool.PoolStats;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Philipp Meinen
@@ -77,6 +77,6 @@ public final class SimplePoolStats implements PoolStats {
 	@Override
 	public String toString() {
 		return String.format("creates=%d, takes=%d, recycled=%d, released=%d",//
-		        creates.get(), takes.get(), recycled.get(), released.get());
+				creates.get(), takes.get(), recycled.get(), released.get());
 	}
 }

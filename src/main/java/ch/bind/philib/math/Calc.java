@@ -30,8 +30,8 @@ public abstract class Calc {
 	/**
 	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not evenly divisible by
 	 * <i>divisor</i>.
-	 * 
-	 * @param num a number &gt;= 0
+	 *
+	 * @param num     a number &gt;= 0
 	 * @param divisor a number &gt; 0
 	 * @return rounded up {@code num/divisor}
 	 */
@@ -43,8 +43,8 @@ public abstract class Calc {
 	/**
 	 * Divides <i>num</i> by <i>divisor</i>, rounding up if <i>num</i> is not evenly divisible by
 	 * <i>divisor</i>.
-	 * 
-	 * @param num a number &gt;= 0
+	 *
+	 * @param num     a number &gt;= 0
 	 * @param divisor a number &gt; 0
 	 * @return rounded up {@code num/divisor}
 	 */
@@ -60,13 +60,11 @@ public abstract class Calc {
 
 	/**
 	 * Detects under or overflow after calculating <b>result = a + b</b>.
-	 * 
 	 * Derivation
-	 * 
 	 * <pre>
 	 * sign bits:
 	 * A B R  Outcome     A^R    B^R   ((A^R) & (B^R))
-	 * 0 0 0  OK           0      0           0 
+	 * 0 0 0  OK           0      0           0
 	 * 0 0 1  Overflow     1      1           1
 	 * 0 1 0  OK           0      1           0
 	 * 0 1 1  OK           1      0           0
@@ -74,10 +72,9 @@ public abstract class Calc {
 	 * 1 0 1  OK           0      1           0
 	 * 1 1 0  Underflow    1      1           1
 	 * 1 1 1  OK           0      0           0
-	 * 
 	 * ((A^R) & (B^R)) produces a negative number if an under/overflow occurred.
 	 * </pre>
-	 * 
+	 *
 	 * @param a -
 	 * @param b -
 	 * @param r result of a + b
@@ -99,7 +96,7 @@ public abstract class Calc {
 	 * f(10) = 55<br/>
 	 * f(100) = 5050<br/>
 	 * </code>
-	 * 
+	 *
 	 * @param end The end value of the sum-range.
 	 * @return The sum of all values from 1 to <code>end</code>, including.
 	 */
@@ -113,9 +110,9 @@ public abstract class Calc {
 
 	/**
 	 * Calculates the sum of all values from <code>start</code> to <code>end</code>, including.
-	 * 
+	 *
 	 * @param start The start value of the sum-range.
-	 * @param end The end value of the sum-range.
+	 * @param end   The end value of the sum-range.
 	 * @return The sum of all values from <code>start</code> to <code>end</code> , including.
 	 */
 

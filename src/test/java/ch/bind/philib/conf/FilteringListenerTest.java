@@ -22,13 +22,13 @@
 
 package ch.bind.philib.conf;
 
+import org.testng.annotations.Test;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-
-import org.testng.annotations.Test;
 
 public class FilteringListenerTest {
 

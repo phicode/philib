@@ -21,12 +21,11 @@
  */
 package ch.bind.philib.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
+import ch.bind.philib.TestUtil;
 import org.testng.annotations.Test;
 
-import ch.bind.philib.TestUtil;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class LeakyBucketTest {
 

@@ -34,7 +34,6 @@ public abstract class CompareUtil {
 
 	/**
 	 * A null-safe equality helper.
-	 *
 	 * <pre>
 	 * input                   return value
 	 * ------------------------------------
@@ -64,7 +63,6 @@ public abstract class CompareUtil {
 
 	/**
 	 * A null-safe compare helper.
-	 *
 	 * <pre>
 	 * input                   return value
 	 * ------------------------------------
@@ -116,7 +114,6 @@ public abstract class CompareUtil {
 	/**
 	 * Helper for compareTo implementations.<br/>
 	 * Boolean version which considers {@code false < true}
-	 *
 	 * <pre>
 	 * a     b
 	 * -----------------------
@@ -137,7 +134,6 @@ public abstract class CompareUtil {
 	/**
 	 * Helper for compareTo implementations.<br/>
 	 * Byte version which masks the input values so that an unsigned comparison is performed.
-	 *
 	 * <pre>
 	 * Masks -128 -&gt; 127 =&gt; 0 -&gt; 255
 	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
@@ -153,7 +149,6 @@ public abstract class CompareUtil {
 
 	/**
 	 * Helper for compareTo implementations.
-	 *
 	 * <pre>
 	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
 	 * </pre>
@@ -168,7 +163,6 @@ public abstract class CompareUtil {
 
 	/**
 	 * Helper for compareTo implementations.
-	 *
 	 * <pre>
 	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; => &#x7b; -1, 0, 1 &#x7d;
 	 * </pre>
@@ -183,7 +177,6 @@ public abstract class CompareUtil {
 
 	/**
 	 * Helper for compareTo implementations.
-	 *
 	 * <pre>
 	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
 	 * </pre>
@@ -198,7 +191,6 @@ public abstract class CompareUtil {
 
 	/**
 	 * Helper for compareTo implementations.
-	 *
 	 * <pre>
 	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
 	 * </pre>
@@ -213,7 +205,6 @@ public abstract class CompareUtil {
 
 	/**
 	 * Helper for compareTo implementations.
-	 *
 	 * <pre>
 	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
 	 * </pre>
@@ -228,7 +219,6 @@ public abstract class CompareUtil {
 
 	/**
 	 * Helper for compareTo implementations.
-	 *
 	 * <pre>
 	 * Maps &#x7b; a&lt;b, a==b, a&gt;b &#x7d; =&gt; &#x7b; -1, 0, 1 &#x7d;
 	 * </pre>

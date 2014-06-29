@@ -22,15 +22,14 @@
 
 package ch.bind.philib.io;
 
-import static ch.bind.philib.io.BitOps.findLowestSetBitIdx64;
-import static org.testng.Assert.assertEquals;
+import ch.bind.philib.TestUtil;
+import ch.bind.philib.util.TLR;
+import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import org.testng.annotations.Test;
-
-import ch.bind.philib.TestUtil;
-import ch.bind.philib.util.TLR;
+import static ch.bind.philib.io.BitOps.findLowestSetBitIdx64;
+import static org.testng.Assert.assertEquals;
 
 public class BitOpsTest {
 

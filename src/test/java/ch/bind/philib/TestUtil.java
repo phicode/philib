@@ -22,9 +22,7 @@
 
 package ch.bind.philib;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import ch.bind.philib.io.SafeCloseUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,7 +34,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ch.bind.philib.io.SafeCloseUtil;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 public class TestUtil {
 
@@ -65,7 +65,7 @@ public class TestUtil {
 		double perS = amount / (timeNs / 1000000000f);
 		double perMs = amount / (timeNs / 1000000f);
 		System.out.printf("Bench [%-20s] %12.0f %-16s in %12d ns => %12.0f %-3s/s => %15.3f %-3s/ms%n", //
-		        clazz.getSimpleName(), amount, description, timeNs, perS, shortUnit, perMs, shortUnit);
+				clazz.getSimpleName(), amount, description, timeNs, perS, shortUnit, perMs, shortUnit);
 	}
 
 	private static volatile SoftReference<List<String>> wordlist;

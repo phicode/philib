@@ -31,9 +31,7 @@ import static ch.bind.philib.lang.MurmurHash.murmur2a_8bit;
 /**
  * Provides helper methods for hash-code generation.<br/>
  * Hash methods for handling all primitive types as well as <code>Object</code>s are provided.<br/>
- * 
  * <b>Usage:</b>
- * 
  * <pre>
  * &#64;Override
  * public int hashCode() {
@@ -44,9 +42,8 @@ import static ch.bind.philib.lang.MurmurHash.murmur2a_8bit;
  *     return hash;
  * }
  * </pre>
- * 
  * Note: fields may be null.
- * 
+ *
  * @author Philipp Meinen
  */
 public abstract class HashUtil {

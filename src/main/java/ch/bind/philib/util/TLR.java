@@ -26,13 +26,13 @@ import java.util.Random;
 
 /**
  * Thread local random. <br />
- * 
  * TODO: deprecate in favor of java.util.concurrent.ThreadLocalRandom once
  * everyone is using java 7.
- * 
+ *
  * @author phil
  */
 public final class TLR {
+
 	private TLR() {
 	}
 
@@ -40,7 +40,9 @@ public final class TLR {
 		@Override
 		protected Random initialValue() {
 			return new Random();
-		};
+		}
+
+		;
 	};
 
 	public static Random current() {

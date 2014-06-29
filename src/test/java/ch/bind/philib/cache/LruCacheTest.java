@@ -22,12 +22,11 @@
 
 package ch.bind.philib.cache;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
+import ch.bind.philib.lang.Cloner;
 import org.testng.annotations.Test;
 
-import ch.bind.philib.lang.Cloner;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @Test
 public class LruCacheTest extends CacheTestBase {

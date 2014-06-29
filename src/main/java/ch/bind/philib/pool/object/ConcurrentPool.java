@@ -22,13 +22,13 @@
 
 package ch.bind.philib.pool.object;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import ch.bind.philib.math.Calc;
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.PoolStats;
 import ch.bind.philib.pool.manager.ObjectManager;
 import ch.bind.philib.validation.Validation;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Philipp Meinen

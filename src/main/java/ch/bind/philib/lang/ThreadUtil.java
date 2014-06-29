@@ -21,15 +21,14 @@
  */
 package ch.bind.philib.lang;
 
+import ch.bind.philib.validation.Validation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ch.bind.philib.validation.Validation;
 
 /**
  * @author Philipp Meinen
@@ -50,9 +49,8 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param t
-	 *            the thread which must be interrupted and joined with a default
-	 *            timeout
+	 * @param t the thread which must be interrupted and joined with a default
+	 *          timeout
 	 * @return {@code true} for OK, {@code false} in case of an error.
 	 */
 	public static boolean interruptAndJoin(Thread t) {
@@ -60,11 +58,9 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param t
-	 *            the thread which must be interrupted
-	 * @param waitTime
-	 *            a specific timeout for the join operation. A negative or zero
-	 *            value means to no timeout is implied.
+	 * @param t        the thread which must be interrupted
+	 * @param waitTime a specific timeout for the join operation. A negative or zero
+	 *                 value means to no timeout is implied.
 	 * @return {@code true} for OK, {@code false} in case of an error.
 	 */
 	public static boolean interruptAndJoin(Thread t, long waitTime) {
@@ -132,7 +128,7 @@ public abstract class ThreadUtil {
 	 * Creates a thread for each non-null runnable in the provided array.<br/>
 	 * A standard {@link ThreadFactory} is used to create threads.<br/>
 	 * The newly created threads are not started.
-	 * 
+	 *
 	 * @param runnables -
 	 */
 	public static Thread[] createThreads(Runnable[] runnables) {
@@ -143,8 +139,8 @@ public abstract class ThreadUtil {
 	 * Creates a thread for each non-null runnable in the provided array.<br/>
 	 * The provided {@link ThreadFactory} is used to create threads.<br/>
 	 * The newly created threads are not started.
-	 * 
-	 * @param runnables -
+	 *
+	 * @param runnables     -
 	 * @param threadFactory -
 	 */
 	public static Thread[] createThreads(Runnable[] runnables, ThreadFactory threadFactory) {
@@ -164,7 +160,6 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * 
 	 * @param threads
 	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
 	 */

@@ -22,13 +22,13 @@
 
 package ch.bind.philib.util;
 
-import java.util.Comparator;
-
 import ch.bind.philib.lang.CompareUtil;
+
+import java.util.Comparator;
 
 /**
  * A key value pair who's key is of type long.
- * 
+ *
  * @author Philipp Meinen
  */
 public interface LongPair<T> {

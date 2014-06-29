@@ -23,7 +23,7 @@ package ch.bind.philib.pool;
 
 /**
  * Statistics about an object-pool.
- * 
+ *
  * @author Philipp Meinen
  */
 public interface PoolStats {

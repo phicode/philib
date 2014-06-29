@@ -22,14 +22,14 @@
 
 package ch.bind.philib.pool.buffer;
 
-import java.nio.ByteBuffer;
-
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.PoolStats;
 import ch.bind.philib.pool.manager.ByteBufferManager;
 import ch.bind.philib.pool.object.ConcurrentPool;
 import ch.bind.philib.pool.object.SoftRefPool;
 import ch.bind.philib.validation.Validation;
+
+import java.nio.ByteBuffer;
 
 /**
  * @author Philipp Meinen

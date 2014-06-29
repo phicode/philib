@@ -22,15 +22,15 @@
 
 package ch.bind.philib.util;
 
+import ch.bind.philib.validation.Validation;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
-import ch.bind.philib.validation.Validation;
-
 /**
  * A statically initialized and immutable map of {@code long -> T}.
- * 
+ *
  * @author Philipp Meinen
  */
 public final class StaticLongMap<T> {
@@ -45,12 +45,11 @@ public final class StaticLongMap<T> {
 	}
 
 	/**
-	 * 
 	 * @param elements
 	 * @return A fully initialized {@code StaticLongMap}.
 	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i> or contains
-	 *             duplicate keys.
-	 * @throws NullPointerException If any value in {@code elements} is a {@code null}-value.
+	 *                                  duplicate keys.
+	 * @throws NullPointerException     If any value in {@code elements} is a {@code null}-value.
 	 */
 	public static <T> StaticLongMap<T> create(Collection<? extends LongPair<T>> elements) {
 		Validation.notNullOrEmpty(elements);
@@ -64,8 +63,8 @@ public final class StaticLongMap<T> {
 	 * @param elements
 	 * @return A fully initialized {@code StaticLongMap}.
 	 * @throws IllegalArgumentException If the {@code elements} parameter is {@code null}, <i>empty</i> or contains
-	 *             duplicate keys.
-	 * @throws NullPointerException If any value in {@code elements} is a {@code null}-value.
+	 *                                  duplicate keys.
+	 * @throws NullPointerException     If any value in {@code elements} is a {@code null}-value.
 	 */
 	public static <T> StaticLongMap<T> create(LongPair<T>[] elements) {
 		Validation.notNullOrEmpty(elements);

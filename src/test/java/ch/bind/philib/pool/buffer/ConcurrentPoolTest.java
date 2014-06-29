@@ -22,13 +22,12 @@
 
 package ch.bind.philib.pool.buffer;
 
-import static org.testng.Assert.assertEquals;
-
-import org.testng.annotations.Test;
-
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.manager.ByteArrayManager;
 import ch.bind.philib.pool.object.ConcurrentPool;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 @Test
 public class ConcurrentPoolTest extends BufferPoolTestBase<byte[]> {

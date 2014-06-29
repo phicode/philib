@@ -22,9 +22,8 @@
 
 package ch.bind.philib.cache;
 
-import org.testng.annotations.Test;
-
 import ch.bind.philib.lang.Cloner;
+import org.testng.annotations.Test;
 
 /**
  * @author Philipp Meinen

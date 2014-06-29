@@ -22,12 +22,11 @@
 
 package ch.bind.philib.pool.object;
 
-import static org.testng.Assert.assertEquals;
-
-import org.testng.annotations.Test;
-
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.manager.ObjectManager;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 public class ObjectPoolTest {
 

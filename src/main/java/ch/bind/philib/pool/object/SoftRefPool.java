@@ -22,10 +22,10 @@
 
 package ch.bind.philib.pool.object;
 
-import java.lang.ref.SoftReference;
-
 import ch.bind.philib.pool.manager.ObjectManager;
 import ch.bind.philib.util.LimitedConcurrentQueue;
+
+import java.lang.ref.SoftReference;
 
 public final class SoftRefPool<T> extends PoolBase<T> {
 
@@ -38,7 +38,7 @@ public final class SoftRefPool<T> extends PoolBase<T> {
 
 	@Override
 	protected T poll() {
-		for (;;) {
+		for (; ; ) {
 			final SoftReference<T> ref = queue.poll();
 			if (ref == null) {
 				return null;

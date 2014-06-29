@@ -22,14 +22,14 @@
 
 package ch.bind.philib.lang;
 
+import ch.bind.philib.validation.Validation;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
-import ch.bind.philib.validation.Validation;
-
 /**
  * A thread factory which generates thread names of the form &lt;name&gt;-&lt;sequence&gt;
- * 
+ *
  * @author philipp meinen
  */
 public final class NamedSeqThreadFactory implements ThreadFactory {
@@ -43,25 +43,25 @@ public final class NamedSeqThreadFactory implements ThreadFactory {
 	private final ThreadGroup group;
 
 	/**
-	 * @see NamedSeqThreadFactory
 	 * @param name The name which must be used for newly created threads.
+	 * @see NamedSeqThreadFactory
 	 */
 	public NamedSeqThreadFactory(String name) {
 		this(name, false, null);
 	}
 
 	/**
-	 * @see NamedSeqThreadFactory
-	 * @param name The name which must be used for newly created threads.
+	 * @param name   The name which must be used for newly created threads.
 	 * @param daemon Newly created threads will have their daemon-flag set to the provided value.
+	 * @see NamedSeqThreadFactory
 	 */
 	public NamedSeqThreadFactory(String name, boolean daemon) {
 		this(name, daemon, null);
 	}
 
 	/**
-	 * @see NamedSeqThreadFactory
 	 * @param name The name which must be used for newly created threads.
+	 * @see NamedSeqThreadFactory
 	 */
 	public NamedSeqThreadFactory(String name, boolean daemon, ThreadGroup group) {
 		Validation.notNull(name);

@@ -22,13 +22,13 @@
 
 package ch.bind.philib.lang;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
 
 import java.util.regex.Pattern;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class ExceptionUtilTest {
 
@@ -46,7 +46,7 @@ public class ExceptionUtilTest {
 		}
 		assertNotNull(e);
 		String p = "^ExceptionUtilTest\\.buildMessageChain:[0-9]+#IllegalArgumentException\\(IAE\\) => " + //
-		        "ExceptionUtilTest\\.buildMessageChain:[0-9]+#NullPointerException\\(NPE\\)$";
+				"ExceptionUtilTest\\.buildMessageChain:[0-9]+#NullPointerException\\(NPE\\)$";
 		String out = ExceptionUtil.buildMessageChain(e);
 		assertTrue(Pattern.matches(p, out));
 	}

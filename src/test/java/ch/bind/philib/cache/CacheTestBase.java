@@ -22,26 +22,24 @@
 
 package ch.bind.philib.cache;
 
+import ch.bind.philib.TestUtil;
+import ch.bind.philib.lang.Cloner;
+import ch.bind.philib.math.Calc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
+
+import java.security.SecureRandom;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.security.SecureRandom;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
-
-import ch.bind.philib.TestUtil;
-import ch.bind.philib.lang.Cloner;
-import ch.bind.philib.math.Calc;
-
 /**
  * tests which must pass on all cache implementations.
- * 
+ *
  * @author philipp meinen
- * 
  */
 @Test
 public abstract class CacheTestBase {
@@ -66,55 +64,55 @@ public abstract class CacheTestBase {
 
 		final int def = getDefaultCapacity();
 
-		cache = this.<Integer, Integer> create();
+		cache = this.<Integer, Integer>create();
 		assertEquals(cache.capacity(), def);
 
-		cache = this.<Integer, Integer> create(def * 4);
+		cache = this.<Integer, Integer>create(def * 4);
 		assertEquals(cache.capacity(), def * 4);
 	}
 
 	@Test
 	public void minCapacity() {
-		this.<Integer, Integer> create(getMinCapacity());
+		this.<Integer, Integer>create(getMinCapacity());
 	}
 
-	@Test(expectedExceptions = { IllegalArgumentException.class })
+	@Test(expectedExceptions = {IllegalArgumentException.class})
 	public void notLessThanMinCapacity() {
-		this.<Integer, Integer> create(getMinCapacity() - getBucketSize());
+		this.<Integer, Integer>create(getMinCapacity() - getBucketSize());
 	}
 
-	@Test(expectedExceptions = { IllegalArgumentException.class })
+	@Test(expectedExceptions = {IllegalArgumentException.class})
 	public void notZeroCapacity() {
-		this.<Integer, Integer> create(0);
+		this.<Integer, Integer>create(0);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void getNullKey() {
-		Cache<String, String> cache = this.<String, String> create();
+		Cache<String, String> cache = this.<String, String>create();
 		cache.get(null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void setNullKey() {
-		Cache<String, String> cache = this.<String, String> create();
+		Cache<String, String> cache = this.<String, String>create();
 		cache.set(null, "abc");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void setNullValue() {
-		Cache<String, String> cache = this.<String, String> create();
+		Cache<String, String> cache = this.<String, String>create();
 		cache.set("abc", null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void removeNullKey() {
-		Cache<String, String> cache = this.<String, String> create();
+		Cache<String, String> cache = this.<String, String>create();
 		cache.remove(null);
 	}
 
 	@Test
 	public void get() {
-		Cache<String, String> cache = this.<String, String> create();
+		Cache<String, String> cache = this.<String, String>create();
 
 		assertNull(cache.get("1"));
 		cache.set("1", "one");
@@ -129,7 +127,7 @@ public abstract class CacheTestBase {
 
 	@Test
 	public void overwrite() {
-		Cache<String, String> cache = this.<String, String> create();
+		Cache<String, String> cache = this.<String, String>create();
 		cache.set("1", "version 1");
 		cache.set("1", "version 2");
 		assertEquals(cache.get("1"), "version 2");
@@ -139,7 +137,7 @@ public abstract class CacheTestBase {
 
 	@Test
 	public void cloner() {
-		Cache<Integer, Integer> cache = this.<Integer, Integer> create(INTEGER_CLONER);
+		Cache<Integer, Integer> cache = this.<Integer, Integer>create(INTEGER_CLONER);
 		Integer one = Integer.valueOf(1);
 		cache.set(one, one);
 		Integer copy = cache.get(one);
@@ -155,7 +153,7 @@ public abstract class CacheTestBase {
 
 	@Test
 	public void up() {
-		Cache<Integer, Integer> cache = this.<Integer, Integer> create();
+		Cache<Integer, Integer> cache = this.<Integer, Integer>create();
 		int hit = 0, miss = 0;
 		final int N = cache.capacity() * UP_DOWN_CAP_COEFF;
 		Integer[] is = new Integer[N];
@@ -179,7 +177,7 @@ public abstract class CacheTestBase {
 
 	@Test
 	public void down() {
-		Cache<Integer, Integer> cache = this.<Integer, Integer> create();
+		Cache<Integer, Integer> cache = this.<Integer, Integer>create();
 		int hit = 0, miss = 0;
 		final int N = cache.capacity() * UP_DOWN_CAP_COEFF;
 		Integer[] is = new Integer[N];
@@ -227,7 +225,7 @@ public abstract class CacheTestBase {
 		}
 
 		long t0 = System.nanoTime();
-		Cache<Integer, byte[]> cache = this.<Integer, byte[]> create(cap);
+		Cache<Integer, byte[]> cache = this.<Integer, byte[]>create(cap);
 		long t1 = System.nanoTime() - t0;
 		for (int i = 0; i < cap; i++) {
 			cache.set(i, data.clone());
@@ -251,7 +249,7 @@ public abstract class CacheTestBase {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(String.format("JVM held on to %d out of %d elements => %dMiB\n", inMem, cap, inMem / 2));
 			LOG.debug(String.format("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
-			        t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f));
+					t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f));
 		}
 	}
 

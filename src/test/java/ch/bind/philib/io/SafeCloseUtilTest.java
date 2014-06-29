@@ -22,18 +22,18 @@
 
 package ch.bind.philib.io;
 
+import org.slf4j.Logger;
+import org.testng.annotations.Test;
+
+import java.io.Closeable;
+import java.io.IOException;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.testng.Assert.assertEquals;
-
-import java.io.Closeable;
-import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.testng.annotations.Test;
 
 public class SafeCloseUtilTest {
 
@@ -76,7 +76,7 @@ public class SafeCloseUtilTest {
 		SafeCloseUtil.close((Closeable) null);
 		SafeCloseUtil.close((Object) null);
 	}
-	
+
 	@Test
 	public void dontFailOnNoCloseMethod() {
 		SafeCloseUtil.close(new Object());

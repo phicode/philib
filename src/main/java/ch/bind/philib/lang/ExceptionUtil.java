@@ -33,19 +33,15 @@ public abstract class ExceptionUtil {
 	/**
 	 * Returns a one-line representation of an exception. The goal of this method is to provide messages which are
 	 * log-friendly.
-	 * 
 	 * The format of these messages looks like:
-	 * 
 	 * <pre>
 	 * className.method:line#exceptionClassName(message) => causingClassName.method:line#exceptionClassName(message) => ... so on, up to the root-exception
 	 * </pre>
-	 * 
 	 * if no line-information is available:
-	 * 
 	 * <pre>
 	 * className.method#exceptionClassName(message) => causingClassName.method#exceptionClassName(message) => ... so on, up to the root-exception
 	 * </pre>
-	 * 
+	 *
 	 * @param t
 	 * @return a message of the format which is described above.
 	 */
