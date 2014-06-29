@@ -61,8 +61,8 @@ public final class BufferUtil {
 		int required = inDst + inSrc;
 		// a new, bigger buffer is required
 		ByteBuffer buf = dst.isDirect() ? //
-		ByteBuffer.allocateDirect(required)
-		        : ByteBuffer.allocate(required);
+				ByteBuffer.allocateDirect(required)
+				: ByteBuffer.allocate(required);
 		buf.put(dst);
 		buf.put(src);
 		buf.flip(); // pos=0; lim=required

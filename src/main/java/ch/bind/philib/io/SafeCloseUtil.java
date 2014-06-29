@@ -21,11 +21,11 @@
  */
 package ch.bind.philib.io;
 
-import java.io.Closeable;
-import java.lang.reflect.Method;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.lang.reflect.Method;
 
 /**
  * @author Philipp Meinen
