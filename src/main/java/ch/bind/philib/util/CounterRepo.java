@@ -29,12 +29,9 @@ import java.util.concurrent.ConcurrentMap;
 
 public final class CounterRepo {
 
-	private static final String DEFAULT_NAME = "default";
-
-	private static final char POSTFIX_SEP = ':';
-
 	public static final CounterRepo DEFAULT = new CounterRepo();
-
+	private static final String DEFAULT_NAME = "default";
+	private static final char POSTFIX_SEP = ':';
 	private final ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<String, Counter>();
 
 	public CounterRepo() {

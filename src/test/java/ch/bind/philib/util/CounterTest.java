@@ -22,15 +22,14 @@
 
 package ch.bind.philib.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import ch.bind.philib.TestUtil;
+import ch.bind.philib.math.Calc;
+import org.testng.annotations.Test;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.testng.annotations.Test;
-
-import ch.bind.philib.TestUtil;
-import ch.bind.philib.math.Calc;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 public class CounterTest {
 

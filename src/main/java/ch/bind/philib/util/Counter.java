@@ -24,23 +24,24 @@ package ch.bind.philib.util;
 
 import ch.bind.philib.math.Calc;
 
-/** A simple counter where values can be added or the whole counter be reset. */
+/**
+ * A simple counter where values can be added or the whole counter be reset.
+ */
 public final class Counter {
 
 	// limit the number of counter buckets that are created
 	// the performance does go up when the number of counter buckets is increased
 	// on the other hand we probably want to keep the number of "support/monitoring-objects" within reason
-	// plus: on a _large_ rig the number of buckets may very well lead to increased memory pressure 
+	// plus: on a _large_ rig the number of buckets may very well lead to increased memory pressure
 	private static final int MAX_NUM_COUNTER_BUCKETS = 8;
 
+	private final Object lock = new Object();
 	private final String name;
-
+	private final CounterBucket[] buckets;
 	private long counts;
 	private long total;
 	private long min = -1;
 	private long max = -1;
-
-	private final CounterBucket[] buckets;
 
 	public Counter(String name) {
 		this.name = name;
@@ -55,24 +56,32 @@ public final class Counter {
 		return name;
 	}
 
-	public synchronized long getNumCounts() {
-		aggregate();
-		return counts;
+	public long getNumCounts() {
+		synchronized (lock) {
+			aggregate();
+			return counts;
+		}
 	}
 
-	public synchronized long getTotal() {
-		aggregate();
-		return total;
+	public long getTotal() {
+		synchronized (lock) {
+			aggregate();
+			return total;
+		}
 	}
 
-	public synchronized long getMin() {
-		aggregate();
-		return min;
+	public long getMin() {
+		synchronized (lock) {
+			aggregate();
+			return min;
+		}
 	}
 
-	public synchronized long getMax() {
-		aggregate();
-		return max;
+	public long getMax() {
+		synchronized (lock) {
+			aggregate();
+			return max;
+		}
 	}
 
 	private void aggregate() {
@@ -111,7 +120,7 @@ public final class Counter {
 			return;
 		}
 		long c, mi, ma, to;
-		synchronized (counter) {
+		synchronized (counter.lock) {
 			counter.aggregate();
 			c = counter.counts;
 			mi = counter.min;
@@ -121,8 +130,8 @@ public final class Counter {
 		if (c == 0) {
 			return;
 		}
-		synchronized (this) {
-			this.aggregate();
+		synchronized (lock) {
+			aggregate();
 			if (counts == 0) {
 				min = mi;
 				max = ma;
@@ -135,20 +144,22 @@ public final class Counter {
 		}
 	}
 
-	public synchronized void reset() {
-		// resets all the buckets
-		aggregate();
+	public void reset() {
+		synchronized (lock) {
+			// resets all the buckets
+			aggregate();
 
-		counts = 0;
-		total = 0;
-		min = -1;
-		max = -1;
+			counts = 0;
+			total = 0;
+			min = -1;
+			max = -1;
+		}
 	}
 
 	@Override
 	public String toString() {
 		long c, mi, ma, to;
-		synchronized (this) {
+		synchronized (lock) {
 			aggregate();
 			c = counts;
 			mi = min;
