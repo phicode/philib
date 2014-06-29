@@ -35,6 +35,8 @@ public final class ServiceState {
 
 	private static final int STATE_CLOSED = 3;
 
+	private final Object lock = new Object();
+
 	private volatile int state;
 
 	public boolean isUninitialized() {
@@ -57,19 +59,16 @@ public final class ServiceState {
 		return state >= STATE_CLOSING;
 	}
 
-	public synchronized void setOpen() {
+	public void setOpen() {
 		switchState(STATE_OPEN);
-		notifyAll();
 	}
 
-	public synchronized void setClosing() {
+	public void setClosing() {
 		switchState(STATE_CLOSING);
-		notifyAll();
 	}
 
-	public synchronized void setClosed() {
+	public void setClosed() {
 		switchState(STATE_CLOSED);
-		notifyAll();
 	}
 
 	public void awaitOpen() throws InterruptedException {
@@ -84,16 +83,21 @@ public final class ServiceState {
 		await(STATE_CLOSED);
 	}
 
-	private synchronized void await(int waitForState) throws InterruptedException {
-		while (state < waitForState) {
-			wait();
+	private void await(int waitForState) throws InterruptedException {
+		synchronized (lock) {
+			while (state < waitForState) {
+				lock.wait();
+			}
 		}
 	}
 
 	private void switchState(int newState) {
-		if (newState < state) {
-			throw new IllegalStateException("service-states can only be moved forward");
+		synchronized (lock) {
+			if (newState < state) {
+				throw new IllegalStateException("service-states can only be moved forward");
+			}
+			state = newState;
+			lock.notifyAll();
 		}
-		state = newState;
 	}
 }
