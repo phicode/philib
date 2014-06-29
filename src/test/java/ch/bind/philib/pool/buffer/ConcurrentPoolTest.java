@@ -32,10 +32,12 @@ import static org.testng.Assert.assertEquals;
 @Test
 public class ConcurrentPoolTest extends BufferPoolTestBase<byte[]> {
 
+	private static final int NCPU = Runtime.getRuntime().availableProcessors();
+
 	@Override
 	Pool<byte[]> createPool(int bufferSize, int maxEntries) {
 		ByteArrayManager manager = new ByteArrayManager(bufferSize);
-		return new ConcurrentPool<byte[]>(manager, maxEntries, true, 4);
+		return new ConcurrentPool<byte[]>(manager, maxEntries, true, NCPU);
 	}
 
 	@Override

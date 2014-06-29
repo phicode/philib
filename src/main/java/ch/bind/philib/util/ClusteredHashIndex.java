@@ -63,7 +63,6 @@ public final class ClusteredHashIndex<K, T extends Entry<K>> implements Clustere
 			scanPrev = scanNow;
 			scanNow = scanNow.getNextIndexEntry();
 		} while (scanNow != null);
-		assert (scanPrev != null);
 		scanPrev.setNextIndexEntry(entry);
 		return true;
 	}

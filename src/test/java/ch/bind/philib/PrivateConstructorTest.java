@@ -38,41 +38,7 @@ import static org.testng.Assert.assertNotNull;
 // test coverage, even utility classes.
 public class PrivateConstructorTest {
 
-	@Test(enabled = true)
-	public void invokeAllPrivateCtors() throws Exception {
-		Package rootPackage = getClass().getPackage();
-		String packageName = rootPackage.getName();
-		// resource paths use forward slash / as separator, on all platforms
-		String resourceRootPath = packageName.replace('.', '/');
-		// System.out.printf("resourceRootPath=%s%n", resourceRootPath);
-		// System.out.println(rootPackage.getName());
-		// System.out.println(resourceRootPath);
-		Enumeration<URL> urls = getClass().getClassLoader().getResources(resourceRootPath);
-		while (urls.hasMoreElements()) {
-			URL url = urls.nextElement();
-			File path = new File(url.getPath());
-			recursiveTestPrivateCtors(packageName, path, 1);
-		}
-	}
-
-	private void recursiveTestPrivateCtors(String packageName, File path, int lvl) throws Exception {
-		// System.out.println("checking dir " + file);
-		File[] subPaths = path.listFiles();
-		assertNotNull(subPaths);
-		int nextLvl = lvl + 1;
-		for (File subPath : subPaths) {
-			if (subPath.isDirectory()) {
-				String subPackageName = packageName + '.' + subPath.getName();
-				recursiveTestPrivateCtors(subPackageName, subPath, nextLvl);
-			} else if (subPath.isFile()) {
-				maybeTestFile(packageName, subPath);
-			} else {
-				System.out.println("unknown file type: " + subPath);
-			}
-		}
-	}
-
-	private static String TEST_FILE_SUFFIX = "Test.class";
+	private static final String TEST_FILE_SUFFIX = "Test.class";
 
 	private static void maybeTestFile(String packageName, File subPath) throws Exception {
 		// System.out.println("file: " +subFile);
@@ -121,11 +87,8 @@ public class PrivateConstructorTest {
 			return;
 		}
 		for (Constructor<?> ctor : ctors) {
-			if (ctor.isSynthetic()) {
-				// introduced by the compiler
-				// System.out.println("ignoring because synthetic: " +
-				// ctor.toString());
-			} else {
+			// ignore synthetic constructors (introduced by the compiler)
+			if (!ctor.isSynthetic()) {
 				int modifiers = ctor.getModifiers();
 				if ((modifiers & Modifier.PRIVATE) != 0) {
 					int numParams = ctor.getParameterTypes().length;
@@ -148,5 +111,39 @@ public class PrivateConstructorTest {
 		}
 		assertNotNull(o);
 		// System.out.println("instantiated a " + o.getClass().getName());
+	}
+
+	@Test(enabled = true)
+	public void invokeAllPrivateCtors() throws Exception {
+		Package rootPackage = getClass().getPackage();
+		String packageName = rootPackage.getName();
+		// resource paths use forward slash / as separator, on all platforms
+		String resourceRootPath = packageName.replace('.', '/');
+		// System.out.printf("resourceRootPath=%s%n", resourceRootPath);
+		// System.out.println(rootPackage.getName());
+		// System.out.println(resourceRootPath);
+		Enumeration<URL> urls = getClass().getClassLoader().getResources(resourceRootPath);
+		while (urls.hasMoreElements()) {
+			URL url = urls.nextElement();
+			File path = new File(url.getPath());
+			recursiveTestPrivateCtors(packageName, path, 1);
+		}
+	}
+
+	private void recursiveTestPrivateCtors(String packageName, File path, int lvl) throws Exception {
+		// System.out.println("checking dir " + file);
+		File[] subPaths = path.listFiles();
+		assertNotNull(subPaths);
+		int nextLvl = lvl + 1;
+		for (File subPath : subPaths) {
+			if (subPath.isDirectory()) {
+				String subPackageName = packageName + '.' + subPath.getName();
+				recursiveTestPrivateCtors(subPackageName, subPath, nextLvl);
+			} else if (subPath.isFile()) {
+				maybeTestFile(packageName, subPath);
+			} else {
+				System.out.println("unknown file type: " + subPath);
+			}
+		}
 	}
 }

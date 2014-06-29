@@ -45,6 +45,19 @@ import static org.testng.Assert.assertTrue;
 public abstract class CacheTestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CacheTestBase.class);
+	private static final int UP_DOWN_CAP_COEFF = 5;
+	private static final Cloner<Integer> INTEGER_CLONER = new Cloner<Integer>() {
+
+		@Override
+		public Integer clone(Integer value) {
+			assertNotNull(value);
+			return new Integer(value.intValue());
+		}
+	};
+
+	public static String itos(int i) {
+		return Integer.toString(i);
+	}
 
 	abstract <K, V> Cache<K, V> create();
 
@@ -125,6 +138,8 @@ public abstract class CacheTestBase {
 		assertNull(cache.get("1"));
 	}
 
+	// private static final int UP_DOWN_CAP_COEFF = 150;
+
 	@Test
 	public void overwrite() {
 		Cache<String, String> cache = this.<String, String>create();
@@ -144,12 +159,8 @@ public abstract class CacheTestBase {
 		assertNotNull(copy);
 		assertEquals(one.intValue(), copy.intValue());
 		// different reference
-		assertTrue(one != copy);
+		assertNotSame(one, copy);
 	}
-
-	private static final int UP_DOWN_CAP_COEFF = 5;
-
-	// private static final int UP_DOWN_CAP_COEFF = 150;
 
 	@Test
 	public void up() {
@@ -199,15 +210,6 @@ public abstract class CacheTestBase {
 		// System.out.println("N: " + N + " hit: " + hit + " miss: " + miss);
 	}
 
-	private static final Cloner<Integer> INTEGER_CLONER = new Cloner<Integer>() {
-
-		@Override
-		public Integer clone(Integer value) {
-			assertNotNull(value);
-			return new Integer(value.intValue());
-		}
-	};
-
 	@Test
 	public void softReferences() {
 		byte[] data = new byte[512 * 1024]; // 512KiB
@@ -251,9 +253,5 @@ public abstract class CacheTestBase {
 			LOG.debug(String.format("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
 					t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f));
 		}
-	}
-
-	public static String itos(int i) {
-		return Integer.toString(i);
 	}
 }

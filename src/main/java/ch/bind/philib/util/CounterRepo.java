@@ -105,7 +105,7 @@ public final class CounterRepo {
 		return nullOrEmpty(postfix) ? n : n + POSTFIX_SEP + postfix;
 	}
 
-	private static final boolean nullOrEmpty(String s) {
+	private static boolean nullOrEmpty(String s) {
 		return s == null || s.isEmpty();
 	}
 }

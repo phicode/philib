@@ -36,16 +36,14 @@ public final class TLR {
 	private TLR() {
 	}
 
-	private static ThreadLocal<Random> tlr = new ThreadLocal<Random>() {
+	private static final ThreadLocal<Random> TLR = new ThreadLocal<Random>() {
 		@Override
 		protected Random initialValue() {
 			return new Random();
 		}
-
-		;
 	};
 
 	public static Random current() {
-		return tlr.get();
+		return TLR.get();
 	}
 }

@@ -30,7 +30,7 @@ public final class BitOps {
 	private BitOps() {
 	}
 
-	public static final int findLowestSetBitIdx64(final long v) {
+	public static int findLowestSetBitIdx64(final long v) {
 		if (v == 0) {
 			// no bits are set
 			return -1;

@@ -48,7 +48,7 @@ public final class Bench {
 		}
 	}
 
-	private static long runBenchAndMeasure(Bencher bench, long n) throws InterruptedException {
+	private static long runBenchAndMeasure(Bencher bench, long n) {
 		long t = System.nanoTime();
 		bench.run(n);
 		return System.nanoTime() - t;

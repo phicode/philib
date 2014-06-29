@@ -90,7 +90,7 @@ public class RingBufferTest {
 			int len = rand.nextInt(RANDOM_TEST_MAX_CHUNK_SIZE) + 1;
 			byte[] buf = new byte[len];
 			int a = ringBuf.available();
-			boolean doRead = a >= len ? rand.nextBoolean() : false;
+			boolean doRead = a >= len && rand.nextBoolean();
 			if (!doRead && a + len > RANDOM_TEST_MAX_BUF_SIZE) {
 				doRead = true;
 			}

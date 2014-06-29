@@ -30,7 +30,7 @@ import ch.bind.philib.pool.PoolStats;
  */
 final class MultiPoolStats implements PoolStats {
 
-	private PoolStats[] stats;
+	private final PoolStats[] stats;
 
 	MultiPoolStats(PoolStats[] stats) {
 		this.stats = stats;

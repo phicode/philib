@@ -31,13 +31,13 @@ public final class ValidationUtil {
 	private ValidationUtil() {
 	}
 
-	public static final ValidationResults validate(final Validatable validatable) {
+	public static ValidationResults validate(final Validatable validatable) {
 		final ValidationResults results = new ValidationResults();
 		validatable.validate(results); // NPE is intended!
 		return results;
 	}
 
-	public static final <T extends Validatable> ValidationResults validate(final Collection<T> validatables) {
+	public static <T extends Validatable> ValidationResults validate(final Collection<T> validatables) {
 		final ValidationResults results = new ValidationResults();
 		for (Validatable validatable : validatables) {
 			validatable.validate(results); // NPE is intended!
@@ -45,7 +45,7 @@ public final class ValidationUtil {
 		return results;
 	}
 
-	public static final <T extends Validatable> ValidationResults validate(final T[] validatables) {
+	public static <T extends Validatable> ValidationResults validate(final T[] validatables) {
 		final ValidationResults results = new ValidationResults();
 		for (Validatable validatable : validatables) {
 			validatable.validate(results); // NPE is intended!

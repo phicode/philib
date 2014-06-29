@@ -259,10 +259,10 @@ public class ConfigTest {
 
 	private static final class RecordingConfigValueListener implements ConfigListener {
 
-		Map<String, String> current = new HashMap<String, String>();
-		Set<String> changed = new HashSet<String>();
-		Set<String> removed = new HashSet<String>();
-		Set<String> added = new HashSet<String>();
+		final Map<String, String> current = new HashMap<String, String>();
+		final Set<String> changed = new HashSet<String>();
+		final Set<String> removed = new HashSet<String>();
+		final Set<String> added = new HashSet<String>();
 
 		@Override
 		public void changed(String key, String oldValue, String newValue) {
