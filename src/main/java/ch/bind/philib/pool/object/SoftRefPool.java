@@ -38,7 +38,7 @@ public final class SoftRefPool<T> extends PoolBase<T> {
 
 	@Override
 	protected T poll() {
-		for (; ; ) {
+		while (true) {
 			final SoftReference<T> ref = queue.poll();
 			if (ref == null) {
 				return null;
