@@ -28,19 +28,12 @@ import ch.bind.philib.pool.PoolStats;
 import ch.bind.philib.pool.manager.ObjectManager;
 import ch.bind.philib.validation.Validation;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * @author Philipp Meinen
  */
 public final class ConcurrentPool<T> implements Pool<T> {
 
-	// TODO: fixed size pool, 'selected' by threads through their id
-	private final PoolThreadLocal poolByThread = new PoolThreadLocal();
-
 	private final PoolBase<T>[] pools;
-
-	private final AtomicLong usageCount = new AtomicLong(0);
 
 	private final MultiPoolStats stats;
 
@@ -68,12 +61,12 @@ public final class ConcurrentPool<T> implements Pool<T> {
 
 	@Override
 	public T take() {
-		return poolByThread.get().take();
+		return getPoolByThread().take();
 	}
 
 	@Override
 	public void recycle(T value) {
-		poolByThread.get().recycle(value);
+		getPoolByThread().recycle(value);
 	}
 
 	@Override
@@ -92,26 +85,15 @@ public final class ConcurrentPool<T> implements Pool<T> {
 
 	@Override
 	public void clear() {
-		poolByThread.get().clear();
+		getPoolByThread().clear();
 	}
 
 	public int getConcurrency() {
 		return pools.length;
 	}
 
-	PoolBase<T> bindToThread() {
-		// round robin distribution in the order the
-		// threads first access the pool
-		long v = usageCount.getAndIncrement();
-		int poolIdx = (int) (v % pools.length);
-		return pools[poolIdx];
-	}
-
-	private final class PoolThreadLocal extends ThreadLocal<PoolBase<T>> {
-
-		@Override
-		protected PoolBase<T> initialValue() {
-			return ConcurrentPool.this.bindToThread();
-		}
+	private PoolBase<T> getPoolByThread() {
+		int idx = (int) (Thread.currentThread().getId() % pools.length);
+		return pools[idx];
 	}
 }
