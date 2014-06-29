@@ -22,17 +22,17 @@
 
 package ch.bind.philib.lang;
 
+import ch.bind.philib.util.TLR;
+import ch.bind.philib.validation.Validation;
+
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Random;
 
-import ch.bind.philib.util.TLR;
-import ch.bind.philib.validation.Validation;
-
 /**
  * Various functions for dealing with arrays which are not present in the
  * standard {@link java.util.Arrays} class.
- * 
+ *
  * @author Philipp Meinen
  * @since 2009-06-10
  */
@@ -45,14 +45,20 @@ public abstract class ArrayUtil {
 	public static final long[] EMPTY_LONG_ARRAY = new long[0];
 	public static final float[] EMPTY_FLOAT_ARRAY = new float[0];
 	public static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
+	private static final char[] TO_HEX = {'0', '1', '2', '3', //
+			'4', '5', '6', '7', //
+			'8', '9', 'A', 'B', //
+			'C', 'D', 'E', 'F'};
+	private static volatile byte[] nullFiller;
 
 	protected ArrayUtil() {
 	}
 
 	/**
 	 * shorthand for {@code java.lang.reflect.Array.newInstance(clazz, size)}
+	 *
 	 * @param clazz -
-	 * @param size -
+	 * @param size  -
 	 * @return -
 	 */
 	@SuppressWarnings("unchecked")
@@ -63,14 +69,14 @@ public abstract class ArrayUtil {
 	/**
 	 * Fills the <code>destination</code> array with randomly picked values from
 	 * the <code>source</code> array. No value will be picked twice.
-	 * 
-	 * @param source The array from which random values must be picked. The
-	 *            content of this array will not be altered.
+	 *
+	 * @param source      The array from which random values must be picked. The
+	 *                    content of this array will not be altered.
 	 * @param destination The array which must be filled with random values.
-	 *            Previous values within this array will be overwritten.
-	 * @throws NullPointerException If either of the two parameters is null.
+	 *                    Previous values within this array will be overwritten.
+	 * @throws NullPointerException     If either of the two parameters is null.
 	 * @throws IllegalArgumentException If the <code>source</code>-array is smaller than the <code>destination</code>
-	 *             -array.
+	 *                                  -array.
 	 */
 	public static <T> void pickRandom(final T[] source, final T[] destination) {
 		if (source == null)
@@ -95,11 +101,11 @@ public abstract class ArrayUtil {
 
 	/**
 	 * concatenate the content of two byte arrays.
-	 * 
+	 *
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
 	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a
-	 *         copy of their content.
+	 * copy of their content.
 	 */
 	public static byte[] concat(byte[] a, byte[] b) {
 		// override null arrays
@@ -119,14 +125,14 @@ public abstract class ArrayUtil {
 
 	/**
 	 * append the content of two byte arrays up to a certain capacity limit
-	 * 
+	 *
 	 * @param a the first byte array (may be null)
 	 * @param b the second byte array (may be null)
 	 * @return a new byte array with the combined length of {@code a} and {@code b}, containing a
-	 *         copy of their content.
-	 *         if the combined
-	 *         length exceeds {@code capacity} the returned array {@code a} will
-	 *         have {@code a.length == capacity}.
+	 * copy of their content.
+	 * if the combined
+	 * length exceeds {@code capacity} the returned array {@code a} will
+	 * have {@code a.length == capacity}.
 	 */
 	public static byte[] append(byte[] a, byte[] b, int capacity) {
 		// override null arrays
@@ -184,8 +190,8 @@ public abstract class ArrayUtil {
 		Validation.notNull(from);
 		int l = from.length;
 		int num = 0;
-		for (int i = 0; i < l; i++) {
-			if (CompareUtil.equals(from[i], what)) {
+		for (T a : from) {
+			if (CompareUtil.equals(a, what)) {
 				num++;
 			}
 		}
@@ -238,7 +244,7 @@ public abstract class ArrayUtil {
 		}
 
 		for (int i = 0; i < maxLoops; i++)
-			notfound: {
+			notfound:{
 				final int off = dataOffset + i;
 				for (int j = 0; j < searchLen; j++) {
 					if (data[off + j] != search[j]) {
@@ -310,14 +316,9 @@ public abstract class ArrayUtil {
 		sb.append(TO_HEX[v & 15]);
 	}
 
-	private static final char[] TO_HEX = { '0', '1', '2', '3', //
-	        '4', '5', '6', '7', //
-	        '8', '9', 'A', 'B', //
-	        'C', 'D', 'E', 'F' };
-
 	/**
 	 * Overwrites the buffer's content with zeros.
-	 * 
+	 *
 	 * @param buf -
 	 */
 	public static void memclr(final ByteBuffer buf) {
@@ -342,7 +343,7 @@ public abstract class ArrayUtil {
 
 	/**
 	 * Overwrites the buffer's content with zeros.
-	 * 
+	 *
 	 * @param buf -
 	 */
 	public static void memclr(final byte[] buf) {
@@ -361,11 +362,9 @@ public abstract class ArrayUtil {
 		}
 	}
 
-	private static final void memset(byte[] src, byte[] dst, int dstOff, int len) {
+	private static void memset(byte[] src, byte[] dst, int dstOff, int len) {
 		System.arraycopy(src, 0, dst, dstOff, len);
 	}
-
-	private static volatile byte[] nullFiller;
 
 	private static byte[] getFiller() {
 		byte[] f = nullFiller;

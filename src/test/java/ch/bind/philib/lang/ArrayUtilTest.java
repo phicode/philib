@@ -22,6 +22,15 @@
 
 package ch.bind.philib.lang;
 
+import ch.bind.philib.util.TLR;
+import org.testng.annotations.Test;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
 import static ch.bind.philib.lang.ArrayUtil.EMPTY_BYTE_ARRAY;
 import static ch.bind.philib.lang.ArrayUtil.append;
 import static ch.bind.philib.lang.ArrayUtil.concat;
@@ -38,17 +47,8 @@ import static ch.bind.philib.lang.ArrayUtil.toArray;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
-import org.testng.annotations.Test;
-
-import ch.bind.philib.util.TLR;
 
 public class ArrayUtilTest {
 
@@ -83,7 +83,7 @@ public class ArrayUtilTest {
 		}
 		pickRandom(src, dst);
 		for (int i = 0; i < N; i++) {
-			int v = dst[i].intValue();
+			int v = dst[i];
 			assertTrue(v >= 0);
 			assertTrue(v < N);
 			assertFalse(found[v]);
@@ -458,7 +458,7 @@ public class ArrayUtilTest {
 		assertNotNull(res);
 		assertEquals(res.getClass(), String[].class);
 		assertEquals(res.length, 1);
-		assertTrue(res[0] == x);
+		assertSame(res[0], x);
 	}
 
 	@Test
@@ -469,7 +469,7 @@ public class ArrayUtilTest {
 		assertNotNull(res);
 		assertEquals(res.getClass(), String[].class);
 		assertEquals(res.length, 1);
-		assertTrue(res[0] == x);
+		assertSame(res[0], x);
 	}
 
 	@Test
@@ -480,7 +480,7 @@ public class ArrayUtilTest {
 		assertNotNull(res);
 		assertEquals(res.getClass(), Object[].class);
 		assertEquals(res.length, 1);
-		assertTrue(res[0] == x);
+		assertSame(res[0], x);
 	}
 
 	@Test
@@ -491,37 +491,37 @@ public class ArrayUtilTest {
 		assertNotNull(res);
 		assertEquals(res.getClass(), Object[].class);
 		assertEquals(res.length, 1);
-		assertTrue(res[0] == x);
+		assertSame(res[0], x);
 	}
 
 	@Test
 	public void appendXY() {
 		String x = "foo";
-		String[] xs = { "bar" };
+		String[] xs = {"bar"};
 		String[] res = append(String.class, xs, x);
 		assertNotNull(res);
 		assertEquals(res.getClass(), String[].class);
 		assertEquals(res.length, 2);
-		assertTrue(res[0] == xs[0]);
-		assertTrue(res[1] == x);
+		assertSame(res[0], xs[0]);
+		assertSame(res[1], x);
 	}
 
 	@Test
 	public void prependXY() {
 		String x = "foo";
-		String[] xs = { "bar" };
+		String[] xs = {"bar"};
 		String[] res = prepend(String.class, xs, x);
 		assertNotNull(res);
 		assertEquals(res.getClass(), String[].class);
 		assertEquals(res.length, 2);
-		assertTrue(res[0] == x);
-		assertTrue(res[1] == xs[0]);
+		assertSame(res[0], x);
+		assertSame(res[1], xs[0]);
 	}
 
 	@Test
 	public void appendXYOtherType() {
 		String x = "foo";
-		String[] xs = { "bar" };
+		String[] xs = {"bar"};
 		Object[] res = append(Object.class, xs, x);
 		assertNotNull(res);
 		assertEquals(res.getClass(), Object[].class);
@@ -533,7 +533,7 @@ public class ArrayUtilTest {
 	@Test
 	public void prependXYOtherType() {
 		String x = "foo";
-		String[] xs = { "bar" };
+		String[] xs = {"bar"};
 		Object[] res = prepend(Object.class, xs, x);
 		assertNotNull(res);
 		assertEquals(res.getClass(), Object[].class);
@@ -544,33 +544,33 @@ public class ArrayUtilTest {
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void appendNoNullClazz() {
-		String[] xs = { "bar" };
+		String[] xs = {"bar"};
 		append((Class<String>) null, xs, "quack");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void prependNoNullClazz() {
-		String[] xs = { "bar" };
+		String[] xs = {"bar"};
 		prepend((Class<String>) null, xs, "quack");
 	}
 
 	@Test
 	public void appendNullValue() {
-		String[] xs = { "bar" };
-		String[] exp = { "bar", null };
+		String[] xs = {"bar"};
+		String[] exp = {"bar", null};
 		assertEquals(append(String.class, xs, null), exp);
 	}
 
 	@Test
 	public void prependNullValue() {
-		String[] xs = { "bar" };
-		String[] exp = { null, "bar" };
+		String[] xs = {"bar"};
+		String[] exp = {null, "bar"};
 		assertEquals(prepend(String.class, xs, null), exp);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void removeNoNullClazz() {
-		String[] from = { "bar" };
+		String[] from = {"bar"};
 		remove((Class<String>) null, from, "foo");
 	}
 
@@ -582,14 +582,14 @@ public class ArrayUtilTest {
 
 	@Test
 	public void removeNone() {
-		String[] from = { "a", "b", "c" };
+		String[] from = {"a", "b", "c"};
 		String[] res = remove(String.class, from, "d");
 		assertTrue(from == res);
 	}
 
 	@Test
 	public void removeFront() {
-		String[] from = { "a", "b", "c" };
+		String[] from = {"a", "b", "c"};
 		String[] res = remove(String.class, from, "a");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "b");
@@ -598,7 +598,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void removeMid() {
-		String[] from = { "a", "b", "c" };
+		String[] from = {"a", "b", "c"};
 		String[] res = remove(String.class, from, "b");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "a");
@@ -607,7 +607,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void removeBack() {
-		String[] from = { "a", "b", "c" };
+		String[] from = {"a", "b", "c"};
 		String[] res = remove(String.class, from, "c");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "a");
@@ -616,7 +616,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void removeMultiple() {
-		String[] from = { "a", "b", "c", "c" };
+		String[] from = {"a", "b", "c", "c"};
 		String[] res = remove(String.class, from, "c");
 		assertEquals(res.length, 2);
 		assertEquals(res[0], "a");
@@ -625,26 +625,26 @@ public class ArrayUtilTest {
 
 	@Test
 	public void removeAll() {
-		String[] from = { "c", "c", "c", "c" };
+		String[] from = {"c", "c", "c", "c"};
 		String[] res = remove(String.class, from, "c");
 		assertEquals(res.length, 0);
 	}
 
 	@Test
 	public void toArrayNull() {
-		Object x = toArray(Integer.class, null);
+		Integer[] x = toArray(Integer.class, null);
 		assertNotNull(x);
 		assertTrue(x.getClass() == Integer[].class);
-		assertEquals(((Integer[]) x).length, 0);
+		assertEquals((x).length, 0);
 	}
 
 	@Test
 	public void toArrayEmpty() {
 		List<String> l = new ArrayList<String>();
-		Object x = toArray(Object.class, l);
+		Object[] x = toArray(Object.class, l);
 		assertNotNull(x);
 		assertTrue(x.getClass() == Object[].class);
-		assertEquals(((Object[]) x).length, 0);
+		assertEquals((x).length, 0);
 	}
 
 	@Test
