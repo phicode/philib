@@ -52,8 +52,8 @@ public abstract class StringUtil {
 
 	/**
 	 * Counts the number of times the character with the given unicode {@code value} occurs.
-	 * 
-	 * @param str the input string, may be null or empty
+	 *
+	 * @param str   the input string, may be null or empty
 	 * @param value the unicode value to search for
 	 * @return the number of times the given unicode {@code value} occurs.
 	 */
@@ -77,12 +77,12 @@ public abstract class StringUtil {
 
 	/**
 	 * Splits a string by a given unicode {@code delimiter}.
-	 * 
-	 * @param str the input string, may be null or empty
+	 *
+	 * @param str         the input string, may be null or empty
 	 * @param delimimiter the delimiter to use
 	 * @return A string array with the different parts of the string after splitting it. The
-	 *         returned array is never null but may be empty (length 0). However, none of the
-	 *         returned values is empty.
+	 * returned array is never null but may be empty (length 0). However, none of the
+	 * returned values is empty.
 	 */
 	public static String[] split(String str, int delimimiter) {
 		if (str == null) {
@@ -94,7 +94,7 @@ public abstract class StringUtil {
 		}
 		final int n = count(str, delimimiter);
 		if (n == 0) {
-			return new String[] { str };
+			return new String[]{str};
 		}
 		// make room for the case where no two delimiters follow each other
 		String[] parts = new String[n + 1];
@@ -124,73 +124,73 @@ public abstract class StringUtil {
 		return rv;
 	}
 
-	/** @deprecated use {@link ToString#start(Object)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#start(Object)} instead. */
 	@Deprecated
 	public static StringBuilder start(Object obj) {
 		return ToString.start(obj);
 	}
 
-	/** @deprecated use {@link ToString#end(StringBuilder)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#end(StringBuilder)} instead. */
 	@Deprecated
 	public static String end(StringBuilder sb) {
 		return ToString.end(sb);
 	}
 
-	/** @deprecated use {@link ToString#first(StringBuilder, String, Object)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#first(StringBuilder, String, Object)} instead. */
 	@Deprecated
 	public static void firstObj(StringBuilder sb, String name, Object obj) {
 		ToString.first(sb, name, obj);
 	}
 
-	/** @deprecated use {@link ToString#first(StringBuilder, Object)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#first(StringBuilder, Object)} instead. */
 	@Deprecated
 	public static void firstObj(StringBuilder sb, Object obj) {
 		ToString.first(sb, obj);
 	}
 
-	/** @deprecated use {@link ToString#append(StringBuilder, String, Object)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, String, Object)} instead. */
 	@Deprecated
 	public static void addObj(StringBuilder sb, String name, Object obj) {
 		ToString.append(sb, name, obj);
 	}
 
-	/** @deprecated use {@link ToString#append(StringBuilder, Object)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, Object)} instead. */
 	@Deprecated
 	public static void addObj(StringBuilder sb, Object obj) {
 		ToString.append(sb, obj);
 	}
 
-	/** @deprecated use {@link ToString#first(StringBuilder, String, int)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#first(StringBuilder, String, int)} instead. */
 	@Deprecated
 	public static void firstInt(StringBuilder sb, String name, int v) {
 		ToString.first(sb, name, v);
 	}
 
-	/** @deprecated use {@link ToString#append(StringBuilder, String, int)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, String, int)} instead. */
 	@Deprecated
 	public static void addInt(StringBuilder sb, String name, int v) {
 		ToString.append(sb, name, v);
 	}
 
-	/** @deprecated use {@link ToString#append(StringBuilder, int)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, int)} instead. */
 	@Deprecated
 	public static void addInt(StringBuilder sb, int v) {
 		ToString.append(sb, v);
 	}
 
-	/** @deprecated use {@link ToString#first(StringBuilder, String, long)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#first(StringBuilder, String, long)} instead. */
 	@Deprecated
 	public static void firstLong(StringBuilder sb, String name, long v) {
 		ToString.first(sb, name, v);
 	}
 
-	/** @deprecated use {@link ToString#append(StringBuilder, String, long)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, String, long)} instead. */
 	@Deprecated
 	public static void addLong(StringBuilder sb, String name, long v) {
 		ToString.append(sb, name, v);
 	}
 
-	/** @deprecated use {@link ToString#append(StringBuilder, long)} instead. */
+	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, long)} instead. */
 	@Deprecated
 	public static void addLong(StringBuilder sb, long v) {
 		ToString.append(sb, v);

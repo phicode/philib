@@ -22,6 +22,11 @@
 
 package ch.bind.philib.lang;
 
+import ch.bind.philib.TestUtil;
+import ch.bind.philib.test.Bench;
+import ch.bind.philib.test.Bencher;
+import org.testng.annotations.Test;
+
 import static ch.bind.philib.lang.StringUtil.addInt;
 import static ch.bind.philib.lang.StringUtil.addLong;
 import static ch.bind.philib.lang.StringUtil.addObj;
@@ -32,12 +37,6 @@ import static ch.bind.philib.lang.StringUtil.firstLong;
 import static ch.bind.philib.lang.StringUtil.firstObj;
 import static ch.bind.philib.lang.StringUtil.start;
 import static org.testng.Assert.assertEquals;
-
-import org.testng.annotations.Test;
-
-import ch.bind.philib.TestUtil;
-import ch.bind.philib.test.Bench;
-import ch.bind.philib.test.Bencher;
 
 public class StringUtilTest {
 
