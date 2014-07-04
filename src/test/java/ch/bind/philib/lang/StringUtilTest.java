@@ -118,7 +118,7 @@ public class StringUtilTest {
 	public void countBench() throws InterruptedException {
 		if (TestUtil.RUN_BENCHMARKS) {
 			for (int i = 16; i <= 1024; i *= 2) {
-				Bench.run(new CountBencher(i));
+				Bench.runAndPrint(new CountBencher(i));
 			}
 		}
 	}
@@ -172,7 +172,7 @@ public class StringUtilTest {
 	public void splitBench() throws InterruptedException {
 		if (TestUtil.RUN_BENCHMARKS) {
 			for (int i = 16; i <= 1024; i *= 2) {
-				Bench.run(new SplitBencher(i));
+				Bench.runAndPrint(new SplitBencher(i));
 			}
 		}
 	}
