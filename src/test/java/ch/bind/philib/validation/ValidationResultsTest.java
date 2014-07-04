@@ -22,8 +22,6 @@
 
 package ch.bind.philib.validation;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -33,20 +31,9 @@ import static org.testng.Assert.fail;
 
 public class ValidationResultsTest {
 
-	private ValidationResults results;
-
-	@BeforeMethod
-	public void beforeMethod() {
-		results = new ValidationResults();
-	}
-
-	@AfterMethod
-	public void afterMethod() {
-		results = null;
-	}
-
 	@Test
 	public void noError() throws Exception {
+		ValidationResults results = new ValidationResults();
 		ValidatableDummy dummy = new ValidatableDummy();
 		dummy.validate(results);
 
@@ -59,6 +46,7 @@ public class ValidationResultsTest {
 
 	@Test
 	public void testErrors() {
+		ValidationResults results = new ValidationResults();
 		ValidatableDummy dummy = new ValidatableDummy();
 
 		assertNotNull(results);
@@ -76,6 +64,7 @@ public class ValidationResultsTest {
 
 	@Test
 	public void checkValidation() {
+		ValidationResults results = new ValidationResults();
 		results.addError("test");
 		try {
 			results.checkValidations();
@@ -89,6 +78,7 @@ public class ValidationResultsTest {
 
 	@Test
 	public void addError() {
+		ValidationResults results = new ValidationResults();
 		results.addError("test");
 
 		assertEquals(1, results.getNumErrors());
@@ -97,6 +87,7 @@ public class ValidationResultsTest {
 
 	@Test
 	public void addFormatedError() {
+		ValidationResults results = new ValidationResults();
 		results.addError("%d %s %b", 1, "test", true);
 
 		assertEquals(1, results.getNumErrors());
@@ -105,6 +96,7 @@ public class ValidationResultsTest {
 
 	@Test
 	public void validateNotNull() {
+		ValidationResults results = new ValidationResults();
 		results.validateNotNull(this, "this!");
 		assertEquals(0, results.getNumErrors());
 		assertEquals("", results.toString());
@@ -116,6 +108,7 @@ public class ValidationResultsTest {
 
 	@Test
 	public void validateMinLength() {
+		ValidationResults results = new ValidationResults();
 		for (int i = 0; i <= 4; i++) {
 			results.validateMinLength("test", "name", i);
 			assertEquals(0, results.getNumErrors());
@@ -129,6 +122,7 @@ public class ValidationResultsTest {
 
 	@Test
 	public void validateMaxLength() {
+		ValidationResults results = new ValidationResults();
 		for (int i = 10; i >= 4; i--) {
 			results.validateMaxLength("test", "name", i);
 			assertEquals(0, results.getNumErrors());
