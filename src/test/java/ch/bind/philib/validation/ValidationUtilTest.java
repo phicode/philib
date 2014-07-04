@@ -93,15 +93,13 @@ public class ValidationUtilTest {
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void validateOneThrowNPE() {
-		ValidatableDummy dummy = null;
-		ValidationUtil.validate(dummy);
+		ValidationUtil.validate((Validatable) null);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void validateCollectionThrowNPE() {
 		List<Validatable> list = new ArrayList<Validatable>();
-		ValidatableDummy dummy = null;
-		list.add(dummy);
+		list.add(null);
 		assertEquals(1, list.size());
 		ValidationUtil.validate(list);
 	}
