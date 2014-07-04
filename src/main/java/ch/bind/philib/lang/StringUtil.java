@@ -125,73 +125,73 @@ public abstract class StringUtil {
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#start(Object)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static StringBuilder start(Object obj) {
 		return ToString.start(obj);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#end(StringBuilder)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static String end(StringBuilder sb) {
 		return ToString.end(sb);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#first(StringBuilder, String, Object)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void firstObj(StringBuilder sb, String name, Object obj) {
 		ToString.first(sb, name, obj);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#first(StringBuilder, Object)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void firstObj(StringBuilder sb, Object obj) {
 		ToString.first(sb, obj);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, String, Object)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void addObj(StringBuilder sb, String name, Object obj) {
 		ToString.append(sb, name, obj);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, Object)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void addObj(StringBuilder sb, Object obj) {
 		ToString.append(sb, obj);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#first(StringBuilder, String, int)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void firstInt(StringBuilder sb, String name, int v) {
 		ToString.first(sb, name, v);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, String, int)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void addInt(StringBuilder sb, String name, int v) {
 		ToString.append(sb, name, v);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, int)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void addInt(StringBuilder sb, int v) {
 		ToString.append(sb, v);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#first(StringBuilder, String, long)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void firstLong(StringBuilder sb, String name, long v) {
 		ToString.first(sb, name, v);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, String, long)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void addLong(StringBuilder sb, String name, long v) {
 		ToString.append(sb, name, v);
 	}
 
 	/** @deprecated use {@link ch.bind.philib.lang.ToString#append(StringBuilder, long)} instead. */
-	@Deprecated
+	@Deprecated // TODO: remove in version >= 0.13
 	public static void addLong(StringBuilder sb, long v) {
 		ToString.append(sb, v);
 	}
