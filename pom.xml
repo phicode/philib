@@ -19,7 +19,7 @@
 	<packaging>jar</packaging>
 
 	<name>philib</name>
-	<description>utility classes by Philipp Meinen &lt;philipp@bind.ch&gt;</description>
+	<description>philib is a small java library containing utility classes</description>
 	<url>https://github.com/PhiCode/philib</url>
 
 	<properties>
@@ -165,7 +165,6 @@
 					</archive>
 				</configuration>
 			</plugin>
-
 
 			<plugin>
 				<groupId>org.apache.felix</groupId>

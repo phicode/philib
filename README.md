@@ -1,7 +1,7 @@
 philib
 ======
 
-philib is a small java utilities library.  
+philib is a small java library containing utility classes.  
 Most of these utilities have been written because they are/where missing in other libraries.
 
 See the [javadoc](https://bind.ch/philib/apidocs) API overview for a list of packages that might be of interest.
