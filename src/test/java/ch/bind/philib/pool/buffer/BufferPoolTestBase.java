@@ -207,7 +207,7 @@ public abstract class BufferPoolTestBase<T> {
 		private final int putOps;
 
 		public StressTester(Semaphore ready, Semaphore go, Semaphore end, Pool<T> pool, long numOps, int getOps, int putOps) {
-			Validation.isTrue(getOps >= putOps);
+			assertTrue(getOps >= putOps);
 			this.ready = ready;
 			this.go = go;
 			this.end = end;
