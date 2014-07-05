@@ -1,9 +1,3 @@
-Release checklist
-
-Code:
- - basic documentation for major packages/utilities
-
-
 Urls:
 nexus oss repo:     https://oss.sonatype.org/index.html
 nexus oss repo web: https://oss.sonatype.org/content/groups/staging/
