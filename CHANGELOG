@@ -6,7 +6,7 @@
 
 === 0.12.0 ===
  F: ToString: moved toString helpers from StringUtil to a new ToString class
- F: a micro-benchmarking utility
+ F: bench: added a simple micro-benchmarking utility
  F: conf: renamed ConfigValueListener -> ConfigListener
  F: conf: added LoggingListener
  F: conf: added an initializing constructor Config(Map<String,String>) 
