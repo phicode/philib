@@ -1,4 +1,5 @@
-1. ~/.m2/settings.xml
+=== settings ===
+~/.m2/settings.xml
 	<servers>
 		<server>
 			<id>sonatype-nexus-snapshots</id>
@@ -12,20 +13,25 @@
 		</server>
 	</servers>
 
-2. run "check.sh headers" and "check.sh updates"
+=== verification ===
+./check.sh headers && ./check.sh updates
+env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn clean test install
 
-3. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn clean test install
+=== release build ===
+env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:prepare -DpushChanges=false
+env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:perform -DlocalCheckout=true
 
-4. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:prepare -DpushChanges=false
+=== publish artifact ===
+- login @ https://oss.sonatype.org/index.html
+- navigate to "Staging Repositories"
+- select the release in question and "Close" it
+- refresh, select again and "Release"
 
-5. env PATH="/usr/lib/jvm/java-6-openjdk-amd64/bin:$PATH" mvn release:perform -DlocalCheckout=true
+=== publish tag ===
+git push && git push --tags
 
-6. login @ https://oss.sonatype.org/index.html
-
-7. navigate to "Staging Repositories"
-
-8. select the release in question and "Close" it
-
-9. refresh, select again and "Release"
-
-10. git push && git push --tags
+=== publish site ===
+git checkout vx.y.z
+rm -rf target
+mvn site:site javadoc:javadoc
+scp target/site ...
