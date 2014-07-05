@@ -53,7 +53,7 @@ public class LeakyBucketTest {
 		assertEquals(100, lb.canTake(timeNs));
 	}
 
-	@Test(timeOut = 2000)
+	@Test(timeOut = 20000)
 	public void fakeTimeCountSmallSteps() {
 		LeakyBucket lb = LeakyBucket.withTakesPerSecond(2500, 2500);
 		long timeNs = NS_PER_SEC;
