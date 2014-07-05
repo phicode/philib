@@ -1,6 +1,5 @@
-100% RingBuffer test coverage
-
-hit/miss statistics into the LRU caches
-
-bitstream codec
+- package level docs
+- 100% RingBuffer test coverage
+- hit/miss statistics into the LRU caches
+- bitstream codec
 
