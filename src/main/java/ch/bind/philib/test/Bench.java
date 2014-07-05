@@ -35,20 +35,20 @@ public final class Bench {
 		return run(bencher, DEFAULT_MAX_RUNTIME_MS);
 	}
 
-	public static Result run(Bencher bencher, long maxRuntimeMs) throws InterruptedException {
+	public static Result run(Bencher bencher, long minRuntimeMs) throws InterruptedException {
 		Validation.notNull(bencher);
-		long maxRuntimeNs = maxRuntimeMs * 1000000;
+		long maxRuntimeNs = minRuntimeMs * 1000000;
 
-		long n = 10;
+		long loops = 10;
 		while (true) {
-			long tNs = runAndMeasure(bencher, n);
-			if (tNs >= maxRuntimeNs) {
-				return new Result(bencher, n, tNs);
+			long timeNs = runAndMeasure(bencher, loops);
+			if (timeNs >= maxRuntimeNs) {
+				return new Result(bencher, loops, timeNs);
 			}
-			if (tNs * 8 < maxRuntimeNs) {
-				n *= 8;
+			if (timeNs * 8 < maxRuntimeNs) {
+				loops *= 8;
 			} else {
-				n *= 2;
+				loops *= 2;
 			}
 		}
 	}
@@ -57,31 +57,43 @@ public final class Bench {
 		run(bencher, DEFAULT_MAX_RUNTIME_MS).print(System.out);
 	}
 
-	public static void runAndPrint(Bencher bencher, long maxRuntimeMs) throws InterruptedException {
-		run(bencher, maxRuntimeMs).print(System.out);
+	public static void runAndPrint(Bencher bencher, long minRuntimeMs) throws InterruptedException {
+		run(bencher, minRuntimeMs).print(System.out);
 	}
 
-	private static long runAndMeasure(Bencher bench, long n) {
+	private static long runAndMeasure(Bencher bench, long loops) {
 		long t = System.nanoTime();
-		bench.run(n);
+		bench.run(loops);
 		return System.nanoTime() - t;
 	}
 
 	public static final class Result {
 
 		private final Bencher bencher;
-		private final long n;
-		private final long tNs;
+		private final long loops;
+		private final long timeNs;
 
-		public Result(Bencher bencher, long n, long tNs) {
+		public Result(Bencher bencher, long loops, long timeNs) {
 			this.bencher = bencher;
-			this.n = n;
-			this.tNs = tNs;
+			this.loops = loops;
+			this.timeNs = timeNs;
+		}
+
+		public Bencher getBencher() {
+			return bencher;
+		}
+
+		public long getLoops() {
+			return loops;
+		}
+
+		public long getTimeNs() {
+			return timeNs;
 		}
 
 		public void print(PrintStream printStream) {
 			printStream.printf("%-30s %10d ops in %10d ns => %8dns/op\n", //
-					bencher.getName(), n, tNs, Calc.ceilDiv(tNs, n));
+					bencher.getName(), loops, timeNs, Calc.ceilDiv(timeNs, loops));
 		}
 	}
 }

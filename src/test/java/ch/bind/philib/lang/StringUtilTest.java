@@ -136,13 +136,13 @@ public class StringUtilTest {
 		}
 
 		@Override
-		public void run(long n) {
+		public void run(long loops) {
 			String s = str;
 			long total = 0;
-			for (long i = 0; i < n; i++) {
+			for (long i = 0; i < loops; i++) {
 				total += StringUtil.count(s, '.');
 			}
-			assertEquals(total, s.length() * n);
+			assertEquals(total, s.length() * loops);
 		}
 
 		@Override
@@ -190,12 +190,12 @@ public class StringUtilTest {
 		}
 
 		@Override
-		public void run(long n) {
+		public void run(long loops) {
 			long total = 0;
-			for (long i = 0; i < n; i++) {
+			for (long i = 0; i < loops; i++) {
 				total += StringUtil.split(str, '.').length;
 			}
-			assertEquals(total, str.length() * n / 2);
+			assertEquals(total, str.length() * loops / 2);
 		}
 
 		@Override
