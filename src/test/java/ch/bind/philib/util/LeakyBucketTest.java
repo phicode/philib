@@ -93,7 +93,7 @@ public class LeakyBucketTest {
 		}
 	}
 
-	@Test(timeOut = 1000)
+	@Test(timeOut = 10000)
 	public void takeWithRealTime() {
 		TestUtil.gcAndSleep(50);
 		LeakyBucket lb = LeakyBucket.withTakesPerSecond(25000, 1000);
