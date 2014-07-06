@@ -22,6 +22,7 @@
 
 package ch.bind.philib;
 
+import ch.bind.philib.lang.ArrayUtil;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -104,7 +105,7 @@ public class PrivateConstructorTest {
 		Object o;
 		if (!ctor.isAccessible()) {
 			ctor.setAccessible(true);
-			o = ctor.newInstance(new Object[0]);
+			o = ctor.newInstance(ArrayUtil.EMPTY_OBJECT_ARRAY);
 			ctor.setAccessible(false);
 		} else {
 			o = ctor.newInstance();

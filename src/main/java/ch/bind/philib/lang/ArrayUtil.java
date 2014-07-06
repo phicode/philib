@@ -45,10 +45,13 @@ public abstract class ArrayUtil {
 	public static final long[] EMPTY_LONG_ARRAY = new long[0];
 	public static final float[] EMPTY_FLOAT_ARRAY = new float[0];
 	public static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
+	public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+
 	private static final char[] TO_HEX = {'0', '1', '2', '3', //
 			'4', '5', '6', '7', //
 			'8', '9', 'A', 'B', //
 			'C', 'D', 'E', 'F'};
+
 	private static volatile byte[] nullFiller;
 
 	protected ArrayUtil() {
