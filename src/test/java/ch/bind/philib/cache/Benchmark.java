@@ -23,9 +23,9 @@
 package ch.bind.philib.cache;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.util.TLR;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.testng.Assert.fail;
 
@@ -134,7 +134,7 @@ public final class Benchmark {
 
 		private final int loops;
 
-		private final Random rand = TLR.current();
+		private final Random rand = ThreadLocalRandom.current();
 
 		Runner(Cache<Integer, String> cache, int loops) {
 			this.cache = cache;

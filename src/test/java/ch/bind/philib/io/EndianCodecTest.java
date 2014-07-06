@@ -22,12 +22,12 @@
 
 package ch.bind.philib.io;
 
-import ch.bind.philib.util.TLR;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.testng.Assert.assertEquals;
 
@@ -41,7 +41,7 @@ public class EndianCodecTest {
 
 	@BeforeMethod
 	public void beforeMethod() {
-		rand = TLR.current();
+		rand = ThreadLocalRandom.current();
 		buf = new byte[4096];
 	}
 

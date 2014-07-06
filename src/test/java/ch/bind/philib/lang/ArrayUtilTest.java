@@ -22,7 +22,6 @@
 
 package ch.bind.philib.lang;
 
-import ch.bind.philib.util.TLR;
 import org.testng.annotations.Test;
 
 import java.nio.ByteBuffer;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static ch.bind.philib.lang.ArrayUtil.EMPTY_BYTE_ARRAY;
 import static ch.bind.philib.lang.ArrayUtil.append;
@@ -307,7 +307,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void memsetArray() {
-		Random rand = TLR.current();
+		Random rand = ThreadLocalRandom.current();
 		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
@@ -320,7 +320,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void memsetArrayByteBuffer() {
-		Random rand = TLR.current();
+		Random rand = ThreadLocalRandom.current();
 		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);
@@ -334,7 +334,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void memsetDirectByteBuffer() {
-		Random rand = TLR.current();
+		Random rand = ThreadLocalRandom.current();
 		for (int i = 0; i < 2000; i++) {
 			byte[] b = new byte[i];
 			rand.nextBytes(b);

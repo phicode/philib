@@ -23,13 +23,13 @@
 package ch.bind.philib.io;
 
 import ch.bind.philib.TestUtil;
-import ch.bind.philib.util.TLR;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -81,7 +81,7 @@ public class RingBufferTest {
 
 	@Test
 	public void randomAccess() {
-		final Random rand = TLR.current();
+		final Random rand = ThreadLocalRandom.current();
 		final LinkedList<Byte> bufExp = new LinkedList<Byte>();
 		final RingBuffer ringBuf = new RingBuffer();
 		int size = 0;
@@ -135,7 +135,7 @@ public class RingBufferTest {
 		final long start = System.nanoTime();
 		RingBuffer ringBuf = new RingBuffer();
 		byte[] buf = new byte[PERF_CHUNKSIZE];
-		TLR.current().nextBytes(buf);
+		ThreadLocalRandom.current().nextBytes(buf);
 		long performed = 0;
 		while (performed < PERF_SIZE) {
 			ringBuf.write(buf);
@@ -269,7 +269,7 @@ public class RingBufferTest {
 
 	private byte[] genData(int num) {
 		byte[] d = new byte[num];
-		TLR.current().nextBytes(d);
+		ThreadLocalRandom.current().nextBytes(d);
 		return d;
 	}
 }

@@ -22,12 +22,12 @@
 
 package ch.bind.philib.lang;
 
-import ch.bind.philib.util.TLR;
 import ch.bind.philib.validation.Validation;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Various functions for dealing with arrays which are not present in the
@@ -90,7 +90,7 @@ public abstract class ArrayUtil {
 		final int nDst = destination.length;
 		if (nSrc < nDst)
 			throw new IllegalArgumentException("the source arrays length must be greater or equal to the destination arrays length");
-		final Random rand = TLR.current();
+		final Random rand = ThreadLocalRandom.current();
 		final boolean[] taken = new boolean[nSrc];
 
 		for (int i = 0; i < nDst; i++) {
