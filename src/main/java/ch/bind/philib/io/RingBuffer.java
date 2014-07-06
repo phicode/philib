@@ -49,7 +49,7 @@ public final class RingBuffer implements DoubleSidedBuffer {
 
 	public RingBuffer(int capacity) {
 		Validation.notNegative(capacity, "capacity must not be negative");
-		_init(capacity);
+		init(capacity);
 	}
 
 	@Override
@@ -75,86 +75,86 @@ public final class RingBuffer implements DoubleSidedBuffer {
 
 	@Override
 	public void read(byte[] data) {
-		_checkParam(data);
-		_read(data, 0, data.length);
+		check(data);
+		readFront(data, 0, data.length);
 	}
 
 	@Override
 	public void read(byte[] data, int off, int len) {
-		_checkParam(data, off, len);
-		_read(data, off, len);
+		check(data, off, len);
+		readFront(data, off, len);
 	}
 
 	@Override
 	public void readBack(byte[] data) {
-		_checkParam(data);
+		check(data);
 		_readBack(data, 0, data.length);
 	}
 
 	@Override
 	public void readBack(byte[] data, int off, int len) {
-		_checkParam(data, off, len);
+		check(data, off, len);
 		_readBack(data, off, len);
 	}
 
 	@Override
 	public void write(byte[] data) {
-		_checkParam(data);
+		check(data);
 		_write(data, 0, data.length);
 	}
 
 	@Override
 	public void write(byte[] data, int off, int len) {
-		_checkParam(data, off, len);
+		check(data, off, len);
 		_write(data, off, len);
 	}
 
 	@Override
 	public void writeFront(byte[] data) {
-		_checkParam(data);
+		check(data);
 		_writeFront(data, 0, data.length);
 	}
 
 	@Override
 	public void writeFront(byte[] data, int off, int len) {
-		_checkParam(data, off, len);
+		check(data, off, len);
 		_writeFront(data, off, len);
 	}
 
-	private void _read(byte[] data, int off, int len) {
+	private void readFront(byte[] data, int off, int len) {
 		if (len == 0) {
 			return;
 		}
-		_readLenCheck(len);
-		_copyFromRingBufFront(data, off, len);
-		_consumed(len);
+		readLenCheck(len);
+		copyFromRingBufFront(data, off, len);
+		consumedFront(len);
 	}
 
 	private void _readBack(byte[] data, int off, int len) {
 		if (len == 0) {
 			return;
 		}
-		_readLenCheck(len);
-		_copyFromRingBufBack(data, off, len);
-		_consumedBack(len);
+		readLenCheck(len);
+		copyFromRingBufBack(data, off, len);
+		consumedBack(len);
 	}
 
 	private void _write(byte[] data, int off, int len) {
 		int newSize = ringSize + len;
 		_ensureBufferSize(newSize);
-		_copyToRingBufBack(data, off, len);
+		copyToRingBufBack(data, off, len);
 		ringSize = newSize;
 	}
 
 	private void _writeFront(byte[] data, int off, int len) {
 		int newSize = ringSize + len;
 		_ensureBufferSize(newSize);
-		_copyToRingBufFront(data, off, len);
+		copyToRingBufFront(data, off, len);
 		ringSize = newSize;
-		ringOffset = _offsetMinus(len);
+		ringOffset = offsetMinus(len);
 	}
 
-	private void _init(int capacity) {
+	private void init(int capacity) {
 		this.ringCapacity = capacity;
 		this.ringBuf = new byte[capacity];
 	}
@@ -169,13 +169,13 @@ public final class RingBuffer implements DoubleSidedBuffer {
 		}
 		byte[] newBuf = new byte[newCap];
 		// copy all data into the beginning of the new buffer
-		_copyFromRingBufFront(newBuf, 0, ringSize);
+		copyFromRingBufFront(newBuf, 0, ringSize);
 		this.ringBuf = newBuf;
 		this.ringCapacity = newCap;
 		this.ringOffset = 0;
 	}
 
-	private void _copyFromRingBufFront(byte[] buf, int off, int len) {
+	private void copyFromRingBufFront(byte[] buf, int off, int len) {
 		int availToEnd = ringCapacity - ringOffset;
 		if (availToEnd >= len) {
 			// all data is available from one read
@@ -189,8 +189,8 @@ public final class RingBuffer implements DoubleSidedBuffer {
 		}
 	}
 
-	private void _copyFromRingBufBack(byte[] buf, int off, int len) {
-		int firstReadOffset = _offsetPlus(ringSize - len);
+	private void copyFromRingBufBack(byte[] buf, int off, int len) {
+		int firstReadOffset = offsetPlus(ringSize - len);
 		int availToEnd = ringCapacity - firstReadOffset;
 		int numReadOne = Math.min(availToEnd, len);
 		int numReadTwo = len - numReadOne;
@@ -200,8 +200,8 @@ public final class RingBuffer implements DoubleSidedBuffer {
 		}
 	}
 
-	private void _copyToRingBufBack(byte[] data, int off, int len) {
-		int writePosOne = _offsetPlus(ringSize);
+	private void copyToRingBufBack(byte[] data, int off, int len) {
+		int writePosOne = offsetPlus(ringSize);
 		int availBack = ringCapacity - writePosOne;
 		int numWriteOne = Math.min(availBack, len);
 		int numWriteTwo = len - numWriteOne;
@@ -212,8 +212,8 @@ public final class RingBuffer implements DoubleSidedBuffer {
 		}
 	}
 
-	private void _copyToRingBufFront(byte[] data, int off, int len) {
-		int writePosOne = _offsetMinus(len);
+	private void copyToRingBufFront(byte[] data, int off, int len) {
+		int writePosOne = offsetMinus(len);
 		int availBack = ringCapacity - writePosOne;
 		int numWriteOne = Math.min(availBack, len);
 		ac(data, off, ringBuf, writePosOne, numWriteOne);
@@ -223,17 +223,17 @@ public final class RingBuffer implements DoubleSidedBuffer {
 		}
 	}
 
-	private void _consumed(int len) {
+	private void consumedFront(int len) {
 		ringSize -= len;
 		if (ringSize == 0) {
 			// try to realign the ringbuffer if it is emtpy
 			ringOffset = 0;
 		} else {
-			ringOffset = _offsetPlus(len);
+			ringOffset = offsetPlus(len);
 		}
 	}
 
-	private void _consumedBack(int len) {
+	private void consumedBack(int len) {
 		ringSize -= len;
 		if (ringSize == 0) {
 			// try to realign the ringbuffer if it is emtpy
@@ -241,19 +241,19 @@ public final class RingBuffer implements DoubleSidedBuffer {
 		}
 	}
 
-	private void _readLenCheck(int len) {
+	private void readLenCheck(int len) {
 		if (this.ringSize < len) {
 			throw new IllegalArgumentException("not enough data in buffer");
 		}
 	}
 
-	private int _offsetPlus(int shift) {
+	private int offsetPlus(int shift) {
 		int offset = ringOffset + shift;
 		offset %= ringCapacity;
 		return offset;
 	}
 
-	private int _offsetMinus(int shift) {
+	private int offsetMinus(int shift) {
 		int offset = ringOffset - shift;
 		if (offset < 0) {
 			offset += ringCapacity;
@@ -261,20 +261,14 @@ public final class RingBuffer implements DoubleSidedBuffer {
 		return offset;
 	}
 
-	private static void _checkParam(byte[] data) {
-		if (data == null) {
-			throw new IllegalArgumentException("data-buffer must not be null");
-		}
+	private static void check(byte[] data) {
+		Validation.notNull(data, "data-buffer must not be null");
 	}
 
-	private static void _checkParam(byte[] data, int off, int len) {
-		_checkParam(data);
-		if (off < 0) {
-			throw new IllegalArgumentException("offset must not be negative");
-		}
-		if (len < 0) {
-			throw new IllegalArgumentException("length must not be negative");
-		}
+	private static void check(byte[] data, int off, int len) {
+		check(data);
+		Validation.notNegative(off,"offset must not be negative");
+		Validation.notNegative(len,"length must not be negative");
 		// (off + len) > data.length could overflow
 		// but since all 3 parameters are in the range 0-Integer.MAX_VALUE the
 		// calculation can be transformed
