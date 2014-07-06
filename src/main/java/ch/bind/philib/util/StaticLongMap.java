@@ -91,7 +91,7 @@ public final class StaticLongMap<T> {
 			keys[i] = key;
 			values[i] = value;
 		}
-		return new StaticLongMap<T>(keys, values);
+		return new StaticLongMap<>(keys, values);
 	}
 
 	/**

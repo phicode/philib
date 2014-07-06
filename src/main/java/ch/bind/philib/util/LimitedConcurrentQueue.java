@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public final class LimitedConcurrentQueue<T> {
 
-	private final ConcurrentLinkedQueue<T> queue = new ConcurrentLinkedQueue<T>();
+	private final ConcurrentLinkedQueue<T> queue = new ConcurrentLinkedQueue<>();
 
 	private final AtomicInteger size = new AtomicInteger();
 

@@ -62,7 +62,7 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 		int lines = capacity / order;
 		this.order = order;
-		this.entries = new AtomicReferenceArray<Entry<K, V>>(capacity);
+		this.entries = new AtomicReferenceArray<>(capacity);
 		this.valueCloner = valueCloner;
 		this.lineMask = lines - 1;
 	}
@@ -76,7 +76,7 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		final int line = Math.abs(hash) & lineMask;
 		final int startIdx = line * order;
 
-		final Entry<K, V> newe = new Entry<K, V>(key, hash, value);
+		final Entry<K, V> newe = new Entry<>(key, hash, value);
 
 		while (true) {
 			int insertIdx = -1;
@@ -187,7 +187,7 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		public Entry(K key, int hash, V value) {
 			this.key = key;
 			this.hash = hash;
-			this.value = new SoftReference<V>(value);
+			this.value = new SoftReference<>(value);
 		}
 
 		public void setLastAccessMaxVal(long access) {

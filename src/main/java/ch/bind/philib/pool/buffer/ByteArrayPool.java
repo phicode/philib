@@ -68,14 +68,14 @@ public final class ByteArrayPool implements Pool<byte[]> {
 
 	public static ByteArrayPool create(int bufferSize, int maxEntries) {
 		ByteArrayManager manager = new ByteArrayManager(bufferSize);
-		return new ByteArrayPool(new SoftRefPool<byte[]>(manager, maxEntries));
+		return new ByteArrayPool(new SoftRefPool<>(manager, maxEntries));
 	}
 
 	public static ByteArrayPool create(int bufferSize, int maxEntries, int concurrencyLevel) {
 		ByteArrayManager manager = new ByteArrayManager(bufferSize);
 		if (concurrencyLevel < 2) {
-			return new ByteArrayPool(new SoftRefPool<byte[]>(manager, maxEntries));
+			return new ByteArrayPool(new SoftRefPool<>(manager, maxEntries));
 		}
-		return new ByteArrayPool(new ConcurrentPool<byte[]>(manager, maxEntries, true, concurrencyLevel));
+		return new ByteArrayPool(new ConcurrentPool<>(manager, maxEntries, true, concurrencyLevel));
 	}
 }

@@ -34,7 +34,7 @@ public final class FilteringListener implements ConfigListener {
 
 	private final ConfigListener listener;
 
-	private final Set<String> filteredProperties = new HashSet<String>();
+	private final Set<String> filteredProperties = new HashSet<>();
 
 	private boolean blacklist = true;
 

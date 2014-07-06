@@ -91,7 +91,7 @@ public final class StaticIntMap<T> {
 			keys[i] = key;
 			values[i] = value;
 		}
-		return new StaticIntMap<T>(keys, values);
+		return new StaticIntMap<>(keys, values);
 	}
 
 	/**

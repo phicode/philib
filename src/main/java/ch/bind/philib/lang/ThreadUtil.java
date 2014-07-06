@@ -150,7 +150,7 @@ public abstract class ThreadUtil {
 		if (threadFactory == null) {
 			threadFactory = DEFAULT_THREAD_FACTORY;
 		}
-		List<Thread> ts = new ArrayList<Thread>(runnables.length);
+		List<Thread> ts = new ArrayList<>(runnables.length);
 		for (Runnable r : runnables) {
 			if (r != null) {
 				ts.add(threadFactory.newThread(r));

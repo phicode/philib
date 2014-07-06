@@ -54,7 +54,7 @@ class LruCacheEntry<K, V> implements Entry<K>, LruNode {
 	}
 
 	void setValue(V value) {
-		this.value = new SoftReference<V>(value);
+		this.value = new SoftReference<>(value);
 	}
 
 	@Override

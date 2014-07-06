@@ -78,10 +78,10 @@ public abstract class CacheTestBase {
 
 		final int def = getDefaultCapacity();
 
-		cache = this.<Integer, Integer>create();
+		cache = this.create();
 		assertEquals(cache.capacity(), def);
 
-		cache = this.<Integer, Integer>create(def * 4);
+		cache = this.create(def * 4);
 		assertEquals(cache.capacity(), def * 4);
 	}
 
@@ -102,31 +102,31 @@ public abstract class CacheTestBase {
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void getNullKey() {
-		Cache<String, String> cache = this.<String, String>create();
+		Cache<String, String> cache = this.create();
 		cache.get(null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void setNullKey() {
-		Cache<String, String> cache = this.<String, String>create();
+		Cache<String, String> cache = this.create();
 		cache.set(null, "abc");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void setNullValue() {
-		Cache<String, String> cache = this.<String, String>create();
+		Cache<String, String> cache = this.create();
 		cache.set("abc", null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void removeNullKey() {
-		Cache<String, String> cache = this.<String, String>create();
+		Cache<String, String> cache = this.create();
 		cache.remove(null);
 	}
 
 	@Test
 	public void get() {
-		Cache<String, String> cache = this.<String, String>create();
+		Cache<String, String> cache = this.create();
 
 		assertNull(cache.get("1"));
 		cache.set("1", "one");
@@ -143,7 +143,7 @@ public abstract class CacheTestBase {
 
 	@Test
 	public void overwrite() {
-		Cache<String, String> cache = this.<String, String>create();
+		Cache<String, String> cache = this.create();
 		cache.set("1", "version 1");
 		cache.set("1", "version 2");
 		assertEquals(cache.get("1"), "version 2");
@@ -153,7 +153,7 @@ public abstract class CacheTestBase {
 
 	@Test
 	public void cloner() {
-		Cache<Integer, Integer> cache = this.<Integer, Integer>create(INTEGER_CLONER);
+		Cache<Integer, Integer> cache = this.create(INTEGER_CLONER);
 		Integer one = Integer.valueOf(1);
 		cache.set(one, one);
 		Integer copy = cache.get(one);
@@ -165,7 +165,7 @@ public abstract class CacheTestBase {
 
 	@Test
 	public void up() {
-		Cache<Integer, Integer> cache = this.<Integer, Integer>create();
+		Cache<Integer, Integer> cache = this.create();
 		int hit = 0, miss = 0;
 		final int N = cache.capacity() * UP_DOWN_CAP_COEFF;
 		Integer[] is = new Integer[N];
@@ -189,7 +189,7 @@ public abstract class CacheTestBase {
 
 	@Test
 	public void down() {
-		Cache<Integer, Integer> cache = this.<Integer, Integer>create();
+		Cache<Integer, Integer> cache = this.create();
 		int hit = 0, miss = 0;
 		final int N = cache.capacity() * UP_DOWN_CAP_COEFF;
 		Integer[] is = new Integer[N];
@@ -228,7 +228,7 @@ public abstract class CacheTestBase {
 		}
 
 		long t0 = System.nanoTime();
-		Cache<Integer, byte[]> cache = this.<Integer, byte[]>create(cap);
+		Cache<Integer, byte[]> cache = this.create(cap);
 		long t1 = System.nanoTime() - t0;
 		for (int i = 0; i < cap; i++) {
 			cache.set(i, data.clone());

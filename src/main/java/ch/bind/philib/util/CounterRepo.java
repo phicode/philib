@@ -32,7 +32,7 @@ public final class CounterRepo {
 	public static final CounterRepo DEFAULT = new CounterRepo();
 	private static final String DEFAULT_NAME = "default";
 	private static final char POSTFIX_SEP = ':';
-	private final ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<String, Counter>();
+	private final ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<>();
 
 	public CounterRepo() {
 	}
@@ -80,7 +80,7 @@ public final class CounterRepo {
 	}
 
 	public Collection<Counter> getCounters() {
-		return new ArrayList<Counter>(counters.values());
+		return new ArrayList<>(counters.values());
 	}
 
 	public void clear() {

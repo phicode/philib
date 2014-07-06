@@ -52,9 +52,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 
-	private final SortedMap<Long, K> timeoutToKey = new TreeMap<Long, K>();
+	private final SortedMap<Long, K> timeoutToKey = new TreeMap<>();
 
-	private final Map<K, TOEntry<K, V>> keyToValue = new HashMap<K, TOEntry<K, V>>();
+	private final Map<K, TOEntry<K, V>> keyToValue = new HashMap<>();
 
 	private final ReadWriteLock rwlock = new ReentrantReadWriteLock();
 
@@ -89,7 +89,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 				// key-value pairs are added in short succession
 				actualTimestampNs += ((long) (Math.random() * 1000) + 1);
 			}
-			TOEntry<K, V> entry = new TOEntry<K, V>(actualTimestampNs, key, value);
+			TOEntry<K, V> entry = new TOEntry<>(actualTimestampNs, key, value);
 			timeoutToKey.put(actualTimestampNs, key);
 			keyToValue.put(key, entry);
 			putCond.signalAll();
@@ -153,7 +153,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 					break;
 				}
 				if (rv == null) {
-					rv = new ArrayList<Map.Entry<K, V>>();
+					rv = new ArrayList<>();
 				}
 				rv.add(e);
 			}
@@ -290,7 +290,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 			return Long.MAX_VALUE;
 		}
 		Long lowest = timeoutToKey.firstKey();
-		long diff = lowest.longValue() - nowNs;
+		long diff = lowest - nowNs;
 		return diff < 0 ? 0 : diff;
 	}
 

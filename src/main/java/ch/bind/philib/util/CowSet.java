@@ -44,7 +44,7 @@ public final class CowSet<E> {
 
 	private final Class<E> clazz;
 
-	private final Set<E> content = new HashSet<E>();
+	private final Set<E> content = new HashSet<>();
 
 	private volatile E[] empty;
 

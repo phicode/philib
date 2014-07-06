@@ -50,9 +50,9 @@ public final class ConcurrentPool<T> implements Pool<T> {
 		PoolStats[] s = new PoolStats[concurrencyLevel];
 		for (int i = 0; i < concurrencyLevel; i++) {
 			if (softRefs) {
-				pools[i] = new SoftRefPool<T>(manager, maxPerPool);
+				pools[i] = new SoftRefPool<>(manager, maxPerPool);
 			} else {
-				pools[i] = new StrongRefPool<T>(manager, maxPerPool);
+				pools[i] = new StrongRefPool<>(manager, maxPerPool);
 			}
 			s[i] = pools[i].getPoolStats();
 		}

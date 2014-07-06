@@ -73,9 +73,9 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 		oldGenRatio = Calc.clip(oldGenRatio, MIN_OLD_GEN_RATIO, MAX_OLD_GEN_RATIO);
 		int oldCap = (int) (this.capacity * oldGenRatio);
 		int youngCap = this.capacity - oldCap;
-		this.lruYoungGen = new LruList<StagedLruCacheEntry<K, V>>(youngCap);
-		this.lruOldGen = new LruList<StagedLruCacheEntry<K, V>>(oldCap);
-		this.index = new ClusteredHashIndex<K, StagedLruCacheEntry<K, V>>(capacity);
+		this.lruYoungGen = new LruList<>(youngCap);
+		this.lruOldGen = new LruList<>(oldCap);
+		this.index = new ClusteredHashIndex<>(capacity);
 		this.valueCloner = valueCloner;
 	}
 
@@ -86,7 +86,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 		Validation.notNull(value);
 		StagedLruCacheEntry<K, V> entry = index.get(key);
 		if (entry == null) {
-			entry = new StagedLruCacheEntry<K, V>(key, value);
+			entry = new StagedLruCacheEntry<>(key, value);
 			index.add(entry);
 			addYoungGen(entry, false);
 		} else {

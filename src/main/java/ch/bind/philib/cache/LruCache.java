@@ -50,8 +50,8 @@ public final class LruCache<K, V> implements Cache<K, V> {
 
 	public LruCache(int capacity, Cloner<V> valueCloner) {
 		Validation.isTrue(capacity > 0, "capacity must be greater than 0");
-		this.lru = new LruList<LruCacheEntry<K, V>>(capacity);
-		this.index = new ClusteredHashIndex<K, LruCacheEntry<K, V>>(capacity);
+		this.lru = new LruList<>(capacity);
+		this.index = new ClusteredHashIndex<>(capacity);
 		this.valueCloner = valueCloner;
 	}
 
@@ -61,7 +61,7 @@ public final class LruCache<K, V> implements Cache<K, V> {
 		Validation.notNull(value);
 		LruCacheEntry<K, V> entry = index.get(key);
 		if (entry == null) {
-			entry = new LruCacheEntry<K, V>(key, value);
+			entry = new LruCacheEntry<>(key, value);
 			index.add(entry);
 			LruCacheEntry<K, V> removed = lru.add(entry);
 			if (removed != null) {

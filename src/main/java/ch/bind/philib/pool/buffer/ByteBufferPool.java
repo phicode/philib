@@ -70,14 +70,14 @@ public final class ByteBufferPool implements Pool<ByteBuffer> {
 
 	public static ByteBufferPool create(int bufferSize, int maxEntries) {
 		ByteBufferManager manager = new ByteBufferManager(bufferSize);
-		return new ByteBufferPool(new SoftRefPool<ByteBuffer>(manager, maxEntries));
+		return new ByteBufferPool(new SoftRefPool<>(manager, maxEntries));
 	}
 
 	public static ByteBufferPool create(int bufferSize, int maxEntries, int concurrencyLevel) {
 		ByteBufferManager manager = new ByteBufferManager(bufferSize);
 		if (concurrencyLevel < 2) {
-			return new ByteBufferPool(new SoftRefPool<ByteBuffer>(manager, maxEntries));
+			return new ByteBufferPool(new SoftRefPool<>(manager, maxEntries));
 		}
-		return new ByteBufferPool(new ConcurrentPool<ByteBuffer>(manager, maxEntries, true, concurrencyLevel));
+		return new ByteBufferPool(new ConcurrentPool<>(manager, maxEntries, true, concurrencyLevel));
 	}
 }

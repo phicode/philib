@@ -31,7 +31,7 @@ public final class StrongRefPool<T> extends PoolBase<T> {
 
 	public StrongRefPool(ObjectManager<T> manager, int maxEntries) {
 		super(manager);
-		queue = new LimitedConcurrentQueue<T>(maxEntries);
+		queue = new LimitedConcurrentQueue<>(maxEntries);
 	}
 
 	@Override

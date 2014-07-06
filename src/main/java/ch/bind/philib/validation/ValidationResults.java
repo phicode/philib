@@ -34,7 +34,7 @@ public final class ValidationResults implements Serializable {
 	private final LinkedList<String> errors;
 
 	public ValidationResults() {
-		errors = new LinkedList<String>();
+		errors = new LinkedList<>();
 	}
 
 	public int getNumErrors() {

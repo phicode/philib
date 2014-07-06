@@ -33,7 +33,7 @@ public final class SoftRefPool<T> extends PoolBase<T> {
 
 	public SoftRefPool(ObjectManager<T> manager, int maxEntries) {
 		super(manager);
-		queue = new LimitedConcurrentQueue<SoftReference<T>>(maxEntries);
+		queue = new LimitedConcurrentQueue<>(maxEntries);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public final class SoftRefPool<T> extends PoolBase<T> {
 
 	@Override
 	protected boolean offer(T value) {
-		return queue.offer(new SoftReference<T>(value));
+		return queue.offer(new SoftReference<>(value));
 	}
 
 	@Override

@@ -45,9 +45,9 @@ import java.util.Set;
  */
 public final class Config {
 
-	private final CowSet<ConfigListener> listeners = new CowSet<ConfigListener>(ConfigListener.class);
+	private final CowSet<ConfigListener> listeners = new CowSet<>(ConfigListener.class);
 
-	private final List<URL> urls = new LinkedList<URL>();
+	private final List<URL> urls = new LinkedList<>();
 
 	private boolean loading;
 
@@ -66,7 +66,7 @@ public final class Config {
 	}
 
 	public Config(Map<String, String> config) {
-		this.config = new HashMap<String, String>(config);
+		this.config = new HashMap<>(config);
 	}
 
 	public synchronized void setURL(URL url) {
@@ -109,7 +109,7 @@ public final class Config {
 		loading = true;
 		int numSuccess = 0;
 		Exception lastExc = null;
-		Map<String, String> newConfig = new HashMap<String, String>();
+		Map<String, String> newConfig = new HashMap<>();
 		try {
 			for (URL url : urls) {
 				if (url == null) {
@@ -145,7 +145,7 @@ public final class Config {
 	}
 
 	public static Map<String, String> toMap(Properties p) {
-		Map<String, String> m = new HashMap<String, String>();
+		Map<String, String> m = new HashMap<>();
 		for (String key : p.stringPropertyNames()) {
 			m.put(key, p.getProperty(key));
 		}
