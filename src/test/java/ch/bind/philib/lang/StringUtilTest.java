@@ -27,15 +27,7 @@ import ch.bind.philib.test.Bench;
 import ch.bind.philib.test.Bencher;
 import org.testng.annotations.Test;
 
-import static ch.bind.philib.lang.StringUtil.addInt;
-import static ch.bind.philib.lang.StringUtil.addLong;
-import static ch.bind.philib.lang.StringUtil.addObj;
-import static ch.bind.philib.lang.StringUtil.end;
 import static ch.bind.philib.lang.StringUtil.extractBack;
-import static ch.bind.philib.lang.StringUtil.firstInt;
-import static ch.bind.philib.lang.StringUtil.firstLong;
-import static ch.bind.philib.lang.StringUtil.firstObj;
-import static ch.bind.philib.lang.StringUtil.start;
 import static org.testng.Assert.assertEquals;
 
 public class StringUtilTest {
@@ -47,59 +39,6 @@ public class StringUtilTest {
 		assertEquals(extractBack("a.b.c", '.'), "c");
 		assertEquals(extractBack("....c", '.'), "c");
 		assertEquals(extractBack("c.", '.'), "");
-	}
-
-	@Test
-	public void toStrForStr() {
-		String a = "a";
-
-		StringBuilder sb = start(a);
-		String out = end(sb);
-		assertEquals(out, "String[]");
-
-		sb = start(a);
-		firstObj(sb, "a", a);
-		addObj(sb, "b", "b");
-		out = end(sb);
-		assertEquals(out, "String[a=a, b=b]");
-
-		sb = start(a);
-		firstObj(sb, a);
-		addObj(sb, "b");
-		out = end(sb);
-		assertEquals(out, "String[a, b]");
-	}
-
-	@Test
-	public void toStrForInt() {
-		Integer a = 1;
-
-		StringBuilder sb = start(a);
-		String out = end(sb);
-		assertEquals(out, "Integer[]");
-
-		sb = start(a);
-		firstInt(sb, "a", a);
-		addInt(sb, 2);
-		addInt(sb, "c", 3);
-		out = end(sb);
-		assertEquals(out, "Integer[a=1, 2, c=3]");
-	}
-
-	@Test
-	public void toStrForLong() {
-		Long a = 1L;
-
-		StringBuilder sb = start(a);
-		String out = end(sb);
-		assertEquals(out, "Long[]");
-
-		sb = start(a);
-		firstLong(sb, "a", a);
-		addLong(sb, 2);
-		addLong(sb, "c", 3);
-		out = end(sb);
-		assertEquals(out, "Long[a=1, 2, c=3]");
 	}
 
 	@Test
