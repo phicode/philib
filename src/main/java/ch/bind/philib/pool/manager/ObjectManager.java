@@ -33,7 +33,7 @@ public interface ObjectManager<T> {
 	void release(T value);
 
 	/**
-	 * Prepare an object to be reused by a different user. Implementors of this method must make sure that any data from
+	 * Prepare an object to be reused by a different user. Implementations of this method must make sure that any data from
 	 * previous users is cleared.
 	 *
 	 * @param value The object which must be prepared for reuse.
