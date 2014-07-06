@@ -74,10 +74,10 @@ public abstract class SafeCloseUtil {
 		try {
 			closeMethod = obj.getClass().getMethod("close");
 		} catch (NoSuchMethodException e) {
-			LOG.warn("close method not found on class: " + obj.getClass().getName());
+			logger.warn("close method not found on class: " + obj.getClass().getName());
 			return;
 		} catch (SecurityException e) {
-			LOG.warn("cannot access close method on class: " + obj.getClass().getName());
+			logger.warn("cannot access close method on class: " + obj.getClass().getName());
 			return;
 		}
 		try {
