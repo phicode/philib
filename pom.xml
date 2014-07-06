@@ -14,7 +14,7 @@
 
 	<groupId>ch.bind</groupId>
 	<artifactId>philib</artifactId>
-	<version>0.12.1-SNAPSHOT</version>
+	<version>0.13.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>philib</name>
@@ -23,8 +23,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.source.version>1.6</java.source.version>
-		<java.target.version>1.6</java.target.version>
+		<java.source.version>1.7</java.source.version>
+		<java.target.version>1.7</java.target.version>
 		<javac.optimize>true</javac.optimize>
 		<javac.showWarnings>true</javac.showWarnings>
 		<javac.showDeprecation>true</javac.showDeprecation>
