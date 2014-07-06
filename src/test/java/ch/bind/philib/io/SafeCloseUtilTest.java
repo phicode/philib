@@ -23,6 +23,7 @@
 package ch.bind.philib.io;
 
 import org.slf4j.Logger;
+import org.slf4j.helpers.NOPLogger;
 import org.testng.annotations.Test;
 
 import java.io.Closeable;
@@ -79,7 +80,7 @@ public class SafeCloseUtilTest {
 
 	@Test
 	public void dontFailOnNoCloseMethod() {
-		SafeCloseUtil.close(new Object());
+		SafeCloseUtil.close(new Object(), NOPLogger.NOP_LOGGER);
 	}
 
 	private static final class C implements Closeable {
