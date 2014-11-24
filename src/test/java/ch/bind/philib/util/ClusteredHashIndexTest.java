@@ -40,27 +40,27 @@ public class ClusteredHashIndexTest {
 
 	@Test
 	public void noDoubleAdds() {
-		ClusteredHashIndex<Long, TestEntry<Long>> index = new ClusteredHashIndex<Long, TestEntry<Long>>(64);
+		ClusteredHashIndex<Long, TestEntry<Long>> index = new ClusteredHashIndex<>(64);
 
 		for (int i = 0; i < 128; i++) {
-			TestEntry<Long> e = new TestEntry<Long>(Long.valueOf(i));
+			TestEntry<Long> e = new TestEntry<>((long) i);
 			assertTrue(index.add(e));
 		}
 
 		for (int i = 0; i < 128; i++) {
-			TestEntry<Long> e = new TestEntry<Long>(Long.valueOf(i));
+			TestEntry<Long> e = new TestEntry<>((long) i);
 			assertFalse(index.add(e));
 		}
 	}
 
 	@Test
 	public void addRemove() {
-		ClusteredHashIndex<Long, TestEntry<Long>> index = new ClusteredHashIndex<Long, TestEntry<Long>>(64);
+		ClusteredHashIndex<Long, TestEntry<Long>> index = new ClusteredHashIndex<>(64);
 
-		LinkedList<Long> inMap = new LinkedList<Long>();
+		LinkedList<Long> inMap = new LinkedList<>();
 		for (int i = 0; i < 128; i++) {
-			Long key = Long.valueOf(i);
-			TestEntry<Long> e = new TestEntry<Long>(key);
+			Long key = (long) i;
+			TestEntry<Long> e = new TestEntry<>(key);
 			assertTrue(index.add(e));
 			inMap.add(key);
 		}
@@ -77,8 +77,8 @@ public class ClusteredHashIndexTest {
 			}
 
 			for (int i = -100; i < 200; i++) {
-				Long key = Long.valueOf(i);
-				TestEntry<Long> e = new TestEntry<Long>(key);
+				Long key = (long) i;
+				TestEntry<Long> e = new TestEntry<>(key);
 				if (i >= 0 && i < 128) {
 					if (inMap.contains(key)) {
 						assertFalse(index.add(e));
@@ -101,13 +101,13 @@ public class ClusteredHashIndexTest {
 		// all keys will land in the exact same position
 		// effectively a linked list)
 
-		ClusteredHashIndex<Key, TestEntry<Key>> index = new ClusteredHashIndex<Key, TestEntry<Key>>(64);
+		ClusteredHashIndex<Key, TestEntry<Key>> index = new ClusteredHashIndex<>(64);
 		Key[] keys = new Key[1024];
 		@SuppressWarnings("unchecked")
 		TestEntry<Key>[] entries = new TestEntry[keys.length];
 		for (int i = 0, l = keys.length; i < l; i++) {
 			Key k = new Key(1);
-			TestEntry<Key> e = new TestEntry<Key>(k);
+			TestEntry<Key> e = new TestEntry<>(k);
 			keys[i] = k;
 			entries[i] = e;
 			index.add(e);

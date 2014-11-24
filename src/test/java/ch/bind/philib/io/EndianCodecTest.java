@@ -35,24 +35,21 @@ public class EndianCodecTest {
 
 	private static final int REPEATS = 2048;
 
-	private Random rand;
-
 	private byte[] buf;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		rand = ThreadLocalRandom.current();
 		buf = new byte[4096];
 	}
 
 	@AfterMethod
 	public void afterMethod() {
-		rand = null;
 		buf = null;
 	}
 
 	@Test
 	public void randomInt64() {
+		Random rand = ThreadLocalRandom.current();
 		long v = rand.nextLong();
 		testInt64(v);
 		for (int i = 0; i < REPEATS; i++) {
@@ -63,6 +60,7 @@ public class EndianCodecTest {
 
 	@Test
 	public void randomInt32() {
+		Random rand = ThreadLocalRandom.current();
 		int v = rand.nextInt();
 		testInt32(v);
 		for (int i = 0; i < REPEATS; i++) {
@@ -73,6 +71,7 @@ public class EndianCodecTest {
 
 	@Test
 	public void randomInt16() {
+		Random rand = ThreadLocalRandom.current();
 		int v = rand.nextInt(65536);
 		testInt16(v);
 		for (int i = 0; i < REPEATS; i++) {
@@ -83,6 +82,7 @@ public class EndianCodecTest {
 
 	@Test
 	public void randomInt8() {
+		Random rand = ThreadLocalRandom.current();
 		int v = rand.nextInt(256);
 		testInt8(v);
 		for (int i = 0; i < REPEATS; i++) {

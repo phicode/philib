@@ -154,7 +154,6 @@ public class CounterTest {
 			assertEquals(a.getMin(), 1);
 			assertEquals(a.getMax(), 100);
 		}
-
 	}
 
 	@Test

@@ -35,7 +35,7 @@ public class FinishedFutureTest {
 
 	@Test
 	public void withNull() {
-		FinishedFuture<Integer> ff = new FinishedFuture<Integer>(null);
+		FinishedFuture<Integer> ff = new FinishedFuture<>(null);
 		assertFalse(ff.cancel(true));
 		assertFalse(ff.cancel(false));
 		assertNull(ff.get());
@@ -47,7 +47,7 @@ public class FinishedFutureTest {
 	@Test
 	public void withValue() {
 		Integer value = 123456;
-		FinishedFuture<Integer> ff = new FinishedFuture<Integer>(value);
+		FinishedFuture<Integer> ff = new FinishedFuture<>(value);
 		assertFalse(ff.cancel(true));
 		assertFalse(ff.cancel(false));
 		assertEquals(ff.get(), value);

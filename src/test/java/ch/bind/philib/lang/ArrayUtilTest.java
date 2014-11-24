@@ -640,7 +640,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void toArrayEmpty() {
-		List<String> l = new ArrayList<String>();
+		List<String> l = new ArrayList<>();
 		Object[] x = toArray(Object.class, l);
 		assertNotNull(x);
 		assertTrue(x.getClass() == Object[].class);

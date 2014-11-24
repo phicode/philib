@@ -41,7 +41,7 @@ public class RingBufferTest {
 
 	private static final long GB = 1024 * MB;
 
-	private static final int TEST_BUF_SIZE = 1 * MB;
+	private static final int TEST_BUF_SIZE = MB;
 
 	private static final int RANDOM_TEST_SIZE = 16 * MB;
 
@@ -57,7 +57,7 @@ public class RingBufferTest {
 
 	@Test
 	public void frontAndBack() {
-		LinkedList<byte[]> bufExp = new LinkedList<byte[]>();
+		LinkedList<byte[]> bufExp = new LinkedList<>();
 		RingBuffer buf = new RingBuffer();
 		assertEquals(0, buf.available());
 		final int chunkSize = 16;
@@ -82,7 +82,7 @@ public class RingBufferTest {
 	@Test
 	public void randomAccess() {
 		final Random rand = ThreadLocalRandom.current();
-		final LinkedList<Byte> bufExp = new LinkedList<Byte>();
+		final LinkedList<Byte> bufExp = new LinkedList<>();
 		final RingBuffer ringBuf = new RingBuffer();
 		int size = 0;
 		long performed = 0;

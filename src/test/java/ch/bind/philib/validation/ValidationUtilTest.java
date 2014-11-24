@@ -45,7 +45,7 @@ public class ValidationUtilTest {
 
 	@Test
 	public void validateCollection() {
-		List<ValidatableDummy> list = new ArrayList<ValidatableDummy>();
+		List<ValidatableDummy> list = new ArrayList<>();
 		list.add(new ValidatableDummy());
 		list.add(new ValidatableDummy());
 
@@ -98,7 +98,7 @@ public class ValidationUtilTest {
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void validateCollectionThrowNPE() {
-		List<Validatable> list = new ArrayList<Validatable>();
+		List<Validatable> list = new ArrayList<>();
 		list.add(null);
 		assertEquals(1, list.size());
 		ValidationUtil.validate(list);

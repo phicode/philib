@@ -154,7 +154,7 @@ public class ValidationTest {
 			assertTrue(e instanceof IllegalArgumentException);
 		}
 
-		Map<String, String> a = new HashMap<String, String>();
+		Map<String, String> a = new HashMap<>();
 		try {
 			Validation.notNullOrEmpty(a);
 			fail("should throw");
@@ -175,7 +175,7 @@ public class ValidationTest {
 			assertTrue(e instanceof IllegalArgumentException);
 		}
 
-		List<String> a = new LinkedList<String>();
+		List<String> a = new LinkedList<>();
 		try {
 			Validation.notNullOrEmpty(a);
 			fail("should throw");

@@ -76,7 +76,7 @@ public class TestUtil {
 		if (wl != null) {
 			return wl;
 		}
-		ArrayList<String> words = new ArrayList<String>(256 * 1024);
+		ArrayList<String> words = new ArrayList<>(256 * 1024);
 		InputStream is = TestUtil.class.getResourceAsStream("/words_en");
 		assertNotNull(is);
 		try {
@@ -88,7 +88,7 @@ public class TestUtil {
 			}
 			words.trimToSize();
 			wl = Collections.unmodifiableList(words);
-			wordlist = new SoftReference<List<String>>(wl);
+			wordlist = new SoftReference<>(wl);
 			return wl;
 		} catch (IOException e) {
 			fail(e.getMessage());

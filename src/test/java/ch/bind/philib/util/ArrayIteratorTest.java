@@ -37,7 +37,7 @@ public class ArrayIteratorTest {
 	@Test
 	public void regular() {
 		Integer[] xs = {1, 2, 3,};
-		ArrayIterator<Integer> iter = new ArrayIterator<Integer>(xs);
+		ArrayIterator<Integer> iter = new ArrayIterator<>(xs);
 
 		assertTrue(iter.hasNext());
 		assertEquals(iter.next().intValue(), 1);
@@ -57,7 +57,7 @@ public class ArrayIteratorTest {
 	@Test
 	public void regularWithModifications() {
 		Integer[] xs = {1, 2, 3,};
-		ArrayIterator<Integer> iter = new ArrayIterator<Integer>(xs);
+		ArrayIterator<Integer> iter = new ArrayIterator<>(xs);
 
 		xs[0] = 5;
 		assertTrue(iter.hasNext());
@@ -80,14 +80,13 @@ public class ArrayIteratorTest {
 	@Test
 	public void empty() {
 		Integer[] xs = {};
-		ArrayIterator<Integer> iter = new ArrayIterator<Integer>(xs);
+		ArrayIterator<Integer> iter = new ArrayIterator<>(xs);
 		verifyEnd(iter);
 	}
 
 	@Test
 	public void nullArray() {
-		Integer[] xs = null;
-		ArrayIterator<Integer> iter = new ArrayIterator<Integer>(xs);
+		ArrayIterator<Integer> iter = new ArrayIterator<>((Integer[])null);
 		verifyEnd(iter);
 	}
 

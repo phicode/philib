@@ -33,7 +33,7 @@ public class LimitedConcurrentQueueTest {
 
 	@Test
 	public void offer() {
-		LimitedConcurrentQueue<Integer> lcq = new LimitedConcurrentQueue<Integer>(2);
+		LimitedConcurrentQueue<Integer> lcq = new LimitedConcurrentQueue<>(2);
 		assertEquals(lcq.getLimit(), 2);
 		assertTrue(lcq.offer(1));
 		assertTrue(lcq.offer(2));
@@ -42,7 +42,7 @@ public class LimitedConcurrentQueueTest {
 
 	@Test
 	public void poll() {
-		LimitedConcurrentQueue<Integer> lcq = new LimitedConcurrentQueue<Integer>(2);
+		LimitedConcurrentQueue<Integer> lcq = new LimitedConcurrentQueue<>(2);
 		assertNull(lcq.poll());
 		assertEquals(lcq.size(), 0);
 		assertTrue(lcq.offer(1));

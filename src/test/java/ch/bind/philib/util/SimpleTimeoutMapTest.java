@@ -43,7 +43,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void putEntry() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		map.put(0, 123, 456);
 		assertEquals(1, map.size());
 		assertFalse(map.isEmpty());
@@ -54,12 +54,12 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void duplicateKeys() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		int key = 12345678;
 		Integer prev1 = map.put(1000, key, 1);
 		Integer prev2 = map.put(1000, key, 1234);
 		assertNull(prev1);
-		assertTrue(prev2 != null && prev2.intValue() == 1);
+		assertTrue(prev2 != null && prev2 == 1);
 		assertEquals(map.get(key).intValue(), 1234);
 		long timeToNextTimeout = map.getTimeToNextTimeout();
 		assertTrue(timeToNextTimeout > 800 && timeToNextTimeout <= 1000);
@@ -67,7 +67,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void nullOnEmpty() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		assertTrue(map.isEmpty());
 		assertNull(map.pollTimeoutNow());
 		assertNull(map.get(1));
@@ -75,7 +75,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void returnNullOnNoTimeouts() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		map.put(1, 123, 456);
 		assertFalse(map.isEmpty());
 		assertNull(map.pollTimeoutNow());
@@ -83,7 +83,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void returnZeroOnImmediateTimeout() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		map.put(0, 123, 456);
 		assertEquals(map.getTimeToNextTimeout(), 0);
 		assertNotNull(map.pollTimeoutNow());
@@ -92,13 +92,13 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void longMaxValueOnEmpty() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		assertEquals(map.getTimeToNextTimeout(), Long.MAX_VALUE);
 	}
 
 	@Test
 	public void removeOnEmptyReturnsNull() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		map.put(1000, 123, 456);
 		assertEquals(map.remove(123).intValue(), 456);
 		assertNull(map.remove(123));
@@ -106,7 +106,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void clear() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		map.put(1, 123, 456);
 		map.clear();
 		assertEquals(map.size(), 0);
@@ -122,9 +122,9 @@ public class SimpleTimeoutMapTest {
 		Integer[] ints = new Integer[N];
 		int[] keys = new int[N];
 		for (int i = 0; i < N; i++) {
-			ints[i] = Integer.valueOf(i);
+			ints[i] = i;
 		}
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		for (int i = 0; i < N; i++) {
 			map.put(0, ints[i], ints[i]);
 		}
@@ -132,7 +132,7 @@ public class SimpleTimeoutMapTest {
 			Entry<Integer, Integer> e = map.pollTimeoutNow();
 			assertNotNull(e);
 			assertEquals(e.getKey(), e.getValue());
-			keys[i] = e.getKey().intValue();
+			keys[i] = e.getKey();
 		}
 		assertTrue(map.isEmpty());
 		// the first key should be on the exact timestamp, the others
@@ -147,7 +147,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void entryEqualsAndHashcode() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 
 		map.put(0, 111, 222);
 		Entry<Integer, Integer> a1 = map.pollTimeoutNow();
@@ -176,7 +176,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void accuratePollTimeoutNow() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		Integer kv = 1;
 		long totalNs = 0;
 
@@ -195,7 +195,7 @@ public class SimpleTimeoutMapTest {
 	@Test
 	public void accuratePollTimeout() throws InterruptedException {
 		TestUtil.gcAndSleep(50);
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		Integer kv = 1;
 		long totalNs = 0;
 
@@ -212,7 +212,7 @@ public class SimpleTimeoutMapTest {
 	@Test
 	public void accuratePollTimeout2() throws InterruptedException {
 		TestUtil.gcAndSleep(50);
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		Integer kv = 1;
 		long totalNs = 0;
 
@@ -229,7 +229,7 @@ public class SimpleTimeoutMapTest {
 	@Test
 	public void accuratePollTimeout3() throws InterruptedException {
 		TestUtil.gcAndSleep(50);
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		Integer kv = 1;
 		long totalT1 = 0;
 		long totalT2 = 0;
@@ -250,7 +250,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test
 	public void blockingPool() throws InterruptedException {
-		final TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		final TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		final AtomicBoolean ok = new AtomicBoolean(false);
 		final CountDownLatch started = new CountDownLatch(1);
 		final CountDownLatch finished = new CountDownLatch(1);
@@ -286,7 +286,7 @@ public class SimpleTimeoutMapTest {
 
 	@Test(expectedExceptions = UnsupportedOperationException.class)
 	public void entrySetValueUnsupported() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		map.put(0, 123, 456);
 		Entry<Integer, Integer> e = map.pollTimeoutNow();
 		assertNotNull(e);
@@ -295,25 +295,25 @@ public class SimpleTimeoutMapTest {
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "timeout must not be negative")
 	public void addNoNegativeTimeout() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		map.put(-1, 1, 2);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "key must not be null")
 	public void noNullKey() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		map.put(0, null, 2);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "value must not be null")
 	public void noNullValue() {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		map.put(0, 1, null);
 	}
 
 	@Test
 	public void pollAllTimeoutNow() throws InterruptedException {
-		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<Integer, Integer>();
+		TimeoutMap<Integer, Integer> map = new SimpleTimeoutMap<>();
 		List<Entry<Integer, Integer>> tos = map.pollAllTimeoutNow();
 		assertNotNull(tos);
 		assertTrue(tos.isEmpty());

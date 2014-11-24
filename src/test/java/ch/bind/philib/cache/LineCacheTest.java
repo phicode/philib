@@ -33,17 +33,17 @@ public class LineCacheTest extends CacheTestBase {
 
 	@Override
 	<K, V> Cache<K, V> create() {
-		return new LineCache<K, V>();
+		return new LineCache<>();
 	}
 
 	@Override
 	<K, V> Cache<K, V> create(int capacity) {
-		return new LineCache<K, V>(capacity, 4);
+		return new LineCache<>(capacity, 4);
 	}
 
 	@Override
 	<K, V> Cache<K, V> create(Cloner<V> valueCloner) {
-		return new LineCache<K, V>(valueCloner);
+		return new LineCache<>(valueCloner);
 	}
 
 	@Override

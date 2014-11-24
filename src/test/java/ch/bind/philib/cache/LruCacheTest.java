@@ -33,17 +33,17 @@ public class LruCacheTest extends CacheTestBase {
 
 	@Override
 	<K, V> Cache<K, V> create() {
-		return new LruCache<K, V>();
+		return new LruCache<>();
 	}
 
 	@Override
 	<K, V> Cache<K, V> create(int capacity) {
-		return new LruCache<K, V>(capacity);
+		return new LruCache<>(capacity);
 	}
 
 	@Override
 	<K, V> Cache<K, V> create(Cloner<V> valueCloner) {
-		return new LruCache<K, V>(valueCloner);
+		return new LruCache<>(valueCloner);
 	}
 
 	@Override

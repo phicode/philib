@@ -34,7 +34,7 @@ public class LruListTest {
 	public void removeTailOnOverflow() {
 		TestNode a = new TestNode(), b = new TestNode(), c = new TestNode();
 
-		LruList<TestNode> lru = new LruList<TestNode>(2);
+		LruList<TestNode> lru = new LruList<>(2);
 		assertNull(lru.add(a));
 		assertNull(lru.add(b));
 		assertEquals(lru.add(c), a);
@@ -44,7 +44,7 @@ public class LruListTest {
 	public void moveToHead() {
 		TestNode a = new TestNode(), b = new TestNode(), c = new TestNode();
 
-		LruList<TestNode> lru = new LruList<TestNode>(2);
+		LruList<TestNode> lru = new LruList<>(2);
 		assertNull(lru.add(a));
 		assertNull(lru.add(b));
 		lru.moveToHead(a);
@@ -57,7 +57,7 @@ public class LruListTest {
 	public void clear() {
 		TestNode a = new TestNode(), b = new TestNode();
 
-		LruList<TestNode> lru = new LruList<TestNode>(2);
+		LruList<TestNode> lru = new LruList<>(2);
 		assertNull(lru.add(a));
 		assertNull(lru.add(b));
 		assertEquals(lru.size(), 2);
@@ -74,7 +74,7 @@ public class LruListTest {
 	public void removeTail() {
 		TestNode a = new TestNode(), b = new TestNode(), c = new TestNode();
 
-		LruList<TestNode> lru = new LruList<TestNode>(3);
+		LruList<TestNode> lru = new LruList<>(3);
 		lru.add(a); // lru: a
 		lru.add(b); // lru: b, a
 		lru.add(c); // lru: c, b, a
@@ -92,7 +92,7 @@ public class LruListTest {
 	public void fullScenario() {
 		TestNode a = new TestNode(), b = new TestNode(), c = new TestNode();
 
-		LruList<TestNode> lru = new LruList<TestNode>(3);
+		LruList<TestNode> lru = new LruList<>(3);
 		assertEquals(lru.capacity(), 3);
 		lru.add(a); // lru: a
 		assertEquals(lru.size(), 1);
@@ -130,19 +130,19 @@ public class LruListTest {
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void nonNullAdd() {
-		LruList<TestNode> lru = new LruList<TestNode>(1);
+		LruList<TestNode> lru = new LruList<>(1);
 		lru.add(null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void nonNullRemove() {
-		LruList<TestNode> lru = new LruList<TestNode>(1);
+		LruList<TestNode> lru = new LruList<>(1);
 		lru.remove(null);
 	}
 
 	@Test
 	public void addAsserts() {
-		LruList<TestNode> lru = new LruList<TestNode>(8);
+		LruList<TestNode> lru = new LruList<>(8);
 		TestNode node = new TestNode();
 		TestNode bad = new TestNode();
 
@@ -167,7 +167,7 @@ public class LruListTest {
 
 	@Test
 	public void removeAsserts() {
-		LruList<TestNode> lru = new LruList<TestNode>(8);
+		LruList<TestNode> lru = new LruList<>(8);
 		TestNode node = new TestNode();
 		TestNode bad = new TestNode();
 

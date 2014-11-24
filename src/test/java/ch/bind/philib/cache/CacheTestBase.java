@@ -55,7 +55,7 @@ public abstract class CacheTestBase {
 		@Override
 		public Integer clone(Integer value) {
 			assertNotNull(value);
-			return new Integer(value.intValue());
+			return new Integer(value);
 		}
 	};
 
@@ -157,7 +157,7 @@ public abstract class CacheTestBase {
 	@Test
 	public void cloner() {
 		Cache<Integer, Integer> cache = this.create(INTEGER_CLONER);
-		Integer one = Integer.valueOf(1);
+		Integer one = 1;
 		cache.set(one, one);
 		Integer copy = cache.get(one);
 		assertNotNull(copy);
@@ -173,12 +173,12 @@ public abstract class CacheTestBase {
 		final int N = cache.capacity() * UP_DOWN_CAP_COEFF;
 		Integer[] is = new Integer[N];
 		for (int i = 0; i < N; i++) {
-			is[i] = Integer.valueOf(i);
+			is[i] = i;
 		}
 		for (int i = 0; i < N; i++) {
 			cache.set(is[i], is[i]);
 			for (int j = 0; j <= i; j++) {
-				Integer v = null;
+				Integer v;
 				if ((v = cache.get(is[j])) != null) {
 					assertEquals(v, is[j]);
 					hit++;
@@ -197,12 +197,12 @@ public abstract class CacheTestBase {
 		final int N = cache.capacity() * UP_DOWN_CAP_COEFF;
 		Integer[] is = new Integer[N];
 		for (int i = 0; i < N; i++) {
-			is[i] = Integer.valueOf(i);
+			is[i] = i;
 		}
 		for (int i = 0; i < N; i++) {
 			cache.set(is[i], is[i]);
 			for (int j = i; j >= 0; j--) {
-				Integer v = null;
+				Integer v;
 				if ((v = cache.get(is[j])) != null) {
 					assertEquals(v, is[j]);
 					hit++;

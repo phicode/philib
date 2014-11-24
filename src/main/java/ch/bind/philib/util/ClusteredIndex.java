@@ -42,5 +42,4 @@ public interface ClusteredIndex<K, T extends Entry<K>> {
 
 		void setNextIndexEntry(Entry<K> nextHashEntry);
 	}
-
 }

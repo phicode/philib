@@ -121,7 +121,7 @@ public class StaticIntMapTest {
 
 	@Test
 	public void getOrThrow() {
-		Set<TestDummy> xs = new HashSet<TestDummy>();
+		Set<TestDummy> xs = new HashSet<>();
 		for (int i = 0; i < 1000; i++) {
 			int key = (i + 1) * 5;
 			xs.add(new TestDummy(key, String.valueOf(key)));

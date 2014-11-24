@@ -28,7 +28,7 @@ public interface Cloner<T> {
 	 * Clones a given object.
 	 *
 	 * @param obj The object to clone - may be {@code null}.
-	 * @return
+	 * @return the cloned object or {@code null} if the input parameter was {@code null}.
 	 */
 	T clone(T obj);
 }

@@ -32,17 +32,17 @@ public class CowSetTest {
 
 	@Test
 	public void isEmpty() {
-		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		CowSet<Integer> cs = new CowSet<>(Integer.class);
 		assertTrue(cs.isEmpty());
 		assertTrue(cs.add(1));
 		assertFalse(cs.isEmpty());
-		assertTrue(cs.remove(new Integer(1))); // other integer object
+		assertTrue(cs.remove(1)); // other integer object
 		assertTrue(cs.isEmpty());
 	}
 
 	@Test
 	public void emptyView() {
-		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		CowSet<Integer> cs = new CowSet<>(Integer.class);
 		Integer[] empty1 = cs.getView();
 		cs.add(1);
 		assertEquals(cs.getView().length, 1);
@@ -53,19 +53,19 @@ public class CowSetTest {
 
 	@Test
 	public void noNullAdd() {
-		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		CowSet<Integer> cs = new CowSet<>(Integer.class);
 		assertFalse(cs.add(null));
 	}
 
 	@Test
 	public void noNullRemove() {
-		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		CowSet<Integer> cs = new CowSet<>(Integer.class);
 		assertFalse(cs.remove(null));
 	}
 
 	@Test
 	public void noViewUpdateOnFalseRemove() {
-		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		CowSet<Integer> cs = new CowSet<>(Integer.class);
 		cs.add(55);
 		Integer[] v = cs.getView();
 		assertEquals(v.length, 1);
@@ -76,9 +76,9 @@ public class CowSetTest {
 
 	@Test
 	public void noDuplicates() {
-		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		CowSet<Integer> cs = new CowSet<>(Integer.class);
 		Integer a = 55;
-		Integer b = new Integer(55); // different reference but equals
+		Integer b = 55; // different reference but equals
 		assertTrue(cs.add(a));
 		assertFalse(cs.add(a));
 		assertFalse(cs.add(b));
@@ -87,7 +87,7 @@ public class CowSetTest {
 
 	@Test
 	public void size() {
-		CowSet<Integer> cs = new CowSet<Integer>(Integer.class);
+		CowSet<Integer> cs = new CowSet<>(Integer.class);
 		assertEquals(cs.size(), 0);
 		cs.add(1);
 		assertEquals(cs.size(), 1);

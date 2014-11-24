@@ -32,7 +32,7 @@ public class StagedLruCacheEntryTest {
 
 	@Test
 	public void toggleOldGenBit() {
-		StagedLruCacheEntry<Integer, Integer> x = new StagedLruCacheEntry<Integer, Integer>(1, 2);
+		StagedLruCacheEntry<Integer, Integer> x = new StagedLruCacheEntry<>(1, 2);
 		assertTrue(x.isInYoungGen());
 		x.setInYoungGen();
 		assertTrue(x.isInYoungGen());

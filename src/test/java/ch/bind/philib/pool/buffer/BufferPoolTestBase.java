@@ -25,7 +25,6 @@ package ch.bind.philib.pool.buffer;
 import ch.bind.philib.TestUtil;
 import ch.bind.philib.pool.Pool;
 import ch.bind.philib.pool.PoolStats;
-import ch.bind.philib.validation.Validation;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.Semaphore;
@@ -171,7 +170,7 @@ public abstract class BufferPoolTestBase<T> {
 		Semaphore go = new Semaphore(0);
 		Semaphore end = new Semaphore(0);
 		for (int i = 0; i < numThreads; i++) {
-			StressTester<T> st = new StressTester<T>(ready, go, end, pool, numOpsPerThread, getOps, putOps);
+			StressTester<T> st = new StressTester<>(ready, go, end, pool, numOpsPerThread, getOps, putOps);
 			ts[i] = new Thread(st);
 			ts[i].start();
 		}

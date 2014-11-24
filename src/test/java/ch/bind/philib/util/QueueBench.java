@@ -136,7 +136,7 @@ public class QueueBench {
 			try {
 				ctrl.acquire();
 				for (int i = 0, v = start; i < num; i++, v++) {
-					Integer vi = Integer.valueOf(v);
+					Integer vi = v;
 					while (!queue.offer(vi)) {
 						Thread.yield();
 					}
@@ -175,7 +175,7 @@ public class QueueBench {
 					while ((v = queue.poll()) == null) {
 						Thread.yield();
 					}
-					sum += v.intValue();
+					sum += v;
 				}
 			} catch (InterruptedException e) {
 				System.out.println("consumer interrupted");

@@ -104,7 +104,7 @@ public class ThreadUtilTest {
 		final int N = 10;
 		final CountDownLatch started = new CountDownLatch(N);
 		final CountDownLatch stopped = new CountDownLatch(N);
-		List<Thread> ts = new ArrayList<Thread>();
+		List<Thread> ts = new ArrayList<>();
 		for (int i = 0; i < N; i++) {
 			Thread t = new Thread(new InterruptTestRunnable(started, stopped, 1));
 			ts.add(t);

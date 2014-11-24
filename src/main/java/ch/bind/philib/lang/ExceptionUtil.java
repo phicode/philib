@@ -42,7 +42,7 @@ public abstract class ExceptionUtil {
 	 * className.method#exceptionClassName(message) => causingClassName.method#exceptionClassName(message) => ... so on, up to the root-exception
 	 * </pre>
 	 *
-	 * @param t
+	 * @param t -
 	 * @return a message of the format which is described above.
 	 */
 	public static String buildMessageChain(Throwable t) {

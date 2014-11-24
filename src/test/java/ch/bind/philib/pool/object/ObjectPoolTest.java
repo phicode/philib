@@ -32,13 +32,13 @@ public class ObjectPoolTest {
 
 	@Test
 	public void halfRecycleable() {
-		Pool<Integer> pool = new StrongRefPool<Integer>(new RecycleOddManager(), 8);
+		Pool<Integer> pool = new StrongRefPool<>(new RecycleOddManager(), 8);
 		for (int i = 0; i < 10; i++) {
 			assertEquals(pool.take().intValue(), i);
 		}
 		assertEquals(pool.getNumPooled(), 0);
 		for (int i = 0; i < 10; i++) {
-			pool.recycle(Integer.valueOf(i));
+			pool.recycle(i);
 		}
 		// 1, 3, 5, 7, 9 => 5
 		assertEquals(pool.getNumPooled(), 5);
@@ -56,7 +56,7 @@ public class ObjectPoolTest {
 
 		@Override
 		public Integer create() {
-			return Integer.valueOf(next++);
+			return next++;
 		}
 
 		@Override
@@ -64,7 +64,7 @@ public class ObjectPoolTest {
 
 		@Override
 		public boolean prepareForRecycle(Integer value) {
-			return (value.intValue() & 1) == 1;
+			return (value & 1) == 1;
 		}
 
 		@Override

@@ -37,7 +37,7 @@ public class ConcurrentPoolTest extends BufferPoolTestBase<byte[]> {
 	@Override
 	Pool<byte[]> createPool(int bufferSize, int maxEntries) {
 		ByteArrayManager manager = new ByteArrayManager(bufferSize);
-		return new ConcurrentPool<byte[]>(manager, maxEntries, true, NCPU);
+		return new ConcurrentPool<>(manager, maxEntries, true, NCPU);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class ConcurrentPoolTest extends BufferPoolTestBase<byte[]> {
 		ByteArrayManager manager = new ByteArrayManager(1024);
 		int maxEntries = 8;
 		for (int i = -10; i < 2; i++) {
-			ConcurrentPool<byte[]> pool = new ConcurrentPool<byte[]>(manager, maxEntries, true, 0);
+			ConcurrentPool<byte[]> pool = new ConcurrentPool<>(manager, maxEntries, true, 0);
 			assertEquals(pool.getConcurrency(), 2);
 		}
 	}

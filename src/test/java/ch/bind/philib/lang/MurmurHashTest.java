@@ -43,13 +43,13 @@ public class MurmurHashTest {
 		MurmurHash.optimize();
 		List<String> wordlist = TestUtil.getWordlist();
 
-		Map<Integer, String> murmur2hashes = new HashMap<Integer, String>(wordlist.size(), 1f);
-		Map<Integer, String> murmur2ahashes = new HashMap<Integer, String>(wordlist.size(), 1f);
-		Map<Integer, String> murmur3hashes = new HashMap<Integer, String>(wordlist.size(), 1f);
+		Map<Integer, String> murmur2hashes = new HashMap<>(wordlist.size(), 1f);
+		Map<Integer, String> murmur2ahashes = new HashMap<>(wordlist.size(), 1f);
+		Map<Integer, String> murmur3hashes = new HashMap<>(wordlist.size(), 1f);
 
-		List<String> dups2 = new LinkedList<String>();
-		List<String> dups2a = new LinkedList<String>();
-		List<String> dups3 = new LinkedList<String>();
+		List<String> dups2 = new LinkedList<>();
+		List<String> dups2a = new LinkedList<>();
+		List<String> dups3 = new LinkedList<>();
 		for (String s : wordlist) {
 			int m2 = MurmurHash.murmur2(s.getBytes());
 			int m2a = MurmurHash.murmur2a(s.getBytes());

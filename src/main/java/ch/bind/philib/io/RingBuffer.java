@@ -267,8 +267,8 @@ public final class RingBuffer implements DoubleSidedBuffer {
 
 	private static void check(byte[] data, int off, int len) {
 		check(data);
-		Validation.notNegative(off,"offset must not be negative");
-		Validation.notNegative(len,"length must not be negative");
+		Validation.notNegative(off, "offset must not be negative");
+		Validation.notNegative(len, "length must not be negative");
 		// (off + len) > data.length could overflow
 		// but since all 3 parameters are in the range 0-Integer.MAX_VALUE the
 		// calculation can be transformed

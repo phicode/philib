@@ -33,17 +33,17 @@ public class StagedLruCacheTest extends CacheTestBase {
 
 	@Override
 	<K, V> Cache<K, V> create() {
-		return new StagedLruCache<K, V>();
+		return new StagedLruCache<>();
 	}
 
 	@Override
 	<K, V> Cache<K, V> create(int capacity) {
-		return new StagedLruCache<K, V>(capacity);
+		return new StagedLruCache<>(capacity);
 	}
 
 	@Override
 	<K, V> Cache<K, V> create(Cloner<V> valueCloner) {
-		return new StagedLruCache<K, V>(valueCloner);
+		return new StagedLruCache<>(valueCloner);
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class StagedLruCacheTest extends CacheTestBase {
 	@Test
 	public void stages() {
 		final int cap = 100000;
-		Cache<Integer, Integer> cache = new StagedLruCache<Integer, Integer>(cap, null, 0.5, 2);
+		Cache<Integer, Integer> cache = new StagedLruCache<>(cap, null, 0.5, 2);
 
 		set(cache, 0, 50000);
 
@@ -115,7 +115,7 @@ public class StagedLruCacheTest extends CacheTestBase {
 	@Test
 	public void removeOldEntry() {
 		// 1 entry old generation & 1 young generation
-		Cache<Integer, Integer> cache = new StagedLruCache<Integer, Integer>(2, null, 0.5, 2);
+		Cache<Integer, Integer> cache = new StagedLruCache<>(2, null, 0.5, 2);
 		cache.set(1, 1);
 
 		// 'elevate' 1 to old-gen
@@ -136,7 +136,7 @@ public class StagedLruCacheTest extends CacheTestBase {
 
 	private static void set(Cache<Integer, Integer> cache, int from, int to) {
 		for (int i = from; i < to; i++) {
-			cache.set(i, Integer.valueOf(i * i));
+			cache.set(i, i * i);
 		}
 	}
 

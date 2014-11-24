@@ -50,37 +50,37 @@ public final class Benchmark {
 	// ...
 
 	private static void simple() {
-		Cache<Integer, String> cache = new LruCache<Integer, String>(COUNT);
+		Cache<Integer, String> cache = new LruCache<>(COUNT);
 		TestUtil.gcAndSleep();
 		benchNormal(cache);
 	}
 
 	private static void staged() {
-		Cache<Integer, String> cache = new StagedLruCache<Integer, String>(COUNT);
+		Cache<Integer, String> cache = new StagedLruCache<>(COUNT);
 		TestUtil.gcAndSleep();
 		benchNormal(cache);
 	}
 
 	private static void line() {
-		Cache<Integer, String> cache = new LineCache<Integer, String>(COUNT, 4);
+		Cache<Integer, String> cache = new LineCache<>(COUNT, 4);
 		TestUtil.gcAndSleep();
 		benchNormal(cache);
 	}
 
 	private static void parallelSimple() {
-		Cache<Integer, String> cache = new LruCache<Integer, String>(COUNT);
+		Cache<Integer, String> cache = new LruCache<>(COUNT);
 		TestUtil.gcAndSleep();
 		benchThreaded(cache, NCPU);
 	}
 
 	private static void parallelStaged() {
-		Cache<Integer, String> cache = new StagedLruCache<Integer, String>(COUNT);
+		Cache<Integer, String> cache = new StagedLruCache<>(COUNT);
 		TestUtil.gcAndSleep();
 		benchThreaded(cache, NCPU);
 	}
 
 	private static void parallelLine() {
-		Cache<Integer, String> cache = new LineCache<Integer, String>(COUNT, 4);
+		Cache<Integer, String> cache = new LineCache<>(COUNT, 4);
 		TestUtil.gcAndSleep();
 		benchThreaded(cache, NCPU);
 	}
@@ -134,8 +134,6 @@ public final class Benchmark {
 
 		private final int loops;
 
-		private final Random rand = ThreadLocalRandom.current();
-
 		Runner(Cache<Integer, String> cache, int loops) {
 			this.cache = cache;
 			this.loops = loops;
@@ -143,6 +141,7 @@ public final class Benchmark {
 
 		@Override
 		public void run() {
+			Random rand = ThreadLocalRandom.current();
 			final int queryMax = COUNT * 11 / 10;
 			// final int queryMax = COUNT;
 			final long tStart = System.currentTimeMillis();
