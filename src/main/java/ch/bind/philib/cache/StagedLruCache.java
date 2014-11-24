@@ -23,6 +23,7 @@
 package ch.bind.philib.cache;
 
 import ch.bind.philib.lang.Cloner;
+import ch.bind.philib.lang.ClonerNoop;
 import ch.bind.philib.math.Calc;
 import ch.bind.philib.util.ClusteredHashIndex;
 import ch.bind.philib.util.ClusteredIndex;
@@ -76,7 +77,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 		this.lruYoungGen = new LruList<>(youngCap);
 		this.lruOldGen = new LruList<>(oldCap);
 		this.index = new ClusteredHashIndex<>(capacity);
-		this.valueCloner = valueCloner;
+		this.valueCloner = ClonerNoop.getIfNull(valueCloner);
 	}
 
 	// TODO: remove code duplication with LruCache
@@ -119,7 +120,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 		} else {
 			lruOldGen.moveToHead(entry);
 		}
-		return valueCloner == null ? value : valueCloner.clone(value);
+		return valueCloner.clone(value);
 	}
 
 	@Override

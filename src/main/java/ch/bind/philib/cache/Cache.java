@@ -54,12 +54,9 @@ public interface Cache<K, V> {
 	 */
 	void remove(K key);
 
-	/**
-	 * @return the capacity of this cache.
-	 */
+	/** @return the capacity of this cache. */
 	int capacity();
 
 	/** Remove all elements from the cache. */
 	void clear();
-
 }
