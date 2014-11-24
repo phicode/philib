@@ -23,25 +23,29 @@
 package ch.bind.philib.cache;
 
 import ch.bind.philib.lang.Cloner;
+import ch.bind.philib.lang.ClonerNoop;
 import ch.bind.philib.lang.MurmurHash;
 import ch.bind.philib.validation.Validation;
 
-import java.lang.ref.SoftReference;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-/** @author Philipp Meinen */
+/**
+ * @author Philipp Meinen
+ */
 public final class LineCache<K, V> implements Cache<K, V> {
 
 	static final int DEFAULT_ORDER = 8;
 
 	private final AtomicReferenceArray<Entry<K, V>> entries;
 
+	private final AtomicLong[] lineClocks;
+
+	private final Cloner<V> valueCloner;
+
 	private final int lineMask;
 
 	private final int order;
-
-	private final Cloner<V> valueCloner;
 
 	public LineCache() {
 		this(DEFAULT_CAPACITY, DEFAULT_ORDER, null);
@@ -61,9 +65,13 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		Validation.isTrue(capacity % order == 0, "capacity must be a multiple of order");
 
 		int lines = capacity / order;
-		this.order = order;
 		this.entries = new AtomicReferenceArray<>(capacity);
-		this.valueCloner = valueCloner;
+		this.lineClocks = new AtomicLong[lines];
+		for (int i = 0; i < lines; i++) {
+			lineClocks[i] = new AtomicLong();
+		}
+		this.valueCloner = ClonerNoop.getIfNull(valueCloner);
+		this.order = order;
 		this.lineMask = lines - 1;
 	}
 
@@ -75,38 +83,38 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		final int hash = hash(key);
 		final int line = Math.abs(hash) & lineMask;
 		final int startIdx = line * order;
-
-		final Entry<K, V> newe = new Entry<>(key, hash, value);
+		final int endIdx = startIdx + order;
+		final long clock = lineClocks[line].getAndIncrement();
+		final Entry<K, V> newEntry = new Entry<>(clock, key, hash, value);
 
 		while (true) {
-			int insertIdx = -1;
-			Entry<K, V> overwrite = null;
+			int emptyIdx = -1;
+			int lowestClockIdx = -1;
+			Entry<K, V> lowestClock = null;
 
-			for (int o = 0; o < order; o++) {
-				final int idx = startIdx + o;
-				final Entry<K, V> e = entries.get(idx);
+			for (int i = startIdx; i < endIdx; i++) {
+				final Entry<K, V> e = entries.get(i);
 				if (e == null) {
-					if (overwrite != null || insertIdx == -1) {
-						insertIdx = idx;
-						overwrite = null;
-					}
+					// possible insertion location
+					emptyIdx = i;
 					continue;
 				}
 				if (e.matches(key, hash)) {
-					if (entries.compareAndSet(idx, e, newe)) {
-						return;
+					// override existing entries if we are not dealing with a concurrent update
+					if (e.clock < clock) {
+						entries.compareAndSet(i, e, newEntry);
 					}
-					break; // repeat while
+					return;
 				}
-				if (insertIdx == -1) {
-					insertIdx = idx;
-					overwrite = e;
-				} else if (overwrite != null && e.lastAccess.get() < overwrite.lastAccess.get()) {
-					insertIdx = idx;
-					overwrite = e;
+				if (lowestClock == null || e.clock < lowestClock.clock) {
+					lowestClock = e;
+					lowestClockIdx = i;
 				}
 			}
-			if (entries.compareAndSet(insertIdx, overwrite, newe)) {
+			if (emptyIdx != -1 && entries.compareAndSet(emptyIdx, null, newEntry)) {
+				return;
+			}
+			if (lowestClockIdx != -1 && entries.compareAndSet(lowestClockIdx, lowestClock, newEntry)) {
 				return;
 			}
 		}
@@ -123,22 +131,23 @@ public final class LineCache<K, V> implements Cache<K, V> {
 		final int hash = hash(key);
 		final int line = Math.abs(hash) & lineMask;
 		final int startIdx = line * order;
+		final int endIdx = startIdx + order;
 
-		for (int o = 0; o < order; o++) {
-			final int idx = startIdx + o;
-			final Entry<K, V> e = entries.get(idx);
-			if (e != null && e.matches(key, hash)) {
-				final V value = e.value.get();
-				if (value == null) {
-					// soft-reference was collected
-					entries.compareAndSet(idx, e, null);
-					return null;
-				}
-				e.setLastAccessMaxVal(System.nanoTime());
-				return valueCloner == null ? value : valueCloner.clone(value);
+		Entry<K, V> found = null;
+		for (int i = startIdx; i < endIdx; i++) {
+			final Entry<K, V> e = entries.get(i);
+			if (e == null || !e.matches(key, hash)) {
+				continue;
+			}
+			if (found == null) {
+				found = e;
+			} else if (e.clock > found.clock) {
+				// newer entry found
+				entries.compareAndSet(i, found, null);
+				found = e;
 			}
 		}
-		return null;
+		return found == null ? null : valueCloner.clone(found.value);
 	}
 
 	@Override
@@ -176,28 +185,19 @@ public final class LineCache<K, V> implements Cache<K, V> {
 
 	private static final class Entry<K, V> {
 
+		final long clock;
+
 		final K key;
+
+		final V value;
 
 		final int hash;
 
-		final AtomicLong lastAccess = new AtomicLong();
-
-		final SoftReference<V> value;
-
-		public Entry(K key, int hash, V value) {
+		public Entry(long clock, K key, int hash, V value) {
+			this.clock = clock;
 			this.key = key;
+			this.value = value;
 			this.hash = hash;
-			this.value = new SoftReference<>(value);
-		}
-
-		public void setLastAccessMaxVal(long access) {
-			long v = lastAccess.get();
-			while (access > v) {
-				if (lastAccess.compareAndSet(v, access)) {
-					return;
-				}
-				v = lastAccess.get();
-			}
 		}
 
 		boolean matches(final K k, final int h) {

@@ -24,12 +24,15 @@ package ch.bind.philib.cache;
 
 import ch.bind.philib.TestUtil;
 import ch.bind.philib.lang.Cloner;
+import ch.bind.philib.lang.NamedSeqThreadFactory;
+import ch.bind.philib.lang.ThreadUtil;
 import ch.bind.philib.math.Calc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.security.SecureRandom;
+import java.util.concurrent.CountDownLatch;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -253,6 +256,74 @@ public abstract class CacheTestBase {
 			LOG.debug(String.format("JVM held on to %d out of %d elements => %dMiB\n", inMem, cap, inMem / 2));
 			LOG.debug(String.format("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
 					t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f));
+		}
+	}
+
+	@Test
+	public void stressTest() throws InterruptedException {
+		if (!TestUtil.RUN_STRESS_TESTS) {
+			return;
+		}
+		int concurrency = Runtime.getRuntime().availableProcessors() * 64;
+		int values = concurrency * 2;
+		int minutes = 2;
+		System.out.printf("stress testing %s for %d minutes with concurrency %d over %d values\n", //
+				getClass().getSimpleName(), minutes, concurrency, values);
+		StressTester[] sts = new StressTester[concurrency];
+		Cache<Integer, Integer> cache = create(concurrency);
+		for (int i = 0; i < concurrency; i++) {
+			sts[i] = new StressTester(cache, values);
+		}
+		Thread[] ts = ThreadUtil.createThreads(sts, new NamedSeqThreadFactory("Cache Stress-Test"));
+		ThreadUtil.startThreads(ts);
+		Thread.sleep(minutes * 60 * 1000);
+		ThreadUtil.interruptAndJoinThreads(ts);
+		long iterations = 0;
+		for (StressTester st : sts) {
+			iterations += st.iterations;
+			assertTrue(st.ok);
+		}
+		System.out.printf("finished with %d iterations\n", iterations);
+	}
+
+	private class StressTester implements Runnable {
+
+		private final Cache<Integer, Integer> cache;
+		private final Integer[] keys;
+
+		final CountDownLatch finished = new CountDownLatch(1);
+		boolean ok;
+		long iterations;
+
+		public StressTester(Cache<Integer, Integer> cache, int n) {
+			this.cache = cache;
+			this.keys = new Integer[n];
+			for (int i = 0; i < n; i++) {
+				keys[i] = i;
+			}
+		}
+
+		@Override
+		public void run() {
+			Thread t = Thread.currentThread();
+			long iterations = 0;
+			try {
+				while (!t.isInterrupted()) {
+					for (Integer key : keys) {
+						if (cache.get(key) == null) {
+							cache.set(key, key);
+						}
+					}
+					iterations++;
+				}
+				ok = true;
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			} finally {
+				this.iterations = iterations;
+				finished.countDown();
+			}
 		}
 	}
 }
