@@ -65,7 +65,7 @@ public class LruCacheTest extends CacheTestBase {
 	public void fullCacheWhereOldObjectGetRemoved() {
 		final int testSize = Cache.DEFAULT_CAPACITY;
 
-		LruCache<String, String> cache = new LruCache<String, String>(testSize);
+		LruCache<String, String> cache = new LruCache<>(testSize);
 
 		for (int i = 1; i <= testSize; i++) {
 			cache.set(itos(i), itos(i * i * i));
@@ -96,7 +96,7 @@ public class LruCacheTest extends CacheTestBase {
 	@Test
 	public void fullCacheWhereOldObjectGetRemoved2() {
 		final int testSize = 10000;
-		LruCache<String, String> cache = new LruCache<String, String>(testSize);
+		LruCache<String, String> cache = new LruCache<>(testSize);
 
 		for (int i = 1; i <= testSize; i++) {
 			cache.set(itos(i), itos(i * i));
@@ -134,7 +134,7 @@ public class LruCacheTest extends CacheTestBase {
 
 	@Test
 	public void fullCacheWhereOldObjectGetRemoved3() {
-		LruCache<String, String> cache = new LruCache<String, String>(100000);
+		LruCache<String, String> cache = new LruCache<>(100000);
 
 		for (int i = 1; i <= 100000; i++) {
 			cache.set(itos(i), itos(i * i));
