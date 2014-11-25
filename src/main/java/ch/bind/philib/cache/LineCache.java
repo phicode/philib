@@ -38,13 +38,10 @@ public final class LineCache<K, V> implements Cache<K, V> {
 	static final int DEFAULT_ORDER = 8;
 
 	private final AtomicReferenceArray<Entry<K, V>> entries;
-
 	private final AtomicLong[] lineClocks;
-
 	private final Cloner<V> valueCloner;
 
 	private final int lineMask;
-
 	private final int order;
 
 	public LineCache() {
@@ -184,13 +181,9 @@ public final class LineCache<K, V> implements Cache<K, V> {
 	}
 
 	private static final class Entry<K, V> {
-
 		final long clock;
-
 		final K key;
-
 		final V value;
-
 		final int hash;
 
 		public Entry(long clock, K key, int hash, V value) {

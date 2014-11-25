@@ -25,13 +25,11 @@ package ch.bind.philib.cache;
 import ch.bind.philib.util.ClusteredIndex.Entry;
 import ch.bind.philib.util.LruNode;
 
-import java.lang.ref.SoftReference;
-
 class LruCacheEntry<K, V> implements Entry<K>, LruNode {
 
 	private final K key;
 
-	private SoftReference<V> value;
+	private V value;
 
 	private Entry<K> nextIndexEntry;
 
@@ -41,7 +39,7 @@ class LruCacheEntry<K, V> implements Entry<K>, LruNode {
 
 	LruCacheEntry(K key, V value) {
 		this.key = key;
-		setValue(value);
+		this.value = value;
 	}
 
 	@Override
@@ -49,12 +47,12 @@ class LruCacheEntry<K, V> implements Entry<K>, LruNode {
 		return key;
 	}
 
-	V getValue() {
-		return value.get();
+	void setValue(V value) {
+		this.value = value;
 	}
 
-	void setValue(V value) {
-		this.value = new SoftReference<>(value);
+	V getValue() {
+		return value;
 	}
 
 	@Override

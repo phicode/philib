@@ -43,16 +43,12 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 	private static final double MAX_OLD_GEN_RATIO = 0.9;
 
 	private final LruList<StagedLruCacheEntry<K, V>> lruYoungGen;
-
 	private final LruList<StagedLruCacheEntry<K, V>> lruOldGen;
-
 	private final ClusteredIndex<K, StagedLruCacheEntry<K, V>> index;
+	private final Cloner<V> valueCloner;
 
 	private final int oldGenAfterHits;
-
 	private final int capacity;
-
-	private final Cloner<V> valueCloner;
 
 	public StagedLruCache() {
 		this(DEFAULT_CAPACITY);
@@ -89,7 +85,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 		if (entry == null) {
 			entry = new StagedLruCacheEntry<>(key, value);
 			index.add(entry);
-			addYoungGen(entry, false);
+			addYoungGen(entry);
 		} else {
 			entry.setValue(value);
 		}
@@ -100,12 +96,6 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 		Validation.notNull(key);
 		final StagedLruCacheEntry<K, V> entry = index.get(key);
 		if (entry == null) {
-			return null;
-		}
-		final V value = entry.getValue();
-		if (value == null) {
-			// the soft-reference has been collected by the gc
-			removeLruAndIndex(entry);
 			return null;
 		}
 		if (entry.isInYoungGen()) {
@@ -120,7 +110,7 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 		} else {
 			lruOldGen.moveToHead(entry);
 		}
-		return valueCloner.clone(value);
+		return valueCloner.clone(entry.getValue());
 	}
 
 	@Override
@@ -152,28 +142,19 @@ public final class StagedLruCache<K, V> implements Cache<K, V> {
 		}
 	}
 
-	private void addYoungGen(final StagedLruCacheEntry<K, V> entry, final boolean checkValue) {
-		if (checkValue && entry.getValue() == null) {
-			index.remove(entry);
-		} else {
-			entry.setInYoungGen();
-			StagedLruCacheEntry<K, V> removed = lruYoungGen.add(entry);
-			if (removed != null) {
-				// TODO: move to old gen if it has room
-				index.remove(removed);
-			}
+	private void addYoungGen(final StagedLruCacheEntry<K, V> entry) {
+		entry.setInYoungGen();
+		StagedLruCacheEntry<K, V> removed = lruYoungGen.add(entry);
+		if (removed != null) {
+			index.remove(removed);
 		}
 	}
 
 	private void addOldGen(final StagedLruCacheEntry<K, V> entry) {
-		if (entry.getValue() == null) {
-			index.remove(entry);
-		} else {
-			entry.setInOldGen();
-			StagedLruCacheEntry<K, V> removed = lruOldGen.add(entry);
-			if (removed != null) {
-				addYoungGen(removed, true);
-			}
+		entry.setInOldGen();
+		StagedLruCacheEntry<K, V> removed = lruOldGen.add(entry);
+		if (removed != null) {
+			addYoungGen(removed);
 		}
 	}
 }

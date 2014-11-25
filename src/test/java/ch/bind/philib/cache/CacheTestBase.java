@@ -26,12 +26,10 @@ import ch.bind.philib.TestUtil;
 import ch.bind.philib.lang.Cloner;
 import ch.bind.philib.lang.NamedSeqThreadFactory;
 import ch.bind.philib.lang.ThreadUtil;
-import ch.bind.philib.math.Calc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import java.security.SecureRandom;
 import java.util.concurrent.CountDownLatch;
 
 import static org.testng.Assert.assertEquals;
@@ -215,47 +213,21 @@ public abstract class CacheTestBase {
 	}
 
 	@Test
-	public void softReferences() {
-		byte[] data = new byte[512 * 1024]; // 512KiB
-		new SecureRandom().nextBytes(data);
-
-		// Make the cache hold on to more data than it possibly can
-		// 16GiB if the vm has no specified upper limit
-		long vmmax = Runtime.getRuntime().maxMemory();
-		vmmax = vmmax == Long.MAX_VALUE ? 16L * 1024 * 1024 * 1024 : (long) (vmmax * 1.05);
-
-		int bs = getBucketSize();
-		int cap = (int) Calc.ceilDiv(vmmax, data.length);
-		if (cap % bs != 0) {
-			cap += (bs - (cap % bs));
+	public void clear() {
+		Cache<Integer, Integer> cache = this.create();
+		for (int i = 0; i < 256; i++) {
+			cache.set(i, i);
 		}
-
-		long t0 = System.nanoTime();
-		Cache<Integer, byte[]> cache = this.create(cap);
-		long t1 = System.nanoTime() - t0;
-		for (int i = 0; i < cap; i++) {
-			cache.set(i, data.clone());
-		}
-		long t2 = System.nanoTime() - t0 - t1;
-		int inMem = 0;
-		for (int i = 0; i < cap; i++) {
+		int retained = 0;
+		for (int i = 0; i < 256; i++) {
 			if (cache.get(i) != null) {
-				inMem++;
+				retained++;
 			}
 		}
-		// the JVM must have thrown away some of the soft-references
-		assertTrue(inMem < cap, inMem + " >= " + cap);
-		long t3 = System.nanoTime() - t0 - t1 - t2;
-
-		// remove all hard-referenced to SoftReference objects and give the JVM
-		// a chance to free memory
+		assertTrue(retained > cache.capacity() / 2);
 		cache.clear();
-		TestUtil.gcAndSleep(100);
-
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(String.format("JVM held on to %d out of %d elements => %dMiB\n", inMem, cap, inMem / 2));
-			LOG.debug(String.format("times[init=%.3fms, filling %.1fGiB: %.3fms, counting live entries: %.3fms]\n", //
-					t1 / 1000000f, cap / 2048f, t2 / 1000000f, t3 / 1000000f));
+		for (int i = 0; i < 256; i++) {
+			assertNull(cache.get(i));
 		}
 	}
 

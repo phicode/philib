@@ -32,9 +32,7 @@ import ch.bind.philib.validation.Validation;
 public final class LruCache<K, V> implements Cache<K, V> {
 
 	private final LruList<LruCacheEntry<K, V>> lru;
-
 	private final ClusteredIndex<K, LruCacheEntry<K, V>> index;
-
 	private final Cloner<V> valueCloner;
 
 	public LruCache() {
@@ -80,14 +78,8 @@ public final class LruCache<K, V> implements Cache<K, V> {
 		if (entry == null) {
 			return null;
 		}
-		V value = entry.getValue();
-		if (value == null) {
-			// the soft-reference has been collected by the gc
-			removeLruAndIndex(entry);
-			return null;
-		}
 		lru.moveToHead(entry);
-		return valueCloner.clone(value);
+		return valueCloner.clone(entry.getValue());
 	}
 
 	@Override
