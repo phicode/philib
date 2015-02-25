@@ -78,13 +78,13 @@ public abstract class StringUtil {
 	/**
 	 * Splits a string by a given unicode {@code delimiter}.
 	 *
-	 * @param str         the input string, may be null or empty
-	 * @param delimimiter the delimiter to use
+	 * @param str       the input string, may be null or empty
+	 * @param delimiter the delimiter to use
 	 * @return A string array with the different parts of the string after splitting it. The
 	 * returned array is never null but may be empty (length 0). However, none of the
 	 * returned values is empty.
 	 */
-	public static String[] split(String str, int delimimiter) {
+	public static String[] split(String str, int delimiter) {
 		if (str == null) {
 			return EMPTY_STRING_ARRAY;
 		}
@@ -92,7 +92,7 @@ public abstract class StringUtil {
 		if (len == 0) {
 			return EMPTY_STRING_ARRAY;
 		}
-		final int n = count(str, delimimiter);
+		final int n = count(str, delimiter);
 		if (n == 0) {
 			return new String[]{str};
 		}
@@ -101,7 +101,7 @@ public abstract class StringUtil {
 		int i = 0;
 		int fromIdx = 0;
 		while (true) {
-			int off = str.indexOf(delimimiter, fromIdx);
+			int off = str.indexOf(delimiter, fromIdx);
 			int partLen;
 			if (off == -1) {
 				partLen = len - fromIdx;
