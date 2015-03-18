@@ -20,25 +20,13 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ch.bind.philib.lang;
+package ch.bind.philib.text;
+
+import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-import static ch.bind.philib.lang.TableFormatter.NULL_TABLE;
-import static ch.bind.philib.lang.TableFormatter.formatTable;
-import static org.testng.Assert.assertEquals;
-
-public class TableFormatterTest {
-
-	@Test
-	public void nullTable() {
-		assertEquals(formatTable(null), NULL_TABLE);
-
-		assertEquals(formatTable(new Object[0][]), NULL_TABLE);
-
-		Object[][] empty = {null, {}};
-		assertEquals(formatTable(empty), NULL_TABLE);
-	}
+public class TablePrinterTest {
 
 	@Test
 	public void unevenTable() {
@@ -49,16 +37,15 @@ public class TableFormatterTest {
 				null, // empty again
 				{"c", "baz5", null, "qed"}, //
 		};
-		String exp = "+---+------+---+-----+\n" + //
-				"| a | 1    |   |     |\n" + //
-				"+---+------+---+-----+\n" + //
-				"| b | foo  | 2 |     |\n" + //
-				"|   |      |   |     |\n" + //
-				"|   |      |   |     |\n" + //
-				"|   |      |   |     |\n" + //
-				"| c | baz5 |   | qed |\n" + //
-				"+---+------+---+-----+";
-		assertEquals(formatTable(table), exp);
+		String exp = 
+				"a 1         \n" + //
+				"b foo  2    \n" + //
+				"            \n" + //
+				"            \n" + //
+				"            \n" + //
+				"c baz5   qed";
+		StringBuilder sb= new StringBuilder();
+		assertEquals(print(sb,table), exp);
 	}
 
 	@Test

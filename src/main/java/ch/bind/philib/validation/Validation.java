@@ -158,4 +158,29 @@ public abstract class Validation {
 		}
 		return values;
 	}
+
+	/**
+	 * Verifies thats a all arrays of a two-dimensional array are of equal length.
+	 * @param matrix the two dimensional array to be verified.
+	 */
+	public static void equalLengths(Object[][] matrix) {
+		equalLengths(matrix, "multi dimensional array contains sub-arrays of different length");
+	}
+	/**
+	 * Verifies thats a all arrays of a two-dimensional array are of equal length.
+	 * @param matrix the two dimensional array to be verified.
+	 * @param message the error to throw upon encountering a validation missmatch.
+	 */
+	public static void equalLengths(Object[][] matrix, String message) {
+		Validation.notNull(matrix);
+		if (matrix.length < 2) {
+			return;
+		}
+		int l = matrix[0].length;
+		for (int i = 1; i < matrix.length; i++) {
+			if (matrix[i].length != l) {
+				throw new IllegalArgumentException(message);
+			}
+		}
+	}
 }
