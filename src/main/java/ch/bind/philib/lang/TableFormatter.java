@@ -23,17 +23,44 @@
 package ch.bind.philib.lang;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 public class TableFormatter {
 
 	static final String NULL_TABLE = "+-+\n| |\n+-+";
 
+	public interface FieldAccessor {
+		Object getField(int index);
+	}
+
+	public static <T extends FieldAccessor> void formatTable(Appendable appendable, Collection<T> collection, int numFields, FieldAccessor accessor) {
+		//TODO: unit test
+		//TODO: cache length while 
+		//TODO: title row
+		int rows = collection.size();
+		Object[][] table = new Object[rows][numFields];
+		for (int row = 0; row < rows; row++) {
+			for (int f = 0; f < numFields; f++) {
+				table[row][f] = accessor.getField(f);
+			}
+		}
+		formatTable(appendable, table);
+	}
+
+	//TODO: option for borderless printing
+	public static void formatTable(Appendable appendable, Object[][] table) {
+		// TODO
+	}
+
 	/**
-	 * Pretty-prints a table.
+	 * Pretty-prints a table in row major order.
 	 *
-	 * @param table The table which must be printed in a friendly way. The first row is considered the 'title' row.
+	 * @param table The table which must be printed in a friendly way. The first row is considered
+	 *            the 'title' row.
 	 * @return The result of the table pretty-printing.
 	 */
+	// TODO: String[][]
+	// TODO: remove in favor of the api above
 	public static String formatTable(Object[][] table) {
 		if (table == null || table.length == 0) {
 			return NULL_TABLE;
