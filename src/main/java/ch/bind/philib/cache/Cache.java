@@ -30,7 +30,7 @@ package ch.bind.philib.cache;
 public interface Cache<K, V> {
 
 	/** The default capacity of an object cache. */
-	public static final int DEFAULT_CAPACITY = 256;
+	int DEFAULT_CAPACITY = 256;
 
 	/**
 	 * Sets a key-value-pair to the cache.

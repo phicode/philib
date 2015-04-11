@@ -26,8 +26,6 @@ import ch.bind.philib.TestUtil;
 import ch.bind.philib.lang.Cloner;
 import ch.bind.philib.lang.NamedSeqThreadFactory;
 import ch.bind.philib.lang.ThreadUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -46,13 +44,13 @@ import static org.testng.Assert.assertTrue;
 @Test
 public abstract class CacheTestBase {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CacheTestBase.class);
 	private static final int UP_DOWN_CAP_COEFF = 5;
 	private static final Cloner<Integer> INTEGER_CLONER = new Cloner<Integer>() {
 
 		@Override
 		public Integer clone(Integer value) {
 			assertNotNull(value);
+			//noinspection UnnecessaryBoxing
 			return new Integer(value);
 		}
 	};

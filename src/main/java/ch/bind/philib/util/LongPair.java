@@ -37,7 +37,7 @@ public interface LongPair<T> {
 
 	T getValue();
 
-	public static final Comparator<LongPair<?>> KEY_COMPARATOR = new Comparator<LongPair<?>>() {
+	Comparator<LongPair<?>> KEY_COMPARATOR = new Comparator<LongPair<?>>() {
 
 		@Override
 		public int compare(LongPair<?> a, LongPair<?> b) {

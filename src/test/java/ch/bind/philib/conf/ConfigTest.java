@@ -125,11 +125,11 @@ public class ConfigTest {
 		assertNull(c.get("foo"));
 
 		assertNotNull(c.getInt("a"));
-		assertTrue(c.getInt("a").intValue() == 1);
+		assertTrue(c.getInt("a") == 1);
 		assertNull(c.getInt("foo"));
 
 		assertNotNull(c.getLong("a"));
-		assertTrue(c.getLong("a").longValue() == 1L);
+		assertTrue(c.getLong("a") == 1L);
 		assertNull(c.getLong("foo"));
 	}
 
@@ -244,7 +244,7 @@ public class ConfigTest {
 
 	@Test
 	public void initializingConstructor() throws IOException {
-		Map<String, String> values = new HashMap<String, String>();
+		Map<String, String> values = new HashMap<>();
 		values.put("a", "1");
 		Config c = new Config(values);
 		assertEquals(c.get("a"), "1");
@@ -259,10 +259,10 @@ public class ConfigTest {
 
 	private static final class RecordingConfigValueListener implements ConfigListener {
 
-		final Map<String, String> current = new HashMap<String, String>();
-		final Set<String> changed = new HashSet<String>();
-		final Set<String> removed = new HashSet<String>();
-		final Set<String> added = new HashSet<String>();
+		final Map<String, String> current = new HashMap<>();
+		final Set<String> changed = new HashSet<>();
+		final Set<String> removed = new HashSet<>();
+		final Set<String> added = new HashSet<>();
 
 		@Override
 		public void changed(String key, String oldValue, String newValue) {

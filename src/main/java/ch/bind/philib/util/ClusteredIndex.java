@@ -34,7 +34,7 @@ public interface ClusteredIndex<K, T extends Entry<K>> {
 
 	void clear();
 
-	public interface Entry<K> {
+	interface Entry<K> {
 
 		K getKey();
 

@@ -78,8 +78,8 @@ public abstract class StringUtil {
 	/**
 	 * Splits a string by a given unicode {@code delimiter}.
 	 *
-	 * @param str       the input string, may be null or empty
-	 * @param delimiter the delimiter to use
+	 * @param str         the input string, may be null or empty
+	 * @param delimimiter the delimiter to use
 	 * @return A string array with the different parts of the string after splitting it. The
 	 * returned array is never null but may be empty (length 0). However, none of the
 	 * returned values is empty.
