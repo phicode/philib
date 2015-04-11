@@ -50,7 +50,8 @@ public abstract class CacheTestBase {
 		@Override
 		public Integer clone(Integer value) {
 			assertNotNull(value);
-			//noinspection UnnecessaryBoxing
+			// creating an entirely new object is the entirely intended to test the value cloning of caches.
+			//noinspection UnnecessaryBoxing,BoxingBoxedValue
 			return new Integer(value);
 		}
 	};
