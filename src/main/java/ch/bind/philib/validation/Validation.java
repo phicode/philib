@@ -160,16 +160,19 @@ public abstract class Validation {
 	}
 
 	/**
-	 * Verifies thats a all arrays of a two-dimensional array are of equal length.
+	 * Verifies that all arrays of a two-dimensional array are of equal length.
+	 *
 	 * @param matrix the two dimensional array to be verified.
 	 */
 	public static void equalLengths(Object[][] matrix) {
 		equalLengths(matrix, "multi dimensional array contains sub-arrays of different length");
 	}
+
 	/**
-	 * Verifies thats a all arrays of a two-dimensional array are of equal length.
-	 * @param matrix the two dimensional array to be verified.
-	 * @param message the error to throw upon encountering a validation missmatch.
+	 * Verifies that all arrays of a two-dimensional array are of equal length.
+	 *
+	 * @param matrix  the two dimensional array to be verified.
+	 * @param message the error to throw upon encountering a validation mismatch.
 	 */
 	public static void equalLengths(Object[][] matrix, String message) {
 		Validation.notNull(matrix);
