@@ -14,7 +14,7 @@ check_headers () {
 }
 
 check_updates () {
-	mvn versions:display-dependency-updates versions:display-plugin-updates versions:display-property-updates
+	mvn -U versions:display-dependency-updates versions:display-plugin-updates versions:display-property-updates
 }
 
 check_coverage() {
