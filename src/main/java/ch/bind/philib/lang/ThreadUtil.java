@@ -29,7 +29,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Philipp Meinen
@@ -117,16 +119,10 @@ public abstract class ThreadUtil {
 		}
 	}
 
-	public static final ThreadFactory DEFAULT_THREAD_FACTORY = new ThreadFactory() {
-
-		@Override
-		public Thread newThread(Runnable r) {
-			return new Thread(r);
-		}
-	};
+	public static final ThreadFactory DEFAULT_THREAD_FACTORY = Executors.defaultThreadFactory();
 
 	/**
-	 * Creates a thread for each non-null runnable in the provided array.<br/>
+	 * Creates a thread for each {@code Runnable} in the provided array.<br/>
 	 * A standard {@link ThreadFactory} is used to create threads.<br/>
 	 * The newly created threads are not started.
 	 *
@@ -137,31 +133,23 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * Creates a thread for each non-null runnable in the provided array.<br/>
+	 * Creates a thread for each {@code Runnable} in the provided array.<br/>
 	 * The provided {@link ThreadFactory} is used to create threads.<br/>
 	 * The newly created threads are not started.
 	 *
 	 * @param runnables     -
-	 * @param threadFactory -
+	 * @param factory -
 	 */
-	public static Thread[] createThreads(Runnable[] runnables, ThreadFactory threadFactory) {
-		if (runnables == null) {
-			return new Thread[0];
+	public static Thread[] createThreads(Runnable[] runnables, ThreadFactory factory) {
+		Thread[] threads = new Thread[runnables.length];
+		for (int i = 0; i < runnables.length; i++) {
+			threads[i] = factory.newThread(runnables[i]);
 		}
-		if (threadFactory == null) {
-			threadFactory = DEFAULT_THREAD_FACTORY;
-		}
-		List<Thread> ts = new ArrayList<>(runnables.length);
-		for (Runnable r : runnables) {
-			if (r != null) {
-				ts.add(threadFactory.newThread(r));
-			}
-		}
-		return ArrayUtil.toArray(Thread.class, ts);
+		return threads;
 	}
 
 	/**
-	 * @param threads
+	 * @param threads -
 	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
 	 */
 	public static boolean interruptAndJoinThreads(Thread[] threads) {
@@ -169,8 +157,8 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param threads
-	 * @param waitTimePerThread
+	 * @param threads -
+	 * @param waitTimePerThread -
 	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
 	 */
 	public static boolean interruptAndJoinThreads(Thread[] threads, long waitTimePerThread) {
@@ -186,7 +174,7 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param threads
+	 * @param threads -
 	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
 	 */
 	public static boolean interruptAndJoinThreads(Collection<? extends Thread> threads) {
@@ -194,8 +182,8 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param threads
-	 * @param waitTimePerThread
+	 * @param threads -
+	 * @param waitTimePerThread -
 	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
 	 */
 	public static boolean interruptAndJoinThreads(Collection<? extends Thread> threads, long waitTimePerThread) {
