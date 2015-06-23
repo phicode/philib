@@ -9,7 +9,8 @@
  G: java: the project has been switched to java 7
  G: removed deprecated class conf.ConfigValueListener (replacement: conf.ConfigListener)
  G: removed deprecated toString utility methods in lang.StringUtil (replacement: lang.ToString.*)
- F: added ClonerNoop to simplify code which supports value cloning 
+ F: added ClonerNoop to simplify code which supports value cloning
+ F: added HashUtil methods for arrays
 
 === 0.12.0 ===
  F: ToString: moved toString helpers from StringUtil to a new ToString class

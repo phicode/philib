@@ -143,12 +143,12 @@ public final class MurmurHash {
 	}
 
 	public static int murmur2a(byte[] key) {
-		return murmur2a(key, MURMUR2_32_SEED);
+		return murmur2a(MURMUR2_32_SEED, key);
 	}
 
 	// This is a variant of MurmurHash2 modified to use the Merkle-Damgard
 	// construction.
-	public static int murmur2a(byte[] key, int hash) {
+	public static int murmur2a(int hash, byte[] key) {
 		final int len = key.length;
 		final int limitOffset = len & 0xFFFFFFFC;
 

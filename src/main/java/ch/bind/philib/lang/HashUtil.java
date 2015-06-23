@@ -23,6 +23,7 @@
 package ch.bind.philib.lang;
 
 import static ch.bind.philib.lang.MurmurHash.MURMUR2_32_SEED;
+import static ch.bind.philib.lang.MurmurHash.murmur2a;
 import static ch.bind.philib.lang.MurmurHash.murmur2a_16bit;
 import static ch.bind.philib.lang.MurmurHash.murmur2a_32bit;
 import static ch.bind.philib.lang.MurmurHash.murmur2a_64bit;
@@ -87,6 +88,42 @@ public abstract class HashUtil {
 		return nextHash(MURMUR2_32_SEED, obj);
 	}
 
+	public static int startHash(final boolean[] values) {
+		return nextHash(MURMUR2_32_SEED, values);
+	}
+
+	public static int startHash(final byte[] values) {
+		return nextHash(MURMUR2_32_SEED, values);
+	}
+
+	public static int startHash(final char[] values) {
+		return nextHash(MURMUR2_32_SEED, values);
+	}
+
+	public static int startHash(final short[] values) {
+		return nextHash(MURMUR2_32_SEED, values);
+	}
+
+	public static int startHash(final int[] values) {
+		return nextHash(MURMUR2_32_SEED, values);
+	}
+
+	public static int startHash(final long[] values) {
+		return nextHash(MURMUR2_32_SEED, values);
+	}
+
+	public static int startHash(final float[] values) {
+		return nextHash(MURMUR2_32_SEED, values);
+	}
+
+	public static int startHash(final double[] values) {
+		return nextHash(MURMUR2_32_SEED, values);
+	}
+
+	public static int startHash(final Object[] objs) {
+		return nextHash(MURMUR2_32_SEED, objs);
+	}
+
 	public static int nextHash(int hash, final boolean value) {
 		return murmur2a_8bit(hash, (value ? 1 : 0));
 	}
@@ -122,6 +159,102 @@ public abstract class HashUtil {
 	public static int nextHash(int hash, final Object obj) {
 		int objHash = ((obj == null) ? 0 : obj.hashCode());
 		return murmur2a_32bit(hash, objHash);
+	}
+
+	public static int nextHash(int hash, final boolean[] values) {
+		if (values == null || values.length == 0) {
+			return murmur2a_32bit(hash, 0);
+		}
+		hash = murmur2a_32bit(hash, values.length);
+		for (boolean value : values) {
+			hash = nextHash(hash, value);
+		}
+		return hash;
+	}
+
+	public static int nextHash(int hash, final byte[] values) {
+		if (values == null || values.length == 0) {
+			return murmur2a_32bit(hash, 0);
+		}
+		hash = murmur2a_32bit(hash, values.length);
+		return murmur2a(hash, values);
+	}
+
+	public static int nextHash(int hash, final char[] values) {
+		if (values == null || values.length == 0) {
+			return murmur2a_32bit(hash, 0);
+		}
+		hash = murmur2a_32bit(hash, values.length);
+		for (char value : values) {
+			hash = nextHash(hash, value);
+		}
+		return hash;
+	}
+
+	public static int nextHash(int hash, final short[] values) {
+		if (values == null || values.length == 0) {
+			return murmur2a_32bit(hash, 0);
+		}
+		hash = murmur2a_32bit(hash, values.length);
+		for (short value : values) {
+			hash = nextHash(hash, value);
+		}
+		return hash;
+	}
+
+	public static int nextHash(int hash, final int[] values) {
+		if (values == null || values.length == 0) {
+			return murmur2a_32bit(hash, 0);
+		}
+		hash = murmur2a_32bit(hash, values.length);
+		for (int value : values) {
+			hash = nextHash(hash, value);
+		}
+		return hash;
+	}
+
+	public static int nextHash(int hash, final long[] values) {
+		if (values == null || values.length == 0) {
+			return murmur2a_32bit(hash, 0);
+		}
+		hash = murmur2a_32bit(hash, values.length);
+		for (long value : values) {
+			hash = nextHash(hash, value);
+		}
+		return hash;
+	}
+
+	public static int nextHash(int hash, final float[] values) {
+		if (values == null || values.length == 0) {
+			return murmur2a_32bit(hash, 0);
+		}
+		hash = murmur2a_32bit(hash, values.length);
+		for (float value : values) {
+			hash = nextHash(hash, value);
+		}
+		return hash;
+	}
+
+	public static int nextHash(int hash, final double[] values) {
+		if (values == null || values.length == 0) {
+			return murmur2a_32bit(hash, 0);
+		}
+		hash = murmur2a_32bit(hash, values.length);
+		for (double value : values) {
+			hash = nextHash(hash, value);
+		}
+		return hash;
+	}
+
+	public static int nextHash(int hash, final Object[] objects) {
+		if (objects == null || objects.length == 0) {
+			return murmur2a_32bit(hash, 0);
+		}
+		hash = murmur2a_32bit(hash, objects.length);
+		for (Object object : objects) {
+			hash = nextHash(hash, object);
+		}
+		return hash;
 	}
 
 	public static int fromFloat(final float value) {

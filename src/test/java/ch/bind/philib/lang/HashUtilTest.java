@@ -151,11 +151,12 @@ public class HashUtilTest {
 
 	@Test
 	public void nullObj() {
-		String s = "a";
-		int a = nextHash(startHash(s), null);
-		int b = nextHash(startHash(s), s);
-		int c = nextHash(startHash(null), null);
-		int d = nextHash(startHash(null), s);
+		Object nil = null;
+		Object o = "a";
+		int a = nextHash(startHash(o), nil);
+		int b = nextHash(startHash(o), o);
+		int c = nextHash(startHash(nil), nil);
+		int d = nextHash(startHash(nil), o);
 		assertTrue(a != b && a != c && a != d);
 		assertTrue(b != c && b != d);
 		assertTrue(c != d);
