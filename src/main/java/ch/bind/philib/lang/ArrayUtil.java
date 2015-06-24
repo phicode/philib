@@ -38,6 +38,8 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public abstract class ArrayUtil {
 
+	public static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
+	public static final boolean[] EMPTY_BOOL_ARRAY = EMPTY_BOOLEAN_ARRAY; // just because boolean is way too long
 	public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 	public static final char[] EMPTY_CHAR_ARRAY = new char[0];
 	public static final short[] EMPTY_SHORT_ARRAY = new short[0];

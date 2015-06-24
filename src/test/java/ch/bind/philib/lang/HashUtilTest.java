@@ -30,12 +30,17 @@ import java.util.List;
 
 import static ch.bind.philib.lang.HashUtil.nextHash;
 import static ch.bind.philib.lang.HashUtil.startHash;
+import static ch.bind.philib.lang.MurmurHash.MURMUR2_32_SEED;
+import static ch.bind.philib.lang.MurmurHash.murmur2a;
+import static ch.bind.philib.lang.MurmurHash.murmur2a_32bit;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class HashUtilTest {
+
+	private final int HASH_4BYTE_ZERO = murmur2a_32bit(MURMUR2_32_SEED, 0);
 
 	@Test
 	public void simpleByte() {
@@ -260,5 +265,65 @@ public class HashUtilTest {
 		h = HashUtil.nextHash(h, c);
 		h = HashUtil.nextHash(h, d);
 		return h;
+	}
+
+	@Test
+	public void arrayNilOrEmpty() {
+		assertEquals(startHash(ArrayUtil.EMPTY_BOOL_ARRAY), HASH_4BYTE_ZERO);
+		assertEquals(startHash((boolean[]) null), HASH_4BYTE_ZERO);
+
+		assertEquals(startHash(ArrayUtil.EMPTY_BYTE_ARRAY), HASH_4BYTE_ZERO);
+		assertEquals(startHash((byte[]) null), HASH_4BYTE_ZERO);
+
+		assertEquals(startHash(ArrayUtil.EMPTY_CHAR_ARRAY), HASH_4BYTE_ZERO);
+		assertEquals(startHash((char[]) null), HASH_4BYTE_ZERO);
+
+		assertEquals(startHash(ArrayUtil.EMPTY_SHORT_ARRAY), HASH_4BYTE_ZERO);
+		assertEquals(startHash((short[]) null), HASH_4BYTE_ZERO);
+
+		assertEquals(startHash(ArrayUtil.EMPTY_INT_ARRAY), HASH_4BYTE_ZERO);
+		assertEquals(startHash((int[]) null), HASH_4BYTE_ZERO);
+
+		assertEquals(startHash(ArrayUtil.EMPTY_LONG_ARRAY), HASH_4BYTE_ZERO);
+		assertEquals(startHash((long[]) null), HASH_4BYTE_ZERO);
+
+		assertEquals(startHash(ArrayUtil.EMPTY_FLOAT_ARRAY), HASH_4BYTE_ZERO);
+		assertEquals(startHash((float[]) null), HASH_4BYTE_ZERO);
+
+		assertEquals(startHash(ArrayUtil.EMPTY_DOUBLE_ARRAY), HASH_4BYTE_ZERO);
+		assertEquals(startHash((double[]) null), HASH_4BYTE_ZERO);
+
+		assertEquals(startHash(ArrayUtil.EMPTY_OBJECT_ARRAY), HASH_4BYTE_ZERO);
+		assertEquals(startHash((Object[]) null), HASH_4BYTE_ZERO);
+	}
+
+	@Test
+	public void arrayLengthOne() {
+		assertEquals(startHash(new boolean[]{true}), nextHash(startHash(1), true));
+		assertEquals(startHash(new boolean[]{false}), nextHash(startHash(1), false));
+
+		assertEquals(startHash(new byte[]{0x5A}), nextHash(startHash(1), (byte) 0x5A));
+		assertEquals(startHash(new char[]{0x5A5A}), nextHash(startHash(1), (char) 0x5A5A));
+		assertEquals(startHash(new short[]{0x5A5A}), nextHash(startHash(1), (short) 0x5A5A));
+		assertEquals(startHash(new int[]{0x5A5A5A5A}), nextHash(startHash(1), 0x5A5A5A5A));
+		assertEquals(startHash(new long[]{0x5A5A5A5A5A5A5A5AL}), nextHash(startHash(1), 0x5A5A5A5A5A5A5A5AL));
+		assertEquals(startHash(new float[]{(float) Math.PI}), nextHash(startHash(1), (float) Math.PI));
+		assertEquals(startHash(new double[]{Math.PI}), nextHash(startHash(1), Math.PI));
+		assertEquals(startHash(new Object[]{"test"}), nextHash(startHash(1), "test"));
+	}
+
+	@Test
+	public void arrayLengthTwo() {
+		assertEquals(startHash(new boolean[]{true, false}), nextHash(nextHash(startHash(2), true), false));
+		assertEquals(startHash(new boolean[]{false, true}), nextHash(nextHash(startHash(2), false), true));
+
+		assertEquals(startHash(new byte[]{0x5A, 0x3C}), murmur2a(startHash(2), new byte[]{0x5A, 0x3C}));
+		assertEquals(startHash(new char[]{0x5AA5, 0x3C3C}), nextHash(nextHash(startHash(2), (char) 0x5AA5), (char) 0x3C3C));
+		assertEquals(startHash(new short[]{0x5A5A, 0x3C3C}), nextHash(nextHash(startHash(2), (short) 0x5A5A), (short) 0x3C3C));
+		assertEquals(startHash(new int[]{0x5A5A5A5A, 0x3C3C3C3C}), nextHash(nextHash(startHash(2), 0x5A5A5A5A), 0x3C3C3C3C));
+		assertEquals(startHash(new long[]{0x5A5A5A5A5A5A5A5AL, 0x3C3C3C3C3C3C3C3CL}), nextHash(nextHash(startHash(2), 0x5A5A5A5A5A5A5A5AL), 0x3C3C3C3C3C3C3C3CL));
+		assertEquals(startHash(new float[]{(float) Math.PI, (float) Math.E}), nextHash(nextHash(startHash(2), (float) Math.PI), (float) Math.E));
+		assertEquals(startHash(new double[]{Math.PI, Math.E}), nextHash(nextHash(startHash(2), Math.PI), Math.E));
+		assertEquals(startHash(new Object[]{"a", "b"}), nextHash(nextHash(startHash(2), "a"), "b"));
 	}
 }
