@@ -24,6 +24,8 @@ package ch.bind.philib.concurrent;
 
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -132,6 +134,31 @@ public class SingleFlightTest {
 		assertEquals(numCalls.get(), 2);
 		assertTrue((result1.result == 1 && result2.result == 2)
 				|| (result1.result == 2 && result2.result == 1));
+	}
+
+	@Test(timeOut = 25000)
+	public void manyCalls() throws InterruptedException {
+		int N = 4096;
+		final AtomicInteger numCalls = new AtomicInteger();
+		Callable<Integer> c = new Callable<Integer>() {
+			@Override
+			public Integer call() throws Exception {
+				Thread.sleep(0, 5000); // 5us
+				return numCalls.incrementAndGet();
+			}
+		};
+		SingleFlight sf = new SingleFlight(N);
+		String key = "key";
+		List<AsyncResult<Integer>> calls = new ArrayList<>();
+		for (int i = 0; i < N; i++) {
+			calls.add(async(sf, key, c));
+		}
+		for (AsyncResult<Integer> call : calls) {
+			call.thread.join();
+			assertNull(call.exc);
+		}
+//		System.out.println("num calls: " + numCalls.get());
+		assertTrue(numCalls.get() < N);
 	}
 
 	private Callable<String> callableString(final String value) {
