@@ -10,4 +10,4 @@ This library can be found in the [maven central repository](https://search.maven
 
 Current build status:
  - Jenkins: [![Jenkins](https://bind.ch:443/jenkins/job/philib/badge/icon)](https://bind.ch:443/jenkins/job/philib/)  
- - TravisCI: [![TravisCI](https://travis-ci.org/PhiCode/philib.svg?branch=master)](https://travis-ci.org/PhiCode/philib)    
+ - TravisCI: [![TravisCI](https://travis-ci.org/phicode/philib.svg?branch=master)](https://travis-ci.org/phicode/philib)    

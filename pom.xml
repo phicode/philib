@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
@@ -20,7 +20,7 @@
 
 	<name>philib</name>
 	<description>philib is a small java library containing utility classes</description>
-	<url>https://github.com/PhiCode/philib</url>
+	<url>https://github.com/phicode/philib</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,11 +46,11 @@
 
 	<scm>
 		<!-- read only connection -->
-		<connection>scm:git:https://github.com/PhiCode/philib</connection>
+		<connection>scm:git:https://github.com/phicode/philib</connection>
 		<!-- read/write connection -->
 		<developerConnection>scm:git:git@bind.ch:philib</developerConnection>
 		<!-- browsable url -->
-		<url>https://github.com/PhiCode/philib</url>
+		<url>https://github.com/phicode/philib</url>
 		<tag>HEAD</tag>
 	</scm>
 
