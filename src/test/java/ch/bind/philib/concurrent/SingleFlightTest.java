@@ -147,9 +147,9 @@ public class SingleFlightTest {
 				return numCalls.incrementAndGet();
 			}
 		};
-		SingleFlight sf = new SingleFlight(N);
+		SingleFlight sf = new SingleFlight();
 		String key = "key";
-		List<AsyncResult<Integer>> calls = new ArrayList<>();
+		List<AsyncResult<Integer>> calls = new ArrayList<>(N);
 		for (int i = 0; i < N; i++) {
 			calls.add(async(sf, key, c));
 		}
