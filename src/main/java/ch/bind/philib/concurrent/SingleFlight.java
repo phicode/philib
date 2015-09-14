@@ -28,6 +28,22 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * SingleFlight implements call deduplication for equal keys.
+ * <p/>
+ * Example:
+ * <pre>
+ * public Result expensiveOperation(final Parameters parameters) throws Exception {
+ *     return singleFlight.execute(parameters, new Callable&lt;Result&gt;() {
+ *         &#64;Override
+ *         public Result call() {
+ *             return expensiveOperationImpl(parameters);
+ *         }
+ *     });
+ * }
+ *
+ * private Result expensiveOperationImpl(Parameters parameters) {
+ *     // the real implementation
+ * }
+ * </pre>
  */
 public class SingleFlight {
 
