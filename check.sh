@@ -14,15 +14,15 @@ check_headers () {
 }
 
 check_updates () {
-	mvn -U versions:display-dependency-updates versions:display-plugin-updates versions:display-property-updates
+	mvn -B -U versions:display-dependency-updates versions:display-plugin-updates versions:display-property-updates
 }
 
 check_coverage() {
-	mvn cobertura:cobertura
+	mvn -B cobertura:cobertura
 }
 
 check_coverage_xml() {
-	mvn cobertura:cobertura -Dcobertura.report.format=xml
+	mvn -B cobertura:cobertura -Dcobertura.report.format=xml
 }
 
 case $1 in
