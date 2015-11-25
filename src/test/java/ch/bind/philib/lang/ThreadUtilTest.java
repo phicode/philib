@@ -186,13 +186,12 @@ public class ThreadUtilTest {
 		long tStart = System.nanoTime();
 		for (int i = 0; i < 1000; i++) {
 			long tms = System.currentTimeMillis();
-			ThreadUtil.sleepUntilMs(tms - 10);
+			ThreadUtil.sleepUntilMs(tms - 10); // noop
 		}
 		long elapsed = (System.nanoTime() - tStart);
-		// this should finish within less than 200us
-		// but that would make the test very flaky
-		// probably even this 5 milliseconds are too flaky
-		assertTrue(elapsed < 5 * 1000 * 1000);
+		// this should finish within a few hundred microseconds
+		// but that would make the test very flaky due to os-specific scheduling
+		assertTrue(elapsed < 25_000_1000); // 25ms
 	}
 
 	@Test
