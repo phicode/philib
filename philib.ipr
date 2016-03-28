@@ -17,7 +17,7 @@
       <profile default="true" name="Default" enabled="false">
         <processorPath useClasspath="true" />
       </profile>
-      <profile default="false" name="Annotation profile for philib" enabled="true">
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -254,26 +254,26 @@
     <mapping directory="" vcs="Git" />
   </component>
   <component name="libraryTable">
-    <library name="Maven: ch.qos.logback:logback-classic:1.1.3">
+    <library name="Maven: ch.qos.logback:logback-classic:1.1.6">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.1.3/logback-classic-1.1.3.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.1.6/logback-classic-1.1.6.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.1.3/logback-classic-1.1.3-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.1.6/logback-classic-1.1.6-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.1.3/logback-classic-1.1.3-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.1.6/logback-classic-1.1.6-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: ch.qos.logback:logback-core:1.1.3">
+    <library name="Maven: ch.qos.logback:logback-core:1.1.6">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-core/1.1.3/logback-core-1.1.3.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-core/1.1.6/logback-core-1.1.6.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-core/1.1.3/logback-core-1.1.3-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-core/1.1.6/logback-core-1.1.6-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-core/1.1.3/logback-core-1.1.3-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-core/1.1.6/logback-core-1.1.6-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.beust:jcommander:1.48">
@@ -285,28 +285,6 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.48/jcommander-1.48-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.apache.ant:ant-launcher:1.7.0">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.7.0/ant-launcher-1.7.0.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.7.0/ant-launcher-1.7.0-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.7.0/ant-launcher-1.7.0-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.apache.ant:ant:1.7.0">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.7.0/ant-1.7.0.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.7.0/ant-1.7.0-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.7.0/ant-1.7.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.beanshell:bsh:2.0b4">
@@ -331,37 +309,26 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-all/2.0.2-beta/mockito-all-2.0.2-beta-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.slf4j:slf4j-api:1.7.13">
+    <library name="Maven: org.slf4j:slf4j-api:1.7.19">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.13/slf4j-api-1.7.13.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.19/slf4j-api-1.7.19.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.13/slf4j-api-1.7.13-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.19/slf4j-api-1.7.19-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.13/slf4j-api-1.7.13-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.19/slf4j-api-1.7.19-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.testng:testng:6.9.9">
+    <library name="Maven: org.testng:testng:6.9.10">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.9/testng-6.9.9.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.10/testng-6.9.10.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.9/testng-6.9.9-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.10/testng-6.9.10-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.9/testng-6.9.9-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.yaml:snakeyaml:1.15">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.15/snakeyaml-1.15.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.15/snakeyaml-1.15-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.15/snakeyaml-1.15-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.10/testng-6.9.10-sources.jar!/" />
       </SOURCES>
     </library>
   </component>
