@@ -23,11 +23,13 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.source.version>1.7</java.source.version>
-		<java.target.version>1.7</java.target.version>
-		<javac.optimize>true</javac.optimize>
-		<javac.showWarnings>true</javac.showWarnings>
-		<javac.showDeprecation>true</javac.showDeprecation>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.optimize>true</maven.compiler.optimize>
+		<maven.compiler.showWarnings>true</maven.compiler.showWarnings>
+		<maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
+		<maven.compiler.compilerArgument>-Xlint:unchecked</maven.compiler.compilerArgument>
 
 		<!-- the following two properties are adjusted if the profile 'bench' is 
 			activated -->
@@ -84,7 +86,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.1.6</version>
+			<version>1.1.7</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -92,7 +94,7 @@
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
-			<version>6.9.10</version>
+			<version>6.9.12</version>
 			<scope>test</scope>
 
 			<exclusions>
@@ -123,20 +125,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.5.1</version>
-				<configuration>
-					<source>${java.source.version}</source>
-					<target>${java.target.version}</target>
-					<optimize>${javac.optimize}</optimize>
-					<showWarnings>${javac.showWarnings}</showWarnings>
-					<showDeprecation>${javac.showDeprecation}</showDeprecation>
-					<compilerArgument>-Xlint:unchecked</compilerArgument>
-				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.7</version>
+				<version>3.0.1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
@@ -158,7 +152,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.0.2</version>
 				<configuration>
 					<archive>
 						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
@@ -169,7 +163,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>3.0.1</version>
+				<version>3.2.0</version>
 				<extensions>true</extensions>
 				<executions>
 					<execution>
@@ -190,7 +184,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>3.0.3</version>
+				<version>3.0.4</version>
 			</plugin>
 
 			<plugin>
@@ -214,7 +208,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.5</version>
+				<version>3.5.1</version>
 			</plugin>
 
 			<plugin>
