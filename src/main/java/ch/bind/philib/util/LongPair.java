@@ -37,14 +37,10 @@ public interface LongPair<T> {
 
 	T getValue();
 
-	Comparator<LongPair<?>> KEY_COMPARATOR = new Comparator<LongPair<?>>() {
-
-		@Override
-		public int compare(LongPair<?> a, LongPair<?> b) {
-			if (a == null || b == null) {
-				throw new NullPointerException("LongPair.KEY_COMPARATOR does not support null-values");
-			}
-			return CompareUtil.diff(a.getKey(), b.getKey());
+	Comparator<LongPair<?>> KEY_COMPARATOR = (a, b) -> {
+		if (a == null || b == null) {
+			throw new NullPointerException("LongPair.KEY_COMPARATOR does not support null-values");
 		}
+		return CompareUtil.diff(a.getKey(), b.getKey());
 	};
 }

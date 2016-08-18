@@ -247,7 +247,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void testFormatShortHexArrayExtended() {
-		assertEquals(formatShortHex((byte[]) null, 0, 1), "");
+		assertEquals(formatShortHex(null, 0, 1), "");
 		assertEquals(formatShortHex(EMPTY_BYTE_ARRAY, 1, 2), "");
 
 		byte[] a = "abcd".getBytes();
@@ -545,13 +545,13 @@ public class ArrayUtilTest {
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void appendNoNullClazz() {
 		String[] xs = {"bar"};
-		append((Class<String>) null, xs, "quack");
+		append(null, xs, "quack");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void prependNoNullClazz() {
 		String[] xs = {"bar"};
-		prepend((Class<String>) null, xs, "quack");
+		prepend(null, xs, "quack");
 	}
 
 	@Test
@@ -571,7 +571,7 @@ public class ArrayUtilTest {
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void removeNoNullClazz() {
 		String[] from = {"bar"};
-		remove((Class<String>) null, from, "foo");
+		remove(null, from, "foo");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)

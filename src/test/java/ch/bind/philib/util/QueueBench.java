@@ -35,9 +35,9 @@ public class QueueBench {
 
 	public static void main(String[] args) throws Exception {
 		printHeader();
-		testRange(new LinkedBlockingQueue<Integer>());
-		testRange(new ArrayBlockingQueue<Integer>(10000));
-		testRange(new ConcurrentLinkedQueue<Integer>());
+		testRange(new LinkedBlockingQueue<>());
+		testRange(new ArrayBlockingQueue<>(10000));
+		testRange(new ConcurrentLinkedQueue<>());
 	}
 
 	private static void printHeader() {

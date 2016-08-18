@@ -84,9 +84,7 @@ public final class Config {
 	public synchronized void setURLs(Collection<URL> urls) {
 		Validation.notNullOrEmpty(urls);
 		this.urls.clear();
-		for (URL url : urls) {
-			this.urls.add(url);
-		}
+		this.urls.addAll(urls);
 	}
 
 	public void addListener(ConfigListener listener) {

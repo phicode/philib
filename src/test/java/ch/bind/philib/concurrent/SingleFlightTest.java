@@ -118,12 +118,7 @@ public class SingleFlightTest {
 	@Test(timeOut = 1000)
 	public void differentKeys() throws InterruptedException {
 		final AtomicInteger numCalls = new AtomicInteger();
-		Callable<Integer> c = new Callable<Integer>() {
-			@Override
-			public Integer call() throws Exception {
-				return numCalls.incrementAndGet();
-			}
-		};
+		Callable<Integer> c = () -> numCalls.incrementAndGet();
 		c = delay(c, 100);
 		SingleFlight sf = new SingleFlight();
 		AsyncResult<Integer> result1 = async(sf, "key-1", c);
@@ -140,12 +135,9 @@ public class SingleFlightTest {
 	public void manyCalls() throws InterruptedException {
 		int N = 4096;
 		final AtomicInteger numCalls = new AtomicInteger();
-		Callable<Integer> c = new Callable<Integer>() {
-			@Override
-			public Integer call() throws Exception {
-				Thread.sleep(0, 5000); // 5us
-				return numCalls.incrementAndGet();
-			}
+		Callable<Integer> c = () -> {
+			Thread.sleep(0, 5000); // 5us
+			return numCalls.incrementAndGet();
 		};
 		SingleFlight sf = new SingleFlight();
 		String key = "key";
@@ -162,23 +154,16 @@ public class SingleFlightTest {
 	}
 
 	private Callable<String> callableString(final String value) {
-		return new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return value;
-			}
-		};
+		return () -> value;
 	}
 
 	private Callable<String> callableException(final String message) {
-		return new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				throw new Exception(message);
-			}
+		return () -> {
+			throw new Exception(message);
 		};
 	}
 
+	@SuppressWarnings("Convert2Lambda")
 	private <V> Callable<V> delay(final Callable<V> delegate, final long delay) {
 		return new Callable<V>() {
 			@Override

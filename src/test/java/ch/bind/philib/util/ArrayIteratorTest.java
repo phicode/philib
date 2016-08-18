@@ -86,7 +86,7 @@ public class ArrayIteratorTest {
 
 	@Test
 	public void nullArray() {
-		ArrayIterator<Integer> iter = new ArrayIterator<>((Integer[])null);
+		ArrayIterator<Integer> iter = new ArrayIterator<>(null);
 		verifyEnd(iter);
 	}
 
