@@ -43,7 +43,7 @@ import java.util.Set;
 /**
  * @author Philipp Meinen
  */
-public final class Config {
+public class Config {
 
 	private final CowSet<ConfigListener> listeners = new CowSet<>(ConfigListener.class);
 
