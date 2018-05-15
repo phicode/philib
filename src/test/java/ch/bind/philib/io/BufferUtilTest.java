@@ -22,22 +22,33 @@
 
 package ch.bind.philib.io;
 
-import ch.bind.philib.lang.ArrayUtil;
-import org.testng.annotations.Test;
+import static ch.bind.philib.TestUtil.UTF_8;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.nio.ByteBuffer;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
+
+import ch.bind.philib.lang.ArrayUtil;
 
 public class BufferUtilTest {
 
-	private static final byte[] abcde = "abcde".getBytes();
+	private static final byte[] abcde = "abcde".getBytes(UTF_8);
 
-	private static final byte[] qwxyz = "qwxyz".getBytes();
+	private static final byte[] qwxyz = "qwxyz".getBytes(UTF_8);
 
 	private static final byte[] both = ArrayUtil.concat(abcde, qwxyz);
+
+	private static void verify(ByteBuffer res, byte[] expected) {
+		assertEquals(res.remaining(), expected.length);
+		byte[] verify = new byte[expected.length];
+		res.get(verify);
+		assertEquals(verify, expected);
+	}
 
 	@Test
 	public void appendWithEnoughSpace() {
@@ -53,7 +64,7 @@ public class BufferUtilTest {
 		src.flip();
 
 		ByteBuffer res = BufferUtil.append(dst, src);
-		assertTrue(res == dst);
+		assertSame(res, dst);
 		verify(res, both);
 	}
 
@@ -73,7 +84,7 @@ public class BufferUtilTest {
 		src.flip();
 
 		ByteBuffer res = BufferUtil.append(dst, src);
-		assertTrue(res == dst);
+		assertSame(res, dst);
 		verify(res, both);
 	}
 
@@ -100,8 +111,8 @@ public class BufferUtilTest {
 		ByteBuffer res1 = BufferUtil.append(dst1, src);
 		src.flip();
 		ByteBuffer res2 = BufferUtil.append(dst2, src);
-		assertTrue(res1 != dst1);
-		assertTrue(res2 != dst2);
+		assertNotSame(res1, dst1);
+		assertNotSame(res2, dst2);
 		assertFalse(res1.isDirect());
 		assertTrue(res2.isDirect());
 
@@ -123,15 +134,8 @@ public class BufferUtilTest {
 		src.flip();
 
 		ByteBuffer res = BufferUtil.append(dst, src);
-		assertTrue(res == dst);
+		assertSame(res, dst);
 
 		verify(res, qwxyz);
-	}
-
-	private static void verify(ByteBuffer res, byte[] expected) {
-		assertEquals(res.remaining(), expected.length);
-		byte[] verify = new byte[expected.length];
-		res.get(verify);
-		assertEquals(verify, expected);
 	}
 }

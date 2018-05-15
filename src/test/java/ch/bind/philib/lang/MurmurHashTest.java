@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static ch.bind.philib.TestUtil.UTF_8;
 import static org.testng.Assert.assertTrue;
 
 public class MurmurHashTest {
@@ -51,9 +52,9 @@ public class MurmurHashTest {
 		List<String> dups2a = new LinkedList<>();
 		List<String> dups3 = new LinkedList<>();
 		for (String s : wordlist) {
-			int m2 = MurmurHash.murmur2(s.getBytes());
-			int m2a = MurmurHash.murmur2a(s.getBytes());
-			int m3 = MurmurHash.murmur3(s.getBytes());
+			int m2 = MurmurHash.murmur2(s.getBytes(UTF_8));
+			int m2a = MurmurHash.murmur2a(s.getBytes(UTF_8));
+			int m3 = MurmurHash.murmur3(s.getBytes(UTF_8));
 
 			String existing2 = murmur2hashes.put(m2, s);
 			String existing2a = murmur2ahashes.put(m2a, s);

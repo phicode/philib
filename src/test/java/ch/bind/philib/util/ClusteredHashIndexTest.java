@@ -22,19 +22,21 @@
 
 package ch.bind.philib.util;
 
-import ch.bind.philib.util.ClusteredIndex.Entry;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import org.testng.annotations.Test;
+
+import ch.bind.philib.util.ClusteredIndex.Entry;
 
 public class ClusteredHashIndexTest {
 
@@ -115,7 +117,7 @@ public class ClusteredHashIndexTest {
 		assertNull(index.get(new Key(1)));
 		for (int i = 0, l = keys.length; i < l; i++) {
 			TestEntry<Key> e = entries[i];
-			assertTrue(index.get(e.getKey()) == e);
+			assertSame(index.get(e.getKey()), e);
 		}
 	}
 
@@ -125,7 +127,7 @@ public class ClusteredHashIndexTest {
 
 		private Entry<K> nextHashEntry;
 
-		public TestEntry(K key) {
+		TestEntry(K key) {
 			this.key = key;
 		}
 

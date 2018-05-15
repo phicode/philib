@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static ch.bind.philib.TestUtil.UTF_8;
 import static ch.bind.philib.lang.ArrayUtil.EMPTY_BYTE_ARRAY;
 import static ch.bind.philib.lang.ArrayUtil.append;
 import static ch.bind.philib.lang.ArrayUtil.concat;
@@ -49,6 +50,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+
+import ch.bind.philib.TestUtil;
 
 public class ArrayUtilTest {
 
@@ -121,7 +124,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void concatNormalNull() {
-		byte[] a = "123".getBytes();
+		byte[] a = "123".getBytes(UTF_8);
 		byte[] b = null;
 		byte[] c = concat(a, b);
 		assertNotNull(c);
@@ -132,7 +135,7 @@ public class ArrayUtilTest {
 	@Test
 	public void concatNullNormal() {
 		byte[] a = null;
-		byte[] b = "123".getBytes();
+		byte[] b = "123".getBytes(UTF_8);
 		byte[] c = concat(a, b);
 		assertNotNull(c);
 		assertEquals(3, c.length);
@@ -141,10 +144,10 @@ public class ArrayUtilTest {
 
 	@Test
 	public void concatNormalNormal() {
-		byte[] a = "123".getBytes();
-		byte[] b = "abc".getBytes();
+		byte[] a = "123".getBytes(UTF_8);
+		byte[] b = "abc".getBytes(UTF_8);
 		byte[] c = concat(a, b);
-		byte[] ce = "123abc".getBytes();
+		byte[] ce = "123abc".getBytes(UTF_8);
 		assertNotNull(c);
 		assertEquals(6, c.length);
 		assertTrue(Arrays.equals(ce, c));
@@ -152,10 +155,10 @@ public class ArrayUtilTest {
 
 	@Test
 	public void appendEnoughCap() {
-		byte[] a = "123".getBytes();
-		byte[] b = "abc".getBytes();
+		byte[] a = "123".getBytes(UTF_8);
+		byte[] b = "abc".getBytes(UTF_8);
 		byte[] c = append(a, b, 8);
-		byte[] ce = "123abc".getBytes();
+		byte[] ce = "123abc".getBytes(UTF_8);
 		assertNotNull(c);
 		assertEquals(6, c.length);
 		assertTrue(Arrays.equals(ce, c));
@@ -163,33 +166,33 @@ public class ArrayUtilTest {
 
 	@Test
 	public void appendCapped() {
-		byte[] a = "123".getBytes();
-		byte[] b = "abc".getBytes();
+		byte[] a = "123".getBytes(UTF_8);
+		byte[] b = "abc".getBytes(UTF_8);
 
 		byte[] c = append(a, b, 5);
 		assertNotNull(c);
 		assertEquals(5, c.length);
-		assertTrue(Arrays.equals("123ab".getBytes(), c));
+		assertTrue(Arrays.equals("123ab".getBytes(UTF_8), c));
 
 		c = append(a, b, 4);
 		assertNotNull(c);
 		assertEquals(4, c.length);
-		assertTrue(Arrays.equals("123a".getBytes(), c));
+		assertTrue(Arrays.equals("123a".getBytes(UTF_8), c));
 
 		c = append(a, b, 3);
 		assertNotNull(c);
 		assertEquals(3, c.length);
-		assertTrue(Arrays.equals("123".getBytes(), c));
+		assertTrue(Arrays.equals("123".getBytes(UTF_8), c));
 
 		c = append(a, b, 2);
 		assertNotNull(c);
 		assertEquals(2, c.length);
-		assertTrue(Arrays.equals("12".getBytes(), c));
+		assertTrue(Arrays.equals("12".getBytes(UTF_8), c));
 
 		c = append(a, b, 1);
 		assertNotNull(c);
 		assertEquals(1, c.length);
-		assertTrue(Arrays.equals("1".getBytes(), c));
+		assertTrue(Arrays.equals("1".getBytes(UTF_8), c));
 
 		c = append(a, b, 0);
 		assertNotNull(c);
@@ -202,8 +205,8 @@ public class ArrayUtilTest {
 
 	@Test
 	public void appendNull() {
-		byte[] a = "123".getBytes();
-		byte[] b = "abc".getBytes();
+		byte[] a = "123".getBytes(UTF_8);
+		byte[] b = "abc".getBytes(UTF_8);
 
 		byte[] c = append(null, b, 4);
 		assertNotNull(c);
@@ -218,22 +221,22 @@ public class ArrayUtilTest {
 
 	@Test
 	public void testExtractBack() {
-		byte[] a = "abcd".getBytes();
+		byte[] a = "abcd".getBytes(UTF_8);
 		assertEquals(extractBack(a, 0), EMPTY_BYTE_ARRAY);
-		assertEquals(extractBack(a, 1), "d".getBytes());
-		assertEquals(extractBack(a, 2), "cd".getBytes());
-		assertEquals(extractBack(a, 3), "bcd".getBytes());
-		assertEquals(extractBack(a, 4), "abcd".getBytes());
+		assertEquals(extractBack(a, 1), "d".getBytes(UTF_8));
+		assertEquals(extractBack(a, 2), "cd".getBytes(UTF_8));
+		assertEquals(extractBack(a, 3), "bcd".getBytes(UTF_8));
+		assertEquals(extractBack(a, 4), "abcd".getBytes(UTF_8));
 	}
 
 	@Test
 	public void testExtractFront() {
-		byte[] a = "abcd".getBytes();
+		byte[] a = "abcd".getBytes(UTF_8);
 		assertEquals(extractFront(a, 0), EMPTY_BYTE_ARRAY);
-		assertEquals(extractFront(a, 1), "a".getBytes());
-		assertEquals(extractFront(a, 2), "ab".getBytes());
-		assertEquals(extractFront(a, 3), "abc".getBytes());
-		assertEquals(extractFront(a, 4), "abcd".getBytes());
+		assertEquals(extractFront(a, 1), "a".getBytes(UTF_8));
+		assertEquals(extractFront(a, 2), "ab".getBytes(UTF_8));
+		assertEquals(extractFront(a, 3), "abc".getBytes(UTF_8));
+		assertEquals(extractFront(a, 4), "abcd".getBytes(UTF_8));
 	}
 
 	@Test
@@ -241,7 +244,7 @@ public class ArrayUtilTest {
 		assertEquals(formatShortHex((byte[]) null), "");
 		assertEquals(formatShortHex(EMPTY_BYTE_ARRAY), "");
 
-		byte[] a = "abcd".getBytes();
+		byte[] a = "abcd".getBytes(UTF_8);
 		assertEquals(formatShortHex(a), "61626364");
 	}
 
@@ -250,7 +253,7 @@ public class ArrayUtilTest {
 		assertEquals(formatShortHex(null, 0, 1), "");
 		assertEquals(formatShortHex(EMPTY_BYTE_ARRAY, 1, 2), "");
 
-		byte[] a = "abcd".getBytes();
+		byte[] a = "abcd".getBytes(UTF_8);
 		assertEquals(formatShortHex(a, 1, 2), "6263");
 		assertEquals(formatShortHex(a, 1, 5555), "626364");
 	}
@@ -260,7 +263,7 @@ public class ArrayUtilTest {
 		assertEquals(formatShortHex((ByteBuffer) null), "");
 		assertEquals(formatShortHex(ByteBuffer.wrap(EMPTY_BYTE_ARRAY)), "");
 
-		byte[] a = "\u0002abcd".getBytes();
+		byte[] a = "\u0002abcd".getBytes(UTF_8);
 		ByteBuffer arrayBb = ByteBuffer.wrap(a);
 		assertEquals(arrayBb.remaining(), 5);
 		assertEquals(formatShortHex(arrayBb), "0261626364");
@@ -276,7 +279,7 @@ public class ArrayUtilTest {
 
 	@Test
 	public void limitedFormatShortHex() {
-		byte[] abcd = "abcd".getBytes();
+		byte[] abcd = "abcd".getBytes(UTF_8);
 		ByteBuffer bb = ByteBuffer.wrap(abcd);
 
 		String a1 = formatShortHex(bb, 8);
@@ -351,10 +354,10 @@ public class ArrayUtilTest {
 
 	@Test
 	public void findAndContains() {
-		byte[] abc = "abc".getBytes();
-		byte[] xyz = "xyz".getBytes();
-		byte[] abcx = "abcx".getBytes();
-		byte[] xabc = "xabc".getBytes();
+		byte[] abc = "abc".getBytes(UTF_8);
+		byte[] xyz = "xyz".getBytes(UTF_8);
+		byte[] abcx = "abcx".getBytes(UTF_8);
+		byte[] xabc = "xabc".getBytes(UTF_8);
 
 		byte[] e = EMPTY_BYTE_ARRAY;
 
@@ -397,13 +400,13 @@ public class ArrayUtilTest {
 
 	@Test
 	public void findMany() {
-		byte[] a = "abaabaaabaaaabaaaaab".getBytes();
-		byte[] _1 = "ab".getBytes();
-		byte[] _2 = "aab".getBytes();
-		byte[] _3 = "aaab".getBytes();
-		byte[] _4 = "aaaab".getBytes();
-		byte[] _5 = "aaaaab".getBytes();
-		byte[] _6 = "aaaaaab".getBytes();
+		byte[] a = "abaabaaabaaaabaaaaab".getBytes(UTF_8);
+		byte[] _1 = "ab".getBytes(UTF_8);
+		byte[] _2 = "aab".getBytes(UTF_8);
+		byte[] _3 = "aaab".getBytes(UTF_8);
+		byte[] _4 = "aaaab".getBytes(UTF_8);
+		byte[] _5 = "aaaaab".getBytes(UTF_8);
+		byte[] _6 = "aaaaaab".getBytes(UTF_8);
 
 		assertTrue(contains(a, _1));
 		assertTrue(contains(a, _2));

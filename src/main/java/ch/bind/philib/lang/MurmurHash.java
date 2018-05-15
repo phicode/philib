@@ -60,8 +60,10 @@ public final class MurmurHash {
 		switch (len & 0x3) {
 			case 3:
 				hash ^= ((key[off + 2] & 0xFF) << 16);
+				// fall through
 			case 2:
 				hash ^= ((key[off + 1] & 0xFF) << 8);
+				// fall through
 			case 1:
 				hash ^= (key[off] & 0xFF);
 
@@ -103,8 +105,10 @@ public final class MurmurHash {
 		switch (len & 0x3) {
 			case 3:
 				k ^= ((key[off + 2] & 0xFF) << 16);
+				// fall through
 			case 2:
 				k ^= ((key[off + 1] & 0xFF) << 8);
+				// fall through
 			case 1:
 				k ^= (key[off] & 0xFF);
 
@@ -165,8 +169,10 @@ public final class MurmurHash {
 		switch (len & 0x3) {
 			case 3:
 				t ^= ((key[off + 2] & 0xFF) << 16);
+				// fall through
 			case 2:
 				t ^= ((key[off + 1] & 0xFF) << 8);
+				// fall through
 			case 1:
 				t ^= (key[off] & 0xFF);
 		}

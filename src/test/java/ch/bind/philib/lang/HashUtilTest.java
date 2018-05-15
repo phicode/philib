@@ -22,12 +22,6 @@
 
 package ch.bind.philib.lang;
 
-import ch.bind.philib.TestUtil;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.List;
-
 import static ch.bind.philib.lang.HashUtil.nextHash;
 import static ch.bind.philib.lang.HashUtil.startHash;
 import static ch.bind.philib.lang.MurmurHash.MURMUR2_32_SEED;
@@ -38,9 +32,35 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.testng.annotations.Test;
+
+import ch.bind.philib.TestUtil;
+
 public class HashUtilTest {
 
 	private final int HASH_4BYTE_ZERO = murmur2a_32bit(MURMUR2_32_SEED, 0);
+
+	private static void verifyStringHashNonCommutative(String a, String b) {
+		assertNotNull(a);
+		assertNotNull(b);
+		assertFalse(a.isEmpty());
+		assertFalse(b.isEmpty());
+
+		int h1 = nextHash(startHash(a), b);
+		int h2 = nextHash(startHash(b), a);
+		assertTrue(h1 != h2);
+	}
+
+	private static int hash(long a, int b, short c, byte d) {
+		int h = HashUtil.startHash(a);
+		h = HashUtil.nextHash(h, b);
+		h = HashUtil.nextHash(h, c);
+		h = HashUtil.nextHash(h, d);
+		return h;
+	}
 
 	@Test
 	public void simpleByte() {
@@ -173,21 +193,10 @@ public class HashUtilTest {
 		String a = null;
 		for (String b : wordlist) {
 			if (a != null) {
-				naiveString(a, b);
+				verifyStringHashNonCommutative(a, b);
 			}
 			a = b;
 		}
-	}
-
-	private static void naiveString(String a, String b) {
-		assertNotNull(a);
-		assertNotNull(b);
-		assertFalse(a.isEmpty());
-		assertFalse(b.isEmpty());
-
-		int h1 = nextHash(startHash(a), b);
-		int h2 = nextHash(startHash(b), a);
-		assertTrue(h1 != h2);
 	}
 
 	@Test(enabled = false)
@@ -204,7 +213,7 @@ public class HashUtilTest {
 		final long tStart = System.currentTimeMillis();
 		for (long a = 3; a <= 300; a += 3) {
 			for (int b = 8; b <= 800; b += 8) {
-				for (short c = 9; c <= 900; c += 9) {
+				for (short c = 9; c <= 900; c = (short) (c + 9)) {
 					for (int id = 1; id < 256; id += 2) {
 						byte d = (byte) (id & 0xFF);
 						int hc = hash(a, b, c, d);
@@ -257,14 +266,6 @@ public class HashUtilTest {
 		// final long t3 = System.currentTimeMillis() - tStart - t0 - t1 - t2;
 		// System.out.printf("t0=%d, t1=%d, t2=%d,t3=%d, collisions=%d/%d\n",
 		// t0, t1, t2, t3, colls, n);
-	}
-
-	private static int hash(long a, int b, short c, byte d) {
-		int h = HashUtil.startHash(a);
-		h = HashUtil.nextHash(h, b);
-		h = HashUtil.nextHash(h, c);
-		h = HashUtil.nextHash(h, d);
-		return h;
 	}
 
 	@Test

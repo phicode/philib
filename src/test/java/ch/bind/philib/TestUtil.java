@@ -45,6 +45,8 @@ public class TestUtil {
 	public static final boolean RUN_BENCHMARKS = "true".equalsIgnoreCase(System.getProperty("runBenchmarks"));
 	public static final boolean RUN_STRESS_TESTS = "true".equalsIgnoreCase(System.getProperty("runStressTests"));
 
+	public static final Charset UTF_8 = Charset.forName("UTF-8");
+
 	private TestUtil() {
 	}
 

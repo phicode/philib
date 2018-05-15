@@ -257,7 +257,7 @@ public abstract class CacheTestBase {
 		System.out.printf("finished with %d iterations\n", iterations);
 	}
 
-	private class StressTester implements Runnable {
+	private static class StressTester implements Runnable {
 
 		private final Cache<Integer, Integer> cache;
 		private final Integer[] keys;
@@ -266,7 +266,7 @@ public abstract class CacheTestBase {
 		boolean ok;
 		long iterations;
 
-		public StressTester(Cache<Integer, Integer> cache, int n) {
+		StressTester(Cache<Integer, Integer> cache, int n) {
 			this.cache = cache;
 			this.keys = new Integer[n];
 			for (int i = 0; i < n; i++) {
