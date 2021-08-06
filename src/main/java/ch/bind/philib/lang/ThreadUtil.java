@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2011 Philipp Meinen <philipp@bind.ch>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -22,16 +22,14 @@
 
 package ch.bind.philib.lang;
 
-import ch.bind.philib.validation.Validation;
+import java.util.Collection;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicReference;
+import ch.bind.philib.validation.Validation;
 
 /**
  * @author Philipp Meinen
@@ -81,6 +79,8 @@ public abstract class ThreadUtil {
 			}
 		} catch (InterruptedException e) {
 			LOG.warn("interrupted while waiting for a thread to finish: " + e.getMessage(), e);
+			// re-interrupt current thread so that the interrupted flag is set
+			Thread.currentThread().interrupt();
 		}
 		if (t.isAlive()) {
 			LOG.warn("thread is still alive: " + t.getName());
@@ -137,8 +137,8 @@ public abstract class ThreadUtil {
 	 * The provided {@link ThreadFactory} is used to create threads.<br/>
 	 * The newly created threads are not started.
 	 *
-	 * @param runnables     -
-	 * @param factory -
+	 * @param runnables -
+	 * @param factory   -
 	 */
 	public static Thread[] createThreads(Runnable[] runnables, ThreadFactory factory) {
 		Thread[] threads = new Thread[runnables.length];
@@ -157,7 +157,7 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param threads -
+	 * @param threads           -
 	 * @param waitTimePerThread -
 	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
 	 */
@@ -182,7 +182,7 @@ public abstract class ThreadUtil {
 	}
 
 	/**
-	 * @param threads -
+	 * @param threads           -
 	 * @param waitTimePerThread -
 	 * @return {@code true} if all threads were shut down, {@code false} otherwise.
 	 */
