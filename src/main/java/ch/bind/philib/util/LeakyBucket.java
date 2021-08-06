@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -32,20 +32,37 @@ import ch.bind.philib.validation.Validation;
  */
 public final class LeakyBucket {
 
-	/** the maximum amount that can be taken before the bucket is "empty" */
+	/**
+	 * the maximum amount that can be taken before the bucket is "empty"
+	 */
 	private final long capacity;
 
-	/** the time between individual takes on en empty bucket */
-	private final long takeIntervalNs;
+	/**
+	 * the interval with which the bucket refilled
+	 */
+	private final long refillIntervalNs;
 
-	/** the last time a recalculation was performed */
+	/**
+	 * the amount that the bucket is refilled every time
+	 */
+	private final long refillAmount;
+
+	private final long timeToFull;
+
+	/**
+	 * the last time a recalculation was performed
+	 */
 	private long lastRecalcNs;
 
-	/** the current content of the bucket */
+	/**
+	 * the current content of the bucket
+	 */
 	private long content;
 
-	private LeakyBucket(long takeIntervalNs, long capacity) {
-		this.takeIntervalNs = takeIntervalNs;
+	private LeakyBucket(long refillIntervalNs, long refillAmount, long capacity) {
+		this.refillIntervalNs = refillIntervalNs;
+		this.refillAmount = refillAmount;
+		this.timeToFull = Calc.ceilDiv(capacity, refillAmount) * refillIntervalNs;
 		this.capacity = capacity;
 		this.content = capacity;
 	}
@@ -65,9 +82,9 @@ public final class LeakyBucket {
 	}
 
 	public static LeakyBucket withTakeIntervalNs(long takeIntervalNs, long capacity) {
-		Validation.isTrue(takeIntervalNs > 0, "takeIntervalNs must be > 0");
+		Validation.isTrue(takeIntervalNs > 0, "refillIntervalNs must be > 0");
 		Validation.isTrue(capacity >= 1, "capacity must be >= 1");
-		return new LeakyBucket(takeIntervalNs, capacity);
+		return new LeakyBucket(takeIntervalNs, 1, capacity);
 	}
 
 	public long getCapacity() {
@@ -112,7 +129,7 @@ public final class LeakyBucket {
 			// available immediately
 			return 0;
 		}
-		long nextTakeNano = lastRecalcNs + takeIntervalNs;
+		long nextTakeNano = lastRecalcNs + refillIntervalNs;
 		return nextTakeNano - timeNs;
 	}
 
@@ -139,7 +156,12 @@ public final class LeakyBucket {
 			lastRecalcNs = timeNs;
 		} else {
 			long diff = timeNs - lastRecalcNs;
-			long newlyAvailable = diff / takeIntervalNs;
+			if (diff >= timeToFull) {
+				content = capacity;
+				lastRecalcNs = timeNs;
+				return;
+			}
+			long newlyAvailable = (diff / refillIntervalNs) * refillAmount;
 			if (newlyAvailable > 0) {
 				// do not overflow
 				long newContent = content + newlyAvailable;
@@ -147,7 +169,7 @@ public final class LeakyBucket {
 					content = capacity;
 					lastRecalcNs = timeNs;
 				} else {
-					lastRecalcNs += (newlyAvailable * takeIntervalNs);
+					lastRecalcNs += (newlyAvailable * refillIntervalNs);
 					content = newContent;
 				}
 			}
