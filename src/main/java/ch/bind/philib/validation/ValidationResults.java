@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2006-2011 Philipp Meinen <philipp@bind.ch>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -23,7 +23,8 @@
 package ch.bind.philib.validation;
 
 import java.io.Serializable;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Philipp Meinen
@@ -32,10 +33,10 @@ public final class ValidationResults implements Serializable {
 
 	static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private static final long serialVersionUID = 8465822377127857280L;
-	private final LinkedList<String> errors;
+	private final List<String> errors;
 
 	public ValidationResults() {
-		errors = new LinkedList<>();
+		errors = new ArrayList<>();
 	}
 
 	public int getNumErrors() {
