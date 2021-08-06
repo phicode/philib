@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -68,7 +69,7 @@ public class SafeCloseUtilTest {
 		Logger l = mock(Logger.class);
 		SafeCloseUtil.close(o, l);
 		assertEquals(o.numCalls, 1);
-		verify(l).error(anyString(), any(IOException.class));
+		verify(l).error(anyString(), any(InvocationTargetException.class));
 		verifyNoMoreInteractions(l);
 	}
 

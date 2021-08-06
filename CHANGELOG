@@ -5,7 +5,7 @@
       G = general
 
 === 0.14.0 ===
- G: java 8
+ G: java 11
 
 === 0.13.0 ===
  G: remove lang/TablePrinter

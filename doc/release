@@ -12,14 +12,15 @@
 			<password>...</password>
 		</server>
 	</servers>
+        
 
 === verification ===
 ./check.sh headers && ./check.sh updates
-env PATH="/usr/lib/jvm/java-7-openjdk-amd64/bin:$PATH" mvn clean test install
+mvn clean test install
 
 === release build ===
-env PATH="/usr/lib/jvm/java-7-openjdk-amd64/bin:$PATH" mvn release:prepare -DpushChanges=false
-env PATH="/usr/lib/jvm/java-7-openjdk-amd64/bin:$PATH" mvn release:perform -DlocalCheckout=true
+mvn release:prepare -DpushChanges=false
+mvn release:perform -DlocalCheckout=true
 
 === publish artifact ===
 - login @ https://oss.sonatype.org/index.html
@@ -34,4 +35,4 @@ git push && git push --tags
 git checkout vx.y.z
 rm -rf target
 mvn site:site javadoc:javadoc
-scp target/site ...
+scp target/site ... # for bind.ch/philib/

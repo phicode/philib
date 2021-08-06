@@ -1,4 +1,7 @@
 Urls:
+OSSRH Guide: https://central.sonatype.org/publish/publish-guide/
+OSSRH Maven: https://central.sonatype.org/publish/publish-maven/
+
 nexus oss repo:     https://oss.sonatype.org/index.html
 nexus oss repo web: https://oss.sonatype.org/content/groups/staging/
                     https://oss.sonatype.org/content/groups/public/
@@ -6,3 +9,5 @@ nexus oss wiki:     https://docs.sonatype.org/display/Repository/Sonatype+OSS+Ma
 
 central:            http://repo1.maven.org/maven2/
                     http://mirrors.ibiblio.org/maven2/
+
+

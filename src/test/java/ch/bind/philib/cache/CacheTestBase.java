@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012 Philipp Meinen <philipp@bind.ch>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -22,19 +22,20 @@
 
 package ch.bind.philib.cache;
 
-import ch.bind.philib.TestUtil;
-import ch.bind.philib.lang.Cloner;
-import ch.bind.philib.lang.NamedSeqThreadFactory;
-import ch.bind.philib.lang.ThreadUtil;
-import org.testng.annotations.Test;
-
-import java.util.concurrent.CountDownLatch;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+
+import java.util.concurrent.CountDownLatch;
+
+import org.testng.annotations.Test;
+
+import ch.bind.philib.TestUtil;
+import ch.bind.philib.lang.Cloner;
+import ch.bind.philib.lang.NamedSeqThreadFactory;
+import ch.bind.philib.lang.ThreadUtil;
 
 /**
  * tests which must pass on all cache implementations.
@@ -45,16 +46,6 @@ import static org.testng.Assert.assertTrue;
 public abstract class CacheTestBase {
 
 	private static final int UP_DOWN_CAP_COEFF = 5;
-	private static final Cloner<Integer> INTEGER_CLONER = new Cloner<Integer>() {
-
-		@Override
-		public Integer clone(Integer value) {
-			assertNotNull(value);
-			// creating an entirely new object is the entirely intended to test the value cloning of caches.
-			//noinspection UnnecessaryBoxing,BoxingBoxedValue
-			return new Integer(value);
-		}
-	};
 
 	public static String itos(int i) {
 		return Integer.toString(i);
@@ -151,14 +142,29 @@ public abstract class CacheTestBase {
 		assertNull(cache.get("1"));
 	}
 
+	static class NeedsCloning {
+
+		static final Cloner<NeedsCloning> CLONER = obj -> {
+			assertNotNull(obj);
+			// creating an entirely new object is the entirely intended to test the value cloning of caches.
+			return new NeedsCloning(obj.v);
+		};
+
+		final int v;
+
+		public NeedsCloning(int v) {
+			this.v = v;
+		}
+	}
+
 	@Test
 	public void cloner() {
-		Cache<Integer, Integer> cache = this.create(INTEGER_CLONER);
-		Integer one = 1;
+		Cache<NeedsCloning, NeedsCloning> cache = this.create(NeedsCloning.CLONER);
+		NeedsCloning one = new NeedsCloning(1);
 		cache.set(one, one);
-		Integer copy = cache.get(one);
+		NeedsCloning copy = cache.get(one);
 		assertNotNull(copy);
-		assertEquals(one.intValue(), copy.intValue());
+		assertEquals(one.v, copy.v);
 		// different reference
 		assertNotSame(one, copy);
 	}

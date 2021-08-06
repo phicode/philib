@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2006-2011 Philipp Meinen <philipp@bind.ch>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software
  * is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -22,12 +22,12 @@
 
 package ch.bind.philib.lang;
 
-import ch.bind.philib.validation.Validation;
-
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+
+import ch.bind.philib.validation.Validation;
 
 /**
  * Various functions for dealing with arrays which are not present in the
@@ -162,31 +162,30 @@ public abstract class ArrayUtil {
 		return rv;
 	}
 
+	private static <T> T[] allocatePlus1(Class<T> clazz, T[] a) {
+		if (a == null) {
+			return newArray(clazz, 1);
+		}
+		return newArray(clazz, a.length + 1);
+	}
+
 	public static <T> T[] prepend(Class<T> clazz, T[] a, T b) {
 		Validation.notNull(clazz);
-		if (a == null) {
-			T[] ts = newArray(clazz, 1);
-			ts[0] = b;
-			return ts;
-		}
-		int l = a.length;
-		T[] ts = newArray(clazz, l + 1);
-		System.arraycopy(a, 0, ts, 1, l);
+		T[] ts = allocatePlus1(clazz, a);
 		ts[0] = b;
+		if (ts.length > 1) {
+			System.arraycopy(a, 0, ts, 1, a.length);
+		}
 		return ts;
 	}
 
 	public static <T> T[] append(Class<T> clazz, T[] a, T b) {
 		Validation.notNull(clazz);
-		if (a == null) {
-			T[] ts = newArray(clazz, 1);
-			ts[0] = b;
-			return ts;
+		T[] ts = allocatePlus1(clazz, a);
+		ts[ts.length - 1] = b;
+		if (ts.length > 1) {
+			System.arraycopy(a, 0, ts, 0, a.length);
 		}
-		int l = a.length;
-		T[] ts = newArray(clazz, l + 1);
-		System.arraycopy(a, 0, ts, 0, l);
-		ts[l] = b;
 		return ts;
 	}
 
