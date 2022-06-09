@@ -13,14 +13,15 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.32" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: ch.qos.logback:logback-classic:1.2.5" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: ch.qos.logback:logback-core:1.2.5" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:7.4.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.78" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.webjars:jquery:3.5.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-core:3.11.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy:1.11.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy-agent:1.11.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: ch.qos.logback:logback-classic:1.2.11" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: ch.qos.logback:logback-core:1.2.11" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:7.6.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: com.google.code.findbugs:jsr305:3.0.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.82" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.webjars:jquery:3.6.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-core:4.6.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy:1.12.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy-agent:1.12.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.objenesis:objenesis:3.2" level="project" />
   </component>
 </module>
