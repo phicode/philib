@@ -15,8 +15,18 @@ mvn clean test install
 
 === release build ===
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-mvn release:prepare -DpushChanges=false
-mvn release:perform -DlocalCheckout=true
+release_version=0.14.0
+next_dev_version=0.15.0
+mvn versions:set -DnewVersion=${release_version}
+mvn clean test install -P release
+mvn deploy -P release
+git commit -am "release ${release_version}"
+git tag philib-${release_version} -m "tag release ${release_version}"
+
+mvn versions:set -DnewVersion=${next_dev_version}-SNAPSHOT
+
+# mvn release:prepare -DpushChanges=false
+# mvn release:perform -DlocalCheckout=true
 
 === publish artifact ===
 - login @ https://oss.sonatype.org/index.html
