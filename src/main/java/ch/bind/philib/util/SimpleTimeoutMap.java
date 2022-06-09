@@ -160,7 +160,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 		} finally {
 			wlock.unlock();
 		}
-		return rv != null ? rv : Collections.<Map.Entry<K, V>>emptyList();
+		return rv != null ? rv : Collections.emptyList();
 	}
 
 	@Override
@@ -210,7 +210,7 @@ public final class SimpleTimeoutMap<K, V> implements TimeoutMap<K, V> {
 	/**
 	 * Find entries that are timed out
 	 *
-	 * @param timestamp The timeout cap. Anything older than that is timed out
+	 * @param timestampNs The timeout cap. Anything older than that is timed out
 	 * @return the oldest timed out entry
 	 */
 	private Map.Entry<K, V> _pollTimedoutNs(final long timestampNs) {
