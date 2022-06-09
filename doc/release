@@ -2,12 +2,7 @@
 ~/.m2/settings.xml
 	<servers>
 		<server>
-			<id>sonatype-nexus-snapshots</id>
-			<username>...</username>
-			<password>...</password>
-		</server>
-		<server>
-			<id>sonatype-nexus-staging</id>
+			<id>ossrh</id>
 			<username>...</username>
 			<password>...</password>
 		</server>
