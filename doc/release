@@ -19,6 +19,7 @@
 mvn clean test install
 
 === release build ===
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 mvn release:prepare -DpushChanges=false
 mvn release:perform -DlocalCheckout=true
 
