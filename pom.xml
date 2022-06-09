@@ -59,12 +59,6 @@
 			<email>philipp@bind.ch</email>
 			<url>https://bind.ch/philib/</url>
 			<timezone>1</timezone>
-			<!-- scm username -->
-			<id>philipp</id>
-			<roles>
-				<role>owner</role>
-				<role>developer</role>
-			</roles>
 		</developer>
 	</developers>
 
