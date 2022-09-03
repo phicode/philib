@@ -43,7 +43,7 @@ import ch.bind.philib.validation.Validation;
 /**
  * @author Philipp Meinen
  */
-public final class Config {
+public class Config {
 
 	private final CowSet<ConfigListener> listeners = new CowSet<>(ConfigListener.class);
 
