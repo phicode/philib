@@ -1,16 +1,20 @@
 # Changelog
 
 Changelog for philib
-- F = feature
-- B = bugfix
-- G = general
+- F = Feature
+- B = Bugfix
+- G = General
+
+## next
+Maintenance release.
+
+Update dependencies
 
 ## 0.14.0
-Maintenance release
+Maintenance release.
 
-General changes:
-- switch to java 11
-- add java module support
+- G: switch to java 11
+- G: add java module support
 
 ## 0.13.0
 
