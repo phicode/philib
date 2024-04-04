@@ -43,6 +43,16 @@ import static org.testng.Assert.fail;
 public class ConfigTest {
 
 	@Test
+	public void loadMap() throws IOException {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("aa", "11");
+		Config c = new Config(map);
+		assertEquals(c.getInt("aa").intValue(), 11);
+		c.load();
+		assertEquals(c.getInt("aa").intValue(), 11);
+	}
+
+	@Test
 	public void load() throws IOException {
 		URL url = URLs.forClasspathResource("/words_en");
 		Config c = new Config(url);
